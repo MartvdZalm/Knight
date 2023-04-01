@@ -1,0 +1,15 @@
+package ast;
+
+import lexer.Token;
+
+public class This extends Expression
+{
+	public This(Token token) {
+		super(token);
+	}
+
+	@Override
+	public <R> R accept(Visitor<R> v) {
+		return v.visit(this);
+	}
+}

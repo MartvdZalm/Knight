@@ -1,0 +1,7 @@
+KNIGHT Empire
+{
+    Function MAIN
+    {
+        print('Hello World!'):
+    }
+}

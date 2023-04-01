@@ -1,0 +1,109 @@
+import java.io.File;
+import ast.Program;
+import ast.Tree;
+import parser.Parser;
+import semantics.NameError;
+import semantics.SemanticErrors;
+import symbol.SymbolTable;
+import visitor.BuildSymbolTableVisitor;
+import visitor.CodeGenerator;
+import visitor.NameAnalyserTreeVisitor;
+import visitor.TypeAnalyser;
+
+public class Main
+{
+	public static void main(String argv[])
+	{
+
+		Main main = new Main();
+
+		String[] arr = {"--cgen", "Empire.knight"};
+
+        main.codeGen(arr);
+	}
+
+	public void codeGen(String argv[])
+	{
+		for (int i = 1; i < argv.length; i++) {
+			try {
+
+				if (!isFileValid(argv[i])) {
+					continue;
+				}
+
+				Parser p = new Parser(argv[i]);
+				Tree tree = p.parse();
+
+				if (tree != null) {
+					BuildSymbolTableVisitor bstv = new BuildSymbolTableVisitor();
+					bstv.visit((Program) tree);
+	
+					SymbolTable st = bstv.getSymTab();
+					NameAnalyserTreeVisitor natv = new NameAnalyserTreeVisitor(st);
+					natv.visit((Program) tree);
+
+					TypeAnalyser ta = new TypeAnalyser(st);
+					ta.visit((Program) tree);
+
+					if (SemanticErrors.errorList.size() == 0) {
+						String path = getFileDirPath(argv[i]);
+						CodeGenerator cg = new CodeGenerator(path);
+						cg.visit((Program) tree);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(1);
+			} finally {
+				if (SemanticErrors.errorList.size() != 0) {
+					SemanticErrors.sort();
+					for (NameError e : SemanticErrors.errorList) {
+						System.err.println(e);
+					}
+				}
+			}
+		}
+	}
+
+    private boolean isFileValid(String filename)
+	{
+		File f = new File(filename);
+
+		if (!f.exists()) {
+			System.err.println(filename + ": No such file!");
+			return false;
+		}
+
+		String fileExtension = getFileExtension(f);
+		if (!"knight".equals(fileExtension)) {
+			System.err.println(filename + ": Invalid file extension!");
+			return false;
+		}
+
+		return true;
+	}
+
+    private String getFileExtension(File file)
+	{
+		String name = file.getName();
+		try {
+			return name.substring(name.lastIndexOf(".") + 1);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	private String getFileDirPath(String filename)
+	{
+		try {
+			File f = new File(filename);
+			String path = f.getParent();
+			if (path == null) {
+				return "";
+			}
+			return path + File.separator;
+		} catch (Exception e) {
+			return "";
+		}
+	}
+}
