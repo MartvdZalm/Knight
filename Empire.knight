@@ -2,6 +2,7 @@ KNIGHT Empire
 {
     Function MAIN
     {
-        print('Hello World!'):
+        print('I am getting better.'):
+        print('Next time I will add the println function.'):
     }
 }

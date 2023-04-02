@@ -39,6 +39,7 @@ public class Main
 					bstv.visit((Program) tree);
 	
 					SymbolTable st = bstv.getSymTab();
+					
 					NameAnalyserTreeVisitor natv = new NameAnalyserTreeVisitor(st);
 					natv.visit((Program) tree);
 

@@ -16,35 +16,39 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 {
 	SymbolTable symbolTable;
 	private Klass currClass;
-	private Function currMethod;
+	private Function currFunc;
 	private Set<String> hsKlass = new HashSet<>();
-	private Set<String> hsMethod = new HashSet<>();
+	private Set<String> hsFunc = new HashSet<>();
 
-	public NameAnalyserTreeVisitor(SymbolTable table) {
+	public NameAnalyserTreeVisitor(SymbolTable table)
+	{
 		this.symbolTable = table;
 	}
 
 	@Override
-	public Type visit(Print n) {
+	public Type visit(Print n)
+	{
 		n.getExpr().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Assign n) {
-
+	public Type visit(Assign n)
+	{
 		n.getId().accept(this);
 		n.expr.accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Skip n) {
+	public Type visit(Skip n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Block n) {
+	public Type visit(Block n)
+	{
 		for (int i = 0; i < n.getStatListSize(); i++) {
 			Statement st = n.getStatAt(i);
 			st.accept(this);
@@ -53,7 +57,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IfThenElse n) {
+	public Type visit(IfThenElse n)
+	{
 		n.expr.accept(this);
 		n.then.accept(this);
 		n.elze.accept(this);
@@ -61,91 +66,99 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(While n) {
+	public Type visit(While n)
+	{
 		n.getExpr().accept(this);
 		n.getBody().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(IntLiteral n) {
+	public Type visit(IntLiteral n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Plus n) {
+	public Type visit(Plus n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Minus n) {
+	public Type visit(Minus n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Times n) {
+	public Type visit(Times n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Division n) {
+	public Type visit(Division n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Equals n) {
+	public Type visit(Equals n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(LessThan n) {
+	public Type visit(LessThan n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(And n) {
+	public Type visit(And n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Or n) {
+	public Type visit(Or n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(True true1) {
+	public Type visit(True true1)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(False false1) {
+	public Type visit(False false1)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(This this1) {
-		/**
-		 * Note: This is a hack! Statement cannot exist outside a method. main
-		 * is not a method in this AST. We use this fact to check if this is
-		 * used inside main method.
-		 */
-		if (currMethod == null) {
+	public Type visit(This this1)
+	{
+		if (currFunc == null) {
 			Token sym = this1.getToken();
 			addError(sym.getRow(), sym.getCol(), "this keyword cannot be used in static methods");
 		}
@@ -154,13 +167,15 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(NewArray na) {
+	public Type visit(NewArray na)
+	{
 		na.getArrayLength().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(NewInstance ni) {
+	public Type visit(NewInstance ni)
+	{
 		String id = ni.getClassName().getVarID();
 		Klass klass = symbolTable.getKlass(id);
 		if (klass == null) {
@@ -173,13 +188,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunc cm) {
-		cm.getInstanceName().accept(this); // TODO: Can we check the id? this?
-
-		/*
-		 * Note: Check if method exists in type analysis
-		 */
-		// cm.getMethodId().accept(this);
+	public Type visit(CallFunc cm)
+	{
+		cm.getInstanceName().accept(this);
 
 		for (int i = 0; i < cm.getArgExprListSize(); i++) {
 			Expression e = cm.getArgExprAt(i);
@@ -190,39 +201,44 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Length length) {
+	public Type visit(Length length)
+	{
 		length.getArray().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(IntType intType) {
+	public Type visit(IntType intType)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(StringType stringType) {
+	public Type visit(StringType stringType)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(BooleanType booleanType) {
+	public Type visit(BooleanType booleanType)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IntArrayType intArrayType) {
+	public Type visit(IntArrayType intArrayType)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Identifier i) {
+	public Type visit(Identifier i)
+	{
 		String id = i.getVarID();
-		Variable var = symbolTable.getVar(currMethod, currClass, id);
+		Variable var = symbolTable.getVar(currFunc, currClass, id);
 		if (var == null) {
 			Token sym = i.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
-			// TODO: check method ? check assign, dup code possible
 		}
 
 		i.setB(var);
@@ -230,8 +246,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IdentifierType ref) {
-
+	public Type visit(IdentifierType ref)
+	{
 		String id = ref.getVarID();
 		Klass klass = symbolTable.getKlass(id);
 		if (klass == null) {
@@ -244,13 +260,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IdentifierExpr i) {
+	public Type visit(IdentifierExpr i)
+	{
 		String id = i.getVarID();
-		Variable var = symbolTable.getVar(currMethod, currClass, id);
+		Variable var = symbolTable.getVar(currFunc, currClass, id);
 		if (var == null) {
 			Token sym = i.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
-			// TODO: check method ? check assign, dup code possible
 		}
 
 		i.setB(var);
@@ -258,16 +274,16 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(VarDecl vd) {
+	public Type visit(VarDecl vd)
+	{
 		vd.getType().accept(this);
 		vd.getId().accept(this);
 
 		String id = vd.getId().getVarID();
 
-		if (currMethod == null) {// Klass Variable
-
+		if (currFunc == null) {
 			Klass parent = symbolTable.getKlass(currClass.parent());
-			if (symbolTable.containsVar(null, parent, id)) {// overriding
+			if (symbolTable.containsVar(null, parent, id)) {
 				Token sym = vd.getId().getToken();
 				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in parent class");
 			}
@@ -277,42 +293,34 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArgDecl ad) {
-		/**
-		 * Note: argDeclaration already checked in buildSymbolTable
-		 */
-		// ad.getType().accept(this);
+	public Type visit(ArgDecl ad)
+	{
 		ad.getId().accept(this);
-
 		return null;
 	}
 
 	@Override
-	public Type visit(FuncDecl md) {
-
+	public Type visit(FuncDecl md)
+	{
 		String id = md.getMethodName().getVarID();
-		if (hsMethod.contains(id)) { // Duplicate Method
+		if (hsFunc.contains(id)) { 
 			return null;
 		} else {
-			hsMethod.add(id);
+			hsFunc.add(id);
 		}
 
 		md.getReturnType().accept(this);
-		currMethod = currClass.getMethod(id);
-		md.getMethodName().setB(currMethod);
+		currFunc = currClass.getMethod(id);
+		md.getMethodName().setB(currFunc);
 
 		String parent = currClass.parent();
 		Function supMethod = symbolTable.getMethod(id, parent);
-		if (supMethod != null) { // Method overloading
-			if (supMethod.getParamsSize() != currMethod.getParamsSize()) {
+		if (supMethod != null) {
+			if (supMethod.getParamsSize() != currFunc.getParamsSize()) {
 				Token sym = md.getMethodName().getToken();
 				addError(sym.getRow(), sym.getCol(), "method " + id + " overloads parent class method");
 			}
 		}
-
-		/**
-		 * Note: argDeclaration already checked in buildSymbolTable
-		 */
 
 		for (int i = 0; i < md.getArgListSize(); i++) {
 			ArgDecl ad = md.getArgDeclAt(i);
@@ -330,13 +338,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		md.getReturnExpr().accept(this);
-		currMethod = null;
+		currFunc = null;
 		return null;
 	}
 
 	@Override
-	public Type visit(MainClass mc) {
-
+	public Type visit(MainClass mc)
+	{
 		String id = mc.getClassName().getVarID();
 		currClass = symbolTable.getKlass(id);
 		mc.getClassName().setB(currClass);
@@ -353,10 +361,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Program program) {
-
+	public Type visit(Program program)
+	{
 		checkInheritanceCycle(program);
-
 		program.mClass.accept(this);
 
 		for (int i = 0; i < program.classList.size(); i++) {
@@ -365,8 +372,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		return null;
 	}
 
-	private void checkInheritanceCycle(Program p) {
-
+	private void checkInheritanceCycle(Program p)
+	{
 		Map<String, List<String>> adjList = new HashMap<>();
 
 		for (int i = 0; i < p.getClassListSize(); i++) {
@@ -393,8 +400,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 	}
 
-	private void dfs(String src, Map<String, List<String>> adjList, List<String> visited, List<String> rStack,
-			Program p) {
+	private void dfs(String src, Map<String, List<String>> adjList, List<String> visited, List<String> rStack, Program p)
+	{
 		visited.add(src);
 		rStack.add(src);
 		List<String> cList = adjList.get(src);
@@ -406,22 +413,18 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			if (!visited.contains(cid)) {
 				dfs(cid, adjList, visited, rStack, p);
 			} else if (rStack.contains(cid)) {
-
 				Token sym = getKlassSymbol(cid, p);
 				if (sym != null) {
-					addError(sym.getRow(), sym.getCol(),
-							"Inheretence cycle found in class hierarchy class " + cid + " extends class " + src);
+					addError(sym.getRow(), sym.getCol(), "Inheretence cycle found in class hierarchy class " + cid + " extends class " + src);
 				} else {
-					addError(0, 0,
-							"Inheretence cycle found in class hierarchy class " + cid + " extends parent " + src);
+					addError(0, 0, "Inheretence cycle found in class hierarchy class " + cid + " extends parent " + src);
 				}
-
 			}
 		}
 	}
 
-	public Token getKlassSymbol(String id, Program p) {
-		// TODO: This is a hack!
+	public Token getKlassSymbol(String id, Program p)
+	{
 		for (int i = 0; i < p.getClassListSize(); i++) {
 			ClassDecl cd = p.getClassDeclAt(i);
 			if (cd instanceof ClassDeclSimple) {
@@ -440,14 +443,16 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IndexArray ia) {
+	public Type visit(IndexArray ia)
+	{
 		ia.getArray().accept(this);
 		ia.getIndex().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(ArrayAssign aa) {
+	public Type visit(ArrayAssign aa)
+	{
 		aa.getIdentifier().accept(this);
 		aa.getE1().accept(this);
 		aa.getE2().accept(this);
@@ -455,15 +460,16 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(StringLiteral stringLiteral) {
+	public Type visit(StringLiteral stringLiteral)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(ClassDeclSimple cd) {
-
+	public Type visit(ClassDeclSimple cd)
+	{
 		String id = cd.getId().getVarID();
-		if (hsKlass.contains(id)) { // Duplicate Klass
+		if (hsKlass.contains(id)) { 
 			return null;
 		} else {
 			hsKlass.add(id);
@@ -477,7 +483,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			vd.accept(this);
 		}
 
-		hsMethod.clear();
+		hsFunc.clear();
 		for (int i = 0; i < cd.getMethodListSize(); i++) {
 			FuncDecl md = cd.getMethodDeclAt(i);
 			md.accept(this);
@@ -487,10 +493,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ClassDeclExtends cd) {
-
+	public Type visit(ClassDeclExtends cd)
+	{
 		String id = cd.getId().getVarID();
-		if (hsKlass.contains(id)) { // Duplicate class
+		if (hsKlass.contains(id)) {
 			return null;
 		} else {
 			hsKlass.add(id);
@@ -513,7 +519,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			vd.accept(this);
 		}
 
-		hsMethod.clear();
+		hsFunc.clear();
 		for (int i = 0; i < cd.getMethodListSize(); i++) {
 			FuncDecl md = cd.getMethodDeclAt(i);
 			md.accept(this);
@@ -522,7 +528,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		return null;
 	}
 
-	public static void addError(int line, int col, String errorText) {
+	public static void addError(int line, int col, String errorText)
+	{
 		SemanticErrors.addError(line, col, errorText);
 	}
 }

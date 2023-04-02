@@ -7,5 +7,4 @@ public abstract class ClassDecl extends Tree
 	public ClassDecl(Token token) {
 		super(token);
 	}
-
 }

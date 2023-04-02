@@ -13,30 +13,28 @@ public class Klass extends Binding
 	Hashtable<String, Function> methods;
 	Hashtable<String, Variable> globals;
 	String parent;
-	// Type type;
 
-	public Klass(String id, String p) {
+	public Klass(String id, String p)
+	{
 		super(new IdentifierType(null, id));
 		this.id = id;
 		parent = p;
-		// type = new IdentifierType(null, id);
 		methods = new Hashtable<>();
 		globals = new Hashtable<>();
 	}
 
-	/*
-	 * public Klass() { super(new IdentifierType(null, null)); }
-	 */
-
-	public String getId() {
+	public String getId()
+	{
 		return id;
 	}
 
-	public Type type() {
+	public Type type()
+	{
 		return type;
 	}
 
-	public boolean addMethod(String id, Type type) {
+	public boolean addMethod(String id, Type type)
+	{
 		if (containsMethod(id)) {
 			return false;
 		} else {
@@ -45,11 +43,13 @@ public class Klass extends Binding
 		}
 	}
 
-	public Enumeration<String> getMethods() {
+	public Enumeration<String> getMethods()
+	{
 		return methods.keys();
 	}
 
-	public Function getMethod(String id) {
+	public Function getMethod(String id)
+	{
 		if (containsMethod(id)) {
 			return methods.get(id);
 		} else {
@@ -57,7 +57,8 @@ public class Klass extends Binding
 		}
 	}
 
-	public boolean addVar(String id, Type type) {
+	public boolean addVar(String id, Type type)
+	{
 		if (containsVar(id)) {
 			return false;
 		} else {
@@ -66,7 +67,8 @@ public class Klass extends Binding
 		}
 	}
 
-	public Variable getVar(String id) {
+	public Variable getVar(String id)
+	{
 		if (containsVar(id)) {
 			return globals.get(id);
 		} else {
@@ -74,15 +76,18 @@ public class Klass extends Binding
 		}
 	}
 
-	public boolean containsVar(String id) {
+	public boolean containsVar(String id)
+	{
 		return globals.containsKey(id);
 	}
 
-	public boolean containsMethod(String id) {
+	public boolean containsMethod(String id)
+	{
 		return methods.containsKey(id);
 	}
 
-	public String parent() {
+	public String parent()
+	{
 		return parent;
 	}
 }

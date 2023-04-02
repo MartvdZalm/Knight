@@ -7,25 +7,24 @@ import semantics.SemanticErrors;
 
 public class BuildSymbolTableVisitor implements Visitor<Type>
 {
-
+	private Klass currClass;
+	private Function currFunc;
 	SymbolTable symbolTable;
 	String mKlassId;
 
-	public BuildSymbolTableVisitor() {
+	public BuildSymbolTableVisitor()
+	{
 		this.symbolTable = new SymbolTable();
 	}
 
-	public SymbolTable getSymTab() {
-
+	public SymbolTable getSymTab()
+	{
 		return this.symbolTable;
 	}
 
-	private Klass currClass;
-	private Function currMethod;
-
 	@Override
-	public Type visit(Program n) {
-
+	public Type visit(Program n)
+	{
 		n.mClass.accept(this);
 
 		for (int i = 0; i < n.classList.size(); i++) {
@@ -35,198 +34,204 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Print n) {
-		// TODO Auto-generated method stub
+	public Type visit(Print n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Assign n) {
-		// TODO Auto-generated method stub
+	public Type visit(Assign n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Skip n) {
-		// TODO Auto-generated method stub
+	public Type visit(Skip n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Block n) {
-		// TODO Auto-generated method stub
+	public Type visit(Block n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IfThenElse n) {
-		// TODO Auto-generated method stub
+	public Type visit(IfThenElse n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(While n) {
-		// TODO Auto-generated method stub
+	public Type visit(While n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IntLiteral n) {
-		// TODO Auto-generated method stub
+	public Type visit(IntLiteral n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Plus n) {
-		// TODO Auto-generated method stub
+	public Type visit(Plus n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Minus n) {
-		// TODO Auto-generated method stub
+	public Type visit(Minus n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Times n) {
-		// TODO Auto-generated method stub
+	public Type visit(Times n)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Division n) {
+	public Type visit(Division n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Equals n) {
+	public Type visit(Equals n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(LessThan n) {
+	public Type visit(LessThan n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(And n) {
+	public Type visit(And n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Or n) {
+	public Type visit(Or n)
+	{
 		n.getLhs().accept(this);
 		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(True true1) {
+	public Type visit(True true1)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(False false1) {
+	public Type visit(False false1)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IdentifierExpr identifier) {
-		// TODO Auto-generated method stub
+	public Type visit(IdentifierExpr identifier)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(This this1) {
-		// TODO Auto-generated method stub
+	public Type visit(This this1)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(NewArray newArray) {
-		// TODO Auto-generated method stub
+	public Type visit(NewArray newArray)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(NewInstance newInstance) {
-		// TODO Auto-generated method stub
+	public Type visit(NewInstance newInstance)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(CallFunc cm) {
-
+	public Type visit(CallFunc cm)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Length length) {
-		// TODO Auto-generated method stub
+	public Type visit(Length length)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IntType intType) {
+	public Type visit(IntType intType)
+	{
 		return intType;
 	}
 
 	@Override
-	public Type visit(StringType stringType) {
+	public Type visit(StringType stringType)
+	{
 		return stringType;
 	}
 
 	@Override
-	public Type visit(BooleanType booleanType) {
+	public Type visit(BooleanType booleanType)
+	{
 		return booleanType;
 	}
 
 	@Override
-	public Type visit(IntArrayType intArrayType) {
+	public Type visit(IntArrayType intArrayType)
+	{
 		return intArrayType;
 	}
 
 	@Override
-	public Type visit(IdentifierType refType) {
-
+	public Type visit(IdentifierType refType)
+	{
 		String id = refType.getVarID();
 		if (id != null && id.equals(mKlassId)) {
-			// TODO: This is a Hack!
-			Token sym = refType.getToken();
-			addError(sym.getRow(), sym.getCol(),
-					"main class " + id + " cannot be used as a type in class " + currClass.getId());
+			Token tok = refType.getToken();
+			addError(tok.getRow(), tok.getCol(), "main class " + id + " cannot be used as a type in class " + currClass.getId());
 		}
 
 		return refType;
 	}
 
 	@Override
-	public Type visit(VarDecl vd) {
+	public Type visit(VarDecl vd)
+	{
 		Type t = vd.getType().accept(this);
 		String id = vd.getId().getVarID();
 
-		if (currMethod != null) {// Method Variable
-			if (!currMethod.addVar(id, t)) {
-				Token sym = vd.getId().getToken();
-				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in method "
-						+ currMethod.getId() + " in class " + currClass.getId());
+		if (currFunc != null) {
+			if (!currFunc.addVar(id, t)) {
+				Token tok = vd.getId().getToken();
+				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + currFunc.getId() + " in class " + currClass.getId());
 			}
-
-		} else {// Klass variable
-
-			if (!currClass.addVar(id, t)) {// duplicate
+		} else {
+			if (!currClass.addVar(id, t)) {
 				Token sym = vd.getId().getToken();
-				addError(sym.getRow(), sym.getCol(),
-						"Variable " + id + " already defined in class " + currClass.getId());
+				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + currClass.getId());
 			}
 		}
 
@@ -234,20 +239,21 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArgDecl ad) {
+	public Type visit(ArgDecl ad)
+	{
 		Type t = ad.getType().accept(this);
 		String id = ad.getId().getVarID();
-		if (!currMethod.addParam(id, t)) {
+		if (!currFunc.addParam(id, t)) {
 			Token sym = ad.getId().getToken();
-			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method "
-					+ currMethod.getId() + " in class " + currClass.getId());
+			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + currFunc.getId() + " in class " + currClass.getId());
 		}
 
 		return null;
 	}
 
 	@Override
-	public Type visit(MainClass mc) {
+	public Type visit(MainClass mc)
+	{
 		String id = mc.getClassName().getVarID();
 		mKlassId = id;
 		if (!symbolTable.addKlass(id, null)) {
@@ -258,7 +264,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 			currClass = symbolTable.getKlass(id);
 		}
 
-
 		for (int i = 0; i < mc.getStatListSize(); i++) {
 			mc.getStatAt(i).accept(this);
 		}
@@ -267,78 +272,78 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 			mc.getVarDeclAt(i).accept(this);
 		}
 
-		// currMethod = null;
 		currClass = null;
 		return null;
 	}
 
 	@Override
-	public Type visit(Identifier identifier) {
-		// TODO Auto-generated method stub
+	public Type visit(Identifier identifier)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IndexArray indexArray) {
-		// TODO Auto-generated method stub
+	public Type visit(IndexArray indexArray)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(ArrayAssign arrayAssign) {
-		// TODO Auto-generated method stub
+	public Type visit(ArrayAssign arrayAssign)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(StringLiteral stringLiteral) {
-		// TODO Auto-generated method stub
+	public Type visit(StringLiteral stringLiteral)
+	{
 		return null;
 	}
 
 	@Override
-	public Type visit(FuncDecl md) {
-		Type t = md.getReturnType().accept(this);
-		String id = md.getMethodName().getVarID();
+	public Type visit(FuncDecl funcDecl)
+	{
+		Type type = funcDecl.getReturnType().accept(this);
+		String identifier = funcDecl.getMethodName().getVarID();
 
-		if (!currClass.addMethod(id, t)) {
-			Token sym = md.getToken();
-			addError(sym.getRow(), sym.getCol(), "Method " + id + " already defined in class " + currClass.getId());
-			currMethod = new Function(id, t);
+		if (!currClass.addMethod(identifier, type)) {
+			Token tok = funcDecl.getToken();
+			addError(tok.getRow(), tok.getCol(), "Method " + identifier + " already defined in class " + currClass.getId());
+			currFunc = new Function(identifier, type);
 		} else {
-			currMethod = currClass.getMethod(id);
+			currFunc = currClass.getMethod(identifier);
 		}
 
-		for (int i = 0; i < md.getArgListSize(); i++) {
-			ArgDecl ad = md.getArgDeclAt(i);
+		for (int i = 0; i < funcDecl.getArgListSize(); i++) {
+			ArgDecl ad = funcDecl.getArgDeclAt(i);
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < md.getVarListSize(); i++) {
-			VarDecl vd = md.getVarDeclAt(i);
+		for (int i = 0; i < funcDecl.getVarListSize(); i++) {
+			VarDecl vd = funcDecl.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
-		for (int i = 0; i < md.getStatListSize(); i++) {
-			Statement st = md.getStatAt(i);
+		for (int i = 0; i < funcDecl.getStatListSize(); i++) {
+			Statement st = funcDecl.getStatAt(i);
 			st.accept(this);
 		}
 
-		md.getReturnExpr().accept(this);
-		currMethod = null;
+		funcDecl.getReturnExpr().accept(this);
+		currFunc = null;
 		return null;
 	}
 
 	@Override
-	public Type visit(ClassDeclSimple classDeclSimple) {
-
-		String id = classDeclSimple.getId().getVarID();
-		if (!symbolTable.addKlass(id, null)) {
+	public Type visit(ClassDeclSimple classDeclSimple)
+	{
+		String identifier = classDeclSimple.getId().getVarID();
+		if (!symbolTable.addKlass(identifier, null)) {
 			Token sym = classDeclSimple.getToken();
-			addError(sym.getRow(), sym.getCol(), "Class " + id + " is already defined!");
-			currClass = new Klass(id, null);
+			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
+			currClass = new Klass(identifier, null);
 		} else {
-			currClass = symbolTable.getKlass(id);
+			currClass = symbolTable.getKlass(identifier);
 		}
 
 		for (int i = 0; i < classDeclSimple.getVarListSize(); i++) {
@@ -350,27 +355,25 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 			FuncDecl md = classDeclSimple.getMethodDeclAt(i);
 			md.accept(this);
 		}
-		// System.out.println("visited class" + id);
 		return null;
 	}
 
 	@Override
-	public Type visit(ClassDeclExtends classDeclExtends) {
-
-		String id = classDeclExtends.getId().getVarID();
+	public Type visit(ClassDeclExtends classDeclExtends)
+	{
+		String identifier = classDeclExtends.getId().getVarID();
 		String parent = classDeclExtends.getParent().getVarID();
-		if (!symbolTable.addKlass(id, parent)) {
+		if (!symbolTable.addKlass(identifier, parent)) {
 			Token sym = classDeclExtends.getToken();
-			addError(sym.getRow(), sym.getCol(), "Class " + id + " is already defined!");
-			currClass = new Klass(id, parent);
+			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
+			currClass = new Klass(identifier, parent);
 		} else {
-			currClass = symbolTable.getKlass(id);
+			currClass = symbolTable.getKlass(identifier);
 		}
 
 		if (parent != null && parent.equals(mKlassId)) {
-			// TODO: This is a Hack!
 			Token sym = classDeclExtends.getParent().getToken();
-			addError(sym.getRow(), sym.getCol(), "class " + id + " cannot inherit main class");
+			addError(sym.getRow(), sym.getCol(), "class " + identifier + " cannot inherit main class");
 		}
 
 		for (int i = 0; i < classDeclExtends.getVarListSize(); i++) {
@@ -383,11 +386,11 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 			md.accept(this);
 		}
 		currClass = null;
-		// System.out.println("visited class" + id);
 		return null;
 	}
 
-	public static void addError(int line, int col, String errorText) {
+	public static void addError(int line, int col, String errorText)
+	{
 		SemanticErrors.addError(line, col, errorText);
 	}
 }
