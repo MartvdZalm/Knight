@@ -33,10 +33,26 @@ public class TypeAnalyser implements Visitor<Type>
 
 		if (!((texp instanceof IntType) || (texp instanceof BooleanType) || (texp instanceof StringType))) {
 			Token sym = n.expression.getToken();
-			addError(sym.getRow(), sym.getCol(), "The argument of System.out.println must be of Type int, boolean or String");
+			addError(sym.getRow(), sym.getCol(), "The argument of System.out.print must be of Type int, boolean or String");
 		} else {
 			n.expression.setType(texp);
 		}
+		return null;
+	}
+
+	@Override
+	public Type visit(Println n)
+	{
+		Type texp = n.getExpr().accept(this);
+		if (texp == null) {
+			return null;
+		}
+
+		if (!((texp instanceof IntType) || (texp instanceof BooleanType) || (texp instanceof StringType))) {
+			Token sym = n.getExpr().getToken();
+			addError(sym.getRow(), sym.getCol(), "The argument of System.out.print must be of Type int, boolean or String");
+		}
+
 		return null;
 	}
 

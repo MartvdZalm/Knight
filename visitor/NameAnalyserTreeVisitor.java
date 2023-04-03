@@ -33,6 +33,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(Println n)
+	{
+		n.getExpr().accept(this);
+		return null;
+	}
+
+	@Override
 	public Type visit(Assign n)
 	{
 		n.getId().accept(this);

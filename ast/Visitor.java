@@ -80,4 +80,6 @@ public interface Visitor<R>
 
     public R visit(Length length);
 
+    public R visit(Println println);
+
 }

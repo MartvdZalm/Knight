@@ -14,7 +14,6 @@ public class Main
 {
 	public static void main(String argv[])
 	{
-
 		Main main = new Main();
 
 		String[] arr = {"--cgen", "Empire.knight"};

@@ -33,8 +33,7 @@ public class Parser
 
     public void eat(Tokens tok) throws ParseException
     {
-        if (tok == token.getToken()) 
-        {
+        if (tok == token.getToken()) {
             advance();
         } else {
             error(token.getToken(), tok);
@@ -46,15 +45,13 @@ public class Parser
         Program program = null;
 
         try {
-
             MainClass mainClass = null;
 			List<ClassDecl> classList = new ArrayList<>();
 
             do {
                 token = lexer.nextToken();
-    
+
                 switch (token.getToken()) {
-    
                 case KNIGHT: {
                     mainClass = parseMainClass();
 					while (token != null) {
@@ -376,6 +373,18 @@ public class Parser
 				eat(Tokens.SEMICOLON);
 	
 				Print result = new Print(tok, expr);
+				return result;
+			}
+
+			case PRINTLN: {
+				Token tok = token;
+				eat(Tokens.PRINTLN);
+				eat(Tokens.LEFTPAREN);
+				Expression expr = parseExpression();
+				eat(Tokens.RIGHTPAREN);
+				eat(Tokens.SEMICOLON);
+
+				Println result = new Println(tok, expr);
 				return result;
 			}
 	

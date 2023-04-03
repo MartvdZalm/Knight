@@ -8,6 +8,7 @@ public enum Tokens
     MAIN,
     COMMENT,
     PRINT,
+    PRINTLN,
     SENTINEL,
     IDENTIFIER,
     THIS,

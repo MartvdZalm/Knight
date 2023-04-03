@@ -25,12 +25,25 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Print n) {
+	public String visit(Print n)
+	{
 		StringBuilder sb = new StringBuilder();
-		// sb.append("; println method" + "\n");
 		sb.append("getstatic java/lang/System/out Ljava/io/PrintStream;" + "\n");
 		sb.append(n.getExpr().accept(this) + "\n");
+		sb.append("invokevirtual java/io/PrintStream/print(");
+		sb.append(n.getExpr().type().accept(this));
+		sb.append(")V" + "\n");
 
+		bytecode += 2;
+		return sb.toString();
+	}
+
+	@Override
+	public String visit(Println n)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("getstatic java/lang/System/out Ljava/io/PrintStream;" + "\n");
+		sb.append(n.getExpr().accept(this) + "\n");
 		sb.append("invokevirtual java/io/PrintStream/println(");
 		sb.append(n.getExpr().type().accept(this));
 		sb.append(")V" + "\n");
@@ -40,17 +53,16 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Assign n) {
+	public String visit(Assign n)
+	{
 		StringBuilder sb = new StringBuilder();
 		// sb.append("; assignment" + "\n");
 
 		Binding b = n.getId().getB();
 		int lvIndex = getLocalVarIndex(b);
 		if (lvIndex == -1) { // Class Variable
-			sb.append("aload_0" + "\n");
-			sb.append(n.getExpr().accept(this) + "\n");
-			sb.append(
-					"putfield " + currClass.getId() + "/" + n.getId().getVarID() + " " + b.type().accept(this) + "\n");
+			sb.append("bipush " + n.getExpr().accept(this) + "\n");
+			sb.append("putstatic " + currClass.getId() + "/" + n.getId().getVarID() + " " + b.type().accept(this) + "\n");
 
 			bytecode += 2;
 		} else { // Local Variable
@@ -135,7 +147,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IntLiteral n) {
 		bytecode += 1;
-		return "ldc " + n.getValue() + "\n";
+		return n.getValue() + "\n";
 	}
 
 	@Override
@@ -338,8 +350,7 @@ public class CodeGenerator implements Visitor<String>
 		int lvIndex = getLocalVarIndex(b);
 
 		if (lvIndex == -1) { // Not a local variable
-			sb.append("aload_0" + "\n");
-			sb.append("getfield " + currClass.getId() + "/" + id.getVarID() + " " + b.type().accept(this) + "\n");
+			sb.append("getstatic " + currClass.getId() + "/" + id.getVarID() + " " + b.type().accept(this) + "\n");
 
 			bytecode += 2;
 		} else {
@@ -427,37 +438,41 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(IntArrayType intArrayType) {
+	public String visit(IntArrayType intArrayType)
+	{
 		return "[I";
 	}
 
 	@Override
-	public String visit(IdentifierType refT) {
+	public String visit(IdentifierType refT)
+	{
 		return "L" + refT.getVarID() + ";";
 	}
 
 	@Override
-	public String visit(VarDecl vd) {
-
+	public String visit(VarDecl vd)
+	{
 		if (currMethod != null) {
 			Binding b = vd.getId().getB();
 			setLocalVarIndex(b);
 			return "";
 		} else {
 			bytecode += 1;
-			return ".field public " + vd.getId() + " " + vd.getType().accept(this);
+			return ".field public static " + vd.getId() + " " + vd.getType().accept(this);
 		}
 	}
 
 	@Override
-	public String visit(ArgDecl ad) {
+	public String visit(ArgDecl ad)
+	{
 		Binding b = ad.getId().getB();
 		setLocalVarIndex(b);
 		return ad.getType().accept(this);
 	}
 
 	@Override
-	public String visit(FuncDecl md) {
+	public String visit(FuncDecl md)
+	{
 		slot = 0;
 		int localvars = 1;
 		localvars += md.getArgListSize();
@@ -466,9 +481,6 @@ public class CodeGenerator implements Visitor<String>
 		StringBuilder sb = new StringBuilder();
 		currMethod = (Function) md.getMethodName().getB();
 
-		// sb.append(";" + "\n");
-		// sb.append("; method " + currMethod.getId() + " declaration" + "\n");
-		// sb.append(";" + "\n");
 		sb.append(".method public " + currMethod.getId() + "(");
 
 		for (int i = 0; i < md.getArgListSize(); i++) {
@@ -519,6 +531,12 @@ public class CodeGenerator implements Visitor<String>
 		}
 		bytecode += mc.getVarListSize();
 
+		sb.append(".method public <init>()V" + "\n");
+		sb.append("aload_0" + "\n");
+		sb.append("invokenonvirtual java/lang/Object/<init>()V" + "\n");
+		sb.append("return" + "\n");
+		sb.append(".end method" + "\n");
+
 		sb.append(".method public static main([Ljava/lang/String;)V" + "\n");
 		sb.append(".limit locals 10" + "\n");
 		sb.append(".limit stack 10" + "\n");
@@ -539,13 +557,11 @@ public class CodeGenerator implements Visitor<String>
 
 		String code = program.mClass.accept(this);
 		File f = write(currClass.getId(), code);
-		// System.out.println(code);
 		execJasmin(f);
 
 		for (int i = 0; i < program.classList.size(); i++) {
 			code = program.classList.get(i).accept(this);
 			f = write(currClass.getId(), code);
-			// System.out.println(code);
 			execJasmin(f);
 		}
 		return null;
@@ -618,8 +634,6 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(ArrayAssign aa) {
 		StringBuilder sb = new StringBuilder();
-		// sb.append("; array assignment" + "\n");
-
 		sb.append(aa.getIdentifier().accept(this) + "\n");
 		sb.append(aa.getE1().accept(this) + "\n");
 		sb.append(aa.getE2().accept(this) + "\n");
@@ -682,10 +696,6 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(vd.accept(this) + "\n");
 		}
 
-		// sb.append(";" + "\n");
-		// sb.append("; standard initializer (calls " + currClass.parent() + "'s
-		// initializer)" + "\n");
-		// sb.append(";" + "\n");
 		sb.append(".method public <init>()V" + "\n");
 		sb.append("aload_0" + "\n");
 		sb.append("invokenonvirtual " + currClass.parent() + "/<init>()V" + "\n");

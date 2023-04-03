@@ -9,6 +9,7 @@ public class TokenType
         Symbol.symbol("MAIN", Tokens.MAIN);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("print", Tokens.PRINT);
+        Symbol.symbol("println", Tokens.PRINTLN);
         Symbol.symbol("SENTINEL", Tokens.SENTINEL);
         Symbol.symbol("IDENTIFIER", Tokens.IDENTIFIER);
         Symbol.symbol("this", Tokens.THIS);

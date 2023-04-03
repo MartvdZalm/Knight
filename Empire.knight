@@ -1,8 +1,22 @@
 KNIGHT Empire
 {
+    int a:  
+    int b:
+
     Function MAIN
-    {
-        print('I am getting better.'):
-        print('Next time I will add the println function.'):
+    {   
+        a = 10:
+        b = 5:
+
+        println('a= ' + a):
+        println('b=' + b):
+
+        a = 30:
+        b = 10:
+
+        println('a=' + a):
+        println('b=' + b):
+
+        println(a * b):
     }
 }
