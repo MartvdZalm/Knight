@@ -14,6 +14,7 @@ public class TokenType
         Symbol.symbol("IDENTIFIER", Tokens.IDENTIFIER);
         Symbol.symbol("this", Tokens.THIS);
         Symbol.symbol("new", Tokens.NEW);
+        Symbol.symbol("USE", Tokens.USE);
 
         Symbol.symbol("int",Tokens.INTEGER);
         Symbol.symbol("string", Tokens.STRING);
@@ -39,7 +40,7 @@ public class TokenType
         Symbol.symbol("*",Tokens.TIMES);
         Symbol.symbol("/",Tokens.DIV);
         Symbol.symbol(".", Tokens.DOT);
-        Symbol.symbol("length", Tokens.LENGTH);
+        Symbol.symbol("Length", Tokens.LENGTH);
 
         Symbol.symbol("Function", Tokens.FUNCTION);
         Symbol.symbol("return", Tokens.RETURN);

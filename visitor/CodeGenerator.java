@@ -56,12 +56,15 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(Assign n)
 	{
 		StringBuilder sb = new StringBuilder();
-		// sb.append("; assignment" + "\n");
 
 		Binding b = n.getId().getB();
 		int lvIndex = getLocalVarIndex(b);
 		if (lvIndex == -1) { // Class Variable
-			sb.append("bipush " + n.getExpr().accept(this) + "\n");
+			if (n.getExpr() instanceof NewInstance) {
+				sb.append(n.getExpr().accept(this) + "\n");
+			} else {
+				sb.append("bipush " + n.getExpr().accept(this) + "\n");
+			}
 			sb.append("putstatic " + currClass.getId() + "/" + n.getId().getVarID() + " " + b.type().accept(this) + "\n");
 
 			bytecode += 2;

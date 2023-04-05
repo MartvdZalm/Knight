@@ -13,6 +13,7 @@ public enum Tokens
     IDENTIFIER,
     THIS,
     NEW,
+    USE,
 
     INTEGER,
     STRING,

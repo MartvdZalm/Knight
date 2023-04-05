@@ -15,51 +15,45 @@ public class Main
 	public static void main(String argv[])
 	{
 		Main main = new Main();
-
-		String[] arr = {"--cgen", "Empire.knight"};
-
-        main.codeGen(arr);
+        main.codeGen("Empire.knight");
 	}
 
-	public void codeGen(String argv[])
+	public void codeGen(String str)
 	{
-		for (int i = 1; i < argv.length; i++) {
-			try {
+		try {
+			if (!isFileValid(str)) {
+				return;
+			}
 
-				if (!isFileValid(argv[i])) {
-					continue;
+			Parser p = new Parser(str);
+			Tree tree = p.parse();
+
+			if (tree != null) {
+				BuildSymbolTableVisitor bstv = new BuildSymbolTableVisitor();
+				bstv.visit((Program) tree);
+
+				SymbolTable st = bstv.getSymTab();
+				
+				NameAnalyserTreeVisitor natv = new NameAnalyserTreeVisitor(st);
+				natv.visit((Program) tree);
+
+				TypeAnalyser ta = new TypeAnalyser(st);
+				ta.visit((Program) tree);
+
+				if (SemanticErrors.errorList.size() == 0) {
+					String path = getFileDirPath(str);
+					CodeGenerator cg = new CodeGenerator(path);
+					cg.visit((Program) tree);
 				}
-
-				Parser p = new Parser(argv[i]);
-				Tree tree = p.parse();
-
-				if (tree != null) {
-					BuildSymbolTableVisitor bstv = new BuildSymbolTableVisitor();
-					bstv.visit((Program) tree);
-	
-					SymbolTable st = bstv.getSymTab();
-					
-					NameAnalyserTreeVisitor natv = new NameAnalyserTreeVisitor(st);
-					natv.visit((Program) tree);
-
-					TypeAnalyser ta = new TypeAnalyser(st);
-					ta.visit((Program) tree);
-
-					if (SemanticErrors.errorList.size() == 0) {
-						String path = getFileDirPath(argv[i]);
-						CodeGenerator cg = new CodeGenerator(path);
-						cg.visit((Program) tree);
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(1);
-			} finally {
-				if (SemanticErrors.errorList.size() != 0) {
-					SemanticErrors.sort();
-					for (NameError e : SemanticErrors.errorList) {
-						System.err.println(e);
-					}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		} finally {
+			if (SemanticErrors.errorList.size() != 0) {
+				SemanticErrors.sort();
+				for (NameError e : SemanticErrors.errorList) {
+					System.err.println(e);
 				}
 			}
 		}

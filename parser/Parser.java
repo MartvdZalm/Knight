@@ -89,9 +89,22 @@ public class Parser
         eat(Tokens.LEFTBRACE);
 
 		List<VarDecl> varList = new ArrayList<>();
-		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-			VarDecl var = parseVariable();
-			varList.add(var);
+		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {
+
+			if (token.getToken() == Tokens.IDENTIFIER) {
+				IdentifierType idType = new IdentifierType(token, token.getSymbol());
+				eat(Tokens.IDENTIFIER);
+	
+				if (token.getToken() == Tokens.IDENTIFIER) { 
+					Identifier id2 = new Identifier(token, token.getSymbol());
+					eat(Tokens.IDENTIFIER);
+					eat(Tokens.SEMICOLON);
+					varList.add(new VarDecl(id2.getToken(), idType, id2));
+				}
+			} else {
+				VarDecl var = parseVariable();
+				varList.add(var);
+			}
 		}
 
 		eat(Tokens.FUNCTION);

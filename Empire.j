@@ -1,7 +1,9 @@
 .class public Empire
 .super java/lang/Object
-.field public static a I
-.field public static b I
+.field public static width I
+.field public static length I
+.field public static height I
+.field public static test LTest;
 .method public <init>()V
 aload_0
 invokenonvirtual java/lang/Object/<init>()V
@@ -10,22 +12,64 @@ return
 .method public static main([Ljava/lang/String;)V
 .limit locals 10
 .limit stack 10
+new Test
+dup
+invokespecial Test/<init>()V
+
+putstatic Empire/test LTest;
+
 bipush 10
 
-putstatic Empire/a I
+putstatic Empire/width I
+
+bipush 2
+
+putstatic Empire/length I
 
 bipush 5
 
-putstatic Empire/b I
+putstatic Empire/height I
 
 getstatic java/lang/System/out Ljava/io/PrintStream;
 new java/lang/StringBuilder
 dup
 invokespecial java/lang/StringBuilder/<init>()V
-ldc "a="
+new java/lang/StringBuilder
+dup
+invokespecial java/lang/StringBuilder/<init>()V
+new java/lang/StringBuilder
+dup
+invokespecial java/lang/StringBuilder/<init>()V
+new java/lang/StringBuilder
+dup
+invokespecial java/lang/StringBuilder/<init>()V
+new java/lang/StringBuilder
+dup
+invokespecial java/lang/StringBuilder/<init>()V
+ldc "width="
 
 invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-getstatic Empire/a I
+getstatic Empire/width I
+
+invokevirtual java/lang/StringBuilder/append(I)Ljava/lang/StringBuilder;
+invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
+invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ldc ", length="
+
+invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
+invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+getstatic Empire/length I
+
+invokevirtual java/lang/StringBuilder/append(I)Ljava/lang/StringBuilder;
+invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
+invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ldc ", height="
+
+invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
+invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+getstatic Empire/height I
 
 invokevirtual java/lang/StringBuilder/append(I)Ljava/lang/StringBuilder;
 invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
@@ -35,32 +79,16 @@ getstatic java/lang/System/out Ljava/io/PrintStream;
 new java/lang/StringBuilder
 dup
 invokespecial java/lang/StringBuilder/<init>()V
-ldc "b="
+ldc "Surface:"
 
 invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-getstatic Empire/b I
+getstatic Empire/test LTest;
 
-invokevirtual java/lang/StringBuilder/append(I)Ljava/lang/StringBuilder;
-invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
-invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+getstatic Empire/width I
 
-bipush 30
+getstatic Empire/length I
 
-putstatic Empire/a I
-
-bipush 10
-
-putstatic Empire/b I
-
-getstatic java/lang/System/out Ljava/io/PrintStream;
-new java/lang/StringBuilder
-dup
-invokespecial java/lang/StringBuilder/<init>()V
-ldc "a="
-
-invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-getstatic Empire/a I
-
+invokevirtual Test/surface(II)I
 invokevirtual java/lang/StringBuilder/append(I)Ljava/lang/StringBuilder;
 invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
 invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
@@ -69,23 +97,21 @@ getstatic java/lang/System/out Ljava/io/PrintStream;
 new java/lang/StringBuilder
 dup
 invokespecial java/lang/StringBuilder/<init>()V
-ldc "b="
+ldc "Capacity:"
 
 invokevirtual java/lang/StringBuilder/append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-getstatic Empire/b I
+getstatic Empire/test LTest;
 
+getstatic Empire/width I
+
+getstatic Empire/length I
+
+getstatic Empire/height I
+
+invokevirtual Test/capacity(III)I
 invokevirtual java/lang/StringBuilder/append(I)Ljava/lang/StringBuilder;
 invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;
 invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-
-getstatic java/lang/System/out Ljava/io/PrintStream;
-getstatic Empire/a I
-
-getstatic Empire/b I
-
-imul
-
-invokevirtual java/io/PrintStream/println(I)V
 
 return
 .end method

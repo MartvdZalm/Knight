@@ -1,13 +1,34 @@
 KNIGHT Empire
 {
-    int a:  
-    int b:
+    int width:
+    int length:
+    int height:
+
+    Test test:
 
     Function MAIN
-    {   
-        a = 10:
-        b = 5:
+    {
+        test = new Test():
 
-        println(a * b):
+        width = 10:
+        length = 2:
+        height = 5:
+
+        println('width=' + width + ', length=' + length + ', height=' + height):
+        println('Surface: ' + test.surface(width, length)):
+        println('Capacity: ' + test.capacity(width, length, height)):
+    }
+}
+
+KNIGHT Test
+{
+    Function int surface(int width, int length)
+    {
+        return width * length:
+    }
+
+    Function int capacity(int width, int length, int height)
+    {
+        return width * height * length:
     }
 }
