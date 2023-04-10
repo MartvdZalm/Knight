@@ -1,42 +1,21 @@
 # Knight
-Knight is a compiler for the Knight programming language. It is built using Java and runs on the Java Virtual Machine (JVM).
+Knight is a programming language designed to perform complex tasks quickly and efficiently. It is built on the Java Virtual Machine (JVM) and will later be changed to run on its own software, making it independent of other software dependencies.
 
-# Motivation 
-I created this compiler to improve my programming skills and because I enjoy working on a project that is always evolving. Initially, I used code from other sources as I was learning how a compiler works. As I became more familiar with the process, I modified the code to fit my own preferences and style.
+# Features
+High performance for complex tasks
+Rich library with algorithms and useful utilities
+Object-oriented programming structure for organized code
 
-# Knight example
-```knight
-KNIGHT Empire
-{
-    int width:
-    int length:
-    int height:
+# Usage
+To use Knight, simply download the source code from this repository and compile it using the Java compiler. After compiling, you can run Knight programs by invoking the knight command followed by the path to your Knight source file.
 
-    Test test:
+# Website
+Visit our website at https://www.knight.com to stay updated on the latest news and announcements about Knight. We regularly add new features and improvements to the language, and we welcome feedback and suggestions from our users.
 
-    Function MAIN
-    {
-        test = new Test():
+# Contributions
+Knight is currently maintained by one person, but contributions are always welcome. If you would like to contribute to the development of Knight, please email or contact us via our website.
 
-        width = 10:
-        length = 2:
-        height = 5:
+# License
+See the LICENSE file for more information.
 
-        println('width=' + width + ', length=' + length + ', height=' + height):
-        println('Surface: ' + test.surface(width, length)):
-        println('Capacity: ' + test.capacity(width, length, height)):
-    }
-}
-
-KNIGHT Test
-{
-    Function int surface(int width, int length)
-    {
-        return width * length:
-    }
-
-    Function int capacity(int width, int length, int height)
-    {
-        return width * height * length:
-    }
-}
+We hope you enjoy using Knight and find it helpful in your programming endeavors. Happy coding!
