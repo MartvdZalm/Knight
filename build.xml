@@ -1,0 +1,9 @@
+<project name="Knight" default="compile">
+    <target name="compile">
+        <javac srcdir="src" destdir="bin">
+            <classpath>
+                <pathelement location="lib/jasmin.jar"/>
+            </classpath>
+        </javac>
+    </target>
+</project>
