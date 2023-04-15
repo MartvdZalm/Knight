@@ -547,7 +547,7 @@ public class CodeGenerator implements Visitor<String>
 		String code = program.mClass.accept(this);
 		File f = write(currClass.getId(), code);
 		execJasmin(f);
-
+		
 		for (int i = 0; i < program.classList.size(); i++) {
 			code = program.classList.get(i).accept(this);
 			f = write(currClass.getId(), code);

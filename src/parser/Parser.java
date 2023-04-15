@@ -44,8 +44,11 @@ public class Parser
     {
         Program program = null;
 
+		// Start token because program extends tree. After I am done with implementing this I will take 
+		// a look if I can change this.
+		Token strartToken = token; 
+
         try {
-            MainClass mainClass = null;
 			List<ClassDecl> classList = new ArrayList<>();
 
             do {
@@ -53,7 +56,6 @@ public class Parser
 
                 switch (token.getToken()) {
                 case KNIGHT: {
-                    mainClass = parseMainClass();
 					while (token != null) {
 						ClassDecl klass = parseClassDecl();
 						classList.add(klass);
@@ -67,7 +69,7 @@ public class Parser
                 
             } while (token != null);
 
-            program = new Program(mainClass.getToken(), mainClass, classList);
+            program = new Program(strartToken, classList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,76 +78,8 @@ public class Parser
         return program;
     }
 
-    private MainClass parseMainClass() throws ParseException
-    {
-        eat(Tokens.KNIGHT);
-
-		IdentifierExpr className = null;
-        if (token.getToken() == Tokens.IDENTIFIER)
-        {
-            className = new IdentifierExpr(token, token.getSymbol());
-        }
-		eat(Tokens.IDENTIFIER);
-        eat(Tokens.LEFTBRACE);
-
-		List<VarDecl> varList = new ArrayList<>();
-		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {
-
-			if (token.getToken() == Tokens.IDENTIFIER) {
-				IdentifierType idType = new IdentifierType(token, token.getSymbol());
-				eat(Tokens.IDENTIFIER);
-	
-				if (token.getToken() == Tokens.IDENTIFIER) { 
-					Identifier id2 = new Identifier(token, token.getSymbol());
-					eat(Tokens.IDENTIFIER);
-					eat(Tokens.SEMICOLON);
-					varList.add(new VarDecl(id2.getToken(), idType, id2));
-				}
-			} else {
-				VarDecl var = parseVariable();
-				varList.add(var);
-			}
-		}
-
-		eat(Tokens.FUNCTION);
-		eat(Tokens.MAIN);
-		eat(Tokens.LEFTBRACE);
-
-		List<Statement> statList = new ArrayList<>();
-
-		while (token.getToken() == Tokens.IDENTIFIER) {
-			IdentifierType idType = new IdentifierType(token, token.getSymbol());
-			Identifier id1 = new Identifier(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-
-			if (token.getToken() == Tokens.IDENTIFIER) { 
-				Identifier id2 = new Identifier(token, token.getSymbol());
-				eat(Tokens.IDENTIFIER);
-				eat(Tokens.SEMICOLON);
-				varList.add(new VarDecl(id2.getToken(), idType, id2));
-
-			} else { 
-				Statement stat = parseState1(id1);
-				statList.add(stat);
-				while (token.getToken() != Tokens.RIGHTBRACE) {
-					statList.add(parseStatement());
-				}
-			}
-		}
-
-		while (token.getToken() != Tokens.RIGHTBRACE) {
-			statList.add(parseStatement());
-		}
-
-		eat(Tokens.RIGHTBRACE);
-		eat(Tokens.RIGHTBRACE);
-
-        return new MainClass(className.getToken(), className, statList, varList);
-    }
-
 	public ClassDecl parseClassDecl() throws ParseException
 	{
-
 		eat(Tokens.KNIGHT);
 		IdentifierExpr className = null;
 		if (token.getToken() == Tokens.IDENTIFIER) {
@@ -169,7 +103,11 @@ public class Parser
 
 		List<FuncDecl> funcList = new ArrayList<>();
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() == Tokens.FUNCTION) {
-			funcList.add(parseFuncDecl());
+			eat(Tokens.FUNCTION);
+			if (token.getToken() == Tokens.MAIN) {
+				funcList.add(parseFuncDeclMain());
+			}
+			funcList.add(parseFuncDeclStandard());
 		}
 
 		eat(Tokens.RIGHTBRACE);
@@ -183,10 +121,51 @@ public class Parser
 		}
 	}
 
-	public FuncDecl parseFuncDecl() throws ParseException
+	public FuncDeclMain parseFuncDeclMain() throws ParseException
 	{
-		eat(Tokens.FUNCTION);
+		IdentifierExpr methodName = new IdentifierExpr(token, token.getSymbol());
+		eat(Tokens.MAIN);
+		eat(Tokens.LEFTBRACE);
 
+		List<VarDecl> varList = new ArrayList<>();
+		List<Statement> statList = new ArrayList<>();
+
+		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
+			VarDecl var = parseVariable();
+			varList.add(var);
+		}
+
+		while (token.getToken() == Tokens.IDENTIFIER) {
+			IdentifierType idType = new IdentifierType(token, token.getSymbol());
+			Identifier id1 = new Identifier(token, token.getSymbol());
+			eat(Tokens.IDENTIFIER);
+
+			if (token.getToken() == Tokens.IDENTIFIER) { 
+				Identifier id2 = new Identifier(token, token.getSymbol());
+				eat(Tokens.IDENTIFIER);
+				eat(Tokens.SEMICOLON);
+				varList.add(new VarDecl(id2.getToken(), idType, id2));
+
+				while (token.getToken() == Tokens.INTEGER) {
+					varList.add(parseVariable());
+				}
+
+			} else { 
+				Statement stat = parseState1(id1);
+				statList.add(stat);
+				while (token.getToken() != Tokens.RIGHTBRACE) {
+					statList.add(parseStatement());
+				}
+			}
+		}
+
+		eat(Tokens.RIGHTBRACE);
+
+		return new FuncDeclMain(token, methodName, varList, statList);
+	}
+
+	public FuncDecl parseFuncDeclStandard() throws ParseException
+	{
 		Type returnType = parseType();
 		IdentifierExpr methodName = null;
 		if (token.getToken() == Tokens.IDENTIFIER) {
@@ -248,7 +227,7 @@ public class Parser
 		eat(Tokens.SEMICOLON);	
 		eat(Tokens.RIGHTBRACE);
 
-		return new FuncDecl(methodName.getToken(), returnType, methodName, argList, varList, statList, returnExpr);
+		return new FuncDeclStandard(methodName.getToken(), returnType, methodName, argList, varList, statList, returnExpr);
 	}
 
 	public ArgDecl parseArgument() throws ParseException

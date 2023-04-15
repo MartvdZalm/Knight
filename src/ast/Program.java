@@ -6,21 +6,12 @@ import src.lexer.Token;
 
 public class Program extends Tree
 {
-	public MainClass mClass;
 	public List<ClassDecl> classList;
 
-	public Program(Token token, MainClass mClass, List<ClassDecl> classList) {
+	public Program(Token token, List<ClassDecl> classList)
+	{
 		super(token);
-		this.mClass = mClass;
 		this.classList = classList;
-	}
-
-	public MainClass getmClass() {
-		return mClass;
-	}
-
-	public void setmClass(MainClass mClass) {
-		this.mClass = mClass;
 	}
 
 	public List<ClassDecl> getKlassList() {

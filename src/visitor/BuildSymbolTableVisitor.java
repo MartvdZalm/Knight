@@ -25,8 +25,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	@Override
 	public Type visit(Program n)
 	{
-		n.mClass.accept(this);
-
 		for (int i = 0; i < n.classList.size(); i++) {
 			n.classList.get(i).accept(this);
 		}
@@ -258,31 +256,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(MainClass mc)
-	{
-		String id = mc.getClassName().getVarID();
-		mKlassId = id;
-		if (!symbolTable.addKlass(id, null)) {
-			Token sym = mc.getToken();
-			addError(sym.getRow(), sym.getCol(), "Class " + id + " is already defined!");
-			currClass = new Klass(id, null);
-		} else {
-			currClass = symbolTable.getKlass(id);
-		}
-
-		for (int i = 0; i < mc.getStatListSize(); i++) {
-			mc.getStatAt(i).accept(this);
-		}
-
-		for (int i = 0; i < mc.getVarListSize(); i++) {
-			mc.getVarDeclAt(i).accept(this);
-		}
-
-		currClass = null;
-		return null;
-	}
-
-	@Override
 	public Type visit(Identifier identifier)
 	{
 		return null;
@@ -307,35 +280,62 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDecl funcDecl)
+	public Type visit(FuncDeclMain funcDeclMain)
 	{
-		Type type = funcDecl.getReturnType().accept(this);
-		String identifier = funcDecl.getMethodName().getVarID();
+		String identifier = funcDeclMain.getMethodName().getVarID();
 
 		if (!currClass.addMethod(identifier, type)) {
-			Token tok = funcDecl.getToken();
+			Token tok = funcDeclMain.getToken();
 			addError(tok.getRow(), tok.getCol(), "Method " + identifier + " already defined in class " + currClass.getId());
 			currFunc = new Function(identifier, type);
 		} else {
 			currFunc = currClass.getMethod(identifier);
 		}
 
-		for (int i = 0; i < funcDecl.getArgListSize(); i++) {
-			ArgDecl ad = funcDecl.getArgDeclAt(i);
-			ad.accept(this);
-		}
-
-		for (int i = 0; i < funcDecl.getVarListSize(); i++) {
-			VarDecl vd = funcDecl.getVarDeclAt(i);
+		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
+			VarDecl vd = funcDeclMain.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
-		for (int i = 0; i < funcDecl.getStatListSize(); i++) {
-			Statement st = funcDecl.getStatAt(i);
+		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
+			Statement st = funcDeclMain.getStatAt(i);
 			st.accept(this);
 		}
 
-		funcDecl.getReturnExpr().accept(this);
+		currFunc = null;
+		return null;
+	}
+
+	@Override
+	public Type visit(FuncDeclStandard funcDeclStandard)
+	{
+		Type type = funcDeclStandard.getReturnType().accept(this);
+		String identifier = funcDeclStandard.getMethodName().getVarID();
+
+		if (!currClass.addMethod(identifier, type)) {
+			Token tok = funcDeclStandard.getToken();
+			addError(tok.getRow(), tok.getCol(), "Method " + identifier + " already defined in class " + currClass.getId());
+			currFunc = new Function(identifier, type);
+		} else {
+			currFunc = currClass.getMethod(identifier);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
+			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			VarDecl vd = funcDeclStandard.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			Statement st = funcDeclStandard.getStatAt(i);
+			st.accept(this);
+		}
+
+		funcDeclStandard.getReturnExpr().accept(this);
 		currFunc = null;
 		return null;
 	}

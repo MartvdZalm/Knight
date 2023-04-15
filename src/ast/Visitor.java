@@ -3,8 +3,6 @@ package src.ast;
 public interface Visitor<R>
 {
     public R visit(And and);
-    
-    public R visit(MainClass mainClass);
 
     public R visit(IdentifierExpr identifierExpr);
 
@@ -19,8 +17,6 @@ public interface Visitor<R>
     public R visit(ArgDecl argDecl);
 
     public R visit(VarDecl varDecl);
-
-    public R visit(FuncDecl funcDecl);
 
     public R visit(Program program);
 
@@ -81,5 +77,9 @@ public interface Visitor<R>
     public R visit(Length length);
 
     public R visit(Println println);
+
+    public R visit(FuncDeclMain funcDeclMain);
+
+    public R visit(FuncDeclStandard funcDeclStandard);
 
 }

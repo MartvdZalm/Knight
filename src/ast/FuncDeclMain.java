@@ -4,33 +4,35 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class MainClass extends Tree
+public class FuncDeclMain extends FuncDecl
 {
-	IdentifierExpr className;
-	List<Statement> statList;
-	List<VarDecl> varList;
+	public IdentifierExpr methodName;
+	public List<VarDecl> varList;
+	public List<Statement> statList;
 
-	public MainClass(Token token, IdentifierExpr className, List<Statement> statList, List<VarDecl> varList)
+	public FuncDeclMain(Token token, IdentifierExpr methodName, List<VarDecl> varList, List<Statement> statList)
 	{
 		super(token);
-		this.className = className;
-		this.statList = statList;
+		this.methodName = methodName;
 		this.varList = varList;
+		this.statList = statList;
 	}
 
-	public IdentifierExpr getClassName() {
-		return className;
+	public IdentifierExpr getMethodName()
+	{
+		return methodName;
 	}
 
-	public void setClassName(IdentifierExpr className) {
-		this.className = className;
+	public void setMethodName(IdentifierExpr methodName)
+	{
+		this.methodName = methodName;
 	}
 
 	public int getVarListSize()
 	{
 		return varList.size();
 	}
-	
+
 	public int getStatListSize()
 	{
 		return statList.size();
