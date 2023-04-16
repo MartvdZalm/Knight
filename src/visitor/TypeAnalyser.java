@@ -498,7 +498,24 @@ public class TypeAnalyser implements Visitor<Type>
 		return ad.getType();
 	}
 
-	private void checkOverriding(FuncDecl md, Function m)
+	@Override
+	public Type visit(FuncDeclMain funcDeclMain)
+	{
+		String id = funcDeclMain.getMethodName().getVarID();
+		hsFunc.add(id);
+
+		currFunc = (Function) funcDeclMain.getMethodName().getB();
+
+		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
+			Statement st = funcDeclMain.getStatAt(i);
+			st.accept(this);
+		}
+
+		currFunc = null;
+		return null;
+	}
+
+	private void checkOverriding(FuncDeclStandard md, Function m)
 	{
 		String p = currClass.parent();
 		Function pm = st.getMethod(m.getId(), p);
@@ -528,57 +545,39 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDecl md)
+	public Type visit(FuncDeclStandard funcDeclStandard)
 	{
-		String id = md.getMethodName().getVarID();
+		String id = funcDeclStandard.getMethodName().getVarID();
 		if (hsFunc.contains(id)) { // Duplicate Method
-			return md.getReturnType();
+			return funcDeclStandard.getReturnType();
 		}
 		hsFunc.add(id);
 
-		currFunc = (Function) md.getMethodName().getB();
+		currFunc = (Function) funcDeclStandard.getMethodName().getB();
 
-		checkOverriding(md, currFunc);
+		checkOverriding(funcDeclStandard, currFunc);
 
-		for (int i = 0; i < md.getStatListSize(); i++) {
-			Statement st = md.getStatAt(i);
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			Statement st = funcDeclStandard.getStatAt(i);
 			st.accept(this);
 		}
 
-		Type t1 = md.getReturnType();
-		Type t2 = md.getReturnExpr().accept(this);
+		Type t1 = funcDeclStandard.getReturnType();
+		Type t2 = funcDeclStandard.getReturnExpr().accept(this);
 
 		if (!st.compareTypes(t1, t2)) {
-			Token sym = md.getReturnExpr().getToken();
+			Token sym = funcDeclStandard.getReturnExpr().getToken();
 			addError(sym.getRow(), sym.getCol(), "Method " + id + " must return a result of Type " + t1);
 		}
 
-		md.getReturnExpr().setType(t2);
+		funcDeclStandard.getReturnExpr().setType(t2);
 		currFunc = null;
-		return md.getReturnType();
-	}
-
-	@Override
-	public Type visit(MainClass mc)
-	{
-		currClass = (Klass) mc.getClassName().getB();
-
-		for (int i = 0; i < mc.getStatListSize(); i++) {
-			mc.getStatAt(i).accept(this);
-		}
-
-		for (int i = 0; i < mc.getVarListSize(); i++) {
-			mc.getVarDeclAt(i).accept(this);
-		}
-
-		return null;
+		return funcDeclStandard.getReturnType();
 	}
 
 	@Override
 	public Type visit(Program program)
 	{
-		program.mClass.accept(this);
-
 		for (int i = 0; i < program.classList.size(); i++) {
 			program.classList.get(i).accept(this);
 		}

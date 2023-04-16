@@ -284,14 +284,8 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	{
 		String identifier = funcDeclMain.getMethodName().getVarID();
 
-		if (!currClass.addMethod(identifier, type)) {
-			Token tok = funcDeclMain.getToken();
-			addError(tok.getRow(), tok.getCol(), "Method " + identifier + " already defined in class " + currClass.getId());
-			currFunc = new Function(identifier, type);
-		} else {
-			currFunc = currClass.getMethod(identifier);
-		}
-
+		currFunc = currClass.getMethod(identifier);
+		
 		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
 			VarDecl vd = funcDeclMain.getVarDeclAt(i);
 			vd.accept(this);

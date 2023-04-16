@@ -55,7 +55,7 @@ public class Parser
                 token = lexer.nextToken();
 
                 switch (token.getToken()) {
-                case KNIGHT: {
+                case CLASS: {
 					while (token != null) {
 						ClassDecl klass = parseClassDecl();
 						classList.add(klass);
@@ -80,7 +80,7 @@ public class Parser
 
 	public ClassDecl parseClassDecl() throws ParseException
 	{
-		eat(Tokens.KNIGHT);
+		eat(Tokens.CLASS);
 		IdentifierExpr className = null;
 		if (token.getToken() == Tokens.IDENTIFIER) {
 			className = new IdentifierExpr(token, token.getSymbol());
@@ -106,8 +106,9 @@ public class Parser
 			eat(Tokens.FUNCTION);
 			if (token.getToken() == Tokens.MAIN) {
 				funcList.add(parseFuncDeclMain());
+			} else {
+				funcList.add(parseFuncDeclStandard());
 			}
-			funcList.add(parseFuncDeclStandard());
 		}
 
 		eat(Tokens.RIGHTBRACE);

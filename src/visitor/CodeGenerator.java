@@ -460,20 +460,48 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(FuncDecl md)
+	public String visit(FuncDeclMain funcDeclMain)
+	{
+		slot = 0;
+		StringBuilder sb = new StringBuilder();
+		currMethod = (Function) funcDeclMain.getMethodName().getB();
+
+		sb.append(".method public static main([Ljava/lang/String;)V" + "\n");
+		sb.append(".limit stack 10" + "\n");
+		sb.append(".limit locals 10" + "\n");
+
+		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
+			VarDecl vd = funcDeclMain.getVarDeclAt(i);
+			sb.append(vd.accept(this));
+		}
+
+		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
+			sb.append(funcDeclMain.getStatAt(i).accept(this) + "\n");
+		}
+
+		sb.append("return" + "\n");
+		sb.append(".end method" + "\n");
+
+		currMethod = null;
+		bytecode += 5;
+		return sb.toString();
+	}
+
+	@Override
+	public String visit(FuncDeclStandard funcDeclStandard)
 	{
 		slot = 0;
 		int localvars = 1;
-		localvars += md.getArgListSize();
-		localvars += md.getVarListSize();
+		localvars += funcDeclStandard.getArgListSize();
+		localvars += funcDeclStandard.getVarListSize();
 
 		StringBuilder sb = new StringBuilder();
-		currMethod = (Function) md.getMethodName().getB();
+		currMethod = (Function) funcDeclStandard.getMethodName().getB();
 
 		sb.append(".method public " + currMethod.getId() + "(");
 
-		for (int i = 0; i < md.getArgListSize(); i++) {
-			ArgDecl ad = md.getArgDeclAt(i);
+		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
+			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
 			sb.append(ad.accept(this));
 		}
 		sb.append(")");
@@ -482,16 +510,16 @@ public class CodeGenerator implements Visitor<String>
 		sb.append(".limit locals " + localvars * 4 + "\n");
 		sb.append(".limit stack 100" + "\n");
 
-		for (int i = 0; i < md.getVarListSize(); i++) {
-			VarDecl vd = md.getVarDeclAt(i);
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			VarDecl vd = funcDeclStandard.getVarDeclAt(i);
 			sb.append(vd.accept(this));
 		}
 
-		for (int i = 0; i < md.getStatListSize(); i++) {
-			sb.append(md.getStatAt(i).accept(this) + "\n");
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			sb.append(funcDeclStandard.getStatAt(i).accept(this) + "\n");
 		}
 
-		sb.append(md.getReturnExpr().accept(this) + "\n");
+		sb.append(funcDeclStandard.getReturnExpr().accept(this) + "\n");
 		if (currMethod.type() instanceof IntType || currMethod.type() instanceof BooleanType) {
 			sb.append("ireturn" + "\n");
 		} else {
@@ -506,47 +534,10 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(MainClass mc)
-	{
-		StringBuilder sb = new StringBuilder();
-		labelCount = 0;
-
-		currClass = (Klass) mc.getClassName().getB();
-		sb.append(".class public " + currClass.getId() + "\n");
-		sb.append(".super java/lang/Object" + "\n");
-
-		for (int i = 0; i < mc.getVarListSize(); i++) {
-			sb.append(mc.getVarDeclAt(i).accept(this) + "\n");
-		}
-		bytecode += mc.getVarListSize();
-
-		sb.append(".method public <init>()V" + "\n");
-		sb.append("aload_0" + "\n");
-		sb.append("invokenonvirtual java/lang/Object/<init>()V" + "\n");
-		sb.append("return" + "\n");
-		sb.append(".end method" + "\n");
-
-		sb.append(".method public static main([Ljava/lang/String;)V" + "\n");
-		sb.append(".limit locals 10" + "\n");
-		sb.append(".limit stack 10" + "\n");
-
-		for (int i = 0; i < mc.getStatListSize(); i++) {
-			sb.append(mc.getStatAt(i).accept(this) + "\n");
-		}
-		bytecode += mc.getStatListSize();
-
-		sb.append("return" + "\n");
-		sb.append(".end method" + "\n");
-
-		return sb.toString();
-	}
-
-	@Override
 	public String visit(Program program) {
 
-		String code = program.mClass.accept(this);
-		File f = write(currClass.getId(), code);
-		execJasmin(f);
+		String code;
+		File f;
 		
 		for (int i = 0; i < program.classList.size(); i++) {
 			code = program.classList.get(i).accept(this);

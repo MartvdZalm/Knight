@@ -307,63 +307,72 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDecl md)
+	public Type visit(FuncDeclMain funcDeclMain)
 	{
-		String id = md.getMethodName().getVarID();
+		String id = funcDeclMain.getMethodName().getVarID();
+		if (hsFunc.contains(id)) {
+			return null;
+		} else {
+			hsFunc.add(id);
+		}
+
+		currFunc = currClass.getMethod(id);
+		funcDeclMain.getMethodName().setB(currFunc);
+
+		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
+			VarDecl vd = funcDeclMain.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
+			Statement st = funcDeclMain.getStatAt(i);
+			st.accept(this);
+		}
+
+		currFunc = null;
+		return null;
+	}
+
+	@Override
+	public Type visit(FuncDeclStandard funcDeclStandard)
+	{
+		String id = funcDeclStandard.getMethodName().getVarID();
 		if (hsFunc.contains(id)) { 
 			return null;
 		} else {
 			hsFunc.add(id);
 		}
 
-		md.getReturnType().accept(this);
+		funcDeclStandard.getReturnType().accept(this);
 		currFunc = currClass.getMethod(id);
-		md.getMethodName().setB(currFunc);
+		funcDeclStandard.getMethodName().setB(currFunc);
 
 		String parent = currClass.parent();
 		Function supMethod = symbolTable.getMethod(id, parent);
 		if (supMethod != null) {
 			if (supMethod.getParamsSize() != currFunc.getParamsSize()) {
-				Token sym = md.getMethodName().getToken();
+				Token sym = funcDeclStandard.getMethodName().getToken();
 				addError(sym.getRow(), sym.getCol(), "method " + id + " overloads parent class method");
 			}
 		}
 
-		for (int i = 0; i < md.getArgListSize(); i++) {
-			ArgDecl ad = md.getArgDeclAt(i);
+		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
+			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < md.getVarListSize(); i++) {
-			VarDecl vd = md.getVarDeclAt(i);
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			VarDecl vd = funcDeclStandard.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
-		for (int i = 0; i < md.getStatListSize(); i++) {
-			Statement st = md.getStatAt(i);
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			Statement st = funcDeclStandard.getStatAt(i);
 			st.accept(this);
 		}
 
-		md.getReturnExpr().accept(this);
+		funcDeclStandard.getReturnExpr().accept(this);
 		currFunc = null;
-		return null;
-	}
-
-	@Override
-	public Type visit(MainClass mc)
-	{
-		String id = mc.getClassName().getVarID();
-		currClass = symbolTable.getKlass(id);
-		mc.getClassName().setB(currClass);
-
-		for (int i = 0; i < mc.getStatListSize(); i++) {
-			mc.getStatAt(i).accept(this);
-		}
-
-		for (int i = 0; i < mc.getVarListSize(); i++) {
-			mc.getVarDeclAt(i).accept(this);
-		}
-
 		return null;
 	}
 
@@ -371,7 +380,6 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(Program program)
 	{
 		checkInheritanceCycle(program);
-		program.mClass.accept(this);
 
 		for (int i = 0; i < program.classList.size(); i++) {
 			program.classList.get(i).accept(this);

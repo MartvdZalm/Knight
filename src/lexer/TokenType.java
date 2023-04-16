@@ -5,9 +5,9 @@ public class TokenType
     public TokenType()
     {
         Symbol.symbol("INVALID", Tokens.INVALID);
-        Symbol.symbol("KNIGHT", Tokens.KNIGHT);
+        Symbol.symbol("Class", Tokens.CLASS);
         Symbol.symbol("Extends", Tokens.EXTENDS);
-        Symbol.symbol("MAIN", Tokens.MAIN);
+        Symbol.symbol("Main", Tokens.MAIN);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("print", Tokens.PRINT);
         Symbol.symbol("println", Tokens.PRINTLN);
@@ -15,7 +15,7 @@ public class TokenType
         Symbol.symbol("IDENTIFIER", Tokens.IDENTIFIER);
         Symbol.symbol("this", Tokens.THIS);
         Symbol.symbol("new", Tokens.NEW);
-        Symbol.symbol("USE", Tokens.USE);
+        Symbol.symbol("Use", Tokens.USE);
         Symbol.symbol("int",Tokens.INTEGER);
         Symbol.symbol("string", Tokens.STRING);
         Symbol.symbol(":", Tokens.SEMICOLON);

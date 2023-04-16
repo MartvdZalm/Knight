@@ -3,7 +3,7 @@ package src.lexer;
 public enum Tokens 
 {
     INVALID,
-    KNIGHT,
+    CLASS,
     EXTENDS,
     MAIN,
     COMMENT,
