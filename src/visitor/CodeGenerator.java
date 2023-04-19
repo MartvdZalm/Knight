@@ -146,10 +146,16 @@ public class CodeGenerator implements Visitor<String>
 		return sb.toString();
 	}
 
+	// @Override
+	// public String visit(IntLiteral n) {
+	// 	bytecode += 1;
+	// 	return n.getValue() + "\n";
+	// }
+
 	@Override
 	public String visit(IntLiteral n) {
 		bytecode += 1;
-		return n.getValue() + "\n";
+		return "mov eax, " + n.getValue() + "\n";
 	}
 
 	@Override
@@ -534,8 +540,8 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Program program) {
-
+	public String visit(Program program)
+	{
 		String code;
 		File f;
 		
@@ -567,9 +573,7 @@ public class CodeGenerator implements Visitor<String>
 				String[] args = new String[3];
 				args[0] = "-d";
 				args[1] = f.getParent();
-				// System.out.println(f.getParent());
 				args[2] = f.getPath();
-				// System.out.println(f.getPath());
 				Main.main(args);
 			} catch (Exception e) {
 				System.err.println(e.getMessage());
@@ -629,6 +633,37 @@ public class CodeGenerator implements Visitor<String>
 		return "ldc " + "\"" + stringLiteral.getValue() + "\"" + "\n";
 	}
 
+	// @Override
+	// public String visit(ClassDeclSimple cd) {
+
+	// 	StringBuilder sb = new StringBuilder();
+	// 	labelCount = 0;
+
+	// 	Binding b = cd.getId().getB();
+	// 	currClass = (Klass) b;
+	// 	sb.append(".class public " + currClass.getId() + "\n");
+	// 	sb.append(".super java/lang/Object" + "\n\n");
+
+	// 	for (int i = 0; i < cd.getVarListSize(); i++) {
+	// 		VarDecl vd = cd.getVarDeclAt(i);
+	// 		sb.append(vd.accept(this) + "\n");
+	// 	}
+		
+	// 	sb.append(".method public <init>()V" + "\n");
+	// 	sb.append("aload_0" + "\n");
+	// 	sb.append("invokenonvirtual java/lang/Object/<init>()V" + "\n");
+	// 	sb.append("return" + "\n");
+	// 	sb.append(".end method" + "\n");
+
+	// 	for (int i = 0; i < cd.getMethodListSize(); i++) {
+	// 		FuncDecl md = cd.getMethodDeclAt(i);
+	// 		sb.append(md.accept(this) + "\n");
+	// 	}
+
+	// 	bytecode += 5;
+	// 	return sb.toString();
+	// }
+
 	@Override
 	public String visit(ClassDeclSimple cd) {
 
@@ -637,26 +672,26 @@ public class CodeGenerator implements Visitor<String>
 
 		Binding b = cd.getId().getB();
 		currClass = (Klass) b;
-		sb.append(".class public " + currClass.getId() + "\n");
-		sb.append(".super java/lang/Object" + "\n\n");
+		sb.append("section .text" + "\n");
+		sb.append(".globl _start" + "\n");
+		sb.append("_start:" + "\n");
+		sb.append("push ebp" + "\n");
+		sb.append("mov ebp, esp" + "\n");
 
 		for (int i = 0; i < cd.getVarListSize(); i++) {
 			VarDecl vd = cd.getVarDeclAt(i);
 			sb.append(vd.accept(this) + "\n");
 		}
-		
-		sb.append(".method public <init>()V" + "\n");
-		sb.append("aload_0" + "\n");
-		sb.append("invokenonvirtual java/lang/Object/<init>()V" + "\n");
-		sb.append("return" + "\n");
-		sb.append(".end method" + "\n");
+
+		sb.append("mov eax, 0" + "\n");
+		sb.append("pop ebp" + "\n");
+		sb.append("ret" + "\n");
 
 		for (int i = 0; i < cd.getMethodListSize(); i++) {
 			FuncDecl md = cd.getMethodDeclAt(i);
 			sb.append(md.accept(this) + "\n");
 		}
 
-		bytecode += 5;
 		return sb.toString();
 	}
 

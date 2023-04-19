@@ -187,7 +187,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		Klass klass = symbolTable.getKlass(id);
 		if (klass == null) {
 			Token sym = ni.getClassName().getToken();
-			addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
+		 	addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
 		}
 
 		ni.getClassName().setB(klass);
