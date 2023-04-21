@@ -2,11 +2,11 @@ package src.visitor;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import src.ast.*;
 import src.semantics.*;
 import src.symbol.*;
-import jasmin.Main;
 
 public class CodeGenerator implements Visitor<String>
 {
@@ -17,6 +17,8 @@ public class CodeGenerator implements Visitor<String>
 	private final String PATH;
 	private int bytecode;
 	public static final String LABEL = "Label";
+
+	private ArrayList<Procedures> procedures = new ArrayList<>(); 
 
 	public CodeGenerator(String progPath)
 	{
@@ -30,6 +32,8 @@ public class CodeGenerator implements Visitor<String>
 		sb.append("push dword [" + n.getExpr().accept(this)  + "]" + "\n");
 		sb.append("call print_int" + "\n");
 		sb.append("add esp, 4 " + "\n");
+
+		procedures.add(Procedures.PRINT_INT);
 
 		bytecode += 2;
 		return sb.toString();
@@ -525,19 +529,17 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(Program program)
 	{
 		String code;
-		File f;
 		
 		for (int i = 0; i < program.classList.size(); i++) {
 			code = program.classList.get(i).accept(this);
-			f = write(currClass.getId(), code);
-			execJasmin(f);
+			write(currClass.getId(), code);
 		}
 		return null;
 	}
 
 	private File write(String name, String code) {
 		try {
-			File f = new File(PATH + name + ".j");
+			File f = new File(PATH + name + ".asm");
 			PrintWriter writer = new PrintWriter(f, "UTF-8");
 			writer.println(code);
 			writer.close();
@@ -547,20 +549,6 @@ public class CodeGenerator implements Visitor<String>
 		}
 
 		return null;
-	}
-
-	private void execJasmin(File f) {
-		if (f != null) {
-			try {
-				String[] args = new String[3];
-				args[0] = "-d";
-				args[1] = f.getParent();
-				args[2] = f.getPath();
-				Main.main(args);
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-			}
-		}
 	}
 
 	@Override
@@ -643,11 +631,39 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(md.accept(this) + "\n");
 		}
 
+		if (procedures.size() > 0) {
+			for (int i = 0; i < procedures.size(); i++) {
+				if (procedures.get(i) == Procedures.PRINT_INT) {
+					sb.append(print_int());
+				}
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private String print_int()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("print_int PROC value:DWORD \n");
+		sb.append("push ebp \n");
+		sb.append("mov ebp, esp \n");
+		sb.append("push dword [value] \n");
+		sb.append("push dword format_string\n");
+		sb.append("call printf \n");
+		sb.append("add esp, 8\n");
+		sb.append("pop ebp \n");
+		sb.append("ret \n");
+		sb.append("format_string db \"%d\\n\", 0\n");
+		sb.append("print_int ENDP \n");
+
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(ClassDeclExtends cd) {
+	public String visit(ClassDeclExtends cd)
+	{
 		StringBuilder sb = new StringBuilder();
 		labelCount = 0;
 		Binding b = cd.getId().getB();
@@ -679,16 +695,17 @@ public class CodeGenerator implements Visitor<String>
 	
 		return sb.toString();
 	}
-	
 
-	private int getLocalVarIndex(Binding b) {
+	private int getLocalVarIndex(Binding b)
+	{
 		if (b != null && b instanceof Variable) {
 			return ((Variable) b).getLvIndex();
 		}
 		return -1;
 	}
 
-	private int setLocalVarIndex(Binding b) {
+	private int setLocalVarIndex(Binding b)
+	{
 		if (b != null && b instanceof Variable) {
 			((Variable) b).setLvIndex(++slot);
 			return slot;
@@ -696,11 +713,13 @@ public class CodeGenerator implements Visitor<String>
 		return -1;
 	}
 
-	private int getNextLabel() {
+	private int getNextLabel()
+	{
 		return ++labelCount;
 	}
 
-	public int getLen() {
+	public int getLen()
+	{
 		return bytecode;
 	}
 }
