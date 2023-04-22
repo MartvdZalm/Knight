@@ -609,7 +609,6 @@ public class CodeGenerator implements Visitor<String>
 		return sb.toString();
 	}
 
-
 	@Override
 	public String visit(ClassDeclSimple cd) {
 
