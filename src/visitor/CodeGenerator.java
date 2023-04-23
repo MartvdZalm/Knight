@@ -29,9 +29,12 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(Print n)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("push dword [" + n.getExpr().accept(this)  + "]" + "\n");
-		sb.append("call print_int" + "\n");
-		sb.append("add esp, 4 " + "\n");
+
+		sb.append("mov eax, 4 \n"); // The 'write' Systemcall
+		sb.append("mov ebx, 1 \n"); // stdout
+		sb.append(n.getExpr().accept(this) + "\n"); // The address from the number to write
+		sb.append("mov edx, " + n.getExpr().accept(this).length() + "\n"); // The length of the number
+		sb.append("int 0x80 \n");
 
 		procedures.add(Procedures.PRINT_INT);
 
@@ -140,7 +143,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IntLiteral n) {
 		bytecode += 1;
-		return "mov eax, " + n.getValue() + "\n";
+		return "mov ecx, " + n.getValue() + "\n";
 	}
 
 	@Override
@@ -459,8 +462,6 @@ public class CodeGenerator implements Visitor<String>
 
 		sb.append("global _start" + "\n");
 		sb.append("_start:" + "\n");
-		sb.append("push ebp" + "\n");
-		sb.append("mov ebp, esp" + "\n");
 
 		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
 			VarDecl vd = funcDeclMain.getVarDeclAt(i);
@@ -471,8 +472,9 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(funcDeclMain.getStatAt(i).accept(this) + "\n");
 		}
 
-		sb.append("pop ebp" + "\n");
-		sb.append("ret" + "\n");
+		sb.append("mov eax, 1 \n");
+		sb.append("xor ebx, ebx \n");
+		sb.append("int 0x80 \n");
 
 		currMethod = null;
 		bytecode += 5;
@@ -612,7 +614,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(ClassDeclSimple cd) {
 
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(); 
 		labelCount = 0;
 
 		Binding b = cd.getId().getB();
@@ -630,13 +632,14 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(md.accept(this) + "\n");
 		}
 
-		if (procedures.size() > 0) {
-			for (int i = 0; i < procedures.size(); i++) {
-				if (procedures.get(i) == Procedures.PRINT_INT) {
-					sb.append(print_int());
-				}
-			}
-		}
+		// Check if there are any procedures needed.
+		// if (procedures.size() > 0) {
+		// 	for (int i = 0; i < procedures.size(); i++) {
+		// 		if (procedures.get(i) == Procedures.PRINT_INT) {
+		// 			sb.append(print_int());
+		// 		}
+		// 	}
+		// }
 
 		return sb.toString();
 	}

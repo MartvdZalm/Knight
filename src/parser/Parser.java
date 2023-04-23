@@ -160,6 +160,10 @@ public class Parser
 			}
 		}
 
+		while (token.getToken() != Tokens.RIGHTBRACE) {
+			statList.add(parseStatement());
+		}
+
 		eat(Tokens.RIGHTBRACE);
 
 		return new FuncDeclMain(token, methodName, varList, statList);
