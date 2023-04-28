@@ -46,7 +46,7 @@ public class Parser
 
 		// Start token because program extends tree. After I am done with implementing this I will take 
 		// a look if I can change this.
-		Token strartToken = token; 
+		Token startToken = token; 
 
         try {
 			List<ClassDecl> classList = new ArrayList<>();
@@ -69,7 +69,7 @@ public class Parser
                 
             } while (token != null);
 
-            program = new Program(strartToken, classList);
+            program = new Program(startToken, classList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -96,7 +96,8 @@ public class Parser
 			eat(Tokens.IDENTIFIER);
 		}
 		eat(Tokens.LEFTBRACE);
-		List<VarDecl> varList = new ArrayList<>();
+		List<Declaration> varList = new ArrayList<>();
+	
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.FUNCTION) {
 			varList.add(parseVariable());
 		}
@@ -128,11 +129,11 @@ public class Parser
 		eat(Tokens.MAIN);
 		eat(Tokens.LEFTBRACE);
 
-		List<VarDecl> varList = new ArrayList<>();
+		List<Declaration> varList = new ArrayList<>();
 		List<Statement> statList = new ArrayList<>();
 
 		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-			VarDecl var = parseVariable();
+			Declaration var = parseVariable();
 			varList.add(var);
 		}
 
@@ -144,8 +145,13 @@ public class Parser
 			if (token.getToken() == Tokens.IDENTIFIER) { 
 				Identifier id2 = new Identifier(token, token.getSymbol());
 				eat(Tokens.IDENTIFIER);
+
+				if (token.getToken() == Tokens.SEMICOLON) {
+					varList.add(new VarDecl(id2.getToken(), idType, id2));
+				} else {
+					varList.add(new VarDeclInit(token, idType, id2, parseExpression()));
+				}
 				eat(Tokens.SEMICOLON);
-				varList.add(new VarDecl(id2.getToken(), idType, id2));
 
 				while (token.getToken() == Tokens.INTEGER) {
 					varList.add(parseVariable());
@@ -191,11 +197,11 @@ public class Parser
 		eat(Tokens.RIGHTPAREN);
 		eat(Tokens.LEFTBRACE);
 
-		List<VarDecl> varList = new ArrayList<>();
+		List<Declaration> varList = new ArrayList<>();
 		List<Statement> statList = new ArrayList<>();
 
 		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-			VarDecl var = parseVariable();
+			Declaration var = parseVariable();
 			varList.add(var);
 		}
 
@@ -207,8 +213,13 @@ public class Parser
 			if (token.getToken() == Tokens.IDENTIFIER) { 
 				Identifier id2 = new Identifier(token, token.getSymbol());
 				eat(Tokens.IDENTIFIER);
+
+				if (token.getToken() == Tokens.SEMICOLON) {
+					varList.add(new VarDecl(id2.getToken(), idType, id2));
+				} else {
+					varList.add(new VarDeclInit(token, idType, id2, parseExpression()));
+				}
 				eat(Tokens.SEMICOLON);
-				varList.add(new VarDecl(id2.getToken(), idType, id2));
 
 				while (token.getToken() == Tokens.INTEGER) {
 					varList.add(parseVariable());
@@ -247,17 +258,27 @@ public class Parser
 		return new ArgDecl(argId.getToken(), argType, argId);
 	}
 
-	public VarDecl parseVariable() throws ParseException
+	public Declaration parseVariable() throws ParseException
 	{
 		Type type = parseType();
 		Identifier id = null;
+		Declaration decl = null;
+
 		if (token.getToken() == Tokens.IDENTIFIER) {
 			id = new Identifier(token, token.getSymbol());
 		}
+
 		eat(Tokens.IDENTIFIER);
+
+		if (token.getToken() == Tokens.SEMICOLON) {
+			decl = new VarDecl(token, type, id);
+		} else {
+			eat(Tokens.ASSIGN);
+			decl = new VarDeclInit(token, type, id, parseExpression());
+		}
 		eat(Tokens.SEMICOLON);
-		VarDecl var = new VarDecl(id.getToken(), type, id); 
-		return var;
+
+		return decl;
 	}
 
 	public Type parseType() throws ParseException
@@ -394,7 +415,7 @@ public class Parser
 
 			default:
 				throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
-			}
+		}
     }
 
 	public Statement parseState1(Identifier id) throws ParseException

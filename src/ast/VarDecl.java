@@ -2,7 +2,7 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class VarDecl extends Tree
+public class VarDecl extends Declaration
 {
 	Type type;
 	Identifier id;
@@ -14,24 +14,29 @@ public class VarDecl extends Tree
 		this.id = id;
 	}
 
-	public Type getType() {
+	public Type getType()
+	{
 		return type;
 	}
 
-	public void setType(Type type) {
+	public void setType(Type type)
+	{
 		this.type = type;
 	}
 
-	public Identifier getId() {
+	public Identifier getId()
+	{
 		return id;
 	}
 
-	public void setId(Identifier id) {
+	public void setId(Identifier id)
+	{
 		this.id = id;
 	}
 
 	@Override
-	public <R> R accept(Visitor<R> v) {
+	public <R> R accept(Visitor<R> v)
+	{
 		return v.visit(this);
 	}
 

@@ -299,6 +299,26 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		return null;
 	}
 
+	
+	@Override
+	public Type visit(VarDeclInit vd)
+	{
+		vd.getType().accept(this);
+		vd.getId().accept(this);
+
+		String id = vd.getId().getVarID();
+
+		if (currFunc == null) {
+			Klass parent = symbolTable.getKlass(currClass.parent());
+			if (symbolTable.containsVar(null, parent, id)) {
+				Token sym = vd.getId().getToken();
+				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in parent class");
+			}
+		}
+
+		return null;
+	}
+
 	@Override
 	public Type visit(ArgDecl ad)
 	{
@@ -320,7 +340,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		funcDeclMain.getMethodName().setB(currFunc);
 
 		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
-			VarDecl vd = funcDeclMain.getVarDeclAt(i);
+			Declaration vd = funcDeclMain.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -362,7 +382,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
-			VarDecl vd = funcDeclStandard.getVarDeclAt(i);
+			Declaration vd = funcDeclStandard.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -494,7 +514,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		cd.getId().setB(currClass);
 
 		for (int i = 0; i < cd.getVarListSize(); i++) {
-			VarDecl vd = cd.getVarDeclAt(i);
+			Declaration vd = cd.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -530,7 +550,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		for (int i = 0; i < cd.getVarListSize(); i++) {
-			VarDecl vd = cd.getVarDeclAt(i);
+			Declaration vd = cd.getVarDeclAt(i);
 			vd.accept(this);
 		}
 

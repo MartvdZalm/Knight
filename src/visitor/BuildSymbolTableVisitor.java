@@ -243,6 +243,27 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(VarDeclInit vd)
+	{
+		Type t = vd.getType().accept(this);
+		String id = vd.getId().getVarID();
+
+		if (currFunc != null) {
+			if (!currFunc.addVar(id, t)) {
+				Token tok = vd.getId().getToken();
+				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + currFunc.getId() + " in class " + currClass.getId());
+			}
+		} else {
+			if (!currClass.addVar(id, t)) {
+				Token sym = vd.getId().getToken();
+				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + currClass.getId());
+			}
+		}
+
+		return null;
+	}
+
+	@Override
 	public Type visit(ArgDecl ad)
 	{
 		Type t = ad.getType().accept(this);
@@ -287,7 +308,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		currFunc = currClass.getMethod(identifier);
 		
 		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
-			VarDecl vd = funcDeclMain.getVarDeclAt(i);
+			Declaration vd = funcDeclMain.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -320,7 +341,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		}
 
 		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
-			VarDecl vd = funcDeclStandard.getVarDeclAt(i);
+			Declaration vd = funcDeclStandard.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -347,7 +368,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		}
 
 		for (int i = 0; i < classDeclSimple.getVarListSize(); i++) {
-			VarDecl vd = classDeclSimple.getVarDeclAt(i);
+			Declaration vd = classDeclSimple.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -377,7 +398,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		}
 
 		for (int i = 0; i < classDeclExtends.getVarListSize(); i++) {
-			VarDecl vd = classDeclExtends.getVarDeclAt(i);
+			Declaration vd = classDeclExtends.getVarDeclAt(i);
 			vd.accept(this);
 		}
 

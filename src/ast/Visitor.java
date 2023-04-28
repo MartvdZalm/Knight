@@ -82,4 +82,6 @@ public interface Visitor<R>
 
     public R visit(FuncDeclStandard funcDeclStandard);
 
+    public R visit(VarDeclInit varDeclInit);
+
 }

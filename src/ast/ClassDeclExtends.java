@@ -8,10 +8,10 @@ public class ClassDeclExtends extends ClassDecl
 {
 	IdentifierExpr id;
 	IdentifierExpr parent;
-	List<VarDecl> varList;
+	List<Declaration> varList;
 	List<FuncDecl> methodList;
 
-	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<VarDecl> varList, List<FuncDecl> methodList) {
+	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> varList, List<FuncDecl> methodList) {
 		super(token);
 		this.id = className;
 		this.parent = parentClassName;
@@ -50,7 +50,7 @@ public class ClassDeclExtends extends ClassDecl
 		return varList.size();
 	}
 
-	public VarDecl getVarDeclAt(int index) {
+	public Declaration getVarDeclAt(int index) {
 		if (index < varList.size()) {
 			return varList.get(index);
 		}

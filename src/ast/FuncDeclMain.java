@@ -7,10 +7,10 @@ import src.lexer.Token;
 public class FuncDeclMain extends FuncDecl
 {
 	public IdentifierExpr methodName;
-	public List<VarDecl> varList;
+	public List<Declaration> varList;
 	public List<Statement> statList;
 
-	public FuncDeclMain(Token token, IdentifierExpr methodName, List<VarDecl> varList, List<Statement> statList)
+	public FuncDeclMain(Token token, IdentifierExpr methodName, List<Declaration> varList, List<Statement> statList)
 	{
 		super(token);
 		this.methodName = methodName;
@@ -38,7 +38,7 @@ public class FuncDeclMain extends FuncDecl
 		return statList.size();
 	}
 
-	public VarDecl getVarDeclAt(int index)
+	public Declaration getVarDeclAt(int index)
 	{
 		if (index < varList.size()) {
 			return varList.get(index);

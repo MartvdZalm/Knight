@@ -9,11 +9,11 @@ public class FuncDeclStandard extends FuncDecl
     public Type returnType;
 	public IdentifierExpr methodName;
 	public List<ArgDecl> argList;
-	public List<VarDecl> varList;
+	public List<Declaration> varList;
 	public List<Statement> statList;
 	public Expression returnExpr;
 
-	public FuncDeclStandard(Token token, Type returnType, IdentifierExpr methodName, List<ArgDecl> argList, List<VarDecl> varList, List<Statement> statList, Expression returnExpr)
+	public FuncDeclStandard(Token token, Type returnType, IdentifierExpr methodName, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr)
 	{
 		super(token);
 		this.returnType = returnType;
@@ -77,7 +77,7 @@ public class FuncDeclStandard extends FuncDecl
 		return null;
 	}
 
-	public VarDecl getVarDeclAt(int index)
+	public Declaration getVarDeclAt(int index)
 	{
 		if (index < varList.size()) {
 			return varList.get(index);

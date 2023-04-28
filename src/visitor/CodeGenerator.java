@@ -2,7 +2,6 @@ package src.visitor;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 import src.ast.*;
 import src.semantics.*;
@@ -18,7 +17,6 @@ public class CodeGenerator implements Visitor<String>
 	private int bytecode;
 	public static final String LABEL = "Label";
 
-	private ArrayList<Procedures> procedures = new ArrayList<>(); 
 
 	public CodeGenerator(String progPath)
 	{
@@ -30,13 +28,14 @@ public class CodeGenerator implements Visitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("mov eax, 4 \n"); // The 'write' Systemcall
-		sb.append("mov ebx, 1 \n"); // stdout
-		sb.append(n.getExpr().accept(this) + "\n"); // The address from the number to write
-		sb.append("mov edx, " + n.getExpr().accept(this).length() + "\n"); // The length of the number
-		sb.append("int 0x80 \n");
+		sb.append("\tmov eax, 1 \n");
+		sb.append("\tmov edi, 1 \n");
+		sb.append("\tmov rsi, " + n.getExpr().accept(this) + "\n");
 
-		procedures.add(Procedures.PRINT_INT);
+		// Werkt nog niet want het berekend de lengte van het gene wat erin zit en als het een
+		// variable dan krijgt hij de lengt van de variable en niet van de waarde.
+		sb.append("\tmov edx, " + n.getExpr().accept(this).length() + "\n");
+		sb.append("\tsyscall \n");
 
 		bytecode += 2;
 		return sb.toString();
@@ -143,7 +142,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IntLiteral n) {
 		bytecode += 1;
-		return "mov ecx, " + n.getValue() + "\n";
+		return n.getValue() + "\n";
 	}
 
 	@Override
@@ -330,6 +329,7 @@ public class CodeGenerator implements Visitor<String>
 		StringBuilder sb = new StringBuilder();
 
 		Binding b = id.getB();
+
 		int lvIndex = getLocalVarIndex(b);
 
 		if (lvIndex == -1) { // Not a local variable
@@ -446,6 +446,19 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
+	public String visit(VarDeclInit vd)
+	{
+		if (currMethod != null) {
+			Binding b = vd.getId().getB();
+			setLocalVarIndex(b);
+			return "";
+		} else {
+			bytecode += 1;
+			return "\t" + vd.getId() + " db " + vd.getExpr().accept(this);
+		}
+	}
+
+	@Override
 	public String visit(ArgDecl ad)
 	{
 		Binding b = ad.getId().getB();
@@ -460,11 +473,11 @@ public class CodeGenerator implements Visitor<String>
 		StringBuilder sb = new StringBuilder();
 		currMethod = (Function) funcDeclMain.getMethodName().getB();
 
-		sb.append("global _start" + "\n");
-		sb.append("_start:" + "\n");
+		sb.append("	global _start" + "\n \n");
+		sb.append("	_start:" + "\n");
 
 		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
-			VarDecl vd = funcDeclMain.getVarDeclAt(i);
+			Declaration vd = funcDeclMain.getVarDeclAt(i);
 			sb.append(vd.accept(this));
 		}
 
@@ -472,9 +485,9 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(funcDeclMain.getStatAt(i).accept(this) + "\n");
 		}
 
-		sb.append("mov eax, 1 \n");
-		sb.append("xor ebx, ebx \n");
-		sb.append("int 0x80 \n");
+		sb.append("\tmov eax, 60 \n");
+		sb.append("\txor edi, edi \n");
+		sb.append("\tsyscall \n");
 
 		currMethod = null;
 		bytecode += 5;
@@ -505,7 +518,7 @@ public class CodeGenerator implements Visitor<String>
 		sb.append(".limit stack 100" + "\n");
 
 		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
-			VarDecl vd = funcDeclStandard.getVarDeclAt(i);
+			Declaration vd = funcDeclStandard.getVarDeclAt(i);
 			sb.append(vd.accept(this));
 		}
 
@@ -531,7 +544,7 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(Program program)
 	{
 		String code;
-		
+
 		for (int i = 0; i < program.classList.size(); i++) {
 			code = program.classList.get(i).accept(this);
 			write(currClass.getId(), code);
@@ -603,25 +616,23 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(StringLiteral stringLiteral) {
 		StringBuilder sb = new StringBuilder();
 
-		bytecode += 1;
+		sb.append("\"" + stringLiteral.getValue() + "\" \n");
 
-		sb.append("section .data" + "\n");
-		sb.append("msg" + labelCount + ": db " + "\"" + stringLiteral.getValue() + "\"" + ",0" + "\n");
-		labelCount++;
 		return sb.toString();
 	}
 
 	@Override
 	public String visit(ClassDeclSimple cd) {
 
-		StringBuilder sb = new StringBuilder(); 
+		StringBuilder sb = new StringBuilder();
 		labelCount = 0;
 
 		Binding b = cd.getId().getB();
 		currClass = (Klass) b;
+
 		sb.append("section .data" + "\n");
 		for (int i = 0; i < cd.getVarListSize(); i++) {
-			VarDecl vd = cd.getVarDeclAt(i);
+			Declaration vd = cd.getVarDeclAt(i);
 			sb.append(vd.accept(this) + "\n");
 		}
 
@@ -631,34 +642,6 @@ public class CodeGenerator implements Visitor<String>
 			FuncDecl md = cd.getMethodDeclAt(i);
 			sb.append(md.accept(this) + "\n");
 		}
-
-		// Check if there are any procedures needed.
-		// if (procedures.size() > 0) {
-		// 	for (int i = 0; i < procedures.size(); i++) {
-		// 		if (procedures.get(i) == Procedures.PRINT_INT) {
-		// 			sb.append(print_int());
-		// 		}
-		// 	}
-		// }
-
-		return sb.toString();
-	}
-
-	private String print_int()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("print_int PROC value:DWORD \n");
-		sb.append("push ebp \n");
-		sb.append("mov ebp, esp \n");
-		sb.append("push dword [value] \n");
-		sb.append("push dword format_string\n");
-		sb.append("call printf \n");
-		sb.append("add esp, 8\n");
-		sb.append("pop ebp \n");
-		sb.append("ret \n");
-		sb.append("format_string db \"%d\\n\", 0\n");
-		sb.append("print_int ENDP \n");
 
 		return sb.toString();
 	}
@@ -675,26 +658,26 @@ public class CodeGenerator implements Visitor<String>
 		sb.append("_start:\n");
 		sb.append("push ebp\n");
 		sb.append("mov ebp, esp\n");
-	
+
 		// Initialize parent class
 		sb.append("call _" + currClass.parent() + "_init\n");
-	
+
 		// Initialize instance variables
 		for (int i = 0; i < cd.getVarListSize(); i++) {
-			VarDecl vd = cd.getVarDeclAt(i);
+			Declaration vd = cd.getVarDeclAt(i);
 			sb.append(vd.accept(this) + "\n");
 		}
-	
+
 		sb.append("mov eax, 0\n");
 		sb.append("pop ebp\n");
 		sb.append("ret\n");
-	
+
 		// Define methods
 		for (int i = 0; i < cd.getMethodListSize(); i++) {
 			FuncDecl md = cd.getMethodDeclAt(i);
 			sb.append(md.accept(this) + "\n");
 		}
-	
+
 		return sb.toString();
 	}
 

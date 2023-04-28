@@ -493,6 +493,12 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(VarDeclInit vd)
+	{
+		return vd.getType();
+	}
+
+	@Override
 	public Type visit(ArgDecl ad)
 	{
 		return ad.getType();
