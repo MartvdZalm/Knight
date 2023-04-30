@@ -284,7 +284,6 @@ public class Parser
 		return new ArgDecl(argId.getToken(), argType, argId);
 	}
 
-
 	public Type parseType() throws ParseException
 	{
 		switch (token.getToken()) {
@@ -411,7 +410,7 @@ public class Parser
 			}
 	
 			case IDENTIFIER: {
-				Identifier id = new Identifier(token, (String) token.getSymbol());
+				Identifier id = new Identifier(token, token.getSymbol());
 				eat(Tokens.IDENTIFIER);
 				Statement stat = parseState1(id);
 				return stat;

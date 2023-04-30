@@ -14,7 +14,6 @@ public class CodeGenerator implements Visitor<String>
 	private int slot;
 	private int labelCount;
 	private final String PATH;
-	private int bytecode;
 	public static final String LABEL = "Label";
 
 
@@ -37,7 +36,6 @@ public class CodeGenerator implements Visitor<String>
 		sb.append("\tmov edx, " + n.getExpr().accept(this).length() + "\n");
 		sb.append("\tsyscall \n");
 
-		bytecode += 2;
 		return sb.toString();
 	}
 
@@ -51,7 +49,6 @@ public class CodeGenerator implements Visitor<String>
 		sb.append(n.getExpr().type().accept(this));
 		sb.append(")V" + "\n");
 
-		bytecode += 2;
 		return sb.toString();
 	}
 
@@ -70,7 +67,6 @@ public class CodeGenerator implements Visitor<String>
 				sb.append("mov [" + n.id + "], eax" + "\n");
 			}
 
-			bytecode += 2;
 		} else { // Local Variable
 			sb.append(n.getExpr().accept(this) + "\n");
 			Type t = n.getExpr().type();
@@ -79,19 +75,19 @@ public class CodeGenerator implements Visitor<String>
 			} else {
 				sb.append("astore " + lvIndex + "\n");
 			}
-
-			bytecode += 1;
 		}
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(Skip n) {
+	public String visit(Skip n)
+	{
 		return "";
 	}
 
 	@Override
-	public String visit(Block n) {
+	public String visit(Block n)
+	{
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < n.getStatListSize(); i++) {
 			Statement stat = n.getStatAt(i);
@@ -101,8 +97,8 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(IfThenElse n) {
-
+	public String visit(IfThenElse n)
+	{
 		StringBuilder sb = new StringBuilder();
 		String nFalse = LABEL + getNextLabel();
 		String nAfter = LABEL + getNextLabel();
@@ -118,13 +114,12 @@ public class CodeGenerator implements Visitor<String>
 		sb.append(n.getElze().accept(this) + "\n");
 		sb.append(nAfter + ":" + "\n");
 
-		bytecode += 4;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(While n) {
-
+	public String visit(While n)
+	{
 		StringBuilder sb = new StringBuilder();
 		String nStart = LABEL + getNextLabel();
 		String nStmt = LABEL + getNextLabel();
@@ -135,26 +130,24 @@ public class CodeGenerator implements Visitor<String>
 		sb.append(n.getExpr().accept(this) + "\n");
 		sb.append("ifne " + nStmt + "\n");
 
-		bytecode += 4;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(IntLiteral n) {
-		bytecode += 1;
+	public String visit(IntLiteral n)
+	{
 		return n.getValue() + "\n";
 	}
 
 	@Override
-	public String visit(Plus n) {
-
+	public String visit(Plus n)
+	{
 		StringBuilder sb = new StringBuilder();
 		if (n.type() != null && n.type() instanceof IntType) {
 			sb.append(n.getLhs().accept(this) + "\n");
 			sb.append(n.getRhs().accept(this) + "\n");
 			sb.append("iadd" + "\n");
 
-			bytecode += 1;
 		} else {
 
 			sb.append("new java/lang/StringBuilder" + "\n");
@@ -173,47 +166,46 @@ public class CodeGenerator implements Visitor<String>
 
 			sb.append("invokevirtual java/lang/StringBuilder/toString()Ljava/lang/String;");
 
-			bytecode += 6;
 		}
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(Minus n) {
+	public String visit(Minus n)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(n.getLhs().accept(this) + "\n");
 		sb.append(n.getRhs().accept(this) + "\n");
 		sb.append("isub" + "\n");
 
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(Times n) {
+	public String visit(Times n)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(n.getLhs().accept(this) + "\n");
 		sb.append(n.getRhs().accept(this) + "\n");
 		sb.append("imul" + "\n");
 
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(Division n) {
+	public String visit(Division n)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(n.getLhs().accept(this) + "\n");
 		sb.append(n.getRhs().accept(this) + "\n");
 		sb.append("idiv" + "\n");
 
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(Equals n) {
-
+	public String visit(Equals n)
+	{
 		Type t = n.type();
 		String nEquals = LABEL + getNextLabel();
 		String nAfter = LABEL + getNextLabel();
@@ -231,8 +223,6 @@ public class CodeGenerator implements Visitor<String>
 			sb.append("iconst_1" + "\n");
 
 			sb.append(nAfter + ":" + "\n");
-
-			bytecode += 6;
 		} else if (t instanceof StringType || t instanceof IntArrayType || t instanceof IdentifierType) {
 			sb.append("if_acmpeq " + nEquals + "\n");
 			sb.append("iconst_0" + "\n");
@@ -243,14 +233,14 @@ public class CodeGenerator implements Visitor<String>
 
 			sb.append(nAfter + ":" + "\n");
 
-			bytecode += 6;
 		}
 
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(LessThan n) {
+	public String visit(LessThan n)
+	{
 		StringBuilder sb = new StringBuilder();
 		String lessThan = LABEL + getNextLabel();
 		String after = LABEL + getNextLabel();
@@ -266,12 +256,12 @@ public class CodeGenerator implements Visitor<String>
 
 		sb.append(after + ":" + "\n");
 
-		bytecode += 6;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(And n) {
+	public String visit(And n)
+	{
 		StringBuilder sb = new StringBuilder();
 		String nElze = LABEL + getNextLabel();
 		String nAfter = LABEL + getNextLabel();
@@ -287,12 +277,12 @@ public class CodeGenerator implements Visitor<String>
 
 		sb.append(nAfter + ":" + "\n");
 
-		bytecode += 5;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(Or n) {
+	public String visit(Or n)
+	{
 		StringBuilder sb = new StringBuilder();
 		String nElze = LABEL + getNextLabel();
 		String nAfter = LABEL + getNextLabel();
@@ -307,25 +297,24 @@ public class CodeGenerator implements Visitor<String>
 		sb.append(n.getRhs().accept(this) + "\n");
 		sb.append(nAfter + ":" + "\n");
 
-		bytecode += 5;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(True true1) {
-		bytecode += 1;
+	public String visit(True true1)
+	{
 		return "iconst_1";
 	}
 
 	@Override
-	public String visit(False false1) {
-		bytecode += 1;
+	public String visit(False false1)
+	{
 		return "iconst_0";
 	}
 
 	@Override
-	public String visit(IdentifierExpr id) {
-
+	public String visit(IdentifierExpr id)
+	{
 		StringBuilder sb = new StringBuilder();
 
 		Binding b = id.getB();
@@ -335,47 +324,45 @@ public class CodeGenerator implements Visitor<String>
 		if (lvIndex == -1) { // Not a local variable
 			sb.append(id.getVarID());
 
-			bytecode += 2;
 		} else {
 			if (b.type() instanceof IntType || b.type() instanceof BooleanType) {
 				sb.append("iload " + lvIndex + "\n");
 			} else {
 				sb.append("aload " + lvIndex + "\n");
 			}
-
-			bytecode += 1;
 		}
 
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(This this1) {
-		bytecode += 1;
+	public String visit(This this1)
+	{
 		return "aload_0";
 	}
 
 	@Override
-	public String visit(NewArray na) {
+	public String visit(NewArray na)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(na.getArrayLength().accept(this) + "\n");
 		sb.append("newarray int" + "\n");
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(NewInstance ni) {
+	public String visit(NewInstance ni)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("new " + ni.getClassName() + "\n");
 		sb.append("dup" + "\n");
 		sb.append("invokespecial " + ni.getClassName() + "/<init>()V" + "\n");
-		bytecode += 3;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(CallFunc cm) {
+	public String visit(CallFunc cm)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(cm.getInstanceName().accept(this) + "\n");
 		Type refT = cm.getInstanceName().type();
@@ -391,32 +378,34 @@ public class CodeGenerator implements Visitor<String>
 		}
 		sb.append(")" + m.type().accept(this));
 
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(Length length) {
+	public String visit(Length length)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(length.getArray().accept(this) + "\n");
 		sb.append("arraylength" + "\n");
 
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(IntType intType) {
+	public String visit(IntType intType)
+	{
 		return "I";
 	}
 
 	@Override
-	public String visit(StringType stringType) {
+	public String visit(StringType stringType)
+	{
 		return "Ljava/lang/String;";
 	}
 
 	@Override
-	public String visit(BooleanType booleanType) {
+	public String visit(BooleanType booleanType)
+	{
 		return "Z";
 	}
 
@@ -440,7 +429,6 @@ public class CodeGenerator implements Visitor<String>
 			setLocalVarIndex(b);
 			return "";
 		} else {
-			bytecode += 1;
 			return vd.getId() + " dd 0";
 		}
 	}
@@ -453,7 +441,6 @@ public class CodeGenerator implements Visitor<String>
 			setLocalVarIndex(b);
 			return "";
 		} else {
-			bytecode += 1;
 			return "\t" + vd.getId() + " db " + vd.getExpr().accept(this);
 		}
 	}
@@ -490,7 +477,6 @@ public class CodeGenerator implements Visitor<String>
 		sb.append("\tsyscall \n");
 
 		currMethod = null;
-		bytecode += 5;
 		return sb.toString();
 	}
 
@@ -536,7 +522,6 @@ public class CodeGenerator implements Visitor<String>
 
 		currMethod = null;
 
-		bytecode += 5;
 		return sb.toString();
 	}
 
@@ -552,7 +537,8 @@ public class CodeGenerator implements Visitor<String>
 		return null;
 	}
 
-	private File write(String name, String code) {
+	private File write(String name, String code)
+	{
 		try {
 			File f = new File(PATH + name + ".asm");
 			PrintWriter writer = new PrintWriter(f, "UTF-8");
@@ -567,7 +553,8 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Identifier id) {
+	public String visit(Identifier id)
+	{
 		Binding b = id.getB();
 		int lvIndex = getLocalVarIndex(b);
 		StringBuilder sb = new StringBuilder();
@@ -576,44 +563,42 @@ public class CodeGenerator implements Visitor<String>
 			sb.append("aload_0" + "\n");
 			sb.append("getfield " + currClass.getId() + "/" + id.getVarID() + " " + b.type().accept(this) + "\n");
 
-			bytecode += 2;
 		} else {
 			if (b.type() instanceof IntType || b.type() instanceof BooleanType) {
 				sb.append("iload " + lvIndex + "\n");
 			} else {
 				sb.append("aload " + lvIndex + "\n");
 			}
-
-			bytecode += 1;
 		}
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(IndexArray ia) {
+	public String visit(IndexArray ia)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(ia.getArray().accept(this) + "\n");
 		sb.append(ia.getIndex().accept(this) + "\n");
 		sb.append("iaload" + "\n");
 
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(ArrayAssign aa) {
+	public String visit(ArrayAssign aa)
+	{
 		StringBuilder sb = new StringBuilder();
 		sb.append(aa.getIdentifier().accept(this) + "\n");
 		sb.append(aa.getE1().accept(this) + "\n");
 		sb.append(aa.getE2().accept(this) + "\n");
 		sb.append("iastore" + "\n");
 
-		bytecode += 1;
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(StringLiteral stringLiteral) {
+	public String visit(StringLiteral stringLiteral)
+	{
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("\"" + stringLiteral.getValue() + "\" \n");
@@ -622,8 +607,8 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(ClassDeclSimple cd) {
-
+	public String visit(ClassDeclSimple cd)
+	{
 		StringBuilder sb = new StringBuilder();
 		labelCount = 0;
 
@@ -701,10 +686,5 @@ public class CodeGenerator implements Visitor<String>
 	private int getNextLabel()
 	{
 		return ++labelCount;
-	}
-
-	public int getLen()
-	{
-		return bytecode;
 	}
 }

@@ -22,5 +22,4 @@ public abstract class Binding
 	public String toString() {
 		return Integer.toString(count);
 	}
-
 }

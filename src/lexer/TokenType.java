@@ -6,7 +6,7 @@ public class TokenType
     {
         Symbol.symbol("INVALID", Tokens.INVALID);
         Symbol.symbol("class", Tokens.CLASS);
-        Symbol.symbol("Extends", Tokens.EXTENDS);
+        Symbol.symbol("extends", Tokens.EXTENDS);
         Symbol.symbol("main", Tokens.MAIN);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("print", Tokens.PRINT);
@@ -15,10 +15,11 @@ public class TokenType
         Symbol.symbol("IDENTIFIER", Tokens.IDENTIFIER);
         Symbol.symbol("this", Tokens.THIS);
         Symbol.symbol("new", Tokens.NEW);
-        Symbol.symbol("Use", Tokens.USE);
         Symbol.symbol("int",Tokens.INTEGER);
         Symbol.symbol("string", Tokens.STRING);
-        Symbol.symbol(":", Tokens.SEMICOLON);
+        Symbol.symbol(";", Tokens.SEMICOLON);
+        Symbol.symbol("::", Tokens.SRO);
+        Symbol.symbol("std", Tokens.STD);
         Symbol.symbol("{", Tokens.LEFTBRACE);
         Symbol.symbol("}", Tokens.RIGHTBRACE);
         Symbol.symbol("(", Tokens.LEFTPAREN);
