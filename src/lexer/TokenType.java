@@ -5,9 +5,9 @@ public class TokenType
     public TokenType()
     {
         Symbol.symbol("INVALID", Tokens.INVALID);
-        Symbol.symbol("Class", Tokens.CLASS);
+        Symbol.symbol("class", Tokens.CLASS);
         Symbol.symbol("Extends", Tokens.EXTENDS);
-        Symbol.symbol("Main", Tokens.MAIN);
+        Symbol.symbol("main", Tokens.MAIN);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("print", Tokens.PRINT);
         Symbol.symbol("println", Tokens.PRINTLN);
@@ -38,7 +38,6 @@ public class TokenType
         Symbol.symbol("/",Tokens.DIV);
         Symbol.symbol(".", Tokens.DOT);
         Symbol.symbol("Length", Tokens.LENGTH);
-        Symbol.symbol("Function", Tokens.FUNCTION);
         Symbol.symbol("return", Tokens.RETURN);
         Symbol.symbol("true", Tokens.TRUE);
         Symbol.symbol("false", Tokens.FALSE);
