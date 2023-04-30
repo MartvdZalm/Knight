@@ -528,10 +528,14 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Program program)
 	{
-		String code;
+		String code = "";
 
-		for (int i = 0; i < program.classList.size(); i++) {
-			code = program.classList.get(i).accept(this);
+		for (int i = 0; i < program.getIncludeListSize(); i++) {
+			code += program.getIncludeAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			code += program.getClassDeclAt(i).accept(this);
 			write(currClass.getId(), code);
 		}
 		return null;
@@ -664,6 +668,12 @@ public class CodeGenerator implements Visitor<String>
 		}
 
 		return sb.toString();
+	}
+
+	@Override
+	public String visit(Include include)
+	{
+		return include.getId() + "\n";
 	}
 
 	private int getLocalVarIndex(Binding b)

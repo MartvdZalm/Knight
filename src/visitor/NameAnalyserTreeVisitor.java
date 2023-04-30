@@ -401,8 +401,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		checkInheritanceCycle(program);
 
-		for (int i = 0; i < program.classList.size(); i++) {
-			program.classList.get(i).accept(this);
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			program.getClassList().get(i).accept(this);
 		}
 		return null;
 	}
@@ -566,5 +566,11 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
+	}
+
+	@Override
+	public Type visit(Include include)
+	{
+		return null;
 	}
 }

@@ -25,8 +25,8 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	@Override
 	public Type visit(Program n)
 	{
-		for (int i = 0; i < n.classList.size(); i++) {
-			n.classList.get(i).accept(this);
+		for (int i = 0; i < n.getClassListSize(); i++) {
+			n.getClassList().get(i).accept(this);
 		}
 		return null;
 	}
@@ -413,5 +413,11 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
+	}
+
+	@Override
+	public Type visit(Include include)
+	{
+		return null;
 	}
 }

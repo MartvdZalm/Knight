@@ -17,30 +17,36 @@ public class ClassDeclSimple extends ClassDecl
 		this.methodList = methodList;
 	}
 
-	public IdentifierExpr getId() {
+	public IdentifierExpr getId()
+	{
 		return id;
 	}
 
-	public void setId(IdentifierExpr id) {
+	public void setId(IdentifierExpr id)
+	{
 		this.id = id;
 	}
 
-	public int getMethodListSize() {
+	public int getMethodListSize()
+	{
 		return methodList.size();
 	}
 
-	public FuncDecl getMethodDeclAt(int index) {
+	public FuncDecl getMethodDeclAt(int index)
+	{
 		if (index < methodList.size()) {
 			return methodList.get(index);
 		}
 		return null;
 	}
 
-	public int getVarListSize() {
+	public int getVarListSize()
+	{
 		return varList.size();
 	}
 
-	public Declaration getVarDeclAt(int index) {
+	public Declaration getVarDeclAt(int index)
+	{
 		if (index < varList.size()) {
 			return varList.get(index);
 		}
@@ -48,8 +54,8 @@ public class ClassDeclSimple extends ClassDecl
 	}
 
 	@Override
-	public <R> R accept(Visitor<R> v) {
+	public <R> R accept(Visitor<R> v)
+	{
 		return v.visit(this);
 	}
-
 }

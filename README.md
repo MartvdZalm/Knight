@@ -1,3 +1,7 @@
+# Notes
+include <library> is for library classes
+include filename is for own made classes
+
 # Knight
 Knight is a programming language designed to perform complex tasks quickly and efficiently. It is built on the Java Virtual Machine (JVM) and will later be changed to run on its own software, making it independent of other software dependencies.
 

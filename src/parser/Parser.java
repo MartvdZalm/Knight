@@ -50,22 +50,22 @@ public class Parser
 
         try {
 			List<ClassDecl> classList = new ArrayList<>();
+			List<Include> includeList = new ArrayList<>();
 
+			token = lexer.nextToken();
             do {
-                token = lexer.nextToken();
 
                 switch (token.getToken()) {
 					case INCLUDE: {
 						while (token != null && token.getToken() == Tokens.INCLUDE) {
-
+							includeList.add(parseInclude());
 						}
 					}	
 					break;
 
 					case CLASS: {
 						while (token != null) {
-							ClassDecl klass = parseClassDecl();
-							classList.add(klass);
+							classList.add(parseClassDecl());
 						}
 					} 
 					break;
@@ -76,7 +76,7 @@ public class Parser
                 
             } while (token != null);
 
-            program = new Program(startToken, classList);
+            program = new Program(startToken, classList, includeList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,10 +88,7 @@ public class Parser
 	public ClassDecl parseClassDecl() throws ParseException
 	{
 		eat(Tokens.CLASS);
-		IdentifierExpr className = null;
-		if (token.getToken() == Tokens.IDENTIFIER) {
-			className = new IdentifierExpr(token, token.getSymbol());
-		}
+		IdentifierExpr className = new IdentifierExpr(token, token.getSymbol());
 		eat(Tokens.IDENTIFIER);
 
 		IdentifierExpr parent = null;
@@ -132,6 +129,18 @@ public class Parser
 			ClassDecl klass = new ClassDeclExtends(className.getToken(), className, parent, varList, funcList);
 			return klass;
 		}
+	}
+
+	public Include parseInclude() throws ParseException
+	{
+		Token tok = token;
+		eat(Tokens.INCLUDE);
+		eat(Tokens.LESSTHAN);
+		IdentifierExpr className = new IdentifierExpr(token, token.getSymbol());
+		eat(Tokens.IDENTIFIER);
+		eat(Tokens.GREATERTHAN);
+
+		return new Include(tok, className);
 	}
 
 	public Declaration parseVariable(Type type, Identifier id) throws ParseException
