@@ -1,5 +1,5 @@
 # Notes
-include <library> is for library classes
+include <\library> is for library classes
 include filename is for own made classes
 
 # Knight
