@@ -6,6 +6,7 @@ public class TokenType
     {
         Symbol.symbol("INVALID", Tokens.INVALID);
         Symbol.symbol("class", Tokens.CLASS);
+        Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("extends", Tokens.EXTENDS);
         Symbol.symbol("main", Tokens.MAIN);
         Symbol.symbol("//", Tokens.COMMENT);
@@ -33,6 +34,7 @@ public class TokenType
         Symbol.symbol("or", Tokens.OR);
         Symbol.symbol("and",Tokens.AND);
         Symbol.symbol("<", Tokens.LESSTHAN);
+        Symbol.symbol(">", Tokens.GREATERTHAN);
         Symbol.symbol("+", Tokens.PLUS);
         Symbol.symbol("-", Tokens.MINUS);
         Symbol.symbol("*",Tokens.TIMES);

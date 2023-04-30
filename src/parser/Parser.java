@@ -55,16 +55,23 @@ public class Parser
                 token = lexer.nextToken();
 
                 switch (token.getToken()) {
-                case CLASS: {
-					while (token != null) {
-						ClassDecl klass = parseClassDecl();
-						classList.add(klass);
-					}
-                } 
-                break;
+					case INCLUDE: {
+						while (token != null && token.getToken() == Tokens.INCLUDE) {
+
+						}
+					}	
+					break;
+
+					case CLASS: {
+						while (token != null) {
+							ClassDecl klass = parseClassDecl();
+							classList.add(klass);
+						}
+					} 
+					break;
     
-                default:
-                    throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+                	default:
+                    	throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
                 }
                 
             } while (token != null);
