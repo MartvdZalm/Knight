@@ -104,20 +104,21 @@ public class Parser
 		List<Declaration> varList = new ArrayList<>();
 		List<FuncDecl> funcList = new ArrayList<>();
 		
-		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.MAIN) {
-			Type type = parseType();
-			Identifier id = new Identifier(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
+		while (token.getToken() != Tokens.RIGHTBRACE) {
 
-			if (token.getToken() == Tokens.LEFTPAREN) {
-				funcList.add(parseFuncDeclStandard(type, id));
+			if (token.getToken() == Tokens.MAIN) {
+				funcList.add(parseFuncDeclMain());
 			} else {
-				varList.add(parseVariable(type, id));
+				Type type = parseType();
+				Identifier id = new Identifier(token, token.getSymbol());
+				eat(Tokens.IDENTIFIER);
+	
+				if (token.getToken() == Tokens.LEFTPAREN) {
+					funcList.add(parseFuncDeclStandard(type, id));
+				} else {
+					varList.add(parseVariable(type, id));
+				}
 			}
-		}
-
-		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() == Tokens.MAIN) {
-			funcList.add(parseFuncDeclMain());
 		}
 
 		eat(Tokens.RIGHTBRACE);
@@ -535,7 +536,7 @@ public class Parser
 			stOperand.push(this1);
 			parseTerm1();
 		}
-			break;
+		break;
 
 		case NEW: {
 			pushOperator(token);
@@ -602,7 +603,6 @@ public class Parser
 
 	private void parseBinary(Token tok)
 	{
-
 		switch (tok.getToken()) {
 		case OR: {
 			Expression rhs = stOperand.pop();

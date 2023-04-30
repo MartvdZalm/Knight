@@ -165,10 +165,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(This this1)
 	{
-		if (currFunc == null) {
-			Token sym = this1.getToken();
-			addError(sym.getRow(), sym.getCol(), "this keyword cannot be used in static methods");
-		}
+		// if (currFunc == null) {
+		// 	Token sym = this1.getToken();
+		// 	addError(sym.getRow(), sym.getCol(), "this keyword cannot be used in static methods");
+		// }
 
 		return null;
 	}

@@ -17,7 +17,7 @@ public enum Tokens
     INTEGER,
     STRING,
     SEMICOLON,
-    SRO,
+    COLON,
     STD,
     LEFTBRACE, 
     RIGHTBRACE, 

@@ -19,7 +19,7 @@ public class TokenType
         Symbol.symbol("int",Tokens.INTEGER);
         Symbol.symbol("string", Tokens.STRING);
         Symbol.symbol(";", Tokens.SEMICOLON);
-        Symbol.symbol("::", Tokens.SRO);
+        Symbol.symbol(":", Tokens.COLON);
         Symbol.symbol("std", Tokens.STD);
         Symbol.symbol("{", Tokens.LEFTBRACE);
         Symbol.symbol("}", Tokens.RIGHTBRACE);
