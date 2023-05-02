@@ -9,13 +9,15 @@ public class FuncDeclMain extends FuncDecl
 	private IdentifierExpr methodName;
 	private List<Declaration> varList;
 	private List<Statement> statList;
+	private Token access;
 
-	public FuncDeclMain(Token token, IdentifierExpr methodName, List<Declaration> varList, List<Statement> statList)
+	public FuncDeclMain(Token token, IdentifierExpr methodName, List<Declaration> varList, List<Statement> statList, Token access)
 	{
 		super(token);
 		this.methodName = methodName;
 		this.varList = varList;
 		this.statList = statList;
+		this.access = access;
 	}
 
 	public IdentifierExpr getMethodName()
@@ -59,6 +61,16 @@ public class FuncDeclMain extends FuncDecl
 		if (index < statList.size()) {
 			statList.set(index, stat);
 		}
+	}
+
+	public Token getAccess()
+	{
+		return access;
+	}
+
+	public void setAccess(Token access)
+	{
+		this.access = access;
 	}
 
 	@Override

@@ -45,15 +45,12 @@ public class Parser
     {
         Program program = null;
 
-		// Start token because program extends tree. After I am done with implementing this I will take 
-		// a look if I can change this.
-		Token startToken = token; 
-
         try {
 			List<ClassDecl> classList = new ArrayList<>();
 			List<Include> includeList = new ArrayList<>();
 
 			token = lexer.nextToken();
+			currentAccessModifier = token;
             do {
 
                 switch (token.getToken()) {
@@ -76,8 +73,8 @@ public class Parser
                 }
                 
             } while (token != null);
-
-            program = new Program(startToken, classList, includeList);
+			
+            program = new Program(currentAccessModifier, classList, includeList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -220,7 +217,7 @@ public class Parser
 
 		eat(Tokens.RIGHTBRACE);
 
-		return new FuncDeclMain(token, methodName, varList, statList);
+		return new FuncDeclMain(token, methodName, varList, statList, currentAccessModifier);
 	}
 
 	public FuncDecl parseFuncDeclStandard(Type returnType, Identifier identifier) throws ParseException

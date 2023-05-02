@@ -455,7 +455,6 @@ public class TypeAnalyser implements Visitor<Type>
 		return type;
 	}
 
-
 	@Override
 	public Type visit(IntType intType)
 	{
@@ -495,7 +494,21 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(VarDeclInit vd)
 	{
-		return vd.getType();
+		Type rhs = vd.getExpr().accept(this);
+		Type lhs = vd.getId().accept(this);
+
+		if (!st.compareTypes(lhs, rhs)) {
+			Token sym = vd.getToken();
+			if (lhs == null || rhs == null) {
+				addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
+			} else {
+				addError(sym.getRow(), sym.getCol(), "Operator = cannot be applied to " + lhs + ", " + rhs);
+			}
+
+		} else {
+			vd.getExpr().setType(rhs);
+		}
+		return null;
 	}
 
 	@Override
@@ -511,6 +524,11 @@ public class TypeAnalyser implements Visitor<Type>
 		hsFunc.add(id);
 
 		currFunc = (Function) funcDeclMain.getMethodName().getB();
+
+		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
+			Declaration decl = funcDeclMain.getVarDeclAt(i);
+			decl.accept(this);
+		}
 
 		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
 			Statement st = funcDeclMain.getStatAt(i);
@@ -562,6 +580,11 @@ public class TypeAnalyser implements Visitor<Type>
 		currFunc = (Function) funcDeclStandard.getMethodName().getB();
 
 		checkOverriding(funcDeclStandard, currFunc);
+
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			Declaration decl = funcDeclStandard.getVarDeclAt(i);
+			decl.accept(this);
+		}
 
 		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
 			Statement st = funcDeclStandard.getStatAt(i);
@@ -669,16 +692,21 @@ public class TypeAnalyser implements Visitor<Type>
 	public Type visit(ClassDeclSimple cd)
 	{
 		String id = cd.getId().getVarID();
-		if (hsKlass.contains(id)) { // Duplicate class
+		if (hsKlass.contains(id)) {
 			return null;
 		}
 		hsKlass.add(id);
-		// currClass = st.getKlass(id);
 
 		Binding b = cd.getId().getB();
 		currClass = (Klass) b;
 
 		hsFunc.clear();
+
+		for (int i = 0; i < cd.getVarListSize(); i++) {
+			Declaration decl = cd.getVarDeclAt(i);
+			decl.accept(this);
+		}
+
 		for (int i = 0; i < cd.getMethodListSize(); i++) {
 			FuncDecl md = cd.getMethodDeclAt(i);
 			md.accept(this);

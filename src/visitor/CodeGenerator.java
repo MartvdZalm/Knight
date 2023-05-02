@@ -429,7 +429,7 @@ public class CodeGenerator implements Visitor<String>
 			setLocalVarIndex(b);
 			return "";
 		} else {
-			return vd.getId() + " dd 0 " + vd.getAccess();
+			return vd.getId() + " dd 0 ";
 		}
 	}
 
@@ -441,7 +441,7 @@ public class CodeGenerator implements Visitor<String>
 			setLocalVarIndex(b);
 			return "";
 		} else {
-			return "\t" + vd.getId() + " db " + vd.getExpr().accept(this) + " " + vd.getAccess();
+			return "\t" + vd.getId() + " db " + vd.getExpr().accept(this);
 		}
 	}
 

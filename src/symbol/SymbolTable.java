@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import src.ast.IdentifierType;
 import src.ast.IntArrayType;
 import src.ast.IntType;
+import src.ast.StringType;
 import src.ast.Type;
 
 public class SymbolTable
@@ -137,6 +138,9 @@ public class SymbolTable
 			return true;
 		}
 		if (t1 instanceof IntArrayType && t2 instanceof IntArrayType) {
+			return true;
+		}
+		if (t1 instanceof StringType && t2 instanceof StringType) {
 			return true;
 		}
 		if (t1 instanceof IdentifierType && t2 instanceof IdentifierType) {

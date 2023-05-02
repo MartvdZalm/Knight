@@ -303,10 +303,15 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	@Override
 	public Type visit(FuncDeclMain funcDeclMain)
 	{
+		Token token = funcDeclMain.getAccess();
+		if (token.getToken() == Tokens.PRIVATE) {
+			addError(token.getRow(), token.getCol(), "Main method can't be private");
+		}
+
 		String identifier = funcDeclMain.getMethodName().getVarID();
 
 		currFunc = currClass.getMethod(identifier);
-		
+
 		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
 			Declaration vd = funcDeclMain.getVarDeclAt(i);
 			vd.accept(this);
