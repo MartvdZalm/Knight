@@ -12,7 +12,7 @@ import src.symbol.*;
 
 public class TypeAnalyser implements Visitor<Type>
 {
-	SymbolTable st;
+	private SymbolTable st;
 	private Klass currClass;
 	private Function currFunc;
 	private Set<String> hsKlass = new HashSet<>();
@@ -26,16 +26,16 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(Print n)
 	{
-		Type texp = n.expression.accept(this);
+		Type texp = n.getExpr().accept(this);
 		if (texp == null) {
 			return null;
 		}
 
 		if (!((texp instanceof IntType) || (texp instanceof BooleanType) || (texp instanceof StringType))) {
-			Token sym = n.expression.getToken();
+			Token sym = n.getExpr().getToken();
 			addError(sym.getRow(), sym.getCol(), "The argument of System.out.print must be of Type int, boolean or String");
 		} else {
-			n.expression.setType(texp);
+			n.getExpr().setType(texp);
 		}
 		return null;
 	}
@@ -59,8 +59,8 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(Assign n)
 	{
-		Type rhs = n.expr.accept(this);
-		Type lhs = n.id.accept(this);
+		Type rhs = n.getExpr().accept(this);
+		Type lhs = n.getId().accept(this);
 
 		if (!st.compareTypes(lhs, rhs)) {
 			Token sym = n.getToken();
@@ -71,7 +71,7 @@ public class TypeAnalyser implements Visitor<Type>
 			}
 
 		} else {
-			n.expr.setType(rhs);
+			n.getExpr().setType(rhs);
 		}
 
 		return null;
@@ -96,16 +96,16 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(IfThenElse n)
 	{
-		Type texp = n.expr.accept(this);
+		Type texp = n.getExpr().accept(this);
 		if (!(texp instanceof BooleanType)) {
-			Token sym = n.expr.getToken();
+			Token sym = n.getExpr().getToken();
 			addError(sym.getRow(), sym.getCol(), "Expression must be of type boolean");
 		} else {
-			n.expr.setType(texp);
+			n.getExpr().setType(texp);
 		}
 
-		n.then.accept(this);
-		n.elze.accept(this);
+		n.getThen().accept(this);
+		n.getElze().accept(this);
 
 		return null;
 	}
@@ -113,15 +113,15 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(While n)
 	{
-		Type texp = n.expr.accept(this);
+		Type texp = n.getExpr().accept(this);
 		if (!(texp instanceof BooleanType)) {
-			Token sym = n.expr.getToken();
+			Token sym = n.getExpr().getToken();
 			addError(sym.getRow(), sym.getCol(), "Expression must be of type boolean");
 		} else {
-			n.expr.setType(texp);
+			n.getExpr().setType(texp);
 		}
 
-		n.body.accept(this);
+		n.getBody().accept(this);
 
 		return null;
 	}
@@ -324,7 +324,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = i.getB();
 		if (b != null) {
-			Type t = ((Variable) b).type();
+			Type t = ((Variable) b).getType();
 			i.setType(t);
 			return t;
 		}
@@ -385,8 +385,8 @@ public class TypeAnalyser implements Visitor<Type>
 		} else {
 			mid.setB(m);
 			checkCallArguments(cm, m);
-			cm.setType(m.type());
-			return m.type();
+			cm.setType(m.getType());
+			return m.getType();
 		}
 	}
 
@@ -409,7 +409,7 @@ public class TypeAnalyser implements Visitor<Type>
 		// Check argument types
 		for (int i = 0; i < argTypes.size(); i++) {
 			Variable var = m.getParamAt(i);
-			Type t1 = var.type();
+			Type t1 = var.getType();
 			Type t2 = argTypes.get(i);
 
 			if (!st.compareTypes(t1, t2)) {
@@ -534,7 +534,7 @@ public class TypeAnalyser implements Visitor<Type>
 			ArgDecl ad = md.getArgDeclAt(i);
 			Type t1 = ad.accept(this);
 			Variable v = pm.getParamAt(i);
-			Type t2 = v.type();
+			Type t2 = v.getType();
 			if (!st.absCompTypes(t1, t2)) {
 				Token sym = ad.getToken();
 				addError(sym.getRow(), sym.getCol(), "cannot override method " + pm.getId()
@@ -543,7 +543,7 @@ public class TypeAnalyser implements Visitor<Type>
 			}
 		}
 
-		if (!st.absCompTypes(m.type(), pm.type())) {
+		if (!st.absCompTypes(m.getType(), pm.getType())) {
 			Token sym = md.getReturnType().getToken();
 			addError(sym.getRow(), sym.getCol(),
 					"cannot override method " + pm.getId() + "; attempting to use incompatible return type");
@@ -595,7 +595,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = id.getB();
 		if (b != null) {
-			return ((Variable) b).type();
+			return ((Variable) b).getType();
 		}
 		return null;
 	}

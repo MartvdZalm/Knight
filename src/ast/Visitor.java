@@ -85,5 +85,4 @@ public interface Visitor<R>
     public R visit(VarDeclInit varDeclInit);
 
     public R visit(Include include);
-
 }

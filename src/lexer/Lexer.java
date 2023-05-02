@@ -6,7 +6,7 @@ public class Lexer
 {
     private boolean exception;
     private char charachter; 
-    public SourceReader source;
+    private SourceReader source;
 
     public Lexer(String sourceFile)  
     {
@@ -21,10 +21,8 @@ public class Lexer
 
     public Token nextToken()
     { 
-        if (exception) 
-        {
-            if (source != null) 
-            {
+        if (exception) {
+            if (source != null) {
                 source.close();
                 source = null;
             }
@@ -32,8 +30,7 @@ public class Lexer
         }
 
         try {
-            while (Character.isWhitespace(charachter)) // scan past whitespace
-            {  
+            while (Character.isWhitespace(charachter)) {  
                 charachter = source.read();
             }
         } catch (Exception e) {
@@ -41,8 +38,7 @@ public class Lexer
             return nextToken();
         }
 
-        if (Character.isJavaIdentifierStart(charachter)) 
-        {
+        if (Character.isJavaIdentifierStart(charachter)) {
             String identifier = "";
             try {
                 do {
@@ -55,8 +51,7 @@ public class Lexer
             return newIdToken(identifier);
         }
 
-        if (Character.isDigit(charachter)) 
-        {
+        if (Character.isDigit(charachter)) {
             String number = "";
             try {
                 do {
@@ -66,7 +61,6 @@ public class Lexer
             } catch (Exception e) {
                 exception = true;
             }
-
             return newNumberToken(number);
         }   
 
@@ -85,9 +79,7 @@ public class Lexer
             String token = str.toString().trim(); // remove leading/trailing whitespace
 
             return newStringToken(token);
-        }
-        
-        
+        } 
 
         String charOld = "" + charachter;
         String op = charOld;
@@ -112,8 +104,7 @@ public class Lexer
 
     private Token makeToken(String newSymbol) 
     {
-        if (newSymbol.equals("//")) 
-        {  
+        if (newSymbol.equals("//")) {  
             try {
                 int oldLine = source.getRow();
                 do {
@@ -126,8 +117,7 @@ public class Lexer
         }
 
         Symbol symbol = Symbol.symbol(newSymbol, Tokens.INVALID); 
-        if (symbol == null) 
-        {
+        if (symbol == null) {
             exception = true;
             return nextToken();
         }

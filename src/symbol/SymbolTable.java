@@ -14,11 +14,13 @@ public class SymbolTable
 	private Hashtable<String, Klass> hashtable;
 	private Deque<String> rstack = new ArrayDeque<String>();
 
-	public SymbolTable() {
+	public SymbolTable()
+	{
 		hashtable = new Hashtable<>();
 	}
 
-	public boolean addKlass(String id, String parent) {
+	public boolean addKlass(String id, String parent)
+	{
 		if (containsKlass(id)) {
 			return false;
 		} else {
@@ -27,7 +29,8 @@ public class SymbolTable
 		return true;
 	}
 
-	public Klass getKlass(String id) {
+	public Klass getKlass(String id)
+	{
 		if (containsKlass(id)) {
 			return hashtable.get(id);
 		} else {
@@ -35,14 +38,16 @@ public class SymbolTable
 		}
 	}
 
-	public boolean containsKlass(String id) {
+	public boolean containsKlass(String id)
+	{
 		if (id != null) {
 			return hashtable.containsKey(id);
 		}
 		return false;
 	}
 
-	public Variable getVar(Function m, Klass c, String id) {
+	public Variable getVar(Function m, Klass c, String id)
+	{
 		if (m != null) {
 			if (m.getVar(id) != null) {
 				return m.getVar(id);
@@ -52,8 +57,8 @@ public class SymbolTable
 			}
 		}
 
-		while (c != null && !rstack.contains(c.id)) {
-			rstack.push(c.id);
+		while (c != null && !rstack.contains(c.getId())) {
+			rstack.push(c.getId());
 			if (c.getVar(id) != null) {
 				rstack.clear();
 				return c.getVar(id);
@@ -69,7 +74,8 @@ public class SymbolTable
 		return null;
 	}
 
-	public boolean containsVar(Function m, Klass c, String id) {
+	public boolean containsVar(Function m, Klass c, String id)
+	{
 		Variable var = getVar(m, c, id);
 		if (var != null) {
 			return true;
@@ -77,22 +83,24 @@ public class SymbolTable
 		return false;
 	}
 
-	public Type getVarType(Function m, Klass c, String id) {
+	public Type getVarType(Function m, Klass c, String id)
+	{
 		Variable var = getVar(m, c, id);
 		if (var != null) {
-			return var.type();
+			return var.getType();
 		}
 		return null;
 	}
 
-	public Function getMethod(String id, String classScope) {
+	public Function getMethod(String id, String classScope)
+	{
 		if (getKlass(classScope) == null) {
 			return null;
 		}
 
 		Klass c = getKlass(classScope);
-		while (c != null && !rstack.contains(c.id)) {
-			rstack.push(c.id);
+		while (c != null && !rstack.contains(c.getId())) {
+			rstack.push(c.getId());
 			if (c.getMethod(id) != null) {
 				rstack.clear();
 				return c.getMethod(id);
@@ -108,16 +116,18 @@ public class SymbolTable
 		return null;
 	}
 
-	public Type getMethodType(String id, String classScope) {
+	public Type getMethodType(String id, String classScope)
+	{
 		Function m = getMethod(id, classScope);
 		if (m == null) {
 			return null;
 		} else {
-			return m.type();
+			return m.getType();
 		}
 	}
 
-	public boolean compareTypes(Type t1, Type t2) {
+	public boolean compareTypes(Type t1, Type t2)
+	{
 
 		if (t1 == null || t2 == null) {
 			return false;
@@ -133,10 +143,10 @@ public class SymbolTable
 			IdentifierType i1 = (IdentifierType) t1;
 			IdentifierType i2 = (IdentifierType) t2;
 
-			Klass c = getKlass(i2.varID);
-			while (c != null && !rstack.contains(c.id)) {
-				rstack.push(c.id);
-				if (i1.varID.equals(c.getId())) {
+			Klass c = getKlass(i2.getVarID());
+			while (c != null && !rstack.contains(c.getId())) {
+				rstack.push(c.getId());
+				if (i1.getVarID().equals(c.getId())) {
 					rstack.clear();
 					return true;
 				} else {
@@ -152,8 +162,8 @@ public class SymbolTable
 		return false;
 	}
 
-	public boolean absCompTypes(Type t1, Type t2) {
-
+	public boolean absCompTypes(Type t1, Type t2)
+	{
 		if (t1 == null || t2 == null) {
 			return false;
 		}
@@ -167,11 +177,11 @@ public class SymbolTable
 		if (t1 instanceof IdentifierType && t2 instanceof IdentifierType) {
 			IdentifierType i1 = (IdentifierType) t1;
 			IdentifierType i2 = (IdentifierType) t2;
-			if (i1.varID.equals(i2.varID)) {
+			if (i1.getVarID().equals(i2.getVarID())) {
 				return true;
 			}
 		}
-
+		
 		return false;
 	}
 }

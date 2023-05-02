@@ -9,17 +9,20 @@ public abstract class Binding
 	protected Type type;
 	private int count;
 
-	public Binding(Type t) {
+	public Binding(Type t)
+	{
 		count = counter.getCount();
 		type = t;
 	}
 
-	public Type type() {
+	public Type getType()
+	{
 		return type;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return Integer.toString(count);
 	}
 }

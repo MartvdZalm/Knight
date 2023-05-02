@@ -6,6 +6,9 @@ public class TokenType
     {
         Symbol.symbol("INVALID", Tokens.INVALID);
         Symbol.symbol("class", Tokens.CLASS);
+        Symbol.symbol("public", Tokens.PUBLIC);
+        Symbol.symbol("private", Tokens.PRIVATE);
+        Symbol.symbol("protected", Tokens.PROTECTED);
         Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("extends", Tokens.EXTENDS);
         Symbol.symbol("main", Tokens.MAIN);

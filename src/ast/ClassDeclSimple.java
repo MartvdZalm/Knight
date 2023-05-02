@@ -6,11 +6,12 @@ import src.lexer.Token;
 
 public class ClassDeclSimple extends ClassDecl
 {
-	IdentifierExpr id;
-	List<Declaration> varList;
-	List<FuncDecl> methodList;
+	private IdentifierExpr id;
+	private List<Declaration> varList;
+	private List<FuncDecl> methodList;
 
-	public ClassDeclSimple(Token jSymbol, IdentifierExpr className, List<Declaration> varList, List<FuncDecl> methodList) {
+	public ClassDeclSimple(Token jSymbol, IdentifierExpr className, List<Declaration> varList, List<FuncDecl> methodList)
+	{
 		super(jSymbol);
 		this.id = className;
 		this.varList = varList;

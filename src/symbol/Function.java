@@ -9,27 +9,31 @@ import src.semantics.Binding;
 
 public class Function extends Binding
 {
-	String id;
-	Vector<Variable> params;
-	Hashtable<String, Variable> vars;
+	private String id;
+	private Vector<Variable> params;
+	private Hashtable<String, Variable> vars;
 
-	public Function(String id, Type type) {
+	public Function(String id, Type type)
+	{
 		super(type);
 		this.id = id;
 		vars = new Hashtable<>();
 		params = new Vector<>();
 	}
 
-	public String getId() {
+	public String getId()
+	{
 		return id;
 	}
 
 	@Override
-	public Type type() {
+	public Type getType()
+	{
 		return type;
 	}
 
-	public boolean addParam(String id, Type type) {
+	public boolean addParam(String id, Type type)
+	{
 		if (containsParam(id)) {
 			return false;
 		} else {
@@ -38,11 +42,13 @@ public class Function extends Binding
 		}
 	}
 
-	public Enumeration<Variable> getParams() {
+	public Enumeration<Variable> getParams()
+	{
 		return params.elements();
 	}
 
-	public Variable getParamAt(int i) {
+	public Variable getParamAt(int i)
+	{
 		if (i < params.size()) {
 			return params.elementAt(i);
 		} else {
@@ -50,7 +56,8 @@ public class Function extends Binding
 		}
 	}
 
-	public boolean addVar(String id, Type type) {
+	public boolean addVar(String id, Type type)
+	{
 		if (containsVar(id)) {
 			return false;
 		} else {
@@ -59,20 +66,23 @@ public class Function extends Binding
 		}
 	}
 
-	public boolean containsVar(String id) {
+	public boolean containsVar(String id)
+	{
 		return containsParam(id) || vars.containsKey(id);
 	}
 
-	public boolean containsParam(String id) {
+	public boolean containsParam(String id)
+	{
 		for (int i = 0; i < params.size(); i++) {
-			if (params.elementAt(i).id.equals(id)) {
+			if (params.elementAt(i).getId().equals(id)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public Variable getVar(String id) {
+	public Variable getVar(String id)
+	{
 		if (containsVar(id)) {
 			return vars.get(id);
 		} else {
@@ -80,10 +90,10 @@ public class Function extends Binding
 		}
 	}
 
-	public Variable getParam(String id) {
-
+	public Variable getParam(String id)
+	{
 		for (int i = 0; i < params.size(); i++) {
-			if (params.elementAt(i).id.equals(id)) {
+			if (params.elementAt(i).getId().equals(id)) {
 				return (params.elementAt(i));
 			}
 		}
@@ -91,8 +101,8 @@ public class Function extends Binding
 		return null;
 	}
 
-	public int getParamsSize() {
+	public int getParamsSize()
+	{
 		return params.size();
 	}
-
 }

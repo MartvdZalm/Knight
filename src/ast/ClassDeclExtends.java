@@ -6,12 +6,13 @@ import src.lexer.Token;
 
 public class ClassDeclExtends extends ClassDecl
 {
-	IdentifierExpr id;
-	IdentifierExpr parent;
-	List<Declaration> varList;
-	List<FuncDecl> methodList;
+	private IdentifierExpr id;
+	private IdentifierExpr parent;
+	private List<Declaration> varList;
+	private List<FuncDecl> methodList;
 
-	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> varList, List<FuncDecl> methodList) {
+	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> varList, List<FuncDecl> methodList)
+	{
 		super(token);
 		this.id = className;
 		this.parent = parentClassName;
@@ -19,38 +20,46 @@ public class ClassDeclExtends extends ClassDecl
 		this.methodList = methodList;
 	}
 
-	public IdentifierExpr getId() {
+	public IdentifierExpr getId()
+	{
 		return id;
 	}
 
-	public void setId(IdentifierExpr id) {
+	public void setId(IdentifierExpr id)
+	{
 		this.id = id;
 	}
 
-	public IdentifierExpr getParent() {
+	public IdentifierExpr getParent()
+	{
 		return parent;
 	}
 
-	public void setParent(IdentifierExpr parent) {
+	public void setParent(IdentifierExpr parent)
+	{
 		this.parent = parent;
 	}
 
-	public int getMethodListSize() {
+	public int getMethodListSize()
+	{
 		return methodList.size();
 	}
 
-	public FuncDecl getMethodDeclAt(int index) {
+	public FuncDecl getMethodDeclAt(int index)
+	{
 		if (index < methodList.size()) {
 			return methodList.get(index);
 		}
 		return null;
 	}
 
-	public int getVarListSize() {
+	public int getVarListSize()
+	{
 		return varList.size();
 	}
 
-	public Declaration getVarDeclAt(int index) {
+	public Declaration getVarDeclAt(int index)
+	{
 		if (index < varList.size()) {
 			return varList.get(index);
 		}
@@ -58,8 +67,8 @@ public class ClassDeclExtends extends ClassDecl
 	}
 
 	@Override
-	public <R> R accept(Visitor<R> v) {
+	public <R> R accept(Visitor<R> v)
+	{
 		return v.visit(this);
 	}
-
 }

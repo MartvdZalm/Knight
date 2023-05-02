@@ -6,44 +6,52 @@ public class NameError implements Comparable<NameError>
 	private int column;
 	private String errorText;
 
-	public NameError(int line, int column, String errorText) {
+	public NameError(int line, int column, String errorText)
+	{
 		this.line = line;
 		this.column = column;
 		this.errorText = errorText;
 	}
 
-	public int getLine() {
+	public int getLine()
+	{
 		return line;
 	}
 
-	public void setLine(int line) {
+	public void setLine(int line)
+	{
 		this.line = line;
 	}
 
-	public int getColumn() {
+	public int getColumn()
+	{
 		return column;
 	}
 
-	public void setColumn(int column) {
+	public void setColumn(int column)
+	{
 		this.column = column;
 	}
 
-	public String getErrorText() {
+	public String getErrorText()
+	{
 		return errorText;
 	}
 
-	public void setErrorText(String errorText) {
+	public void setErrorText(String errorText)
+	{
 		this.errorText = errorText;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return line + ":" + column + " error: " + errorText;
 	}
 
 	@Override
-	public int compareTo(NameError o) {
-
+	public int compareTo(NameError o)
+	{
 		if (getLine() < o.getLine()) {
 			return -1;
 		} else if (getLine() > o.getLine()) {
@@ -57,7 +65,5 @@ public class NameError implements Comparable<NameError>
 				return 0;
 			}
 		}
-
 	}
-
 }

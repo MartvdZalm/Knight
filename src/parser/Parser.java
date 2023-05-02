@@ -15,6 +15,7 @@ public class Parser
     private static final Token SENTINEL = new Token(Symbol.symbol("SENTINEL", Tokens.SENTINEL), 0, 0);
     private Deque<Token> stOperator = new ArrayDeque<>();
     private Deque<Expression> stOperand = new ArrayDeque<>();
+	private Token currentAccessModifier;
 
     public Parser(String sourceFile)
     {
@@ -104,7 +105,11 @@ public class Parser
 		List<Declaration> varList = new ArrayList<>();
 		List<FuncDecl> funcList = new ArrayList<>();
 		
+		parseAccess();
+
 		while (token.getToken() != Tokens.RIGHTBRACE) {
+
+			parseAccess();
 
 			if (token.getToken() == Tokens.MAIN) {
 				funcList.add(parseFuncDeclMain());
@@ -149,10 +154,10 @@ public class Parser
 		Declaration decl = null;
 
 		if (token.getToken() == Tokens.SEMICOLON) {
-			decl = new VarDecl(token, type, id);
+			decl = new VarDecl(token, type, id, currentAccessModifier);
 		} else {
 			eat(Tokens.ASSIGN);
-			decl = new VarDeclInit(token, type, id, parseExpression());
+			decl = new VarDeclInit(token, type, id, parseExpression(), currentAccessModifier);
 		}
 		eat(Tokens.SEMICOLON);
 
@@ -187,9 +192,9 @@ public class Parser
 				eat(Tokens.IDENTIFIER);
 
 				if (token.getToken() == Tokens.SEMICOLON) {
-					varList.add(new VarDecl(id2.getToken(), idType, id2));
+					varList.add(new VarDecl(id2.getToken(), idType, id2, currentAccessModifier));
 				} else {
-					varList.add(new VarDeclInit(token, idType, id2, parseExpression()));
+					varList.add(new VarDeclInit(token, idType, id2, parseExpression(), currentAccessModifier));
 				}
 				eat(Tokens.SEMICOLON);
 
@@ -255,9 +260,9 @@ public class Parser
 				eat(Tokens.IDENTIFIER);
 
 				if (token.getToken() == Tokens.SEMICOLON) {
-					varList.add(new VarDecl(id2.getToken(), idType, id2));
+					varList.add(new VarDecl(id2.getToken(), idType, id2, currentAccessModifier));
 				} else {
-					varList.add(new VarDeclInit(token, idType, id2, parseExpression()));
+					varList.add(new VarDeclInit(token, idType, id2, parseExpression(), currentAccessModifier));
 				}
 				eat(Tokens.SEMICOLON);
 
@@ -286,7 +291,7 @@ public class Parser
 		eat(Tokens.SEMICOLON);	
 		eat(Tokens.RIGHTBRACE);
 
-		return new FuncDeclStandard(methodName.getToken(), returnType, methodName, argList, varList, statList, returnExpr);
+		return new FuncDeclStandard(methodName.getToken(), returnType, methodName, argList, varList, statList, returnExpr, currentAccessModifier);
 	}
 
 	public ArgDecl parseArgument() throws ParseException
@@ -299,6 +304,23 @@ public class Parser
 		eat(Tokens.IDENTIFIER);
 
 		return new ArgDecl(argId.getToken(), argType, argId);
+	}
+
+	public void parseAccess() throws ParseException
+	{
+		if (token.getToken() == Tokens.PUBLIC) {
+			currentAccessModifier = token;
+			eat(Tokens.PUBLIC);
+			eat(Tokens.COLON);
+		} else if (token.getToken() == Tokens.PRIVATE) {
+			currentAccessModifier = token;
+			eat(Tokens.PRIVATE);
+			eat(Tokens.COLON);
+		} else if (token.getToken() == Tokens.PROTECTED){
+			currentAccessModifier = token;
+			eat(Tokens.PROTECTED);
+			eat(Tokens.COLON);
+		}
 	}
 
 	public Type parseType() throws ParseException

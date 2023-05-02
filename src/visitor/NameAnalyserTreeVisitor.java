@@ -43,7 +43,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(Assign n)
 	{
 		n.getId().accept(this);
-		n.expr.accept(this);
+		n.getExpr().accept(this);
 		return null;
 	}
 
@@ -66,9 +66,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(IfThenElse n)
 	{
-		n.expr.accept(this);
-		n.then.accept(this);
-		n.elze.accept(this);
+		n.getExpr().accept(this);
+		n.getThen().accept(this);
+		n.getElze().accept(this);
 		return null;
 	}
 

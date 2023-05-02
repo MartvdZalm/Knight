@@ -6,14 +6,15 @@ import src.lexer.Token;
 
 public class FuncDeclStandard extends FuncDecl
 {
-    public Type returnType;
-	public IdentifierExpr methodName;
-	public List<ArgDecl> argList;
-	public List<Declaration> varList;
-	public List<Statement> statList;
-	public Expression returnExpr;
+    private Type returnType;
+	private IdentifierExpr methodName;
+	private List<ArgDecl> argList;
+	private List<Declaration> varList;
+	private List<Statement> statList;
+	private Expression returnExpr;
+	private Token access;
 
-	public FuncDeclStandard(Token token, Type returnType, IdentifierExpr methodName, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr)
+	public FuncDeclStandard(Token token, Type returnType, IdentifierExpr methodName, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr, Token access)
 	{
 		super(token);
 		this.returnType = returnType;
@@ -22,6 +23,7 @@ public class FuncDeclStandard extends FuncDecl
 		this.varList = varList;
 		this.statList = statList;
 		this.returnExpr = returnExpr;
+		this.access = access;
 	}
 
 	public Type getReturnType()
@@ -98,6 +100,16 @@ public class FuncDeclStandard extends FuncDecl
 		if (index < statList.size()) {
 			statList.set(index, stat);
 		}
+	}
+
+	public Token getAccess()
+	{
+		return access;
+	}
+
+	public void setAccess(Token access)
+	{
+		this.access = access;
 	}
 
 	@Override

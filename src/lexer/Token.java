@@ -4,7 +4,7 @@ public class Token
 {
     private int row;
     private int col;
-    public Symbol symbol;
+    private Symbol symbol;
 
     public Token(Symbol symbol, int row, int col) 
     {

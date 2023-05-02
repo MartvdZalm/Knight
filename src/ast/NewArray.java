@@ -4,23 +4,27 @@ import src.lexer.Token;
 
 public class NewArray extends Expression
 {
-	Expression arrayLength;
+	private Expression arrayLength;
 
-	public NewArray(Token token, Expression arrayLength) {
+	public NewArray(Token token, Expression arrayLength)
+	{
 		super(token);
 		this.arrayLength = arrayLength;
 	}
 
-	public Expression getArrayLength() {
+	public Expression getArrayLength()
+	{
 		return arrayLength;
 	}
 
-	public void setArrayLength(Expression arrayLength) {
+	public void setArrayLength(Expression arrayLength)
+	{
 		this.arrayLength = arrayLength;
 	}
 
 	@Override
-	public <R> R accept(Visitor<R> v) {
+	public <R> R accept(Visitor<R> v)
+	{
 		return v.visit(this);
 	}
 }

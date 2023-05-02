@@ -6,38 +6,45 @@ import src.lexer.Token;
 
 public class CallFunc extends Expression
 {
-	Expression instanceName;
-	IdentifierExpr methodId;
-	List<Expression> argExprList;
+	private Expression instanceName;
+	private IdentifierExpr methodId;
+	private List<Expression> argExprList;
 
-	public CallFunc(Token token, Expression instanceName, IdentifierExpr methodId, List<Expression> argExprList) {
+	public CallFunc(Token token, Expression instanceName, IdentifierExpr methodId, List<Expression> argExprList)
+	{
 		super(token);
 		this.instanceName = instanceName;
 		this.methodId = methodId;
 		this.argExprList = argExprList;
 	}
 
-	public Expression getInstanceName() {
+	public Expression getInstanceName()
+	{
 		return instanceName;
 	}
 
-	public void setInstanceName(Expression instanceName) {
+	public void setInstanceName(Expression instanceName)
+	{
 		this.instanceName = instanceName;
 	}
 
-	public IdentifierExpr getMethodId() {
+	public IdentifierExpr getMethodId()
+	{
 		return methodId;
 	}
 
-	public void setMethodId(IdentifierExpr methodId) {
+	public void setMethodId(IdentifierExpr methodId)
+	{
 		this.methodId = methodId;
 	}
 
-	public int getArgExprListSize() {
+	public int getArgExprListSize()
+	{
 		return argExprList.size();
 	}
 
-	public Expression getArgExprAt(int index) {
+	public Expression getArgExprAt(int index)
+	{
 		if (index < argExprList.size()) {
 			return argExprList.get(index);
 		}
@@ -45,7 +52,8 @@ public class CallFunc extends Expression
 	}
 
 	@Override
-	public <R> R accept(Visitor<R> v) {
+	public <R> R accept(Visitor<R> v)
+	{
 		return v.visit(this);
 	}
 }

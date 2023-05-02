@@ -17,27 +17,23 @@ public class SourceReader
 
     public char read() throws IOException
     {
-        if (isPriorEndLine) 
-        {
+        if (isPriorEndLine) {
             lineNumber++;
             positionLastChar = -1;
             nextLine = source.readLine();
             isPriorEndLine = false;
         }
 
-        if (nextLine == null) 
-        {  
+        if (nextLine == null) {  
             throw new IOException();
         } 
-        else if (nextLine.length() == 0) 
-        {
+        else if (nextLine.length() == 0) {
             isPriorEndLine = true;
             return ' ';
         }
 
         positionLastChar++;
-        if (positionLastChar >= nextLine.length()) 
-        {
+        if (positionLastChar >= nextLine.length()) {
             isPriorEndLine = true;
             return ' ';
         }

@@ -4,12 +4,14 @@ import src.lexer.Token;
 
 public class This extends Expression
 {
-	public This(Token token) {
+	public This(Token token)
+	{
 		super(token);
 	}
 
 	@Override
-	public <R> R accept(Visitor<R> v) {
+	public <R> R accept(Visitor<R> v)
+	{
 		return v.visit(this);
 	}
 }

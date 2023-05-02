@@ -9,8 +9,8 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 {
 	private Klass currClass;
 	private Function currFunc;
-	SymbolTable symbolTable;
-	String mKlassId;
+	private SymbolTable symbolTable;
+	private String mKlassId;
 
 	public BuildSymbolTableVisitor()
 	{

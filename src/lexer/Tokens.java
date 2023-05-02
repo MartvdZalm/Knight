@@ -3,6 +3,9 @@ package src.lexer;
 public enum Tokens 
 {
     INVALID,
+    PUBLIC,
+    PROTECTED,
+    PRIVATE,
     CLASS,
     EXTENDS,
     MAIN,

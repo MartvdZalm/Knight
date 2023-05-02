@@ -4,17 +4,20 @@ import src.lexer.Token;
 
 public abstract class Expression extends Tree
 {
-	public Type type;
+	private Type type;
 
-	public Expression(Token token) {
+	public Expression(Token token)
+	{
 		super(token);
 	}
 
-	public Type type() {
+	public Type type()
+	{
 		return type;
 	}
 
-	public void setType(Type t) {
+	public void setType(Type t)
+	{
 		type = t;
 	}
 };

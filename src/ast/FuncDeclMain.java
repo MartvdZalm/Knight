@@ -6,9 +6,9 @@ import src.lexer.Token;
 
 public class FuncDeclMain extends FuncDecl
 {
-	public IdentifierExpr methodName;
-	public List<Declaration> varList;
-	public List<Statement> statList;
+	private IdentifierExpr methodName;
+	private List<Declaration> varList;
+	private List<Statement> statList;
 
 	public FuncDeclMain(Token token, IdentifierExpr methodName, List<Declaration> varList, List<Statement> statList)
 	{

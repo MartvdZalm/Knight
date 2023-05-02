@@ -64,7 +64,7 @@ public class CodeGenerator implements Visitor<String>
 				sb.append(n.getExpr().accept(this) + "\n");
 			} else {
 				sb.append(n.getExpr().accept(this) + "\n");
-				sb.append("mov [" + n.id + "], eax" + "\n");
+				sb.append("mov [" + n.getId() + "], eax" + "\n");
 			}
 
 		} else { // Local Variable
@@ -325,7 +325,7 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(id.getVarID());
 
 		} else {
-			if (b.type() instanceof IntType || b.type() instanceof BooleanType) {
+			if (b.getType() instanceof IntType || b.getType() instanceof BooleanType) {
 				sb.append("iload " + lvIndex + "\n");
 			} else {
 				sb.append("aload " + lvIndex + "\n");
@@ -374,9 +374,9 @@ public class CodeGenerator implements Visitor<String>
 		Function m = (Function) cm.getMethodId().getB();
 
 		for (int i = 0; i < m.getParamsSize(); i++) {
-			sb.append(m.getParamAt(i).type().accept(this));
+			sb.append(m.getParamAt(i).getType().accept(this));
 		}
-		sb.append(")" + m.type().accept(this));
+		sb.append(")" + m.getType().accept(this));
 
 		return sb.toString();
 	}
@@ -429,7 +429,7 @@ public class CodeGenerator implements Visitor<String>
 			setLocalVarIndex(b);
 			return "";
 		} else {
-			return vd.getId() + " dd 0";
+			return vd.getId() + " dd 0 " + vd.getAccess();
 		}
 	}
 
@@ -441,7 +441,7 @@ public class CodeGenerator implements Visitor<String>
 			setLocalVarIndex(b);
 			return "";
 		} else {
-			return "\t" + vd.getId() + " db " + vd.getExpr().accept(this);
+			return "\t" + vd.getId() + " db " + vd.getExpr().accept(this) + " " + vd.getAccess();
 		}
 	}
 
@@ -498,7 +498,7 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(ad.accept(this));
 		}
 		sb.append(")");
-		sb.append(currMethod.type().accept(this) + "\n");
+		sb.append(currMethod.getType().accept(this) + "\n");
 
 		sb.append(".limit locals " + localvars * 4 + "\n");
 		sb.append(".limit stack 100" + "\n");
@@ -513,7 +513,7 @@ public class CodeGenerator implements Visitor<String>
 		}
 
 		sb.append(funcDeclStandard.getReturnExpr().accept(this) + "\n");
-		if (currMethod.type() instanceof IntType || currMethod.type() instanceof BooleanType) {
+		if (currMethod.getType() instanceof IntType || currMethod.getType() instanceof BooleanType) {
 			sb.append("ireturn" + "\n");
 		} else {
 			sb.append("areturn" + "\n");
@@ -565,10 +565,10 @@ public class CodeGenerator implements Visitor<String>
 		if (lvIndex == -1) {
 
 			sb.append("aload_0" + "\n");
-			sb.append("getfield " + currClass.getId() + "/" + id.getVarID() + " " + b.type().accept(this) + "\n");
+			sb.append("getfield " + currClass.getId() + "/" + id.getVarID() + " " + b.getType().accept(this) + "\n");
 
 		} else {
-			if (b.type() instanceof IntType || b.type() instanceof BooleanType) {
+			if (b.getType() instanceof IntType || b.getType() instanceof BooleanType) {
 				sb.append("iload " + lvIndex + "\n");
 			} else {
 				sb.append("aload " + lvIndex + "\n");

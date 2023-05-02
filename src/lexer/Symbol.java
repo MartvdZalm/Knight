@@ -6,7 +6,6 @@ public class Symbol
 {
     private String symbol;
     private Tokens token;  
-
     private static HashMap<String, Symbol> symbols = new HashMap<String, Symbol>();
 
     private Symbol(String symbol, Tokens token) 

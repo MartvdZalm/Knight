@@ -4,8 +4,8 @@ import src.lexer.Token;
 
 public class Assign extends Statement
 {
-	public Identifier id;
-	public Expression expr;
+	private Identifier id;
+	private Expression expr;
 
 	public Assign(Token token, Identifier id, Expression src)
 	{

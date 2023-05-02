@@ -5,38 +5,44 @@ import src.semantics.Binding;
 
 public class IdentifierType extends Type
 {
-	public String varID;
-	public Binding b;
+	private String varID;
+	private Binding b;
 
-	public IdentifierType(Token token, String varID) {
+	public IdentifierType(Token token, String varID)
+	{
 		super(token);
 		this.varID = varID;
 	}
 
-	public String getVarID() {
+	public String getVarID()
+	{
 		return varID;
 	}
 
-	public void setVarID(String varID) {
+	public void setVarID(String varID)
+	{
 		this.varID = varID;
 	}
 
-	public Binding getB() {
+	public Binding getB()
+	{
 		return b;
 	}
 
-	public void setB(Binding b) {
+	public void setB(Binding b)
+	{
 		this.b = b;
 	}
 
 	@Override
-	public <R> R accept(Visitor<R> v) {
+	public <R> R accept(Visitor<R> v)
+	{
 		return v.visit(this);
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return varID;
 	}
-
 }

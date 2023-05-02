@@ -4,7 +4,7 @@ import src.lexer.Token;
 
 public class Println extends Statement
 {
-    public Expression expression;
+    private Expression expression;
 
 	public Println(Token token, Expression expression)
 	{

@@ -8,13 +8,14 @@ public class SemanticErrors
 {
 	public static List<NameError> errorList = new ArrayList<>();
 
-	public static void addError(int line, int col, String errorText) {
+	public static void addError(int line, int col, String errorText)
+	{
 		NameError error = new NameError(line, col, errorText);
 		errorList.add(error);
 	}
 
-	public static void sort() {
+	public static void sort()
+	{
 		Collections.sort(errorList);
 	}
-
 }

@@ -9,10 +9,10 @@ import src.semantics.Binding;
 
 public class Klass extends Binding
 {
-	String id;
-	Hashtable<String, Function> methods;
-	Hashtable<String, Variable> globals;
-	String parent;
+	private String id;
+	private Hashtable<String, Function> methods;
+	private Hashtable<String, Variable> globals;
+	private String parent;
 
 	public Klass(String id, String p)
 	{
