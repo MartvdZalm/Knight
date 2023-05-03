@@ -11,6 +11,7 @@ public class TokenType
         Symbol.symbol("protected", Tokens.PROTECTED);
         Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("extends", Tokens.EXTENDS);
+        Symbol.symbol("void", Tokens.VOID);
         Symbol.symbol("main", Tokens.MAIN);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("print", Tokens.PRINT);

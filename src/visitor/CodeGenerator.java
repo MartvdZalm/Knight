@@ -404,6 +404,12 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
+	public String visit(VoidType voidType)
+	{
+		return "voidType";
+	}
+
+	@Override
 	public String visit(BooleanType booleanType)
 	{
 		return "Z";
@@ -481,7 +487,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(FuncDeclStandard funcDeclStandard)
+	public String visit(FuncDeclStandardReturn funcDeclStandard)
 	{
 		slot = 0;
 		int localvars = 1;
@@ -513,6 +519,50 @@ public class CodeGenerator implements Visitor<String>
 		}
 
 		sb.append(funcDeclStandard.getReturnExpr().accept(this) + "\n");
+		if (currMethod.getType() instanceof IntType || currMethod.getType() instanceof BooleanType) {
+			sb.append("ireturn" + "\n");
+		} else {
+			sb.append("areturn" + "\n");
+		}
+		sb.append(".end method" + "\n");
+
+		currMethod = null;
+
+		return sb.toString();
+	}
+
+	@Override
+	public String visit(FuncDeclStandardVoid funcDeclStandard)
+	{
+		slot = 0;
+		int localvars = 1;
+		localvars += funcDeclStandard.getArgListSize();
+		localvars += funcDeclStandard.getVarListSize();
+
+		StringBuilder sb = new StringBuilder();
+		currMethod = (Function) funcDeclStandard.getMethodName().getB();
+
+		sb.append(".method public " + currMethod.getId() + "(");
+
+		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
+			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
+			sb.append(ad.accept(this));
+		}
+		sb.append(")");
+		sb.append(currMethod.getType().accept(this) + "\n");
+
+		sb.append(".limit locals " + localvars * 4 + "\n");
+		sb.append(".limit stack 100" + "\n");
+
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			Declaration vd = funcDeclStandard.getVarDeclAt(i);
+			sb.append(vd.accept(this));
+		}
+
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			sb.append(funcDeclStandard.getStatAt(i).accept(this) + "\n");
+		}
+
 		if (currMethod.getType() instanceof IntType || currMethod.getType() instanceof BooleanType) {
 			sb.append("ireturn" + "\n");
 		} else {

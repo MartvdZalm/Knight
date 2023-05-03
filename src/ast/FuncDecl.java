@@ -8,4 +8,20 @@ public abstract class FuncDecl extends Tree
 	{
 		super(token);
 	}
+
+	public Type getReturnType()
+	{
+		return null;
+	}
+
+	public int getArgListSize()
+	{
+		return 0;
+	}
+
+	public ArgDecl getArgDeclAt(int index)
+	{
+		return null;
+	}
+
 }

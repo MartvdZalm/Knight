@@ -19,6 +19,7 @@ public enum Tokens
     INCLUDE,
     INTEGER,
     STRING,
+    VOID,
     SEMICOLON,
     COLON,
     STD,

@@ -227,6 +227,12 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(VoidType voidType)
+	{
+		return null;
+	}
+
+	@Override
 	public Type visit(BooleanType booleanType)
 	{
 		return null;
@@ -354,7 +360,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclStandard funcDeclStandard)
+	public Type visit(FuncDeclStandardReturn funcDeclStandard)
 	{
 		String id = funcDeclStandard.getMethodName().getVarID();
 		if (hsFunc.contains(id)) { 
@@ -392,6 +398,48 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		funcDeclStandard.getReturnExpr().accept(this);
+		currFunc = null;
+		return null;
+	}
+
+	@Override
+	public Type visit(FuncDeclStandardVoid funcDeclStandard)
+	{
+		String id = funcDeclStandard.getMethodName().getVarID();
+		if (hsFunc.contains(id)) { 
+			return null;
+		} else {
+			hsFunc.add(id);
+		}
+
+		funcDeclStandard.getReturnType().accept(this);
+		currFunc = currClass.getMethod(id);
+		funcDeclStandard.getMethodName().setB(currFunc);
+
+		String parent = currClass.parent();
+		Function supMethod = symbolTable.getMethod(id, parent);
+		if (supMethod != null) {
+			if (supMethod.getParamsSize() != currFunc.getParamsSize()) {
+				Token sym = funcDeclStandard.getMethodName().getToken();
+				addError(sym.getRow(), sym.getCol(), "method " + id + " overloads parent class method");
+			}
+		}
+
+		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
+			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			Declaration vd = funcDeclStandard.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			Statement st = funcDeclStandard.getStatAt(i);
+			st.accept(this);
+		}
+
 		currFunc = null;
 		return null;
 	}

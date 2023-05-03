@@ -468,6 +468,12 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(VoidType voidType)
+	{
+		return voidType;
+	}
+
+	@Override
 	public Type visit(BooleanType booleanType)
 	{
 		return booleanType;
@@ -539,7 +545,7 @@ public class TypeAnalyser implements Visitor<Type>
 		return null;
 	}
 
-	private void checkOverriding(FuncDeclStandard md, Function m)
+	private void checkOverriding(FuncDecl md, Function m)
 	{
 		String p = currClass.parent();
 		Function pm = st.getMethod(m.getId(), p);
@@ -569,7 +575,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclStandard funcDeclStandard)
+	public Type visit(FuncDeclStandardReturn funcDeclStandard)
 	{
 		String id = funcDeclStandard.getMethodName().getVarID();
 		if (hsFunc.contains(id)) { // Duplicate Method
@@ -600,6 +606,33 @@ public class TypeAnalyser implements Visitor<Type>
 		}
 
 		funcDeclStandard.getReturnExpr().setType(t2);
+		currFunc = null;
+		return funcDeclStandard.getReturnType();
+	}
+
+	@Override
+	public Type visit(FuncDeclStandardVoid funcDeclStandard)
+	{
+		String id = funcDeclStandard.getMethodName().getVarID();
+		if (hsFunc.contains(id)) { // Duplicate Method
+			return funcDeclStandard.getReturnType();
+		}
+		hsFunc.add(id);
+
+		currFunc = (Function) funcDeclStandard.getMethodName().getB();
+
+		checkOverriding(funcDeclStandard, currFunc);
+
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			Declaration decl = funcDeclStandard.getVarDeclAt(i);
+			decl.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			Statement st = funcDeclStandard.getStatAt(i);
+			st.accept(this);
+		}
+
 		currFunc = null;
 		return funcDeclStandard.getReturnType();
 	}

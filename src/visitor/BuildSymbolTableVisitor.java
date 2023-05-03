@@ -198,6 +198,12 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(VoidType voidType)
+	{
+		return voidType;		
+	}
+
+	@Override
 	public Type visit(BooleanType booleanType)
 	{
 		return booleanType;
@@ -327,7 +333,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclStandard funcDeclStandard)
+	public Type visit(FuncDeclStandardReturn funcDeclStandard)
 	{
 		Type type = funcDeclStandard.getReturnType().accept(this);
 		String identifier = funcDeclStandard.getMethodName().getVarID();
@@ -356,6 +362,39 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		}
 
 		funcDeclStandard.getReturnExpr().accept(this);
+		currFunc = null;
+		return null;
+	}
+
+	@Override
+	public Type visit(FuncDeclStandardVoid funcDeclStandard)
+	{
+		Type type = funcDeclStandard.getReturnType().accept(this);
+		String identifier = funcDeclStandard.getMethodName().getVarID();
+
+		if (!currClass.addMethod(identifier, type)) {
+			Token tok = funcDeclStandard.getToken();
+			addError(tok.getRow(), tok.getCol(), "Method " + identifier + " already defined in class " + currClass.getId());
+			currFunc = new Function(identifier, type);
+		} else {
+			currFunc = currClass.getMethod(identifier);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
+			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
+			Declaration vd = funcDeclStandard.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			Statement st = funcDeclStandard.getStatAt(i);
+			st.accept(this);
+		}
+
 		currFunc = null;
 		return null;
 	}
