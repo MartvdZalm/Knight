@@ -134,20 +134,15 @@ public class Parser
 	public FuncDeclMain parseFuncDeclMain() throws ParseException
 	{
 		IdentifierExpr methodName = new IdentifierExpr(token, token.getSymbol());
+		List<Declaration> varList = new ArrayList<>();
+		List<Statement> statList = new ArrayList<>();
+
 		eat(Tokens.MAIN);
 		eat(Tokens.LEFTPAREN);
 		eat(Tokens.RIGHTPAREN);
 		eat(Tokens.LEFTBRACE);
 
-		List<Declaration> varList = new ArrayList<>();
-		List<Statement> statList = new ArrayList<>();
-
-		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-			Type type = parseType();
-			Identifier id = new Identifier(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-			varList.add(parseVariable(type, id));
-		}
+		varList = parseVarDecls();
 
 		while (token.getToken() == Tokens.IDENTIFIER) {
 			IdentifierType idType = new IdentifierType(token, token.getSymbol());
@@ -165,13 +160,7 @@ public class Parser
 				}
 				eat(Tokens.SEMICOLON);
 
-				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-					Type type = parseType();
-					Identifier id = new Identifier(token, token.getSymbol());
-					eat(Tokens.IDENTIFIER);
-					varList.add(parseVariable(type, id));
-				}
-
+				varList = parseVarDecls();
 			} else { 
 				Statement stat = parseState1(id1);
 				statList.add(stat);
@@ -193,8 +182,11 @@ public class Parser
 	public FuncDecl parseFuncDeclStandard(Type returnType, Identifier identifier) throws ParseException
 	{
 		IdentifierExpr methodName = new IdentifierExpr(identifier.getToken(), identifier.getVarID());
-		eat(Tokens.LEFTPAREN);
+		List<Declaration> varList = new ArrayList<>();
+		List<Statement> statList = new ArrayList<>();
 		List<ArgDecl> argList = new ArrayList<>();
+
+		eat(Tokens.LEFTPAREN);
 		if (token.getToken() != Tokens.RIGHTPAREN) {
 			argList.add(parseArgument());
 
@@ -207,15 +199,7 @@ public class Parser
 		eat(Tokens.RIGHTPAREN);
 		eat(Tokens.LEFTBRACE);
 
-		List<Declaration> varList = new ArrayList<>();
-		List<Statement> statList = new ArrayList<>();
-
-		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-			Type type = parseType();
-			Identifier id = new Identifier(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-			varList.add(parseVariable(type, id));
-		}
+		varList = parseVarDecls();
 
 		while (token.getToken() == Tokens.IDENTIFIER) {
 			IdentifierType idType = new IdentifierType(token, token.getSymbol());
@@ -233,12 +217,7 @@ public class Parser
 				}
 				eat(Tokens.SEMICOLON);
 
-				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-					Type type = parseType();
-					Identifier id = new Identifier(token, token.getSymbol());
-					eat(Tokens.IDENTIFIER);
-					varList.add(parseVariable(type, id));
-				}
+				varList = parseVarDecls();
 			} else { 
 				Statement stat = parseState1(id1);
 				statList.add(stat);
@@ -271,6 +250,20 @@ public class Parser
 			eat(Tokens.RIGHTBRACE);
 			return new FuncDeclStandardReturn(methodName.getToken(), returnType, methodName, argList, varList, statList, returnExpr, currentAccessModifier);
 		}
+	}
+
+	private List<Declaration> parseVarDecls() throws ParseException
+	{
+		List<Declaration> varList = new ArrayList<>();
+
+		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
+			Type type = parseType();
+			Identifier id = new Identifier(token, token.getSymbol());
+			eat(Tokens.IDENTIFIER);
+			varList.add(parseVariable(type, id));
+		}
+
+		return varList;
 	}
 
 	public Include parseInclude() throws ParseException
