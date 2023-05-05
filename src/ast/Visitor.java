@@ -80,7 +80,7 @@ public interface Visitor<R>
 
     public R visit(FuncDeclMain funcDeclMain);
 
-    public R visit(FuncDeclStandardReturn funcDeclStandard);
+    public R visit(FuncDeclReturn funcDeclStandard);
 
     public R visit(VarDeclInit varDeclInit);
 
@@ -88,5 +88,5 @@ public interface Visitor<R>
 
     public R visit(VoidType voidType);
 
-    public R visit(FuncDeclStandardVoid funcDeclStandardVoid);
+    public R visit(FuncDeclVoid funcDeclStandardVoid);
 }

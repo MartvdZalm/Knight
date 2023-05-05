@@ -6,18 +6,42 @@ import src.lexer.Token;
 
 public class FuncDeclMain extends FuncDecl
 {
+	private Type returnType;
 	private IdentifierExpr methodName;
 	private List<Declaration> varList;
 	private List<Statement> statList;
+	private Expression returnExpr;
 	private Token access;
 
-	public FuncDeclMain(Token token, IdentifierExpr methodName, List<Declaration> varList, List<Statement> statList, Token access)
+	public FuncDeclMain(Token token, Type returnType, IdentifierExpr methodName, List<Declaration> varList, List<Statement> statList, Expression returnExpr, Token access)
 	{
 		super(token);
+		this.returnType = returnType;
 		this.methodName = methodName;
 		this.varList = varList;
 		this.statList = statList;
 		this.access = access;
+		this.returnExpr = returnExpr;
+	}
+
+	public Type getReturnType()
+	{
+		return returnType;
+	}
+
+	public void setReturnType(Type returnType)
+	{
+		this.returnType = returnType;
+	}
+
+	public Expression getReturnExpr()
+	{
+		return returnExpr;
+	}
+
+	public void setReturnExpr(Expression returnExpr)
+	{
+		this.returnExpr = returnExpr;
 	}
 
 	public IdentifierExpr getMethodName()

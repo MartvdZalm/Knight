@@ -487,7 +487,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(FuncDeclStandardReturn funcDeclStandard)
+	public String visit(FuncDeclReturn funcDeclStandard)
 	{
 		slot = 0;
 		int localvars = 1;
@@ -532,7 +532,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(FuncDeclStandardVoid funcDeclStandard)
+	public String visit(FuncDeclVoid funcDeclStandard)
 	{
 		slot = 0;
 		int localvars = 1;

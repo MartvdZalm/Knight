@@ -541,8 +541,22 @@ public class TypeAnalyser implements Visitor<Type>
 			st.accept(this);
 		}
 
+		Type t1 = funcDeclMain.getReturnType();
+		Type t2 = funcDeclMain.getReturnExpr().accept(this);
+
+		Token tok = funcDeclMain.getReturnType().getToken();
+		if (tok.getToken() != Tokens.INTEGER) {
+			addError(tok.getRow(), tok.getCol(), "Method " + id + " must return a result of type int");
+		} else {
+			if (!st.compareTypes(t1, t2)) {
+				Token sym = funcDeclMain.getReturnExpr().getToken();
+				addError(sym.getRow(), sym.getCol(), "Method " + id + " must return a result of Type " + t1);
+			}
+		}
+
+		funcDeclMain.getReturnExpr().setType(t2);
 		currFunc = null;
-		return null;
+		return funcDeclMain.getReturnType();
 	}
 
 	private void checkOverriding(FuncDecl md, Function m)
@@ -575,7 +589,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclStandardReturn funcDeclStandard)
+	public Type visit(FuncDeclReturn funcDeclStandard)
 	{
 		String id = funcDeclStandard.getMethodName().getVarID();
 		if (hsFunc.contains(id)) { // Duplicate Method
@@ -611,7 +625,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclStandardVoid funcDeclStandard)
+	public Type visit(FuncDeclVoid funcDeclStandard)
 	{
 		String id = funcDeclStandard.getMethodName().getVarID();
 		if (hsFunc.contains(id)) { // Duplicate Method

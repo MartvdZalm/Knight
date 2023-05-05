@@ -4,17 +4,16 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class FuncDeclStandardReturn extends FuncDecl
+public class FuncDeclVoid extends FuncDecl
 {
     private Type returnType;
 	private IdentifierExpr methodName;
 	private List<ArgDecl> argList;
 	private List<Declaration> varList;
 	private List<Statement> statList;
-	private Expression returnExpr;
 	private Token access;
 
-	public FuncDeclStandardReturn(Token token, Type returnType, IdentifierExpr methodName, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr, Token access)
+	public FuncDeclVoid(Token token, Type returnType, IdentifierExpr methodName, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Token access)
 	{
 		super(token);
 		this.returnType = returnType;
@@ -22,7 +21,6 @@ public class FuncDeclStandardReturn extends FuncDecl
 		this.argList = argList;
 		this.varList = varList;
 		this.statList = statList;
-		this.returnExpr = returnExpr;
 		this.access = access;
 	}
 
@@ -44,16 +42,6 @@ public class FuncDeclStandardReturn extends FuncDecl
 	public void setMethodName(IdentifierExpr methodName)
 	{
 		this.methodName = methodName;
-	}
-
-	public Expression getReturnExpr()
-	{
-		return returnExpr;
-	}
-
-	public void setReturnExpr(Expression returnExpr)
-	{
-		this.returnExpr = returnExpr;
 	}
 
 	public int getArgListSize()

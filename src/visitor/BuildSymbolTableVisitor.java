@@ -333,7 +333,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclStandardReturn funcDeclStandard)
+	public Type visit(FuncDeclReturn funcDeclStandard)
 	{
 		Type type = funcDeclStandard.getReturnType().accept(this);
 		String identifier = funcDeclStandard.getMethodName().getVarID();
@@ -367,7 +367,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclStandardVoid funcDeclStandard)
+	public Type visit(FuncDeclVoid funcDeclStandard)
 	{
 		Type type = funcDeclStandard.getReturnType().accept(this);
 		String identifier = funcDeclStandard.getMethodName().getVarID();
