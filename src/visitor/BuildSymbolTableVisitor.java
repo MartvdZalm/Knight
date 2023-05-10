@@ -174,7 +174,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunc cm)
+	public Type visit(CallFunc cf)
 	{
 		return null;
 	}

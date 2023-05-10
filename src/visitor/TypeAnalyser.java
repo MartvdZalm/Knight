@@ -367,7 +367,6 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(CallFunc cm)
 	{
-		// Check Reference Object
 		Type ref = cm.getInstanceName().accept(this);
 		if (ref == null || !(ref instanceof IdentifierType)) {
 			Token sym = cm.getInstanceName().getToken();

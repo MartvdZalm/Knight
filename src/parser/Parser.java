@@ -23,24 +23,6 @@ public class Parser
         stOperator.push(SENTINEL);
     }
 
-    public void advance()
-    {
-        try {
-            token = lexer.nextToken();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void eat(Tokens tok) throws ParseException
-    {
-        if (tok == token.getToken()) {
-            advance();
-        } else {
-            error(token.getToken(), tok);
-        }
-    }
-
     public Tree parse() throws ParseException
     {
         Program program = null;
@@ -83,7 +65,7 @@ public class Parser
         return program;
     }
 
-	public ClassDecl parseClassDecl() throws ParseException
+	private ClassDecl parseClassDecl() throws ParseException
 	{
 		eat(Tokens.CLASS);
 		IdentifierExpr className = new IdentifierExpr(token, token.getSymbol());
@@ -131,7 +113,7 @@ public class Parser
 		}
 	}
 
-	public FuncDecl parseFuncDeclStandard(Type returnType, Identifier identifier) throws ParseException
+	private FuncDecl parseFuncDeclStandard(Type returnType, Identifier identifier) throws ParseException
 	{
 		IdentifierExpr methodName = new IdentifierExpr(identifier.getToken(), identifier.getVarID());
 		
@@ -220,7 +202,7 @@ public class Parser
 		}
 	}
 
-	public Include parseInclude() throws ParseException
+	private Include parseInclude() throws ParseException
 	{
 		Token tok = token;
 		eat(Tokens.INCLUDE);
@@ -232,7 +214,7 @@ public class Parser
 		return new Include(tok, className);
 	}
 
-	public Declaration parseVariable(Type type, Identifier id) throws ParseException
+	private Declaration parseVariable(Type type, Identifier id) throws ParseException
 	{
 		Declaration decl = null;
 
@@ -247,7 +229,7 @@ public class Parser
 		return decl;
 	}
 
-	public ArgDecl parseArgument() throws ParseException
+	private ArgDecl parseArgument() throws ParseException
 	{
 		Type argType = parseType();
 		Identifier argId = null;
@@ -358,7 +340,7 @@ public class Parser
         }
     }
 
-	public Statement parseState1(Identifier id) throws ParseException
+	private Statement parseState1(Identifier id) throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -387,7 +369,7 @@ public class Parser
 		}
 	}
 
-	public Type parseType() throws ParseException
+	private Type parseType() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -429,7 +411,7 @@ public class Parser
 		}
 	}
 
-	public Type parseType1() throws ParseException
+	private Type parseType1() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -654,7 +636,90 @@ public class Parser
 		}
 	}
 
-	public void parseTerm1() throws ParseException
+	private boolean isBinary(Tokens operator)
+	{
+		switch (operator) {
+
+		case OR:
+		case AND:
+		case EQUALS:
+		case LESSTHAN:
+		case PLUS:
+		case MINUS:
+		case TIMES:
+		case DIV:
+		case DOT:
+		case LEFTBRACE: {
+			return true;
+		}
+		case NEW: {
+			return false;
+		}
+		default:
+			return false;
+		}
+	}
+
+	private int getPriority(Tokens operator)
+	{
+		switch (operator) {
+
+		case SENTINEL: {
+			return -1;
+		}
+
+		case OR: {
+			return 1;
+		}
+
+		case AND: {
+			return 2;
+		}
+
+		case EQUALS: {
+			return 3;
+		}
+
+		case LESSTHAN: {
+			return 3;
+		}
+
+		case PLUS: {
+			return 4;
+		}
+
+		case MINUS: {
+			return 4;
+		}
+
+		case TIMES: {
+			return 5;
+		}
+
+		case DIV: {
+			return 5;
+		}
+
+		case LEFTBRACE: {
+			return 7;
+		}
+
+		case DOT: {
+			return 8;
+		}
+
+		case NEW: {
+			return 9;
+		}
+
+		default:
+			return 0;
+
+		}
+
+	}
+
+	private void parseTerm1() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -765,90 +830,7 @@ public class Parser
 
 	}
 
-	private boolean isBinary(Tokens operator)
-	{
-		switch (operator) {
-
-		case OR:
-		case AND:
-		case EQUALS:
-		case LESSTHAN:
-		case PLUS:
-		case MINUS:
-		case TIMES:
-		case DIV:
-		case DOT:
-		case LEFTBRACE: {
-			return true;
-		}
-		case NEW: {
-			return false;
-		}
-		default:
-			return false;
-		}
-	}
-
-	private int getPriority(Tokens operator)
-	{
-		switch (operator) {
-
-		case SENTINEL: {
-			return -1;
-		}
-
-		case OR: {
-			return 1;
-		}
-
-		case AND: {
-			return 2;
-		}
-
-		case EQUALS: {
-			return 3;
-		}
-
-		case LESSTHAN: {
-			return 3;
-		}
-
-		case PLUS: {
-			return 4;
-		}
-
-		case MINUS: {
-			return 4;
-		}
-
-		case TIMES: {
-			return 5;
-		}
-
-		case DIV: {
-			return 5;
-		}
-
-		case LEFTBRACE: {
-			return 7;
-		}
-
-		case DOT: {
-			return 8;
-		}
-
-		case NEW: {
-			return 9;
-		}
-
-		default:
-			return 0;
-
-		}
-
-	}
-
-	public void parseTerm2() throws ParseException
+	private void parseTerm2() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -879,7 +861,7 @@ public class Parser
 		}
 	}
 
-	public void parseTerm3() throws ParseException
+	private void parseTerm3() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -919,7 +901,7 @@ public class Parser
 		}
 	}
 
-	public void parseAccess() throws ParseException
+	private void parseAccess() throws ParseException
 	{
 		if (token.getToken() == Tokens.PUBLIC) {
 			currentAccessModifier = token;
@@ -936,7 +918,25 @@ public class Parser
 		}
 	}
 
-    public void error(Tokens found, Tokens expected) throws ParseException
+	private void advance()
+    {
+        try {
+            token = lexer.nextToken();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void eat(Tokens tok) throws ParseException
+    {
+        if (tok == token.getToken()) {
+            advance();
+        } else {
+            error(token.getToken(), tok);
+        }
+    }
+
+    private void error(Tokens found, Tokens expected) throws ParseException
     {
         throw new ParseException(token.getRow(), token.getCol(), "Invalid token : " + found + " Expected token : " + expected);
     }
