@@ -10,6 +10,7 @@
 *.ast
 *.j
 *.xml
+*.png
 
 # Compiled source #
 ###################
