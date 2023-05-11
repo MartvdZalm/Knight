@@ -1,5 +1,4 @@
-![Knight logo](knight.png)
-
+[Knight logo](knight.png)
 
 # Knight
 Knight is an object-oriented programming language built in Java with the goal of being fast and having an easy-to-learn syntax.
