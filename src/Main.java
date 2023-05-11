@@ -14,7 +14,6 @@ import src.visitor.TypeAnalyser;
 
 public class Main
 {
-	// To compile the code use 'ant compile' in the terminal.
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.err.println("Usage: java Main <filename>.knight");
