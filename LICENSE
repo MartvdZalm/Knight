@@ -1,25 +1,21 @@
-LICENSE for Knight
+MIT License
 
-The Knight programming language (the "Software") is provided under the following license terms:
+Copyright (c) [2023] [Mart van der Zalm]
 
-1. Grant of License. Subject to the terms and conditions of this License, Mart van der Zalm grants the user ("You")
-a non-exclusive, non-transferable, limited license to use the Software for commercial or personal purposes.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-2. Restrictions. You may not modify, adapt, translate, reverse engineer, decompile, disassemble, or create derivative 
-works based on the Software. You may not redistribute the Software or any portion of it in any form. You may not use 
-the Software in any way that violates any applicable laws or regulations.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-3. Ownership. The Software is owned by Mart van der Zalm. The Software is protected by copyright laws and international
-copyright treaties, as well as other intellectual property laws and treaties.
-
-4. Disclaimer of Warranties. The Software is provided "AS IS" and without warranty of any kind, express, implied or
-otherwise, including without limitation, any warranty of merchantability or fitness for a particular purpose.
-
-5. Limitation of Liability. Mart van der Zalm shall not be liable for any damages, whether direct, indirect, incidental,
-special or consequential, arising out of or in connection with the use or inability to use the Software.
-
-6. Termination. This License will terminate immediately if You fail to comply with any of the terms and conditions of this
-License. Upon termination, You must immediately cease all use of the Software.
-
-Mart van der Zalm 
-martvanderzalm@gmail.com
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
