@@ -9,6 +9,7 @@
 *.lexed
 *.ast
 *.j
+*.xml
 
 # Compiled source #
 ###################
