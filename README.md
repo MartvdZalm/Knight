@@ -18,4 +18,4 @@ The primary objective of Knight is to create a programming language that is both
 Knight is released under the [License](https://github.com/MartvdZalm/Knight/blob/master/LICENSE).
 
 ## Contact
-For any inquiries or feedback, please contact us at [martvanderzalm@gmail.com].
+For any inquiries or feedback, please contact me at [Email](martvanderzalm@gmail.com).
