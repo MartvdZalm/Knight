@@ -32,13 +32,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Print n)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Println n)
+	public Type visit(Skip skip)
 	{
 		return null;
 	}
@@ -48,13 +42,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	{
 		return null;
 	}
-
-	@Override
-	public Type visit(Skip n)
-	{
-		return null;
-	}
-
+	
 	@Override
 	public Type visit(Block n)
 	{
@@ -180,7 +168,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Length length)
+	public Type visit(CallFunction cf)
 	{
 		return null;
 	}

@@ -26,33 +26,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Print n)
-	{
-		n.getExpr().accept(this);
-		return null;
-	}
-
-	@Override
-	public Type visit(Println n)
-	{
-		n.getExpr().accept(this);
-		return null;
-	}
-
-	@Override
 	public Type visit(Assign n)
 	{
 		n.getId().accept(this);
 		n.getExpr().accept(this);
 		return null;
 	}
-
-	@Override
-	public Type visit(Skip n)
-	{
-		return null;
-	}
-
+	
 	@Override
 	public Type visit(Block n)
 	{
@@ -69,6 +49,12 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		n.getExpr().accept(this);
 		n.getThen().accept(this);
 		n.getElze().accept(this);
+		return null;
+	}
+
+	@Override
+	public Type visit(Skip skip)
+	{
 		return null;
 	}
 
@@ -208,9 +194,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Length length)
+	public Type visit(CallFunction cm)
 	{
-		length.getArray().accept(this);
 		return null;
 	}
 

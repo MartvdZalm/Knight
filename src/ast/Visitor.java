@@ -26,13 +26,9 @@ public interface Visitor<R>
 
     public R visit(IntArrayType intArrayType);
 
-    public R visit(Skip skip);
-
     public R visit(IfThenElse ifThenElse);
 
     public R visit(While while1);
-
-    public R visit(Print print);
 
     public R visit(Assign assign);
 
@@ -74,10 +70,6 @@ public interface Visitor<R>
 
     public R visit(This this1);
 
-    public R visit(Length length);
-
-    public R visit(Println println);
-
     public R visit(FuncDeclMain funcDeclMain);
 
     public R visit(FuncDeclReturn funcDeclStandard);
@@ -89,4 +81,8 @@ public interface Visitor<R>
     public R visit(VoidType voidType);
 
     public R visit(FuncDeclVoid funcDeclStandardVoid);
+
+    public R visit(Skip skip);
+
+    public R visit(CallFunction callFunction);
 }

@@ -4,7 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-
 import src.ast.*;
 import src.lexer.*;
 
@@ -340,6 +339,27 @@ public class Parser
 			return assign;
 		}
 
+		case LEFTPAREN: {
+			IdentifierExpr idExpr = new IdentifierExpr(id.getToken(), id.getVarID());
+			Token tok = token;
+			List<Expression> exprList = new ArrayList<Expression>();
+
+			eat(Tokens.LEFTPAREN);
+			if (token.getToken() != Tokens.RIGHTPAREN) {
+				Expression exprArg = parseExpression();
+				exprList.add(exprArg);
+				while (token.getToken() == Tokens.COMMA) {
+					eat(Tokens.COMMA);
+					exprArg = parseExpression();
+					exprList.add(exprArg);
+				}
+			}
+			eat(Tokens.RIGHTPAREN);
+			eat(Tokens.SEMICOLON);
+			CallFunction callFunc = new CallFunction(tok, null, idExpr, exprList);
+			return callFunc;
+		}
+
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
@@ -448,8 +468,13 @@ public class Parser
 		case IDENTIFIER: {
 			IdentifierExpr id = new IdentifierExpr(token, (String) token.getSymbol());
 			eat(Tokens.IDENTIFIER);
-			stOperand.push(id);
-			parseTerm1();
+			if (token.getToken() == Tokens.LEFTPAREN) {
+				Expression expr = parseCallFunction(id);
+				stOperand.push(expr);	
+			} else {
+				stOperand.push(id);
+				parseTerm1();
+			}
 		}
 		break;
 
@@ -483,6 +508,25 @@ public class Parser
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
+	}
+
+	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
+	{
+		Token tok = token;
+		List<Expression> exprList = new ArrayList<Expression>();
+
+		eat(Tokens.LEFTPAREN);
+		if (token.getToken() != Tokens.RIGHTPAREN) {
+			Expression exprArg = parseExpression();
+			exprList.add(exprArg);
+			while (token.getToken() == Tokens.COMMA) {
+				eat(Tokens.COMMA);
+				exprArg = parseExpression();
+				exprList.add(exprArg);
+			}
+		}
+		eat(Tokens.RIGHTPAREN);
+		return new CallFunc(tok, null, methodId, exprList);
 	}
 
 	private void pushOperator(Token current)
@@ -586,17 +630,9 @@ public class Parser
 		case DOT: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
-			if (rhs != null && rhs instanceof Length) {
-				Length length = (Length) rhs;
-				length.setArray(lhs);
-				stOperand.push(length);
-			} else if (rhs != null && rhs instanceof CallFunc) {
-				// method call
-				CallFunc cm = (CallFunc) rhs;
-				cm.setInstanceName(lhs);
-				stOperand.push(cm);
-			}
-
+			CallFunc cm = (CallFunc) rhs;
+			cm.setInstanceName(lhs);
+			stOperand.push(cm);
 		}
 		break;
 

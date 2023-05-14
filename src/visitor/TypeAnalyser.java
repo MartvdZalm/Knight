@@ -24,39 +24,6 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Print n)
-	{
-		Type texp = n.getExpr().accept(this);
-		if (texp == null) {
-			return null;
-		}
-
-		if (!((texp instanceof IntType) || (texp instanceof BooleanType) || (texp instanceof StringType))) {
-			Token sym = n.getExpr().getToken();
-			addError(sym.getRow(), sym.getCol(), "The argument of System.out.print must be of Type int, boolean or String");
-		} else {
-			n.getExpr().setType(texp);
-		}
-		return null;
-	}
-
-	@Override
-	public Type visit(Println n)
-	{
-		Type texp = n.getExpr().accept(this);
-		if (texp == null) {
-			return null;
-		}
-
-		if (!((texp instanceof IntType) || (texp instanceof BooleanType) || (texp instanceof StringType))) {
-			Token sym = n.getExpr().getToken();
-			addError(sym.getRow(), sym.getCol(), "The argument of System.out.print must be of Type int, boolean or String");
-		}
-
-		return null;
-	}
-
-	@Override
 	public Type visit(Assign n)
 	{
 		Type rhs = n.getExpr().accept(this);
@@ -74,12 +41,6 @@ public class TypeAnalyser implements Visitor<Type>
 			n.getExpr().setType(rhs);
 		}
 
-		return null;
-	}
-
-	@Override
-	public Type visit(Skip n)
-	{
 		return null;
 	}
 
@@ -107,6 +68,12 @@ public class TypeAnalyser implements Visitor<Type>
 		n.getThen().accept(this);
 		n.getElze().accept(this);
 
+		return null;
+	}
+
+	@Override
+	public Type visit(Skip skip)
+	{
 		return null;
 	}
 
@@ -367,26 +334,29 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(CallFunc cm)
 	{
-		Type ref = cm.getInstanceName().accept(this);
-		if (ref == null || !(ref instanceof IdentifierType)) {
-			Token sym = cm.getInstanceName().getToken();
-			addError(sym.getRow(), sym.getCol(), "Dereferenced object must be of an object type");
-		}
 
-		// Check if method exists
-		IdentifierType tid = (IdentifierType) ref;
-		IdentifierExpr mid = cm.getMethodId();
-		Function m = st.getMethod(mid.getVarID(), tid.getVarID());
-		if (m == null) {
-			Token sym = mid.getToken();
-			addError(sym.getRow(), sym.getCol(), "Method " + mid + " not declared");
-			return null;
-		} else {
-			mid.setB(m);
-			checkCallArguments(cm, m);
-			cm.setType(m.getType());
-			return m.getType();
-		}
+		if (cm.getInstanceName() == null) {
+			IdentifierExpr callFunc = cm.getMethodId();
+			Function func = st.getMethod(callFunc.toString(), currClass.getId());
+			
+			if (func == null) {
+				Token sym = callFunc.getToken();
+				addError(sym.getRow(), sym.getCol(), "Method " + callFunc + " not declared");
+				return null;
+			} else {
+				callFunc.setB(func);
+				checkCallArguments(cm, func);
+				cm.setType(func.getType());
+				return func.getType();
+			}
+		} 
+		return null;
+	}
+
+	@Override
+	public Type visit(CallFunction cm)
+	{
+		return null;
 	}
 
 	private void checkCallArguments(CallFunc cm, Function m)
@@ -438,23 +408,6 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Length length)
-	{
-		Type t = length.getArray().accept(this);
-
-		if (t == null || !(t instanceof IntArrayType)) {
-			Token sym = length.getArray().getToken();
-			addError(sym.getRow(), sym.getCol(), "Identifier must be of Type int[]");
-		} else {
-			length.getArray().setType(t);
-		}
-
-		Type type = new IntType(length.getToken());
-		length.setType(type);
-		return type;
-	}
-
-	@Override
 	public Type visit(IntType intType)
 	{
 		return intType;
@@ -501,6 +454,16 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Type rhs = vd.getExpr().accept(this);
 		Type lhs = vd.getId().accept(this);
+
+		if (vd.getExpr() instanceof CallFunc) {
+			CallFunc callFunc = (CallFunc) vd.getExpr();
+			if (callFunc.getInstanceName() == null) {
+				Function func = st.getMethod(callFunc.getMethodId().toString(), currClass.getId());
+				rhs = func.getType();
+			} else {
+				return null;
+			}
+		}
 
 		if (!st.compareTypes(lhs, rhs)) {
 			Token sym = vd.getToken();

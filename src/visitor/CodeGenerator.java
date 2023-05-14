@@ -23,25 +23,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Print n)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(Println n)
-	{
-		return null;
-	}
-
-	@Override
 	public String visit(Assign n)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(Skip n)
 	{
 		return null;
 	}
@@ -59,6 +41,12 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
+	public String visit(Skip skip)
+	{
+		return null;
+	}
+
+	@Override
 	public String visit(While n)
 	{
 		return null;
@@ -67,7 +55,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IntLiteral n)
 	{
-		return null;
+		return "" + n.getValue();
 	}
 
 	@Override
@@ -161,10 +149,19 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Length length)
+	public String visit(CallFunction cm)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(cm.getMethodId() + "\n");
+		for (int i = 0; i < cm.getArgExprListSize(); i++) {
+			sb.append(cm.getArgExprAt(i).accept(this) + "\n");
+		}
+
+
+		return sb.toString();
 	}
+
 
 	@Override
 	public String visit(IntType intType)
@@ -223,19 +220,37 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FuncDeclMain funcDeclMain)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
+			sb.append(funcDeclMain.getStatAt(i).accept(this) + "\n");
+		}
+
+		return sb.toString();
 	}
 
 	@Override
 	public String visit(FuncDeclReturn funcDeclStandard)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			sb.append(funcDeclStandard.getStatAt(i).accept(this) + "\n");
+		}
+
+		return sb.toString();
 	}
 
 	@Override
 	public String visit(FuncDeclVoid funcDeclStandard)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
+			sb.append(funcDeclStandard.getStatAt(i).accept(this) + "\n");
+		}
+
+		return sb.toString();
 	}
 
 	@Override
@@ -299,7 +314,15 @@ public class CodeGenerator implements Visitor<String>
 	{
 		Binding b = cd.getId().getB();
 		currClass = (Klass) b;
-		return cd.getId().toString();
+
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < cd.getMethodListSize(); i++) {
+			FuncDecl vd = cd.getMethodDeclAt(i);
+			sb.append(vd.accept(this) + "\n");
+		}
+
+		return sb.toString();
 	}
 
 	@Override
