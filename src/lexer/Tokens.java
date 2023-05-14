@@ -3,35 +3,42 @@ package src.lexer;
 public enum Tokens 
 {
     INVALID,
+    SENTINEL,
+
+    LEFTPAREN, 
+    RIGHTPAREN,
+    LEFTBRACE, 
+    RIGHTBRACE, 
+
+    SEMICOLON,
+    COLON,
+    DOT,
+    COMMA, 
+
+    IDENTIFIER,
+    INTEGER,
+    STRING,
+    BOOLEAN,
+    TRUE,
+    FALSE,
+
     PUBLIC,
     PROTECTED,
     PRIVATE,
+
     CLASS,
     EXTENDS,
     MAIN,
     COMMENT,
-    PRINT,
-    PRINTLN,
-    SENTINEL,
-    IDENTIFIER,
     THIS,
     NEW,
     INCLUDE,
-    INTEGER,
-    STRING,
-    VOID,
-    SEMICOLON,
-    COLON,
-    STD,
-    LEFTBRACE, 
-    RIGHTBRACE, 
-    LEFTPAREN, 
-    RIGHTPAREN,
+
     IF,
     ELSE,
     WHILE, 
-    COMMA, 
-    ASSIGN, 
+
+    ASSIGN,
     EQUALS,  
     OR,
     AND, 
@@ -41,11 +48,7 @@ public enum Tokens
     MINUS,
     TIMES,
     DIV,
-    DOT,
-    LENGTH,
-    FUNCTION, 
+    
     RETURN, 
-    BOOLEAN,
-    TRUE,
-    FALSE;
+    VOID,
 }

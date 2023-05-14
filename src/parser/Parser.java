@@ -285,30 +285,6 @@ public class Parser
 				return result;
 			}
 	
-			case PRINT: {
-				Token tok = token;
-				eat(Tokens.PRINT);
-				eat(Tokens.LEFTPAREN);
-				Expression expr = parseExpression();
-				eat(Tokens.RIGHTPAREN);
-				eat(Tokens.SEMICOLON);
-	
-				Print result = new Print(tok, expr);
-				return result;
-			}
-
-			case PRINTLN: {
-				Token tok = token;
-				eat(Tokens.PRINTLN);
-				eat(Tokens.LEFTPAREN);
-				Expression expr = parseExpression();
-				eat(Tokens.RIGHTPAREN);
-				eat(Tokens.SEMICOLON);
-
-				Println result = new Println(tok, expr);
-				return result;
-			}
-	
 			case IDENTIFIER: {
 				Identifier id = new Identifier(token, token.getSymbol());
 				eat(Tokens.IDENTIFIER);
@@ -864,13 +840,6 @@ public class Parser
 	private void parseTerm3() throws ParseException
 	{
 		switch (token.getToken()) {
-
-		case LENGTH: {
-			Length length = new Length(token, null);
-			eat(Tokens.LENGTH);
-			stOperand.push(length);
-		}
-		break;
 
 		case IDENTIFIER: {
 			IdentifierExpr methodId = new IdentifierExpr(token, token.getSymbol());

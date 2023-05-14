@@ -33,8 +33,6 @@ public class TokenType
         Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("main", Tokens.MAIN);
         Symbol.symbol("new", Tokens.NEW);
-        Symbol.symbol("print", Tokens.PRINT);
-        Symbol.symbol("println", Tokens.PRINTLN);
 
         Symbol.symbol("return", Tokens.RETURN);
         Symbol.symbol("this", Tokens.THIS);
@@ -52,7 +50,6 @@ public class TokenType
         Symbol.symbol("int", Tokens.INTEGER);
         Symbol.symbol("string", Tokens.STRING);
 
-        Symbol.symbol("Length", Tokens.LENGTH);
         Symbol.symbol("IDENTIFIER", Tokens.IDENTIFIER);
         Symbol.symbol("INVALID", Tokens.INVALID);
         Symbol.symbol("SENTINEL", Tokens.SENTINEL);
