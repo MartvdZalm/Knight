@@ -94,6 +94,12 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(ForLoop forLoop)
+	{
+		return null;
+	}
+
+	@Override
 	public Type visit(IntLiteral n)
 	{
 		Type t = new IntType(n.getToken());
@@ -334,7 +340,6 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(CallFunc cm)
 	{
-
 		if (cm.getInstanceName() == null) {
 			IdentifierExpr callFunc = cm.getMethodId();
 			Function func = st.getMethod(callFunc.toString(), currClass.getId());
@@ -459,7 +464,9 @@ public class TypeAnalyser implements Visitor<Type>
 			CallFunc callFunc = (CallFunc) vd.getExpr();
 			if (callFunc.getInstanceName() == null) {
 				Function func = st.getMethod(callFunc.getMethodId().toString(), currClass.getId());
-				rhs = func.getType();
+				if (func != null) {
+					rhs = func.getType();
+				}
 			} else {
 				return null;
 			}

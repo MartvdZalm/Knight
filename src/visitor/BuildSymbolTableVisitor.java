@@ -62,6 +62,12 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(ForLoop forLoop)
+	{
+		return null;
+	}
+
+	@Override
 	public Type visit(IntLiteral n)
 	{
 		return null;

@@ -7,7 +7,7 @@ import java.util.List;
 import src.ast.*;
 import src.lexer.*;
 
-public class Parser 
+public class Parser
 {
     private Lexer lexer;
     private Token token;
@@ -82,8 +82,6 @@ public class Parser
 
 		List<Declaration> varList = new ArrayList<>();
 		List<FuncDecl> funcList = new ArrayList<>();
-		
-		parseAccess();
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
 			parseAccess();
@@ -98,7 +96,7 @@ public class Parser
 			}
 
 			if (token.getToken() == Tokens.LEFTPAREN) {
-				funcList.add(parseFuncDeclStandard(type, id));
+				funcList.add(parseFunction(type, id));
 			} else {
 				varList.add(parseVariable(type, id));
 			}
@@ -112,7 +110,7 @@ public class Parser
 		}
 	}
 
-	private FuncDecl parseFuncDeclStandard(Type returnType, Identifier identifier) throws ParseException
+	private FuncDecl parseFunction(Type returnType, Identifier identifier) throws ParseException
 	{
 		IdentifierExpr methodName = new IdentifierExpr(identifier.getToken(), identifier.getVarID());
 		
@@ -201,18 +199,6 @@ public class Parser
 		}
 	}
 
-	private Include parseInclude() throws ParseException
-	{
-		Token tok = token;
-		eat(Tokens.INCLUDE);
-		eat(Tokens.LESSTHAN);
-		IdentifierExpr className = new IdentifierExpr(token, token.getSymbol());
-		eat(Tokens.IDENTIFIER);
-		eat(Tokens.GREATERTHAN);
-
-		return new Include(tok, className);
-	}
-
 	private Declaration parseVariable(Type type, Identifier id) throws ParseException
 	{
 		Declaration decl = null;
@@ -283,7 +269,7 @@ public class Parser
 				While result = new While(tok, expr, body);
 				return result;
 			}
-	
+
 			case IDENTIFIER: {
 				Identifier id = new Identifier(token, token.getSymbol());
 				eat(Tokens.IDENTIFIER);
@@ -508,25 +494,6 @@ public class Parser
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
-	}
-
-	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
-	{
-		Token tok = token;
-		List<Expression> exprList = new ArrayList<Expression>();
-
-		eat(Tokens.LEFTPAREN);
-		if (token.getToken() != Tokens.RIGHTPAREN) {
-			Expression exprArg = parseExpression();
-			exprList.add(exprArg);
-			while (token.getToken() == Tokens.COMMA) {
-				eat(Tokens.COMMA);
-				exprArg = parseExpression();
-				exprList.add(exprArg);
-			}
-		}
-		eat(Tokens.RIGHTPAREN);
-		return new CallFunc(tok, null, methodId, exprList);
 	}
 
 	private void pushOperator(Token current)
@@ -837,9 +804,7 @@ public class Parser
 
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getSymbol());
-
 		}
-
 	}
 
 	private void parseTerm2() throws ParseException
@@ -906,21 +871,45 @@ public class Parser
 		}
 	}
 
+	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
+	{
+		Token tok = token;
+		List<Expression> exprList = new ArrayList<Expression>();
+
+		eat(Tokens.LEFTPAREN);
+		if (token.getToken() != Tokens.RIGHTPAREN) {
+			Expression exprArg = parseExpression();
+			exprList.add(exprArg);
+			while (token.getToken() == Tokens.COMMA) {
+				eat(Tokens.COMMA);
+				exprArg = parseExpression();
+				exprList.add(exprArg);
+			}
+		}
+		eat(Tokens.RIGHTPAREN);
+		return new CallFunc(tok, null, methodId, exprList);
+	}
+
 	private void parseAccess() throws ParseException
 	{
-		if (token.getToken() == Tokens.PUBLIC) {
+		if (token.getToken() == Tokens.PUBLIC ||
+			token.getToken() == Tokens.PRIVATE ||
+			token.getToken() == Tokens.PROTECTED) {
 			currentAccessModifier = token;
-			eat(Tokens.PUBLIC);
-			eat(Tokens.COLON);
-		} else if (token.getToken() == Tokens.PRIVATE) {
-			currentAccessModifier = token;
-			eat(Tokens.PRIVATE);
-			eat(Tokens.COLON);
-		} else if (token.getToken() == Tokens.PROTECTED){
-			currentAccessModifier = token;
-			eat(Tokens.PROTECTED);
+			eat(token.getToken());
 			eat(Tokens.COLON);
 		}
+	}
+
+	private Include parseInclude() throws ParseException
+	{
+		Token tok = token;
+		eat(Tokens.INCLUDE);
+		eat(Tokens.LESSTHAN);
+		IdentifierExpr className = new IdentifierExpr(token, token.getSymbol());
+		eat(Tokens.IDENTIFIER);
+		eat(Tokens.GREATERTHAN);
+		return new Include(tok, className);
 	}
 
 	private void advance()

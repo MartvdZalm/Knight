@@ -85,4 +85,6 @@ public interface Visitor<R>
     public R visit(Skip skip);
 
     public R visit(CallFunction callFunction);
+
+    public R visit(ForLoop forLoop);
 }

@@ -36,7 +36,8 @@ public enum Tokens
 
     IF,
     ELSE,
-    WHILE, 
+    WHILE,
+    FOR, 
 
     ASSIGN,
     EQUALS,  

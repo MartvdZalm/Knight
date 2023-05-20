@@ -53,6 +53,12 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
+	public String visit(ForLoop forLoop)
+	{
+		return null;
+	}
+
+	@Override
 	public String visit(IntLiteral n)
 	{
 		return "" + n.getValue();
