@@ -70,21 +70,17 @@ public interface Visitor<R>
 
     public R visit(This this1);
 
-    public R visit(FuncDeclMain funcDeclMain);
-
-    public R visit(FuncDeclReturn funcDeclStandard);
-
     public R visit(VarDeclInit varDeclInit);
 
     public R visit(Include include);
 
     public R visit(VoidType voidType);
 
-    public R visit(FuncDeclVoid funcDeclStandardVoid);
-
     public R visit(Skip skip);
 
     public R visit(CallFunction callFunction);
 
     public R visit(ForLoop forLoop);
+
+    public R visit(FuncExpr functionBody);
 }

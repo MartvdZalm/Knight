@@ -9,15 +9,13 @@ public class ClassDeclExtends extends ClassDecl
 	private IdentifierExpr id;
 	private IdentifierExpr parent;
 	private List<Declaration> varList;
-	private List<FuncDecl> methodList;
 
-	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> varList, List<FuncDecl> methodList)
+	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> varList)
 	{
 		super(token);
 		this.id = className;
 		this.parent = parentClassName;
 		this.varList = varList;
-		this.methodList = methodList;
 	}
 
 	public IdentifierExpr getId()
@@ -38,19 +36,6 @@ public class ClassDeclExtends extends ClassDecl
 	public void setParent(IdentifierExpr parent)
 	{
 		this.parent = parent;
-	}
-
-	public int getMethodListSize()
-	{
-		return methodList.size();
-	}
-
-	public FuncDecl getMethodDeclAt(int index)
-	{
-		if (index < methodList.size()) {
-			return methodList.get(index);
-		}
-		return null;
 	}
 
 	public int getVarListSize()

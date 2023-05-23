@@ -8,14 +8,12 @@ public class ClassDeclSimple extends ClassDecl
 {
 	private IdentifierExpr id;
 	private List<Declaration> varList;
-	private List<FuncDecl> methodList;
 
-	public ClassDeclSimple(Token jSymbol, IdentifierExpr className, List<Declaration> varList, List<FuncDecl> methodList)
+	public ClassDeclSimple(Token jSymbol, IdentifierExpr className, List<Declaration> varList)
 	{
 		super(jSymbol);
 		this.id = className;
 		this.varList = varList;
-		this.methodList = methodList;
 	}
 
 	public IdentifierExpr getId()
@@ -26,19 +24,6 @@ public class ClassDeclSimple extends ClassDecl
 	public void setId(IdentifierExpr id)
 	{
 		this.id = id;
-	}
-
-	public int getMethodListSize()
-	{
-		return methodList.size();
-	}
-
-	public FuncDecl getMethodDeclAt(int index)
-	{
-		if (index < methodList.size()) {
-			return methodList.get(index);
-		}
-		return null;
 	}
 
 	public int getVarListSize()

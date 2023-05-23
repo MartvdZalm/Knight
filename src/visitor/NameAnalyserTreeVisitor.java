@@ -324,114 +324,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclMain funcDeclMain)
+	public Type visit(FuncExpr funcExprReturn)
 	{
-		String id = funcDeclMain.getMethodName().getVarID();
-		if (hsFunc.contains(id)) {
-			return null;
-		} else {
-			hsFunc.add(id);
-		}
-
-		currFunc = currClass.getMethod(id);
-		funcDeclMain.getMethodName().setB(currFunc);
-
-		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
-			Declaration vd = funcDeclMain.getVarDeclAt(i);
-			vd.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
-			Statement st = funcDeclMain.getStatAt(i);
-			st.accept(this);
-		}
-
-		currFunc = null;
-		return null;
-	}
-
-	@Override
-	public Type visit(FuncDeclReturn funcDeclStandard)
-	{
-		String id = funcDeclStandard.getMethodName().getVarID();
-		if (hsFunc.contains(id)) { 
-			return null;
-		} else {
-			hsFunc.add(id);
-		}
-
-		funcDeclStandard.getReturnType().accept(this);
-		currFunc = currClass.getMethod(id);
-		funcDeclStandard.getMethodName().setB(currFunc);
-
-		String parent = currClass.parent();
-		Function supMethod = symbolTable.getMethod(id, parent);
-		if (supMethod != null) {
-			if (supMethod.getParamsSize() != currFunc.getParamsSize()) {
-				Token sym = funcDeclStandard.getMethodName().getToken();
-				addError(sym.getRow(), sym.getCol(), "method " + id + " overloads parent class method");
-			}
-		}
-
-		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
-			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
-			ad.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
-			Declaration vd = funcDeclStandard.getVarDeclAt(i);
-			vd.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
-			Statement st = funcDeclStandard.getStatAt(i);
-			st.accept(this);
-		}
-
-		funcDeclStandard.getReturnExpr().accept(this);
-		currFunc = null;
-		return null;
-	}
-
-	@Override
-	public Type visit(FuncDeclVoid funcDeclStandard)
-	{
-		String id = funcDeclStandard.getMethodName().getVarID();
-		if (hsFunc.contains(id)) { 
-			return null;
-		} else {
-			hsFunc.add(id);
-		}
-
-		funcDeclStandard.getReturnType().accept(this);
-		currFunc = currClass.getMethod(id);
-		funcDeclStandard.getMethodName().setB(currFunc);
-
-		String parent = currClass.parent();
-		Function supMethod = symbolTable.getMethod(id, parent);
-		if (supMethod != null) {
-			if (supMethod.getParamsSize() != currFunc.getParamsSize()) {
-				Token sym = funcDeclStandard.getMethodName().getToken();
-				addError(sym.getRow(), sym.getCol(), "method " + id + " overloads parent class method");
-			}
-		}
-
-		for (int i = 0; i < funcDeclStandard.getArgListSize(); i++) {
-			ArgDecl ad = funcDeclStandard.getArgDeclAt(i);
-			ad.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
-			Declaration vd = funcDeclStandard.getVarDeclAt(i);
-			vd.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
-			Statement st = funcDeclStandard.getStatAt(i);
-			st.accept(this);
-		}
-
-		currFunc = null;
 		return null;
 	}
 
@@ -558,10 +452,6 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		hsFunc.clear();
-		for (int i = 0; i < cd.getMethodListSize(); i++) {
-			FuncDecl md = cd.getMethodDeclAt(i);
-			md.accept(this);
-		}
 
 		return null;
 	}
@@ -594,10 +484,6 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		hsFunc.clear();
-		for (int i = 0; i < cd.getMethodListSize(); i++) {
-			FuncDecl md = cd.getMethodDeclAt(i);
-			md.accept(this);
-		}
 
 		return null;
 	}

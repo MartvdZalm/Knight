@@ -493,131 +493,9 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncDeclMain funcDeclMain)
+	public Type visit(FuncExpr funcExprReturn)
 	{
-		String id = funcDeclMain.getMethodName().getVarID();
-		hsFunc.add(id);
-
-		currFunc = (Function) funcDeclMain.getMethodName().getB();
-
-		for (int i = 0; i < funcDeclMain.getVarListSize(); i++) {
-			Declaration decl = funcDeclMain.getVarDeclAt(i);
-			decl.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclMain.getStatListSize(); i++) {
-			Statement st = funcDeclMain.getStatAt(i);
-			st.accept(this);
-		}
-
-		Type t1 = funcDeclMain.getReturnType();
-		Type t2 = funcDeclMain.getReturnExpr().accept(this);
-
-		Token tok = funcDeclMain.getReturnType().getToken();
-		if (tok.getToken() != Tokens.INTEGER) {
-			addError(tok.getRow(), tok.getCol(), "Method " + id + " must return a result of type int");
-		} else {
-			if (!st.compareTypes(t1, t2)) {
-				Token sym = funcDeclMain.getReturnExpr().getToken();
-				addError(sym.getRow(), sym.getCol(), "Method " + id + " must return a result of Type " + t1);
-			}
-		}
-
-		funcDeclMain.getReturnExpr().setType(t2);
-		currFunc = null;
-		return funcDeclMain.getReturnType();
-	}
-
-	private void checkOverriding(FuncDecl md, Function m)
-	{
-		String p = currClass.parent();
-		Function pm = st.getMethod(m.getId(), p);
-		if (pm == null || pm.getParamsSize() != m.getParamsSize()) {
-			// Overloaded method, Error caught in Name Analysis
-			return;
-		}
-
-		for (int i = 0; i < md.getArgListSize(); i++) {
-			ArgDecl ad = md.getArgDeclAt(i);
-			Type t1 = ad.accept(this);
-			Variable v = pm.getParamAt(i);
-			Type t2 = v.getType();
-			if (!st.absCompTypes(t1, t2)) {
-				Token sym = ad.getToken();
-				addError(sym.getRow(), sym.getCol(), "cannot override method " + pm.getId()
-						+ "; attempting to use incompatible type for parameter " + ad.getId());
-				return;
-			}
-		}
-
-		if (!st.absCompTypes(m.getType(), pm.getType())) {
-			Token sym = md.getReturnType().getToken();
-			addError(sym.getRow(), sym.getCol(),
-					"cannot override method " + pm.getId() + "; attempting to use incompatible return type");
-		}
-	}
-
-	@Override
-	public Type visit(FuncDeclReturn funcDeclStandard)
-	{
-		String id = funcDeclStandard.getMethodName().getVarID();
-		if (hsFunc.contains(id)) { // Duplicate Method
-			return funcDeclStandard.getReturnType();
-		}
-		hsFunc.add(id);
-
-		currFunc = (Function) funcDeclStandard.getMethodName().getB();
-
-		checkOverriding(funcDeclStandard, currFunc);
-
-		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
-			Declaration decl = funcDeclStandard.getVarDeclAt(i);
-			decl.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
-			Statement st = funcDeclStandard.getStatAt(i);
-			st.accept(this);
-		}
-
-		Type t1 = funcDeclStandard.getReturnType();
-		Type t2 = funcDeclStandard.getReturnExpr().accept(this);
-
-		if (!st.compareTypes(t1, t2)) {
-			Token sym = funcDeclStandard.getReturnExpr().getToken();
-			addError(sym.getRow(), sym.getCol(), "Method " + id + " must return a result of Type " + t1);
-		}
-
-		funcDeclStandard.getReturnExpr().setType(t2);
-		currFunc = null;
-		return funcDeclStandard.getReturnType();
-	}
-
-	@Override
-	public Type visit(FuncDeclVoid funcDeclStandard)
-	{
-		String id = funcDeclStandard.getMethodName().getVarID();
-		if (hsFunc.contains(id)) { // Duplicate Method
-			return funcDeclStandard.getReturnType();
-		}
-		hsFunc.add(id);
-
-		currFunc = (Function) funcDeclStandard.getMethodName().getB();
-
-		checkOverriding(funcDeclStandard, currFunc);
-
-		for (int i = 0; i < funcDeclStandard.getVarListSize(); i++) {
-			Declaration decl = funcDeclStandard.getVarDeclAt(i);
-			decl.accept(this);
-		}
-
-		for (int i = 0; i < funcDeclStandard.getStatListSize(); i++) {
-			Statement st = funcDeclStandard.getStatAt(i);
-			st.accept(this);
-		}
-
-		currFunc = null;
-		return funcDeclStandard.getReturnType();
+		return null;
 	}
 
 	@Override
@@ -723,11 +601,6 @@ public class TypeAnalyser implements Visitor<Type>
 			decl.accept(this);
 		}
 
-		for (int i = 0; i < cd.getMethodListSize(); i++) {
-			FuncDecl md = cd.getMethodDeclAt(i);
-			md.accept(this);
-		}
-
 		return null;
 	}
 
@@ -743,10 +616,6 @@ public class TypeAnalyser implements Visitor<Type>
 		currClass = (Klass) b;
 
 		hsFunc.clear();
-		for (int i = 0; i < cd.getMethodListSize(); i++) {
-			FuncDecl md = cd.getMethodDeclAt(i);
-			md.accept(this);
-		}
 
 		return null;
 	}

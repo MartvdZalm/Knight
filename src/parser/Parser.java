@@ -37,7 +37,9 @@ public class Parser
                 switch (token.getToken()) {
 					case INCLUDE: {
 						while (token != null && token.getToken() == Tokens.INCLUDE) {
-							includeList.add(parseInclude());
+							eat(Tokens.INCLUDE);
+							includeList.add(new Include(token, new IdentifierExpr(token, token.getSymbol())));
+							eat(Tokens.IDENTIFIER);
 						}
 					}	
 					break;
@@ -81,60 +83,43 @@ public class Parser
 		eat(Tokens.LEFTBRACE);
 
 		List<Declaration> varList = new ArrayList<>();
-		List<FuncDecl> funcList = new ArrayList<>();
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
 			parseAccess();
-
-			Type type = parseType();
-			Identifier id = new Identifier(token, token.getSymbol());
-
-			if (token.getToken() == Tokens.MAIN) {
-				eat(Tokens.MAIN);
-			} else {
-				eat(Tokens.IDENTIFIER);
-			}
-
-			if (token.getToken() == Tokens.LEFTPAREN) {
-				funcList.add(parseFunction(type, id));
-			} else {
-				varList.add(parseVariable(type, id));
-			}
+			parseVariable();
 		}
 		eat(Tokens.RIGHTBRACE);
 
 		if (parent == null) {
-			return new ClassDeclSimple(className.getToken(), className, varList, funcList);
+			return new ClassDeclSimple(className.getToken(), className, varList);
 		} else {
-			return new ClassDeclExtends(className.getToken(), className, parent, varList, funcList);
+			return new ClassDeclExtends(className.getToken(), className, parent, varList);
 		}
 	}
 
-	private FuncDecl parseFunction(Type returnType, Identifier identifier) throws ParseException
+	private Expression parseFunctionBody() throws ParseException
 	{
-		IdentifierExpr methodName = new IdentifierExpr(identifier.getToken(), identifier.getVarID());
-		
-		List<Declaration> varList = new ArrayList<>();
-		List<Statement> statList = new ArrayList<>();
-		List<ArgDecl> argList = new ArrayList<>();
-
 		eat(Tokens.LEFTPAREN);
+		List<ArgDecl> argList = new ArrayList<ArgDecl>();
+
 		if (token.getToken() != Tokens.RIGHTPAREN) {
 			argList.add(parseArgument());
 
 			while (token.getToken() == Tokens.COMMA) {
-				eat(Tokens.COMMA);
+				eat(Tokens.COMMA);;
 				argList.add(parseArgument());
 			}
 		}
 		eat(Tokens.RIGHTPAREN);
+		eat(Tokens.ASSIGN);
+		eat(Tokens.GREATERTHAN);
 		eat(Tokens.LEFTBRACE);
 
-		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-			Type type = parseType();
-			Identifier id = new Identifier(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-			varList.add(parseVariable(type, id));
+		List<Declaration> varList = new ArrayList<>();
+		List<Statement> statList = new ArrayList<>();
+
+		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
+			varList.add(parseVariable());
 		}
 
 		while (token.getToken() == Tokens.IDENTIFIER) {
@@ -154,64 +139,78 @@ public class Parser
 				eat(Tokens.SEMICOLON);
 
 				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-					Type type = parseType();
-					Identifier id = new Identifier(token, token.getSymbol());
-					eat(Tokens.IDENTIFIER);
-					varList.add(parseVariable(type, id));
+					varList.add(parseVariable());
 				}
 
 			} else { 
 				Statement stat = parseState1(id1);
 				statList.add(stat);
 				
-				if (returnType.getToken().getToken() == Tokens.VOID) {
-					while (token.getToken() != Tokens.RIGHTBRACE) {
-						statList.add(parseStatement());
-					}
-				} else {
-					while (token.getToken() != Tokens.RETURN) {
-						statList.add(parseStatement());
-					}
+				while (token.getToken() != Tokens.RETURN && token.getToken() != Tokens.RIGHTBRACE) {
+					statList.add(parseStatement());
 				}
 			}
 		}
 
-		if (returnType.getToken().getToken() == Tokens.VOID) {
-			while (token.getToken() != Tokens.RIGHTBRACE) {
-				statList.add(parseStatement());
-			}
-			eat(Tokens.RIGHTBRACE);
-			return new FuncDeclVoid(methodName.getToken(), returnType, methodName, argList, varList, statList, currentAccessModifier);			
-		} else {
-			while (token.getToken() != Tokens.RETURN) {
-				statList.add(parseStatement());
-			}
-			eat(Tokens.RETURN);
-			Expression returnExpr = parseExpression();
-			eat(Tokens.SEMICOLON);	
-			eat(Tokens.RIGHTBRACE);
-
-			if (identifier.getToken().getToken() == Tokens.MAIN) {
-				return new FuncDeclMain(token, returnType, methodName, varList, statList, returnExpr, currentAccessModifier);
-			} else {
-				return new FuncDeclReturn(methodName.getToken(), returnType, methodName, argList, varList, statList, returnExpr, currentAccessModifier);
-			}
+		while (token.getToken() != Tokens.RETURN && token.getToken() != Tokens.RIGHTBRACE) {
+			statList.add(parseStatement());
 		}
+
+		Expression returnExpr = null;
+		if (token.getToken() == Tokens.RETURN) {
+			eat(Tokens.RETURN);
+			returnExpr = parseExpression();
+			eat(Tokens.SEMICOLON);
+		} 
+		eat(Tokens.RIGHTBRACE);
+
+		return new FuncExpr(token, argList, varList, statList, returnExpr);
 	}
 
-	private Declaration parseVariable(Type type, Identifier id) throws ParseException
+	private Declaration parseVariable() throws ParseException
 	{
 		Declaration decl = null;
+		Type type = parseType();
+		Identifier id = new Identifier(token, token.getSymbol());
+
+		if (token.getToken() == Tokens.MAIN) {
+			eat(Tokens.MAIN);
+		} else {
+			eat(Tokens.IDENTIFIER);
+		}
 
 		if (token.getToken() == Tokens.SEMICOLON) {
 			decl = new VarDecl(token, type, id, currentAccessModifier);
+			eat(Tokens.SEMICOLON);
 		} else {
 			eat(Tokens.ASSIGN);
 			decl = new VarDeclInit(token, type, id, parseExpression(), currentAccessModifier);
 		}
-		eat(Tokens.SEMICOLON);
+
+		if (token.getToken() == Tokens.SEMICOLON) {
+			eat(Tokens.SEMICOLON);
+		}
 
 		return decl;
+	}
+
+	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
+	{
+		Token tok = token;
+		List<Expression> exprList = new ArrayList<Expression>();
+
+		eat(Tokens.LEFTPAREN);
+		if (token.getToken() != Tokens.RIGHTPAREN) {
+			Expression exprArg = parseExpression();
+			exprList.add(exprArg);
+			while (token.getToken() == Tokens.COMMA) {
+				eat(Tokens.COMMA);
+				exprArg = parseExpression();
+				exprList.add(exprArg);
+			}
+		}
+		eat(Tokens.RIGHTPAREN);
+		return new CallFunc(tok, null, methodId, exprList);
 	}
 
 	private ArgDecl parseArgument() throws ParseException
@@ -481,13 +480,7 @@ public class Parser
 		break;
 
 		case LEFTPAREN: {
-			eat(Tokens.LEFTPAREN);
-			stOperator.push(SENTINEL);
-			Expression expr = parseExpression();
-			eat(Tokens.RIGHTPAREN);
-			stOperand.push(expr);
-			stOperator.pop();
-			parseTerm1();
+			stOperand.add(parseFunctionBody());
 		}
 		break;
 
@@ -871,45 +864,13 @@ public class Parser
 		}
 	}
 
-	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
-	{
-		Token tok = token;
-		List<Expression> exprList = new ArrayList<Expression>();
-
-		eat(Tokens.LEFTPAREN);
-		if (token.getToken() != Tokens.RIGHTPAREN) {
-			Expression exprArg = parseExpression();
-			exprList.add(exprArg);
-			while (token.getToken() == Tokens.COMMA) {
-				eat(Tokens.COMMA);
-				exprArg = parseExpression();
-				exprList.add(exprArg);
-			}
-		}
-		eat(Tokens.RIGHTPAREN);
-		return new CallFunc(tok, null, methodId, exprList);
-	}
-
 	private void parseAccess() throws ParseException
 	{
-		if (token.getToken() == Tokens.PUBLIC ||
-			token.getToken() == Tokens.PRIVATE ||
-			token.getToken() == Tokens.PROTECTED) {
+		if (token.getToken() == Tokens.PUBLIC || token.getToken() == Tokens.PRIVATE || token.getToken() == Tokens.PROTECTED) {
 			currentAccessModifier = token;
 			eat(token.getToken());
 			eat(Tokens.COLON);
 		}
-	}
-
-	private Include parseInclude() throws ParseException
-	{
-		Token tok = token;
-		eat(Tokens.INCLUDE);
-		eat(Tokens.LESSTHAN);
-		IdentifierExpr className = new IdentifierExpr(token, token.getSymbol());
-		eat(Tokens.IDENTIFIER);
-		eat(Tokens.GREATERTHAN);
-		return new Include(tok, className);
 	}
 
 	private void advance()

@@ -4,46 +4,20 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class FuncDeclReturn extends FuncDecl
+public class FuncExpr extends Expression
 {
-    private Type returnType;
-	private IdentifierExpr methodName;
 	private List<ArgDecl> argList;
 	private List<Declaration> varList;
 	private List<Statement> statList;
 	private Expression returnExpr;
-	private Token access;
 
-	public FuncDeclReturn(Token token, Type returnType, IdentifierExpr methodName, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr, Token access)
+	public FuncExpr(Token token, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr)
 	{
 		super(token);
-		this.returnType = returnType;
-		this.methodName = methodName;
 		this.argList = argList;
 		this.varList = varList;
 		this.statList = statList;
 		this.returnExpr = returnExpr;
-		this.access = access;
-	}
-
-	public Type getReturnType()
-	{
-		return returnType;
-	}
-
-	public void setReturnType(Type returnType)
-	{
-		this.returnType = returnType;
-	}
-
-	public IdentifierExpr getMethodName()
-	{
-		return methodName;
-	}
-
-	public void setMethodName(IdentifierExpr methodName)
-	{
-		this.methodName = methodName;
 	}
 
 	public Expression getReturnExpr()
@@ -102,19 +76,9 @@ public class FuncDeclReturn extends FuncDecl
 		}
 	}
 
-	public Token getAccess()
-	{
-		return access;
-	}
-
-	public void setAccess(Token access)
-	{
-		this.access = access;
-	}
-
-	@Override
-	public <R> R accept(Visitor<R> v)
-	{
-		return v.visit(this);
-	}
+    @Override
+    public <R> R accept(Visitor<R> v)
+    {
+        return v.visit(this);
+    }
 }
