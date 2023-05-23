@@ -8,7 +8,7 @@ The primary objective of Knight is to create a programming language that is both
 
 ## Features
 - Object-oriented programming
-- Easy-to-learn syntax inspired by C++ and Java
+- Easy-to-learn syntax inspired by C++ and JavaScript
 - Designed to be efficient
 - First version being developed for Linux with plans for multi-platform support (Windows, iOS, etc.)
 
