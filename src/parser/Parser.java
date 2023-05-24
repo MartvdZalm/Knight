@@ -75,9 +75,7 @@ public class Parser
 		IdentifierExpr parent = null;
 		if (token.getToken() == Tokens.EXTENDS) {
 			eat(Tokens.EXTENDS);
-			if (token.getToken() == Tokens.IDENTIFIER) {
-				parent = new IdentifierExpr(token, token.getSymbol());
-			}
+			parent = new IdentifierExpr(token, token.getSymbol());
 			eat(Tokens.IDENTIFIER);
 		}
 		eat(Tokens.LEFTBRACE);
@@ -86,7 +84,7 @@ public class Parser
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
 			parseAccess();
-			parseVariable();
+			varList.add(parseVariable());
 		}
 		eat(Tokens.RIGHTBRACE);
 
@@ -95,76 +93,6 @@ public class Parser
 		} else {
 			return new ClassDeclExtends(className.getToken(), className, parent, varList);
 		}
-	}
-
-	private Expression parseFunctionBody() throws ParseException
-	{
-		eat(Tokens.LEFTPAREN);
-		List<ArgDecl> argList = new ArrayList<ArgDecl>();
-
-		if (token.getToken() != Tokens.RIGHTPAREN) {
-			argList.add(parseArgument());
-
-			while (token.getToken() == Tokens.COMMA) {
-				eat(Tokens.COMMA);;
-				argList.add(parseArgument());
-			}
-		}
-		eat(Tokens.RIGHTPAREN);
-		eat(Tokens.ASSIGN);
-		eat(Tokens.GREATERTHAN);
-		eat(Tokens.LEFTBRACE);
-
-		List<Declaration> varList = new ArrayList<>();
-		List<Statement> statList = new ArrayList<>();
-
-		while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
-			varList.add(parseVariable());
-		}
-
-		while (token.getToken() == Tokens.IDENTIFIER) {
-			IdentifierType idType = new IdentifierType(token, token.getSymbol());
-			Identifier id1 = new Identifier(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-
-			if (token.getToken() == Tokens.IDENTIFIER) { 
-				Identifier id2 = new Identifier(token, token.getSymbol());
-				eat(Tokens.IDENTIFIER);
-
-				if (token.getToken() == Tokens.SEMICOLON) {
-					varList.add(new VarDecl(id2.getToken(), idType, id2, currentAccessModifier));
-				} else {
-					varList.add(new VarDeclInit(token, idType, id2, parseExpression(), currentAccessModifier));
-				}
-				eat(Tokens.SEMICOLON);
-
-				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.BOOLEAN || token.getToken() == Tokens.STRING) {
-					varList.add(parseVariable());
-				}
-
-			} else { 
-				Statement stat = parseState1(id1);
-				statList.add(stat);
-				
-				while (token.getToken() != Tokens.RETURN && token.getToken() != Tokens.RIGHTBRACE) {
-					statList.add(parseStatement());
-				}
-			}
-		}
-
-		while (token.getToken() != Tokens.RETURN && token.getToken() != Tokens.RIGHTBRACE) {
-			statList.add(parseStatement());
-		}
-
-		Expression returnExpr = null;
-		if (token.getToken() == Tokens.RETURN) {
-			eat(Tokens.RETURN);
-			returnExpr = parseExpression();
-			eat(Tokens.SEMICOLON);
-		} 
-		eat(Tokens.RIGHTBRACE);
-
-		return new FuncExpr(token, argList, varList, statList, returnExpr);
 	}
 
 	private Declaration parseVariable() throws ParseException
@@ -192,6 +120,86 @@ public class Parser
 		}
 
 		return decl;
+	}
+
+	private Expression parseExpression() throws ParseException
+    {
+        try {
+            parseExpr();
+            Token tok = stOperator.peek();
+			while (tok.getToken() != Tokens.SENTINEL) {
+				popOperator();
+				tok = stOperator.peek();
+			}
+			return stOperand.pop();
+
+        } catch (ParseException pe) {
+            throw pe;
+        } catch (Exception e) {
+            System.err.println("Parser Error " + token.getRow() + ":" + token.getCol());
+            throw e;
+        }
+    }
+
+	private Expression parseFunctionBody() throws ParseException
+	{
+		eat(Tokens.LEFTPAREN);
+		List<ArgDecl> argList = new ArrayList<ArgDecl>();
+
+		if (token.getToken() != Tokens.RIGHTPAREN) {
+			argList.add(parseArgument());
+
+			while (token.getToken() == Tokens.COMMA) {
+				eat(Tokens.COMMA);;
+				argList.add(parseArgument());
+			}
+		}
+		eat(Tokens.RIGHTPAREN);
+		eat(Tokens.LEFTBRACE);
+
+		List<Declaration> varList = new ArrayList<>();
+		List<Statement> statList = new ArrayList<>();
+
+		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
+
+			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {	
+				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
+					varList.add(parseVariable());
+				}
+	
+				while (token.getToken() == Tokens.IDENTIFIER) {
+					IdentifierType identifierType = new IdentifierType(token, token.getSymbol());
+					Identifier identifier = new Identifier(token, token.getSymbol());
+					eat(Tokens.IDENTIFIER);
+	
+					if (token.getToken() == Tokens.IDENTIFIER) {
+						Identifier identifier2 = new Identifier(token, token.getSymbol());
+						eat(Tokens.IDENTIFIER);
+						if (token.getToken() == Tokens.SEMICOLON) {
+							varList.add(new VarDecl(token, identifierType, identifier2, currentAccessModifier));
+						} else {
+							varList.add(new VarDeclInit(token, identifierType, identifier2, parseExpression(), currentAccessModifier));
+						}
+						eat(Tokens.SEMICOLON);
+					} else {		
+						Statement stat = parseState1(identifier);
+						statList.add(stat);
+					}
+				}
+			} else {
+				statList.add(parseStatement());
+			}
+		}
+
+		Expression returnExpr = null;
+		if (token.getToken() == Tokens.RETURN) {
+			eat(Tokens.RETURN);
+			returnExpr = parseExpression();
+			eat(Tokens.SEMICOLON);
+		} 
+		eat(Tokens.RIGHTBRACE);
+
+		return new FuncExpr(token, argList, varList, statList, returnExpr);
 	}
 
 	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
@@ -269,35 +277,9 @@ public class Parser
 				return result;
 			}
 
-			case IDENTIFIER: {
-				Identifier id = new Identifier(token, token.getSymbol());
-				eat(Tokens.IDENTIFIER);
-				Statement stat = parseState1(id);
-				return stat;
-			}
-
 			default:
 				throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
-    }
-
-	private Expression parseExpression() throws ParseException
-    {
-        try {
-            parseExpr();
-            Token tok = stOperator.peek();
-			while (tok.getToken() != Tokens.SENTINEL) {
-				popOperator();
-				tok = stOperator.peek();
-			}
-			return stOperand.pop();
-
-        } catch (ParseException pe) {
-            throw pe;
-        } catch (Exception e) {
-            System.err.println("Parser Error " + token.getRow() + ":" + token.getCol());
-            throw e;
-        }
     }
 
 	private Statement parseState1(Identifier id) throws ParseException
