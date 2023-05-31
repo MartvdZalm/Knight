@@ -4,13 +4,13 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class CallFunc extends Expression
+public class CallFunctionStat extends Statement
 {
 	private Expression instanceName;
 	private IdentifierExpr methodId;
 	private List<Expression> argExprList;
 
-	public CallFunc(Token token, Expression instanceName, IdentifierExpr methodId, List<Expression> argExprList)
+	public CallFunctionStat(Token token, Expression instanceName, IdentifierExpr methodId, List<Expression> argExprList)
 	{
 		super(token);
 		this.instanceName = instanceName;

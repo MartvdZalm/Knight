@@ -27,10 +27,8 @@ public enum Tokens
     PRIVATE,
 
     CLASS,
-    EXTENDS,
     MAIN,
     COMMENT,
-    THIS,
     NEW,
     INCLUDE,
 

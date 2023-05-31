@@ -73,8 +73,8 @@ public class Parser
 		eat(Tokens.IDENTIFIER);
 
 		IdentifierExpr parent = null;
-		if (token.getToken() == Tokens.EXTENDS) {
-			eat(Tokens.EXTENDS);
+		if (token.getToken() == Tokens.LESSTHAN) {
+			eat(Tokens.LESSTHAN);
 			parent = new IdentifierExpr(token, token.getSymbol());
 			eat(Tokens.IDENTIFIER);
 		}
@@ -163,6 +163,7 @@ public class Parser
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
 
 			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {	
+				
 				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
 					varList.add(parseVariable());
 				}
@@ -199,7 +200,11 @@ public class Parser
 		} 
 		eat(Tokens.RIGHTBRACE);
 
-		return new FuncExpr(token, argList, varList, statList, returnExpr);
+		if (returnExpr != null) {
+			return new FunctionExprReturn(token, argList, varList, statList, returnExpr);
+		} else {
+			return new FunctionExprVoid(token, argList, varList, statList);
+		}
 	}
 
 	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
@@ -218,7 +223,7 @@ public class Parser
 			}
 		}
 		eat(Tokens.RIGHTPAREN);
-		return new CallFunc(tok, null, methodId, exprList);
+		return new CallFunctionExpr(tok, null, methodId, exprList);
 	}
 
 	private ArgDecl parseArgument() throws ParseException
@@ -323,7 +328,7 @@ public class Parser
 			}
 			eat(Tokens.RIGHTPAREN);
 			eat(Tokens.SEMICOLON);
-			CallFunction callFunc = new CallFunction(tok, null, idExpr, exprList);
+			CallFunctionStat callFunc = new CallFunctionStat(tok, null, idExpr, exprList);
 			return callFunc;
 		}
 
@@ -442,14 +447,6 @@ public class Parser
 				stOperand.push(id);
 				parseTerm1();
 			}
-		}
-		break;
-
-		case THIS: {
-			This this1 = new This(token);
-			eat(Tokens.THIS);
-			stOperand.push(this1);
-			parseTerm1();
 		}
 		break;
 
@@ -572,7 +569,7 @@ public class Parser
 		case DOT: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
-			CallFunc cm = (CallFunc) rhs;
+			CallFunctionExpr cm = (CallFunctionExpr) rhs;
 			cm.setInstanceName(lhs);
 			stOperand.push(cm);
 		}
@@ -761,14 +758,6 @@ public class Parser
 		}
 		break;
 
-		case DOT: {
-			pushOperator(token);
-			eat(Tokens.DOT);
-			parseTerm3();
-			parseTerm1();
-		}
-		break;
-
 		case RIGHTPAREN:
 		case SEMICOLON:
 		case COMMA:
@@ -805,39 +794,6 @@ public class Parser
 			eat(Tokens.LEFTPAREN);
 			eat(Tokens.RIGHTPAREN);
 			stOperand.push(idExpr);
-		}
-		break;
-
-		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
-		}
-	}
-
-	private void parseTerm3() throws ParseException
-	{
-		switch (token.getToken()) {
-
-		case IDENTIFIER: {
-			IdentifierExpr methodId = new IdentifierExpr(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-			eat(Tokens.LEFTPAREN);
-
-			stOperator.push(SENTINEL);
-			List<Expression> exprList = new ArrayList<Expression>();
-
-			if (token.getToken() != Tokens.RIGHTPAREN) {
-				Expression exprArg = parseExpression();
-				exprList.add(exprArg);
-				while (token.getToken() == Tokens.COMMA) {
-					eat(Tokens.COMMA);
-					exprArg = parseExpression();
-					exprList.add(exprArg);
-				}
-			}
-			eat(Tokens.RIGHTPAREN);
-			stOperator.pop(); // Pop SENTINEL
-			CallFunc callMethod = new CallFunc(methodId.getToken(), null, methodId, exprList);
-			stOperand.push(callMethod);
 		}
 		break;
 

@@ -305,13 +305,6 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(This this1)
-	{
-		this1.setType(currClass.type());
-		return currClass.type();
-	}
-
-	@Override
 	public Type visit(NewArray na)
 	{
 		Type tl = na.getArrayLength().accept(this);
@@ -338,7 +331,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunc cm)
+	public Type visit(CallFunctionExpr cm)
 	{
 		if (cm.getInstanceName() == null) {
 			IdentifierExpr callFunc = cm.getMethodId();
@@ -359,12 +352,12 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunction cm)
+	public Type visit(CallFunctionStat cm)
 	{
 		return null;
 	}
 
-	private void checkCallArguments(CallFunc cm, Function m)
+	private void checkCallArguments(CallFunctionExpr cm, Function m)
 	{
 		List<Type> argTypes = new ArrayList<>();
 		for (int i = 0; i < cm.getArgExprListSize(); i++) {
@@ -460,8 +453,8 @@ public class TypeAnalyser implements Visitor<Type>
 		Type rhs = vd.getExpr().accept(this);
 		Type lhs = vd.getId().accept(this);
 
-		if (vd.getExpr() instanceof CallFunc) {
-			CallFunc callFunc = (CallFunc) vd.getExpr();
+		if (vd.getExpr() instanceof CallFunctionExpr) {
+			CallFunctionExpr callFunc = (CallFunctionExpr) vd.getExpr();
 			if (callFunc.getInstanceName() == null) {
 				Function func = st.getMethod(callFunc.getMethodId().toString(), currClass.getId());
 				if (func != null) {
@@ -493,7 +486,13 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncExpr funcExprReturn)
+	public Type visit(FunctionExprReturn funcExprReturn)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionExprVoid funcExprVoid)
 	{
 		return null;
 	}

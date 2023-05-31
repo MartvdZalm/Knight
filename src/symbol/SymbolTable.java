@@ -4,6 +4,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Hashtable;
 
+import src.ast.FunctionExprReturn;
+import src.ast.FunctionExprVoid;
 import src.ast.IdentifierType;
 import src.ast.IntArrayType;
 import src.ast.IntType;
@@ -129,6 +131,7 @@ public class SymbolTable
 
 	public boolean compareTypes(Type t1, Type t2)
 	{
+		System.out.println(t1 + "==" + t2);
 
 		if (t1 == null || t2 == null) {
 			return false;

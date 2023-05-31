@@ -155,17 +155,6 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(This this1)
-	{
-		if (currFunc == null) {
-			Token sym = this1.getToken();
-			addError(sym.getRow(), sym.getCol(), "this keyword cannot be used in static methods");
-		}
-
-		return null;
-	}
-
-	@Override
 	public Type visit(NewArray na)
 	{
 		na.getArrayLength().accept(this);
@@ -187,7 +176,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunc cm)
+	public Type visit(CallFunctionExpr cm)
 	{
 		cm.getInstanceName().accept(this);
 
@@ -200,7 +189,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunction cm)
+	public Type visit(CallFunctionStat cm)
 	{
 		return null;
 	}
@@ -324,7 +313,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncExpr funcExprReturn)
+	public Type visit(FunctionExprReturn funcExprReturn)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionExprVoid funcExprVoid)
 	{
 		return null;
 	}

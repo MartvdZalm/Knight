@@ -52,7 +52,7 @@ public interface Visitor<R>
 
     public R visit(NewArray newArray);
 
-    public R visit(CallFunc callFunc);
+    public R visit(CallFunctionExpr callFunc);
 
     public R visit(Identifier identifier);
 
@@ -68,8 +68,6 @@ public interface Visitor<R>
 
     public R visit(NewInstance newInstance);
 
-    public R visit(This this1);
-
     public R visit(VarDeclInit varDeclInit);
 
     public R visit(Include include);
@@ -78,9 +76,11 @@ public interface Visitor<R>
 
     public R visit(Skip skip);
 
-    public R visit(CallFunction callFunction);
+    public R visit(CallFunctionStat callFunction);
 
     public R visit(ForLoop forLoop);
 
-    public R visit(FuncExpr functionBody);
+    public R visit(FunctionExprReturn functionBody);
+
+    public R visit(FunctionExprVoid functionExprVoid);
 }

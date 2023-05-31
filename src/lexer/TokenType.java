@@ -29,10 +29,8 @@ public class TokenType
         Symbol.symbol("private", Tokens.PRIVATE);
 
         Symbol.symbol("class", Tokens.CLASS);
-        Symbol.symbol("extends", Tokens.EXTENDS);
         Symbol.symbol("main", Tokens.MAIN);
         Symbol.symbol("//", Tokens.COMMENT);
-        Symbol.symbol("this", Tokens.THIS);
         Symbol.symbol("new", Tokens.NEW);
         Symbol.symbol("include", Tokens.INCLUDE);
                 

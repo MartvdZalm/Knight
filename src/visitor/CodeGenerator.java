@@ -131,12 +131,6 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(This this1)
-	{	
-		return null;
-	}
-
-	@Override
 	public String visit(NewArray na)
 	{
 		return null;
@@ -149,13 +143,13 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(CallFunc cm)
+	public String visit(CallFunctionExpr cm)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(CallFunction cm)
+	public String visit(CallFunctionStat cm)
 	{
 		StringBuilder sb = new StringBuilder();
 		
@@ -224,10 +218,17 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(FuncExpr funcExprReturn)
+	public String visit(FunctionExprReturn funcExprReturn)
 	{
 		return null;
 	}
+
+	@Override
+	public String visit(FunctionExprVoid funcExprVoid)
+	{
+		return null;
+	}
+
 
 	@Override
 	public String visit(Program program)

@@ -150,12 +150,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(This this1)
-	{
-		return null;
-	}
-
-	@Override
 	public Type visit(NewArray newArray)
 	{
 		return null;
@@ -168,13 +162,13 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunc cf)
+	public Type visit(CallFunctionExpr cf)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(CallFunction cf)
+	public Type visit(CallFunctionStat cf)
 	{
 		return null;
 	}
@@ -301,7 +295,13 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FuncExpr funcExprReturn)
+	public Type visit(FunctionExprReturn funcExprReturn)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionExprVoid funcExprVoid)
 	{
 		return null;
 	}

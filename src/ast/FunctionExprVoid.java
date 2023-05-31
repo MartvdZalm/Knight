@@ -4,32 +4,20 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class FuncExpr extends Expression
+public class FunctionExprVoid extends Expression
 {
 	private List<ArgDecl> argList;
 	private List<Declaration> varList;
 	private List<Statement> statList;
-	private Expression returnExpr;
 
-	public FuncExpr(Token token, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr)
+	public FunctionExprVoid(Token token, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList)
 	{
 		super(token);
 		this.argList = argList;
 		this.varList = varList;
 		this.statList = statList;
-		this.returnExpr = returnExpr;
 	}
-
-	public Expression getReturnExpr()
-	{
-		return returnExpr;
-	}
-
-	public void setReturnExpr(Expression returnExpr)
-	{
-		this.returnExpr = returnExpr;
-	}
-
+    
 	public int getArgListSize()
 	{
 		return argList.size();
