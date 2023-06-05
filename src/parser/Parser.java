@@ -101,12 +101,7 @@ public class Parser
 		Type type = parseType();
 		Identifier id = new Identifier(token, token.getSymbol());
 
-		if (token.getToken() == Tokens.MAIN) {
-			eat(Tokens.MAIN);
-		} else {
-			eat(Tokens.IDENTIFIER);
-		}
-
+		eat(Tokens.IDENTIFIER);
 		if (token.getToken() == Tokens.SEMICOLON) {
 			decl = new VarDecl(token, type, id, currentAccessModifier);
 			eat(Tokens.SEMICOLON);
@@ -391,8 +386,7 @@ public class Parser
 			return type;
 		}
 
-		case IDENTIFIER:
-		case MAIN: {
+		case IDENTIFIER: {
 			return null;
 		}
 

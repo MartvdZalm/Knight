@@ -27,7 +27,6 @@ public enum Tokens
     PRIVATE,
 
     CLASS,
-    MAIN,
     COMMENT,
     NEW,
     INCLUDE,
