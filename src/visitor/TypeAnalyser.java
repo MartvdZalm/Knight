@@ -1,5 +1,6 @@
 package src.visitor;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -297,7 +298,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = i.getB();
 		if (b != null) {
-			Type t = ((Variable) b).getType();
+			Type t = ((Decl) b).getType();
 			i.setType(t);
 			return t;
 		}
@@ -465,6 +466,22 @@ public class TypeAnalyser implements Visitor<Type>
 			}
 		}
 
+		if (vd.getExpr() instanceof FunctionExprReturn) {
+			FunctionExprReturn funcExprReturn = (FunctionExprReturn) vd.getExpr();
+
+			currFunc = (Function) vd.getId().getB();
+
+			rhs = funcExprReturn.getReturnExpr().accept(this);
+
+		} else if (vd.getExpr() instanceof FunctionExprVoid) {
+			Token tok = vd.getToken();
+			if (!(lhs instanceof VoidType)) {
+				addError(tok.getRow(), tok.getCol(), "Function " + vd.getId() + " must return a result of type " + lhs);
+			}
+			return null;
+		}
+
+		
 		if (!st.compareTypes(lhs, rhs)) {
 			Token sym = vd.getToken();
 			if (lhs == null || rhs == null) {
@@ -476,6 +493,7 @@ public class TypeAnalyser implements Visitor<Type>
 		} else {
 			vd.getExpr().setType(rhs);
 		}
+
 		return null;
 	}
 
@@ -488,6 +506,16 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(FunctionExprReturn funcExprReturn)
 	{
+		for (int i = 0; i < funcExprReturn.getStatListSize(); i++) {
+			Statement st = funcExprReturn.getStatAt(i);
+			st.accept(this);
+		}
+
+		for (int i = 0; i < funcExprReturn.getVarListSize(); i++) {
+			Declaration decl = funcExprReturn.getVarDeclAt(i);
+			decl.accept(this);
+		}
+
 		return null;
 	}
 
@@ -511,7 +539,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = id.getB();
 		if (b != null) {
-			return ((Variable) b).getType();
+			return ((Decl) b).getType();
 		}
 		return null;
 	}

@@ -178,7 +178,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(CallFunctionExpr cm)
 	{
-		cm.getInstanceName().accept(this);
+		/*
+		 * The call function expression can be written like this 'object.functionName()'. Here is object the instancename,
+		 * but if there is no instancename 'functionName()', the instancename will be null. So This check needs to be done.
+		 */
+		if (cm.getInstanceName() != null) {
+			cm.getInstanceName().accept(this);
+		}
 
 		for (int i = 0; i < cm.getArgExprListSize(); i++) {
 			Expression e = cm.getArgExprAt(i);
@@ -229,12 +235,19 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		String id = i.getVarID();
 		Variable var = symbolTable.getVar(currFunc, currClass, id);
-		if (var == null) {
+		Function func = symbolTable.getMethod(id, currClass.getId());
+
+		if (var == null && func == null) {
 			Token sym = i.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
 		}
+		
+		if (var != null) {
+			i.setB(var);
+		} else {
+			i.setB(func);
+		}
 
-		i.setB(var);
 		return null;
 	}
 
@@ -261,7 +274,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			Token sym = i.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
 		}
-
+		
 		i.setB(var);
 		return null;
 	}
@@ -289,10 +302,21 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(VarDeclInit vd)
 	{
-		vd.getType().accept(this);
+		String id = vd.getId().getVarID(); // Get the name of the variable declaration.
+
+		vd.getType().accept(this); 
 		vd.getId().accept(this);
 
-		String id = vd.getId().getVarID();
+		if (vd.getExpr() instanceof FunctionExprReturn) { 
+			if (hsFunc.contains(id)) { // Check if function already exist
+				return null;
+			} else {
+				hsFunc.add(id); // Else add the function to the List.
+			}
+
+			currFunc = currClass.getMethod(id); // Set the current functon to this function.
+			vd.getId().setB(currFunc); // Set the identifier of this declaration connected to the current function, because this declaration is a function.
+		}
 
 		if (currFunc == null) {
 			Klass parent = symbolTable.getKlass(currClass.parent());
@@ -301,6 +325,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in parent class");
 			}
 		}
+
+		vd.getExpr().accept(this);
 
 		return null;
 	}
@@ -315,6 +341,23 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(FunctionExprReturn funcExprReturn)
 	{
+		for (int i = 0; i < funcExprReturn.getArgListSize(); i++) {
+			ArgDecl ad = funcExprReturn.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < funcExprReturn.getVarListSize(); i++) {
+			Declaration vd = funcExprReturn.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < funcExprReturn.getStatListSize(); i++) {
+			Statement st = funcExprReturn.getStatAt(i);
+			st.accept(this);
+		}
+
+		funcExprReturn.getReturnExpr().accept(this);
+		currFunc = null;
 		return null;
 	}
 

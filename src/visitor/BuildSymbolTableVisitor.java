@@ -1,5 +1,7 @@
 package src.visitor;
 
+import java.lang.reflect.Method;
+
 import src.ast.*;
 import src.lexer.*;
 import src.semantics.SemanticErrors;
@@ -242,6 +244,18 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		Type t = vd.getType().accept(this);
 		String id = vd.getId().getVarID();
 
+		if (vd.getExpr() instanceof FunctionExprReturn) {
+			if (!currClass.addMethod(id, t)) {
+				Token tok = vd.getToken();
+				addError(tok.getRow(), tok.getCol(), "Function " + id + " already defined in class " + currClass.getId());
+				return null;
+			} else {
+				currFunc = currClass.getMethod(id);
+			}
+
+			vd.getExpr().accept(this);
+		}
+
 		if (currFunc != null) {
 			if (!currFunc.addVar(id, t)) {
 				Token tok = vd.getId().getToken();
@@ -253,7 +267,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + currClass.getId());
 			}
 		}
-
+		
 		return null;
 	}
 
@@ -297,6 +311,24 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	@Override
 	public Type visit(FunctionExprReturn funcExprReturn)
 	{
+		for (int i = 0; i < funcExprReturn.getArgListSize(); i++) {
+			ArgDecl ad = funcExprReturn.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < funcExprReturn.getVarListSize(); i++) {
+			Declaration vd = funcExprReturn.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < funcExprReturn.getStatListSize(); i++) {
+			Statement st = funcExprReturn.getStatAt(i);
+			st.accept(this);
+		}
+
+		funcExprReturn.getReturnExpr().accept(this);
+		currFunc = null;
+
 		return null;
 	}
 

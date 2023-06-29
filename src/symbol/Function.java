@@ -5,31 +5,17 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import src.ast.Type;
-import src.semantics.Binding;
 
-public class Function extends Binding
+public class Function extends Decl
 {
-	private String id;
 	private Vector<Variable> params;
 	private Hashtable<String, Variable> vars;
 
 	public Function(String id, Type type)
 	{
-		super(type);
-		this.id = id;
+		super(id, type);
 		vars = new Hashtable<>();
 		params = new Vector<>();
-	}
-
-	public String getId()
-	{
-		return id;
-	}
-
-	@Override
-	public Type getType()
-	{
-		return type;
 	}
 
 	public boolean addParam(String id, Type type)

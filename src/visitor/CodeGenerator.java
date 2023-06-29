@@ -158,7 +158,6 @@ public class CodeGenerator implements Visitor<String>
 			sb.append(cm.getArgExprAt(i).accept(this) + "\n");
 		}
 
-
 		return sb.toString();
 	}
 
