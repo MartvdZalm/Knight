@@ -295,10 +295,10 @@ public class Parser
 			return assign;
 		}
 
-		case LEFTBRACE: {
-			eat(Tokens.LEFTBRACE);
+		case LEFTBRACKET: {
+			eat(Tokens.LEFTBRACKET);
 			Expression expr1 = parseExpression();
-			eat(Tokens.RIGHTBRACE);
+			eat(Tokens.RIGHTBRACKET);
 			eat(Tokens.ASSIGN);
 			Expression expr2 = parseExpression();
 			eat(Tokens.SEMICOLON);
@@ -378,10 +378,10 @@ public class Parser
 	{
 		switch (token.getToken()) {
 
-		case LEFTBRACE: {
+		case LEFTBRACKET: {
 			Token tok = token;
-			eat(Tokens.LEFTBRACE);
-			eat(Tokens.RIGHTBRACE);
+			eat(Tokens.LEFTBRACKET);
+			eat(Tokens.RIGHTBRACKET);
 			IntArrayType type = new IntArrayType(tok);
 			return type;
 		}
@@ -457,8 +457,17 @@ public class Parser
 		}
 		break;
 
+		case LEFTBRACKET: {
+			eat(Tokens.LEFTBRACKET);
+			Expression expr = parseExpression();
+			eat(Tokens.RIGHTBRACKET);
+			stOperand.push(new ArrayInitializerExpr(token, expr));
+			parseTerm1();
+		}
+		break;
+
 		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+			throw new ParseException(token.getRow(), token.getCol(), "Invalid token : " + token.getToken());
 		}
 	}
 
@@ -504,6 +513,7 @@ public class Parser
 	private void parseBinary(Token tok)
 	{
 		switch (tok.getToken()) {
+
 		case OR: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -511,6 +521,7 @@ public class Parser
 			stOperand.push(or);
 		}
 		break;
+
 		case AND: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -518,6 +529,7 @@ public class Parser
 			stOperand.push(and);
 		}
 		break;
+
 		case EQUALS: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -525,6 +537,7 @@ public class Parser
 			stOperand.push(equals);
 		}
 		break;
+
 		case LESSTHAN: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -532,6 +545,7 @@ public class Parser
 			stOperand.push(lessThan);
 		}
 		break;
+		
 		case PLUS: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -539,6 +553,7 @@ public class Parser
 			stOperand.push(plus);
 		}
 		break;
+
 		case MINUS: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -546,6 +561,7 @@ public class Parser
 			stOperand.push(minus);
 		}
 		break;
+
 		case TIMES: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -553,6 +569,7 @@ public class Parser
 			stOperand.push(times);
 		}
 		break;
+
 		case DIV: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -560,6 +577,7 @@ public class Parser
 			stOperand.push(div);
 		}
 		break;
+
 		case DOT: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -569,13 +587,14 @@ public class Parser
 		}
 		break;
 
-		case LEFTBRACE: {
+		case LEFTBRACKET: {
 			Expression indexExpr = stOperand.pop();
 			Expression ArrayExpr = stOperand.pop();
-			IndexArray indexArray = new IndexArray(ArrayExpr.getToken(), ArrayExpr, indexExpr);
+			ArrayIndexExpr indexArray = new ArrayIndexExpr(ArrayExpr.getToken(), ArrayExpr, indexExpr);
 			stOperand.push(indexArray);
 		}
 		break;
+
 		default:
 			System.err.println("parseBinary(): Error in parsing");
 		}
@@ -594,7 +613,7 @@ public class Parser
 		case TIMES:
 		case DIV:
 		case DOT:
-		case LEFTBRACE: {
+		case LEFTBRACKET: {
 			return true;
 		}
 		case NEW: {
@@ -645,7 +664,7 @@ public class Parser
 			return 5;
 		}
 
-		case LEFTBRACE: {
+		case LEFTBRACKET: {
 			return 7;
 		}
 
@@ -740,12 +759,12 @@ public class Parser
 		}
 		break;
 
-		case LEFTBRACE: {
+		case LEFTBRACKET: {
 			pushOperator(token);
-			eat(Tokens.LEFTBRACE);
+			eat(Tokens.LEFTBRACKET);
 			stOperator.push(SENTINEL);
 			Expression indexExpr = parseExpression();
-			eat(Tokens.RIGHTBRACE);
+			eat(Tokens.RIGHTBRACKET);
 			stOperator.pop(); 
 			stOperand.push(indexExpr);
 			parseTerm1();
@@ -755,7 +774,7 @@ public class Parser
 		case RIGHTPAREN:
 		case SEMICOLON:
 		case COMMA:
-		case RIGHTBRACE: {
+		case RIGHTBRACKET: {
 			// Epsilon expected
 		}
 		break;

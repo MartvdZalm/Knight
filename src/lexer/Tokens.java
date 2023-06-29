@@ -9,6 +9,8 @@ public enum Tokens
     RIGHTPAREN,
     LEFTBRACE, 
     RIGHTBRACE, 
+    LEFTBRACKET,
+    RIGHTBRACKET,
 
     SEMICOLON,
     COLON,

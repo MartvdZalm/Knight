@@ -545,7 +545,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IndexArray ia)
+	public Type visit(ArrayIndexExpr ia)
 	{
 		// Check array type
 		Type tid = ia.getArray().accept(this);
@@ -567,6 +567,14 @@ public class TypeAnalyser implements Visitor<Type>
 
 		Type t = new IntType(ia.getToken());
 		ia.setType(t);
+		return t;
+	}
+
+	@Override
+	public Type visit(ArrayInitializerExpr aie)
+	{
+		Type t = new IntArrayType(aie.getToken());
+		aie.setType(t);
 		return t;
 	}
 

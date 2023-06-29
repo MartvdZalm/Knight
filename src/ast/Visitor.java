@@ -34,7 +34,7 @@ public interface Visitor<R>
 
     public R visit(ArrayAssign arrayAssign);
 
-    public R visit(IndexArray indexArray);
+    public R visit(ArrayIndexExpr indexArray);
 
     public R visit(Division division);
 
@@ -83,4 +83,6 @@ public interface Visitor<R>
     public R visit(FunctionExprReturn functionBody);
 
     public R visit(FunctionExprVoid functionExprVoid);
+
+    public R visit(ArrayInitializerExpr arrayInitializerExpr);
 }

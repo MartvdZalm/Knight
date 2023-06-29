@@ -10,7 +10,7 @@ import src.symbol.*;
 public class CodeGenerator implements Visitor<String>
 {
 	private Klass currClass;
-	private Function currMethod;
+	private Function currFunc;
 	private int slot;
 	private int labelCount;
 	private final String PATH;
@@ -268,7 +268,13 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(IndexArray ia)
+	public String visit(ArrayIndexExpr ia)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(ArrayInitializerExpr aie)
 	{
 		return null;
 	}

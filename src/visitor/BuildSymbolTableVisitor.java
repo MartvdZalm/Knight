@@ -1,7 +1,5 @@
 package src.visitor;
 
-import java.lang.reflect.Method;
-
 import src.ast.*;
 import src.lexer.*;
 import src.semantics.SemanticErrors;
@@ -244,7 +242,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		Type t = vd.getType().accept(this);
 		String id = vd.getId().getVarID();
 
-		if (vd.getExpr() instanceof FunctionExprReturn) {
+		if (vd.getExpr() instanceof FunctionExprReturn || vd.getExpr() instanceof FunctionExprVoid) {
 			if (!currClass.addMethod(id, t)) {
 				Token tok = vd.getToken();
 				addError(tok.getRow(), tok.getCol(), "Function " + id + " already defined in class " + currClass.getId());
@@ -291,7 +289,13 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IndexArray indexArray)
+	public Type visit(ArrayIndexExpr indexArray)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(ArrayInitializerExpr aie)
 	{
 		return null;
 	}

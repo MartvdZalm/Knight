@@ -11,6 +11,8 @@ public class TokenType
         Symbol.symbol(")", Tokens.RIGHTPAREN);
         Symbol.symbol("{", Tokens.LEFTBRACE);
         Symbol.symbol("}", Tokens.RIGHTBRACE);
+        Symbol.symbol("[", Tokens.LEFTBRACKET);
+        Symbol.symbol("]", Tokens.RIGHTBRACKET);
         
         Symbol.symbol(";", Tokens.SEMICOLON);
         Symbol.symbol(":", Tokens.COLON);

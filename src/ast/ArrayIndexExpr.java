@@ -2,12 +2,12 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class IndexArray extends Expression
+public class ArrayIndexExpr extends Expression
 {
 	private Expression array;
 	private Expression index;
 
-	public IndexArray(Token token, Expression array, Expression index)
+	public ArrayIndexExpr(Token token, Expression array, Expression index)
 	{
 		super(token);
 		this.array = array;
