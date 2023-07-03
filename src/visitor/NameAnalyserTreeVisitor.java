@@ -457,13 +457,6 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArrayInitializerExpr aie)
-	{
-		aie.getArraySize().accept(this);
-		return null;
-	}
-
-	@Override
 	public Type visit(ArrayAssign aa)
 	{
 		aa.getIdentifier().accept(this);

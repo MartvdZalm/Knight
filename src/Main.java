@@ -55,15 +55,13 @@ public class Main
 				/*
 				 * This will put bindings on all the names. For example the variable declaration here 'int a = 5' has a variable named 'a' with type of 'int' and the value '5'. 
 				 * When some other variable will use the variable 'a' like this 'int b = a', then we need to check what kind of type the variable 'a' is. We do this by binding the 
-				 * value '5' to the variable 'a'. With this we can easily help the programmer by giving an error if there is something wrong in the code.
+				 * value '5' and the type to the variable 'a'. With this we can easily help the programmer by giving an error if the types don't match.
 				 */
 				natv.visit((Program) tree);  
 
 				TypeAnalyser ta = new TypeAnalyser(st); // Use the variable 'st' that contains the whole symbol table and give this to the name analyser class. 
-				/*
-				 * This will use the bindings that were set on the previous step and check if every type is correct in the code.
-				 */
-				ta.visit((Program) tree);
+			
+				ta.visit((Program) tree); // This will use the bindings that were set on the previous step and check if every type is correct in the code.
 
 				/*
 				 * This will check if there were any error while compiling. If there were errors while compiling the compiler prints them. Else the abstract syntax tree that has been made by the parser

@@ -571,14 +571,6 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArrayInitializerExpr aie)
-	{
-		Type t = new IntArrayType(aie.getToken());
-		aie.setType(t);
-		return t;
-	}
-
-	@Override
 	public Type visit(ArrayAssign aa)
 	{
 		// Check identifier type

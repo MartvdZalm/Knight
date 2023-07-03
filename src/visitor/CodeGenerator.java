@@ -274,12 +274,6 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(ArrayInitializerExpr aie)
-	{
-		return null;
-	}
-
-	@Override
 	public String visit(ArrayAssign aa)
 	{
 		return null;

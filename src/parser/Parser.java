@@ -7,6 +7,9 @@ import java.util.List;
 import src.ast.*;
 import src.lexer.*;
 
+/**
+ * A class responsible for parsing a source file into an Abstract Syntax Tree (AST).
+ */
 public class Parser
 {
     private Lexer lexer;
@@ -16,12 +19,23 @@ public class Parser
     private Deque<Expression> stOperand = new ArrayDeque<>();
 	private Token currentAccessModifier;
 
+	/**
+     * Constructs a Parser object and initializes the lexer.
+     *
+     * @param sourceFile The path to the source file to be parsed.
+     */
     public Parser(String sourceFile)
     {
         lexer = new Lexer(sourceFile);
         stOperator.push(SENTINEL);
     }
 
+	/**
+     * Parses the source file and constructs the Abstract Syntax Tree (AST).
+     *
+     * @return The root of the AST representing the parsed program.
+     * @throws ParseException If there's an error during the parsing process.
+     */
     public Tree parse() throws ParseException
     {
         Program program = null;
@@ -66,6 +80,12 @@ public class Parser
         return program;
     }
 
+	/**
+     * Parses a class declaration in the source file.
+     *
+     * @return The parsed ClassDecl object representing the class declaration.
+     * @throws ParseException If there's an error during the parsing process.
+     */
 	private ClassDecl parseClassDecl() throws ParseException
 	{
 		eat(Tokens.CLASS);
@@ -95,6 +115,12 @@ public class Parser
 		}
 	}
 
+	/**
+     * Parses a variable declaration in the source file.
+     *
+     * @return The parsed Declaration object representing the variable declaration.
+     * @throws ParseException If there's an error during the parsing process.
+     */
 	private Declaration parseVariable() throws ParseException
 	{
 		Declaration decl = null;
@@ -117,6 +143,12 @@ public class Parser
 		return decl;
 	}
 
+	/**
+     * Parses an expression in the source file.
+     *
+     * @return The parsed Expression object representing the expression.
+     * @throws ParseException If there's an error during the parsing process.
+     */
 	private Expression parseExpression() throws ParseException
     {
         try {
@@ -136,6 +168,12 @@ public class Parser
         }
     }
 
+	/**
+     * Parses a function body in the source file.
+     *
+     * @return The parsed Expression object representing the function body.
+     * @throws ParseException If there's an error during the parsing process.
+     */
 	private Expression parseFunctionBody() throws ParseException
 	{
 		eat(Tokens.LEFTPAREN);
@@ -202,6 +240,13 @@ public class Parser
 		}
 	}
 
+	/**
+     * Parses a function call in the source file.
+     *
+     * @param methodId The identifier representing the method being called.
+     * @return The parsed Expression object representing the function call.
+     * @throws ParseException If there's an error during the parsing process.
+     */
 	private Expression parseCallFunction(IdentifierExpr methodId) throws ParseException
 	{
 		Token tok = token;
@@ -221,6 +266,12 @@ public class Parser
 		return new CallFunctionExpr(tok, null, methodId, exprList);
 	}
 
+	/**
+     * Parses an argument declaration in the source file.
+     *
+     * @return The parsed ArgDecl object representing the argument declaration.
+     * @throws ParseException If there's an error during the parsing process.
+     */
 	private ArgDecl parseArgument() throws ParseException
 	{
 		Type argType = parseType();
@@ -233,6 +284,12 @@ public class Parser
 		return new ArgDecl(argId.getToken(), argType, argId);
 	}
 
+	/**
+	 * Parses a statement and returns the corresponding Statement object.
+	 * 
+	 * @return The parsed Statement object.
+	 * @throws ParseException If there is an error while parsing the statement.
+	 */
 	private Statement parseStatement() throws ParseException
     {
 		switch (token.getToken()) {
@@ -282,6 +339,13 @@ public class Parser
 		}
     }
 
+	/**
+	 * Parses a statement with an Identifier and returns the corresponding Statement object.
+	 * 
+	 * @param id The Identifier for the statement.
+	 * @return The parsed Statement object.
+	 * @throws ParseException If there is an error while parsing the statement.
+	 */
 	private Statement parseState1(Identifier id) throws ParseException
 	{
 		switch (token.getToken()) {
@@ -332,6 +396,12 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Parses a type and returns the corresponding Type object.
+	 * 
+	 * @return The parsed Type object.
+	 * @throws ParseException If there is an error while parsing the type.
+	 */
 	private Type parseType() throws ParseException
 	{
 		switch (token.getToken()) {
@@ -374,6 +444,12 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Parses a type and returns the corresponding Type object.
+	 * 
+	 * @return The parsed Type object.
+	 * @throws ParseException If there is an error while parsing the type.
+	 */
 	private Type parseType1() throws ParseException
 	{
 		switch (token.getToken()) {
@@ -395,6 +471,11 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Parses an expression.
+	 * 
+	 * @throws ParseException If there is an error while parsing the expression.
+	 */
 	private void parseExpr() throws ParseException
 	{
 		switch (token.getToken()) {
@@ -457,20 +538,16 @@ public class Parser
 		}
 		break;
 
-		case LEFTBRACKET: {
-			eat(Tokens.LEFTBRACKET);
-			Expression expr = parseExpression();
-			eat(Tokens.RIGHTBRACKET);
-			stOperand.push(new ArrayInitializerExpr(token, expr));
-			parseTerm1();
-		}
-		break;
-
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token : " + token.getToken());
 		}
 	}
 
+	/**
+	 * Pushes an operator token onto the operator stack.
+	 * 
+	 * @param current The current operator token to be pushed.
+	 */
 	private void pushOperator(Token current)
 	{
 		Token top = stOperator.peek();
@@ -481,6 +558,9 @@ public class Parser
 		stOperator.push(current);
 	}
 
+	/**
+	 * Pops an operator token from the operator stack and processes it accordingly.
+	 */
 	private void popOperator()
 	{
 		Token top = stOperator.pop();
@@ -489,9 +569,13 @@ public class Parser
 		} else {
 			parseUnary(top);
 		}
-
 	}
 
+	/**
+	 * Parses an unary operation with the given token.
+	 * 
+	 * @param tok The unary operation token.
+	 */
 	private void parseUnary(Token tok)
 	{
 		switch (tok.getToken()) {
@@ -510,6 +594,11 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Parses a binary operation with the given token.
+	 * 
+	 * @param tok The binary operation token.
+	 */
 	private void parseBinary(Token tok)
 	{
 		switch (tok.getToken()) {
@@ -600,6 +689,12 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Checks if the given operator is a binary operator.
+	 * 
+	 * @param operator The operator token to be checked.
+	 * @return True if the operator is binary, false otherwise.
+	 */
 	private boolean isBinary(Tokens operator)
 	{
 		switch (operator) {
@@ -624,6 +719,12 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Returns the priority of the given operator.
+	 * 
+	 * @param operator The operator token to get the priority for.
+	 * @return The priority of the operator.
+	 */
 	private int getPriority(Tokens operator)
 	{
 		switch (operator) {
@@ -683,6 +784,11 @@ public class Parser
 
 	}
 
+	/**
+	 * Parses the term following a binary operation.
+	 * 
+	 * @throws ParseException If there is an error while parsing the term.
+	 */
 	private void parseTerm1() throws ParseException
 	{
 		switch (token.getToken()) {
@@ -784,16 +890,21 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Parses the term following a new operation.
+	 * 
+	 * @throws ParseException If there is an error while parsing the term.
+	 */
 	private void parseTerm2() throws ParseException
 	{
 		switch (token.getToken()) {
 
 		case INTEGER: {
 			eat(Tokens.INTEGER);
-			eat(Tokens.LEFTBRACE);
+			eat(Tokens.LEFTBRACKET);
 			stOperator.push(SENTINEL);
 			Expression arrayLength = parseExpression();
-			eat(Tokens.RIGHTBRACE);
+			eat(Tokens.RIGHTBRACKET);
 			stOperator.pop(); 
 			stOperator.pop(); 
 			NewArray array = new NewArray(arrayLength.getToken(), arrayLength);
@@ -815,6 +926,11 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Parses the access modifier.
+	 * 
+	 * @throws ParseException If there is an error while parsing the access modifier.
+	 */
 	private void parseAccess() throws ParseException
 	{
 		if (token.getToken() == Tokens.PUBLIC || token.getToken() == Tokens.PRIVATE || token.getToken() == Tokens.PROTECTED) {
@@ -824,6 +940,9 @@ public class Parser
 		}
 	}
 
+	/**
+	 * Advances the lexer to the next token.
+	 */
 	private void advance()
     {
         try {
@@ -833,6 +952,12 @@ public class Parser
         }
     }
 
+	/**
+	 * Consumes the current token if it matches the expected token, otherwise throws a ParseException.
+	 * 
+	 * @param tok The expected token to consume.
+	 * @throws ParseException If the current token does not match the expected token.
+	 */
     private void eat(Tokens tok) throws ParseException
     {
         if (tok == token.getToken()) {
@@ -842,6 +967,13 @@ public class Parser
         }
     }
 
+	/**
+	 * Throws a ParseException with an error message indicating an invalid token found and the expected token.
+	 * 
+	 * @param found The token that was found but is invalid.
+	 * @param expected The token that was expected at the current position.
+	 * @throws ParseException Always throws a ParseException with an error message.
+	 */
     private void error(Tokens found, Tokens expected) throws ParseException
     {
         throw new ParseException(token.getRow(), token.getCol(), "Invalid token : " + found + " Expected token : " + expected);

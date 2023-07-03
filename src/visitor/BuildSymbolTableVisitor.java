@@ -295,12 +295,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArrayInitializerExpr aie)
-	{
-		return null;
-	}
-
-	@Override
 	public Type visit(ArrayAssign arrayAssign)
 	{
 		return null;

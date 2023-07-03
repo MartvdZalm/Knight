@@ -84,5 +84,4 @@ public interface Visitor<R>
 
     public R visit(FunctionExprVoid functionExprVoid);
 
-    public R visit(ArrayInitializerExpr arrayInitializerExpr);
 }
