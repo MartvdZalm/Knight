@@ -336,7 +336,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		if (cm.getInstanceName() == null) {
 			IdentifierExpr callFunc = cm.getMethodId();
-			Function func = st.getMethod(callFunc.toString(), currClass.getId());
+			Function func = st.getFunction(callFunc.toString(), currClass.getId());
 			
 			if (func == null) {
 				Token sym = callFunc.getToken();
@@ -457,7 +457,7 @@ public class TypeAnalyser implements Visitor<Type>
 		if (vd.getExpr() instanceof CallFunctionExpr) {
 			CallFunctionExpr callFunc = (CallFunctionExpr) vd.getExpr();
 			if (callFunc.getInstanceName() == null) {
-				Function func = st.getMethod(callFunc.getMethodId().toString(), currClass.getId());
+				Function func = st.getFunction(callFunc.getMethodId().toString(), currClass.getId());
 				if (func != null) {
 					rhs = func.getType();
 				}
@@ -522,6 +522,16 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(FunctionExprVoid funcExprVoid)
 	{
+		for (int i = 0; i < funcExprVoid.getStatListSize(); i++) {
+			Statement st = funcExprVoid.getStatAt(i);
+			st.accept(this);
+		}
+
+		for (int i = 0; i < funcExprVoid.getVarListSize(); i++) {
+			Declaration decl = funcExprVoid.getVarDeclAt(i);
+			decl.accept(this);
+		}
+
 		return null;
 	}
 

@@ -14,12 +14,12 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 
 	public BuildSymbolTableVisitor()
 	{
-		this.symbolTable = new SymbolTable();
+		symbolTable = new SymbolTable();
 	}
 
 	public SymbolTable getSymTab()
 	{
-		return this.symbolTable;
+		return symbolTable;
 	}
 
 	@Override
@@ -243,12 +243,12 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		String id = vd.getId().getVarID();
 
 		if (vd.getExpr() instanceof FunctionExprReturn || vd.getExpr() instanceof FunctionExprVoid) {
-			if (!currClass.addMethod(id, t)) {
+			if (!currClass.addFunction(id, t)) {
 				Token tok = vd.getToken();
 				addError(tok.getRow(), tok.getCol(), "Function " + id + " already defined in class " + currClass.getId());
 				return null;
 			} else {
-				currFunc = currClass.getMethod(id);
+				currFunc = currClass.getFunction(id);
 			}
 
 			vd.getExpr().accept(this);

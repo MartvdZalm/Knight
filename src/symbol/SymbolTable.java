@@ -153,7 +153,7 @@ public class SymbolTable
      * @param classScope  The name of the class where the method is being called (search starts here).
      * @return The Function object representing the method with the specified identifier, or null if it does not exist in the given class or its parent classes.
      */
-	public Function getMethod(String id, String classScope)
+	public Function getFunction(String id, String classScope)
 	{
 		if (getKlass(classScope) == null) {
 			return null;
@@ -162,9 +162,9 @@ public class SymbolTable
 		Klass c = getKlass(classScope);
 		while (c != null && !rstack.contains(c.getId())) {
 			rstack.push(c.getId());
-			if (c.getMethod(id) != null) {
+			if (c.getFunction(id) != null) {
 				rstack.clear();
-				return c.getMethod(id);
+				return c.getFunction(id);
 			} else {
 				if (c.parent() == null) {
 					c = null;
@@ -184,9 +184,9 @@ public class SymbolTable
      * @param classScope  The name of the class where the method is being called (search starts here).
      * @return The Type object representing the return type of the method with the specified identifier, or null if it does not exist in the given class or its parent classes.
      */
-	public Type getMethodType(String id, String classScope)
+	public Type getFunctionType(String id, String classScope)
 	{
-		Function m = getMethod(id, classScope);
+		Function m = getFunction(id, classScope);
 		if (m == null) {
 			return null;
 		} else {

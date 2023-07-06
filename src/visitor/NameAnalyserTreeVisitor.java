@@ -235,7 +235,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		String id = i.getVarID();
 		Variable var = symbolTable.getVar(currFunc, currClass, id);
-		Function func = symbolTable.getMethod(id, currClass.getId());
+		Function func = symbolTable.getFunction(id, currClass.getId());
 
 		if (var == null && func == null) {
 			Token sym = i.getToken();
@@ -307,14 +307,14 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		vd.getType().accept(this); 
 		vd.getId().accept(this);
 
-		if (vd.getExpr() instanceof FunctionExprReturn) { 
+		if (vd.getExpr() instanceof FunctionExprReturn || vd.getExpr() instanceof FunctionExprVoid) { 
 			if (hsFunc.contains(id)) { // Check if function already exist
 				return null;
 			} else {
 				hsFunc.add(id); // Else add the function to the List.
 			}
 
-			currFunc = currClass.getMethod(id); // Set the current functon to this function.
+			currFunc = currClass.getFunction(id); // Set the current functon to this function.
 			vd.getId().setB(currFunc); // Set the identifier of this declaration connected to the current function, because this declaration is a function.
 		}
 
@@ -364,6 +364,22 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(FunctionExprVoid funcExprVoid)
 	{
+		for (int i = 0; i < funcExprVoid.getArgListSize(); i++) {
+			ArgDecl ad = funcExprVoid.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < funcExprVoid.getVarListSize(); i++) {
+			Declaration vd = funcExprVoid.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < funcExprVoid.getStatListSize(); i++) {
+			Statement st = funcExprVoid.getStatAt(i);
+			st.accept(this);
+		}
+
+		currFunc = null;
 		return null;
 	}
 

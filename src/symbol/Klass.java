@@ -60,9 +60,9 @@ public class Klass extends Binding
      * @param type The Type associated with the method.
      * @return True if the method is successfully added, false if a method with the same identifier already exists.
      */
-	public boolean addMethod(String id, Type type)
+	public boolean addFunction(String id, Type type)
 	{
-		if (containsMethod(id)) {
+		if (containsFunction(id)) {
 			return false;
 		} else {
 			methods.put(id, new Function(id, type));
@@ -75,7 +75,7 @@ public class Klass extends Binding
      *
      * @return An Enumeration of the class's methods.
      */
-	public Enumeration<String> getMethods()
+	public Enumeration<String> getFunctions()
 	{
 		return methods.keys();
 	}
@@ -86,9 +86,9 @@ public class Klass extends Binding
      * @param id The identifier (name) of the method to retrieve.
      * @return The Function object representing the method with the specified identifier, or null if it does not exist.
      */
-	public Function getMethod(String id)
+	public Function getFunction(String id)
 	{
-		if (containsMethod(id)) {
+		if (containsFunction(id)) {
 			return methods.get(id);
 		} else {
 			return null;
@@ -144,7 +144,7 @@ public class Klass extends Binding
      * @param id The identifier (name) of the method to check.
      * @return True if the class contains the method, false otherwise.
      */
-	public boolean containsMethod(String id)
+	public boolean containsFunction(String id)
 	{
 		return methods.containsKey(id);
 	}
