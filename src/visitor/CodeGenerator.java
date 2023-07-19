@@ -206,13 +206,15 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VarDecl vd)
 	{
+		sectionBSS.append(vd.getId().getVarID() + " resb 10\n");
+
 		return null;
 	}
 
 	@Override
 	public String visit(VarDeclInit vd)
 	{
-		sectionDATA.append(vd.getId().accept(this) + " db " + vd.getExpr().accept(this) + "\n");
+		sectionDATA.append(vd.getId().getVarID() + " db " + vd.getExpr().accept(this) + "\n");
 		
 		return null;
 	}
@@ -305,8 +307,8 @@ public class CodeGenerator implements Visitor<String>
 			program.getClassDeclAt(i).accept(this);
 		}
 
-		code.append(sectionBSS);
-		code.append(sectionDATA);
+		code.append(sectionBSS.append("\n"));
+		code.append(sectionDATA.append("\n"));
 		code.append(sectionTEXT);
 		code.append(sectionEXIT);
 
