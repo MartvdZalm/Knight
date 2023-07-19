@@ -5,13 +5,15 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import src.ast.Type;
+import src.semantics.Binding;
 
 /**
  * Represents a function declaration in the program's symbol handling phase.
  * Function class extends the Decl class and is used to store information about a function, including its parameters and variables.
  */
-public class Function extends Decl
+public class Function extends Binding
 {
+	private String id;
 	private Vector<Variable> params; // Vector to store the function's parameters (Variable objects)
 	private Hashtable<String, Variable> vars; // Hashtable to store the function's variables (Variable objects) with their identifiers as keys
 
@@ -23,9 +25,15 @@ public class Function extends Decl
      */
 	public Function(String id, Type type)
 	{
-		super(id, type);
+		super(type);
+		this.id = id;
 		vars = new Hashtable<>();
 		params = new Vector<>();
+	}
+
+	public String getId()
+	{
+		return id;
 	}
 
 	/**

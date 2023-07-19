@@ -34,6 +34,7 @@ public class TokenType
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("new", Tokens.NEW);
         Symbol.symbol("include", Tokens.INCLUDE);
+        Symbol.symbol("func", Tokens.FUNCTION);
                 
         Symbol.symbol("if", Tokens.IF);
         Symbol.symbol("else", Tokens.ELSE);

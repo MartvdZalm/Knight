@@ -32,6 +32,7 @@ public enum Tokens
     COMMENT,
     NEW,
     INCLUDE,
+    FUNCTION,
 
     IF,
     ELSE,

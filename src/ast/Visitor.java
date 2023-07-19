@@ -80,8 +80,8 @@ public interface Visitor<R>
 
     public R visit(ForLoop forLoop);
 
-    public R visit(FunctionExprReturn functionBody);
+    public R visit(FunctionVoid functionVoid);
 
-    public R visit(FunctionExprVoid functionExprVoid);
+    public R visit(FunctionReturn functionReturn);
 
 }

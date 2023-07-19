@@ -298,7 +298,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = i.getB();
 		if (b != null) {
-			Type t = ((Decl) b).getType();
+			Type t = ((Variable) b).getType();
 			i.setType(t);
 			return t;
 		}
@@ -466,22 +466,6 @@ public class TypeAnalyser implements Visitor<Type>
 			}
 		}
 
-		if (vd.getExpr() instanceof FunctionExprReturn) {
-			FunctionExprReturn funcExprReturn = (FunctionExprReturn) vd.getExpr();
-
-			currFunc = (Function) vd.getId().getB();
-
-			rhs = funcExprReturn.getReturnExpr().accept(this);
-
-		} else if (vd.getExpr() instanceof FunctionExprVoid) {
-			Token tok = vd.getToken();
-			if (!(lhs instanceof VoidType)) {
-				addError(tok.getRow(), tok.getCol(), "Function " + vd.getId() + " must return a result of type " + lhs);
-			}
-			return null;
-		}
-
-		
 		if (!st.compareTypes(lhs, rhs)) {
 			Token sym = vd.getToken();
 			if (lhs == null || rhs == null) {
@@ -504,34 +488,63 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionExprReturn funcExprReturn)
+	public Type visit(FunctionVoid functionVoid)
 	{
-		for (int i = 0; i < funcExprReturn.getStatListSize(); i++) {
-			Statement st = funcExprReturn.getStatAt(i);
+		String functionName = functionVoid.getFunctionName().getVarID();
+
+		if (hsFunc.contains(functionName)) {
+			return functionVoid.getReturnType();
+		}
+		hsFunc.add(functionName);
+
+		currFunc = (Function) functionVoid.getFunctionName().getB();
+
+		for (int i = 0; i < functionVoid.getStatListSize(); i++) {
+			Statement st = functionVoid.getStatAt(i);
 			st.accept(this);
 		}
 
-		for (int i = 0; i < funcExprReturn.getVarListSize(); i++) {
-			Declaration decl = funcExprReturn.getVarDeclAt(i);
+		for (int i = 0; i < functionVoid.getVarListSize(); i++) {
+			Declaration decl = functionVoid.getVarDeclAt(i);
 			decl.accept(this);
 		}
 
+		currFunc = null;
 		return null;
 	}
 
 	@Override
-	public Type visit(FunctionExprVoid funcExprVoid)
+	public Type visit(FunctionReturn functionReturn)
 	{
-		for (int i = 0; i < funcExprVoid.getStatListSize(); i++) {
-			Statement st = funcExprVoid.getStatAt(i);
+		String functionName = functionReturn.getFunctionName().getVarID();
+
+		if (hsFunc.contains(functionName)) {
+			return functionReturn.getReturnType();
+		}
+		hsFunc.add(functionName);
+
+		currFunc = (Function) functionReturn.getFunctionName().getB();
+
+		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
+			Statement st = functionReturn.getStatAt(i);
 			st.accept(this);
 		}
 
-		for (int i = 0; i < funcExprVoid.getVarListSize(); i++) {
-			Declaration decl = funcExprVoid.getVarDeclAt(i);
+		Type t1 = functionReturn.getReturnType();
+		Type t2 = functionReturn.getReturnExpr().accept(this);
+
+		if (!st.compareTypes(t1, t2)) {
+			Token tok = functionReturn.getReturnExpr().getToken();
+			addError(tok.getRow(), tok.getCol(), "Function " + functionName + " must return a result of Type " + t1);
+		}
+
+		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
+			Declaration decl = functionReturn.getVarDeclAt(i);
 			decl.accept(this);
 		}
 
+		functionReturn.getReturnExpr().setType(t2);
+		currFunc = null;
 		return null;
 	}
 
@@ -549,7 +562,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = id.getB();
 		if (b != null) {
-			return ((Decl) b).getType();
+			return ((Variable) b).getType();
 		}
 		return null;
 	}
@@ -632,9 +645,8 @@ public class TypeAnalyser implements Visitor<Type>
 		currClass = (Klass) b;
 
 		hsFunc.clear();
-
-		for (int i = 0; i < cd.getVarListSize(); i++) {
-			Declaration decl = cd.getVarDeclAt(i);
+		for (int i = 0; i < cd.getDeclListSize(); i++) {
+			Declaration decl = cd.getDeclAt(i);
 			decl.accept(this);
 		}
 
@@ -653,6 +665,10 @@ public class TypeAnalyser implements Visitor<Type>
 		currClass = (Klass) b;
 
 		hsFunc.clear();
+		for (int i = 0; i < cd.getDeclListSize(); i++) {
+			Declaration decl = cd.getDeclAt(i);
+			decl.accept(this);
+		}
 
 		return null;
 	}

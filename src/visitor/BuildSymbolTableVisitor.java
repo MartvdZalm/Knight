@@ -4,6 +4,7 @@ import src.ast.*;
 import src.lexer.*;
 import src.semantics.SemanticErrors;
 import src.symbol.*;
+import src.symbol.Function;
 
 public class BuildSymbolTableVisitor implements Visitor<Type>
 {
@@ -242,18 +243,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		Type t = vd.getType().accept(this);
 		String id = vd.getId().getVarID();
 
-		if (vd.getExpr() instanceof FunctionExprReturn || vd.getExpr() instanceof FunctionExprVoid) {
-			if (!currClass.addFunction(id, t)) {
-				Token tok = vd.getToken();
-				addError(tok.getRow(), tok.getCol(), "Function " + id + " already defined in class " + currClass.getId());
-				return null;
-			} else {
-				currFunc = currClass.getFunction(id);
-			}
-
-			vd.getExpr().accept(this);
-		}
-
 		if (currFunc != null) {
 			if (!currFunc.addVar(id, t)) {
 				Token tok = vd.getId().getToken();
@@ -307,32 +296,67 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionExprReturn funcExprReturn)
+	public Type visit(FunctionVoid functionVoid)
 	{
-		for (int i = 0; i < funcExprReturn.getArgListSize(); i++) {
-			ArgDecl ad = funcExprReturn.getArgDeclAt(i);
+		Type type = functionVoid.getReturnType().accept(this);
+		String functionName = functionVoid.getFunctionName().getVarID();
+
+		if (!currClass.addFunction(functionName, type)) {
+			Token tok = functionVoid.getToken();
+			addError(tok.getRow(), tok.getCol(), "Function " + functionName + "  already defined in class " + currClass.getId());
+		} else {
+			currFunc = currClass.getFunction(functionName);
+		}
+
+		for (int i = 0; i < functionVoid.getArgListSize(); i++) {
+			ArgDecl ad = functionVoid.getArgDeclAt(i);
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < funcExprReturn.getVarListSize(); i++) {
-			Declaration vd = funcExprReturn.getVarDeclAt(i);
+		for (int i = 0; i < functionVoid.getVarListSize(); i++) {
+			Declaration vd = functionVoid.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
-		for (int i = 0; i < funcExprReturn.getStatListSize(); i++) {
-			Statement st = funcExprReturn.getStatAt(i);
+		for (int i = 0; i < functionVoid.getStatListSize(); i++) {
+			Statement st = functionVoid.getStatAt(i);
 			st.accept(this);
 		}
 
-		funcExprReturn.getReturnExpr().accept(this);
 		currFunc = null;
-
 		return null;
 	}
 
 	@Override
-	public Type visit(FunctionExprVoid funcExprVoid)
+	public Type visit(FunctionReturn functionReturn)
 	{
+		Type type = functionReturn.getReturnType().accept(this);
+		String functionName = functionReturn.getFunctionName().getVarID();
+
+		if (!currClass.addFunction(functionName, type)) {
+			Token tok = functionReturn.getToken();
+			addError(tok.getRow(), tok.getCol(), "Function " + functionName + "  already defined in class " + currClass.getId());
+		} else {
+			currFunc = currClass.getFunction(functionName);
+		}
+
+		for (int i = 0; i < functionReturn.getArgListSize(); i++) {
+			ArgDecl ad = functionReturn.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
+			Declaration vd = functionReturn.getVarDeclAt(i);
+			vd.accept(this);
+		}
+
+		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
+			Statement st = functionReturn.getStatAt(i);
+			st.accept(this);
+		}
+
+		functionReturn.getReturnExpr().accept(this);
+		currFunc = null;
 		return null;
 	}
 
@@ -348,8 +372,8 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 			currClass = symbolTable.getKlass(identifier);
 		}
 
-		for (int i = 0; i < classDeclSimple.getVarListSize(); i++) {
-			Declaration vd = classDeclSimple.getVarDeclAt(i);
+		for (int i = 0; i < classDeclSimple.getDeclListSize(); i++) {
+			Declaration vd = classDeclSimple.getDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -374,8 +398,8 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 			addError(sym.getRow(), sym.getCol(), "class " + identifier + " cannot inherit main class");
 		}
 
-		for (int i = 0; i < classDeclExtends.getVarListSize(); i++) {
-			Declaration vd = classDeclExtends.getVarDeclAt(i);
+		for (int i = 0; i < classDeclExtends.getDeclListSize(); i++) {
+			Declaration vd = classDeclExtends.getDeclAt(i);
 			vd.accept(this);
 		}
 

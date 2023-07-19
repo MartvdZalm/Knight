@@ -8,14 +8,14 @@ public class ClassDeclExtends extends ClassDecl
 {
 	private IdentifierExpr id;
 	private IdentifierExpr parent;
-	private List<Declaration> varList;
+	private List<Declaration> declList;
 
-	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> varList)
+	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> declList)
 	{
 		super(token);
 		this.id = className;
 		this.parent = parentClassName;
-		this.varList = varList;
+		this.declList = declList;
 	}
 
 	public IdentifierExpr getId()
@@ -38,15 +38,15 @@ public class ClassDeclExtends extends ClassDecl
 		this.parent = parent;
 	}
 
-	public int getVarListSize()
+	public int getDeclListSize()
 	{
-		return varList.size();
+		return declList.size();
 	}
 
-	public Declaration getVarDeclAt(int index)
+	public Declaration getDeclAt(int index)
 	{
-		if (index < varList.size()) {
-			return varList.get(index);
+		if (index < declList.size()) {
+			return declList.get(index);
 		}
 		return null;
 	}

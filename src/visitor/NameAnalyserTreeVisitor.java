@@ -235,19 +235,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		String id = i.getVarID();
 		Variable var = symbolTable.getVar(currFunc, currClass, id);
-		Function func = symbolTable.getFunction(id, currClass.getId());
 
-		if (var == null && func == null) {
+		if (var == null) {
 			Token sym = i.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
 		}
-		
-		if (var != null) {
-			i.setB(var);
-		} else {
-			i.setB(func);
-		}
 
+		i.setB(var);
 		return null;
 	}
 
@@ -282,10 +276,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(VarDecl vd)
 	{
+		String id = vd.getId().getVarID();
+		
 		vd.getType().accept(this);
 		vd.getId().accept(this);
-
-		String id = vd.getId().getVarID();
 
 		if (currFunc == null) {
 			Klass parent = symbolTable.getKlass(currClass.parent());
@@ -297,26 +291,14 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 
 		return null;
 	}
-
 	
 	@Override
 	public Type visit(VarDeclInit vd)
 	{
-		String id = vd.getId().getVarID(); // Get the name of the variable declaration.
+		String id = vd.getId().getVarID();
 
 		vd.getType().accept(this); 
 		vd.getId().accept(this);
-
-		if (vd.getExpr() instanceof FunctionExprReturn || vd.getExpr() instanceof FunctionExprVoid) { 
-			if (hsFunc.contains(id)) { // Check if function already exist
-				return null;
-			} else {
-				hsFunc.add(id); // Else add the function to the List.
-			}
-
-			currFunc = currClass.getFunction(id); // Set the current functon to this function.
-			vd.getId().setB(currFunc); // Set the identifier of this declaration connected to the current function, because this declaration is a function.
-		}
 
 		if (currFunc == null) {
 			Klass parent = symbolTable.getKlass(currClass.parent());
@@ -327,7 +309,6 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		vd.getExpr().accept(this);
-
 		return null;
 	}
 
@@ -339,46 +320,62 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionExprReturn funcExprReturn)
+	public Type visit(FunctionVoid functionVoid)
 	{
-		for (int i = 0; i < funcExprReturn.getArgListSize(); i++) {
-			ArgDecl ad = funcExprReturn.getArgDeclAt(i);
+		String functionName = functionVoid.getFunctionName().getVarID();
+
+		if (hsFunc.contains(functionName)) {
+			return null;
+		} else {
+			hsFunc.add(functionName);
+		}
+
+		for (int i = 0; i < functionVoid.getArgListSize(); i++) {
+			ArgDecl ad = functionVoid.getArgDeclAt(i);
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < funcExprReturn.getVarListSize(); i++) {
-			Declaration vd = funcExprReturn.getVarDeclAt(i);
+		for (int i = 0; i < functionVoid.getVarListSize(); i++) {
+			Declaration vd = functionVoid.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
-		for (int i = 0; i < funcExprReturn.getStatListSize(); i++) {
-			Statement st = funcExprReturn.getStatAt(i);
+		for (int i = 0; i < functionVoid.getStatListSize(); i++) {
+			Statement st = functionVoid.getStatAt(i);
 			st.accept(this);
 		}
 
-		funcExprReturn.getReturnExpr().accept(this);
 		currFunc = null;
 		return null;
 	}
 
 	@Override
-	public Type visit(FunctionExprVoid funcExprVoid)
+	public Type visit(FunctionReturn functionReturn)
 	{
-		for (int i = 0; i < funcExprVoid.getArgListSize(); i++) {
-			ArgDecl ad = funcExprVoid.getArgDeclAt(i);
+		String functionName = functionReturn.getFunctionName().getVarID();
+
+		if (hsFunc.contains(functionName)) {
+			return null;
+		} else {
+			hsFunc.add(functionName);
+		}
+
+		for (int i = 0; i < functionReturn.getArgListSize(); i++) {
+			ArgDecl ad = functionReturn.getArgDeclAt(i);
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < funcExprVoid.getVarListSize(); i++) {
-			Declaration vd = funcExprVoid.getVarDeclAt(i);
+		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
+			Declaration vd = functionReturn.getVarDeclAt(i);
 			vd.accept(this);
 		}
 
-		for (int i = 0; i < funcExprVoid.getStatListSize(); i++) {
-			Statement st = funcExprVoid.getStatAt(i);
+		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
+			Statement st = functionReturn.getStatAt(i);
 			st.accept(this);
 		}
 
+		functionReturn.getReturnExpr().accept(this);
 		currFunc = null;
 		return null;
 	}
@@ -500,8 +497,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		currClass = symbolTable.getKlass(id);
 		cd.getId().setB(currClass);
 
-		for (int i = 0; i < cd.getVarListSize(); i++) {
-			Declaration vd = cd.getVarDeclAt(i);
+		for (int i = 0; i < cd.getDeclListSize(); i++) {
+			Declaration vd = cd.getDeclAt(i);
 			vd.accept(this);
 		}
 
@@ -532,8 +529,8 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			cd.getParent().setB(parentKlass);
 		}
 
-		for (int i = 0; i < cd.getVarListSize(); i++) {
-			Declaration vd = cd.getVarDeclAt(i);
+		for (int i = 0; i < cd.getDeclListSize(); i++) {
+			Declaration vd = cd.getDeclAt(i);
 			vd.accept(this);
 		}
 

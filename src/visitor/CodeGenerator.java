@@ -16,6 +16,11 @@ public class CodeGenerator implements Visitor<String>
 	private final String PATH;
 	public static final String LABEL = "Label";
 
+	private StringBuilder sectionBSS = new StringBuilder();
+	private StringBuilder sectionDATA = new StringBuilder();
+	private StringBuilder sectionTEXT = new StringBuilder();
+	private StringBuilder sectionEXIT = new StringBuilder();
+
 
 	public CodeGenerator(String progPath)
 	{
@@ -61,7 +66,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IntLiteral n)
 	{
-		return "" + n.getValue();
+		return String.valueOf(n.getValue());
 	}
 
 	@Override
@@ -207,6 +212,8 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VarDeclInit vd)
 	{
+		sectionDATA.append(vd.getId().accept(this) + " db " + vd.getExpr().accept(this) + "\n");
+		
 		return null;
 	}
 
@@ -217,54 +224,21 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(FunctionExprReturn funcExprReturn)
+	public String visit(FunctionVoid functionVoid)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(FunctionExprVoid funcExprVoid)
-	{
-		return null;
-	}
-
-
-	@Override
-	public String visit(Program program)
-	{
-		String code = "";
-
-		for (int i = 0; i < program.getIncludeListSize(); i++) {
-			code += program.getIncludeAt(i).accept(this);
-		}
-
-		for (int i = 0; i < program.getClassListSize(); i++) {
-			code += program.getClassDeclAt(i).accept(this);
-			write(currClass.getId(), code);
-		}
-
-		return null;
-	}
-
-	private File write(String name, String code)
-	{
-		try {
-			File f = new File(PATH + name + ".asm");
-			PrintWriter writer = new PrintWriter(f, "UTF-8");
-			writer.println(code);
-			writer.close();
-			return f;
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-
+	public String visit(FunctionReturn functionReturn)
+	{	
 		return null;
 	}
 
 	@Override
 	public String visit(Identifier id)
 	{
-		return null;
+		return id.getVarID();
 	}
 
 	@Override
@@ -293,6 +267,10 @@ public class CodeGenerator implements Visitor<String>
 
 		StringBuilder sb = new StringBuilder();
 
+		for (int i = 0; i < cd.getDeclListSize(); i++) {
+			cd.getDeclAt(i).accept(this);
+		}
+
 		return sb.toString();
 	}
 
@@ -305,7 +283,51 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Include include)
 	{
-		return include.getId() + "\n";
+		return null;
+	}
+
+	@Override
+	public String visit(Program program)
+	{
+		StringBuilder code = new StringBuilder();
+
+		sectionBSS.append("section .bss\n");
+		sectionDATA.append("section .data\n");
+		sectionTEXT.append("section .text\n");
+		sectionTEXT.append("global _start\n");
+		sectionTEXT.append("_start:\n");
+
+		for (int i = 0; i < program.getIncludeListSize(); i++) {
+			program.getIncludeAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			program.getClassDeclAt(i).accept(this);
+		}
+
+		code.append(sectionBSS);
+		code.append(sectionDATA);
+		code.append(sectionTEXT);
+		code.append(sectionEXIT);
+
+		write(currClass.getId(), code);
+
+		return null;
+	}
+
+	private File write(String name, StringBuilder code)
+	{
+		try {
+			File f = new File(PATH + name + ".asm");
+			PrintWriter writer = new PrintWriter(f, "UTF-8");
+			writer.println(code);
+			writer.close();
+			return f;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+
+		return null;
 	}
 
 	private int getLocalVarIndex(Binding b)

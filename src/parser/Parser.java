@@ -100,18 +100,100 @@ public class Parser
 		}
 		eat(Tokens.LEFTBRACE);
 
-		List<Declaration> varList = new ArrayList<>();
+		List<Declaration> declList = new ArrayList<>();
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
 			parseAccess();
-			varList.add(parseVariable());
+
+			if (token.getToken() == Tokens.FUNCTION) {
+				declList.add(parseFunction());
+			} else {
+				declList.add(parseVariable());
+			}
 		}
 		eat(Tokens.RIGHTBRACE);
 
 		if (parent == null) {
-			return new ClassDeclSimple(className.getToken(), className, varList);
+			return new ClassDeclSimple(className.getToken(), className, declList);
 		} else {
-			return new ClassDeclExtends(className.getToken(), className, parent, varList);
+			return new ClassDeclExtends(className.getToken(), className, parent, declList);
+		}
+	}
+
+	/**
+     * Parses a function body in the source file.
+     *
+     * @return The parsed Expression object representing the function body.
+     * @throws ParseException If there's an error during the parsing process.
+     */
+	private Declaration parseFunction() throws ParseException
+	{
+		eat(Tokens.FUNCTION);
+		Type returnType = parseType();
+		IdentifierExpr functionName = new IdentifierExpr(token, token.getSymbol());
+		eat(Tokens.IDENTIFIER);
+
+		eat(Tokens.LEFTPAREN);
+		List<ArgDecl> argList = new ArrayList<ArgDecl>();
+
+		if (token.getToken() != Tokens.RIGHTPAREN) {
+			argList.add(parseArgument());
+
+			while (token.getToken() == Tokens.COMMA) {
+				eat(Tokens.COMMA);;
+				argList.add(parseArgument());
+			}
+		}
+		eat(Tokens.RIGHTPAREN);
+		eat(Tokens.LEFTBRACE);
+
+		List<Declaration> varList = new ArrayList<>();
+		List<Statement> statList = new ArrayList<>();
+
+		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
+
+			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {	
+				
+				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
+					varList.add(parseVariable());
+				}
+	
+				while (token.getToken() == Tokens.IDENTIFIER) {
+					IdentifierType identifierType = new IdentifierType(token, token.getSymbol());
+					Identifier identifier = new Identifier(token, token.getSymbol());
+					eat(Tokens.IDENTIFIER);
+	
+					if (token.getToken() == Tokens.IDENTIFIER) {
+						Identifier identifier2 = new Identifier(token, token.getSymbol());
+						eat(Tokens.IDENTIFIER);
+						if (token.getToken() == Tokens.SEMICOLON) {
+							varList.add(new VarDecl(token, identifierType, identifier2, currentAccessModifier));
+						} else {
+							varList.add(new VarDeclInit(token, identifierType, identifier2, parseExpression(), currentAccessModifier));
+						}
+						eat(Tokens.SEMICOLON);
+					} else {		
+						Statement stat = parseState1(identifier);
+						statList.add(stat);
+					}
+				}
+			} else {
+				statList.add(parseStatement());
+			}
+		}
+
+		Expression returnExpr = null;
+		if (returnType.getToken().getToken() != Tokens.VOID) {
+			eat(Tokens.RETURN);
+			returnExpr = parseExpression();
+			eat(Tokens.SEMICOLON);
+		} 
+		eat(Tokens.RIGHTBRACE);
+
+		if (returnExpr != null) {
+			return new FunctionReturn(token, currentAccessModifier, returnType, functionName, argList, varList, statList, returnExpr);
+		} else {
+			return new FunctionVoid(token, currentAccessModifier, returnType, functionName, argList, varList, statList);
 		}
 	}
 
@@ -167,78 +249,6 @@ public class Parser
             throw e;
         }
     }
-
-	/**
-     * Parses a function body in the source file.
-     *
-     * @return The parsed Expression object representing the function body.
-     * @throws ParseException If there's an error during the parsing process.
-     */
-	private Expression parseFunctionBody() throws ParseException
-	{
-		eat(Tokens.LEFTPAREN);
-		List<ArgDecl> argList = new ArrayList<ArgDecl>();
-
-		if (token.getToken() != Tokens.RIGHTPAREN) {
-			argList.add(parseArgument());
-
-			while (token.getToken() == Tokens.COMMA) {
-				eat(Tokens.COMMA);;
-				argList.add(parseArgument());
-			}
-		}
-		eat(Tokens.RIGHTPAREN);
-		eat(Tokens.LEFTBRACE);
-
-		List<Declaration> varList = new ArrayList<>();
-		List<Statement> statList = new ArrayList<>();
-
-		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
-
-			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {	
-				
-				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
-					varList.add(parseVariable());
-				}
-	
-				while (token.getToken() == Tokens.IDENTIFIER) {
-					IdentifierType identifierType = new IdentifierType(token, token.getSymbol());
-					Identifier identifier = new Identifier(token, token.getSymbol());
-					eat(Tokens.IDENTIFIER);
-	
-					if (token.getToken() == Tokens.IDENTIFIER) {
-						Identifier identifier2 = new Identifier(token, token.getSymbol());
-						eat(Tokens.IDENTIFIER);
-						if (token.getToken() == Tokens.SEMICOLON) {
-							varList.add(new VarDecl(token, identifierType, identifier2, currentAccessModifier));
-						} else {
-							varList.add(new VarDeclInit(token, identifierType, identifier2, parseExpression(), currentAccessModifier));
-						}
-						eat(Tokens.SEMICOLON);
-					} else {		
-						Statement stat = parseState1(identifier);
-						statList.add(stat);
-					}
-				}
-			} else {
-				statList.add(parseStatement());
-			}
-		}
-
-		Expression returnExpr = null;
-		if (token.getToken() == Tokens.RETURN) {
-			eat(Tokens.RETURN);
-			returnExpr = parseExpression();
-			eat(Tokens.SEMICOLON);
-		} 
-		eat(Tokens.RIGHTBRACE);
-
-		if (returnExpr != null) {
-			return new FunctionExprReturn(token, argList, varList, statList, returnExpr);
-		} else {
-			return new FunctionExprVoid(token, argList, varList, statList);
-		}
-	}
 
 	/**
      * Parses a function call in the source file.
@@ -530,11 +540,6 @@ public class Parser
 			eat(Tokens.NEW);
 			parseTerm2();
 			parseTerm1();
-		}
-		break;
-
-		case LEFTPAREN: {
-			stOperand.add(parseFunctionBody());
 		}
 		break;
 

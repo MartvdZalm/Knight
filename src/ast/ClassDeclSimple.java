@@ -7,13 +7,13 @@ import src.lexer.Token;
 public class ClassDeclSimple extends ClassDecl
 {
 	private IdentifierExpr id;
-	private List<Declaration> varList;
+	private List<Declaration> declList;
 
-	public ClassDeclSimple(Token jSymbol, IdentifierExpr className, List<Declaration> varList)
+	public ClassDeclSimple(Token jSymbol, IdentifierExpr className, List<Declaration> declList)
 	{
 		super(jSymbol);
 		this.id = className;
-		this.varList = varList;
+		this.declList = declList;
 	}
 
 	public IdentifierExpr getId()
@@ -26,15 +26,15 @@ public class ClassDeclSimple extends ClassDecl
 		this.id = id;
 	}
 
-	public int getVarListSize()
+	public int getDeclListSize()
 	{
-		return varList.size();
+		return declList.size();
 	}
 
-	public Declaration getVarDeclAt(int index)
+	public Declaration getDeclAt(int index)
 	{
-		if (index < varList.size()) {
-			return varList.get(index);
+		if (index < declList.size()) {
+			return declList.get(index);
 		}
 		return null;
 	}

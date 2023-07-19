@@ -1,13 +1,15 @@
 package src.symbol;
 
 import src.ast.Type;
+import src.semantics.Binding;
 
 /**
  * The Variable class represents a variable declaration in the symbol table.
  * It extends the Decl class, which contains common properties and methods for declarations.
  */
-public class Variable extends Decl
+public class Variable extends Binding
 {
+	private String id;
 	private int lvIndex = -1; // The local variable index in the activation record (initialized to -1)
 
 	/**
@@ -18,7 +20,13 @@ public class Variable extends Decl
      */
 	public Variable(String id, Type type)
 	{
-		super(id, type);
+		super(type);
+		this.id = id;
+	}
+
+	public String getId()
+	{
+		return id;
 	}
 
 	/**
