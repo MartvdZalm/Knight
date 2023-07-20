@@ -330,6 +330,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			hsFunc.add(functionName);
 		}
 
+		functionVoid.getReturnType().accept(this);
+		currFunc = currClass.getFunction(functionName);
+		functionVoid.getFunctionName().setB(currFunc);
+
 		for (int i = 0; i < functionVoid.getArgListSize(); i++) {
 			ArgDecl ad = functionVoid.getArgDeclAt(i);
 			ad.accept(this);
@@ -359,6 +363,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		} else {
 			hsFunc.add(functionName);
 		}
+
+		functionReturn.getReturnType().accept(this);
+		currFunc = currClass.getFunction(functionName);
+		functionReturn.getFunctionName().setB(currFunc);
 
 		for (int i = 0; i < functionReturn.getArgListSize(); i++) {
 			ArgDecl ad = functionReturn.getArgDeclAt(i);

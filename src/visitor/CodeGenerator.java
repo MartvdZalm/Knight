@@ -19,6 +19,7 @@ public class CodeGenerator implements Visitor<String>
 	private StringBuilder sectionBSS = new StringBuilder();
 	private StringBuilder sectionDATA = new StringBuilder();
 	private StringBuilder sectionTEXT = new StringBuilder();
+	private StringBuilder sectionFUNCTIONS = new StringBuilder();
 	private StringBuilder sectionEXIT = new StringBuilder();
 
 
@@ -234,6 +235,20 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
+		sectionFUNCTIONS.append(functionReturn.getFunctionName().getVarID() + ":" + "\n");
+		sectionFUNCTIONS.append("push rbp" + "\n");
+		sectionFUNCTIONS.append("mov rbp, rsp" + "\n");
+
+		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
+			sectionFUNCTIONS.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
+		}
+
+
+		
+
+		sectionFUNCTIONS.append("pop rbp" + "\n");
+		sectionFUNCTIONS.append("ret" + "\n");
+
 		return null;
 	}
 
@@ -258,7 +273,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(StringLiteral stringLiteral)
 	{
-		return null;
+		return "\"" + stringLiteral.getValue() + "\"";
 	}
 
 	@Override
@@ -311,6 +326,7 @@ public class CodeGenerator implements Visitor<String>
 		code.append(sectionDATA.append("\n"));
 		code.append(sectionTEXT);
 		code.append(sectionEXIT);
+		code.append(sectionFUNCTIONS);
 
 		write(currClass.getId(), code);
 
