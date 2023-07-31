@@ -22,7 +22,6 @@ public class CodeGenerator implements Visitor<String>
 	private StringBuilder sectionFUNCTIONS = new StringBuilder();
 	private StringBuilder sectionEXIT = new StringBuilder();
 
-
 	public CodeGenerator(String progPath)
 	{
 		PATH = progPath;
@@ -243,8 +242,6 @@ public class CodeGenerator implements Visitor<String>
 			sectionFUNCTIONS.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
 		}
 
-
-		
 
 		sectionFUNCTIONS.append("pop rbp" + "\n");
 		sectionFUNCTIONS.append("ret" + "\n");

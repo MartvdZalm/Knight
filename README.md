@@ -12,10 +12,6 @@ The primary objective of Knight is to create a programming language that is both
 - Designed to be efficient
 - First version being developed for Linux with plans for multi-platform support (Windows, iOS, etc.)
 
-## Roadmap
-- **July 30, 2023:** Completion of the first version of the compiler
-- Initial version allows creation of simple and small applications
-
 ## License
 Knight is released under the [MIT License](https://github.com/MartvdZalm/Knight/blob/master/LICENSE).
 
