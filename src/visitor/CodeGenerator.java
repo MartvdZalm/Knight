@@ -14,13 +14,13 @@ public class CodeGenerator implements Visitor<String>
 	private int slot;
 	private int labelCount;
 	private final String PATH;
-	public static final String LABEL = "Label";
+	private CGContext currentContext;
 
-	private StringBuilder sectionBSS = new StringBuilder();
-	private StringBuilder sectionDATA = new StringBuilder();
-	private StringBuilder sectionTEXT = new StringBuilder();
-	private StringBuilder sectionFUNCTIONS = new StringBuilder();
-	private StringBuilder sectionEXIT = new StringBuilder();
+	private StringBuilder BSS = new StringBuilder();
+	private StringBuilder DATA = new StringBuilder();
+	private StringBuilder MAIN = new StringBuilder();
+	private StringBuilder FUNCTIONS = new StringBuilder();
+	private StringBuilder EXIT = new StringBuilder();
 
 	public CodeGenerator(String progPath)
 	{
@@ -206,7 +206,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VarDecl vd)
 	{
-		sectionBSS.append(vd.getId().getVarID() + " resb 10\n");
+		BSS.append(vd.getId().getVarID() + " resb 10\n");
 
 		return null;
 	}
@@ -214,9 +214,18 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VarDeclInit vd)
 	{
-		sectionDATA.append(vd.getId().getVarID() + " db " + vd.getExpr().accept(this) + "\n");
+		if (currentContext == CGContext.MAIN) {
+			if (vd.getExpr() instanceof CallFunctionExpr) {
+				BSS.append(vd.getId().getVarID() + " resb 10\n");
+				MAIN.append("call " + ((CallFunctionExpr) vd.getExpr()).getMethodId() + "\n");
+				MAIN.append("mov [" + vd.getId().getVarID() + "], rax");
+			}
+		} else {
+			DATA.append(vd.getId().getVarID() + " db " + vd.getExpr().accept(this));
+			FUNCTIONS.append("mov rax, " + vd.getId().getVarID() + "\n");
+		}
 		
-		return null;
+		return "";
 	}
 
 	@Override
@@ -234,18 +243,30 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
-		sectionFUNCTIONS.append(functionReturn.getFunctionName().getVarID() + ":" + "\n");
-		sectionFUNCTIONS.append("push rbp" + "\n");
-		sectionFUNCTIONS.append("mov rbp, rsp" + "\n");
+		if (functionReturn.getFunctionName().getVarID().equals("main")) {
+			for (int i = 0; i < functionReturn.getVarListSize(); i++) {
+				setContext(CGContext.MAIN);
+				MAIN.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
+			}
 
-		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
-			sectionFUNCTIONS.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
+			
+		} else {
+			setContext(CGContext.FUNCTION);
+			FUNCTIONS.append(functionReturn.getFunctionName().getVarID() + ":" + "\n");
+			FUNCTIONS.append("push rbp" + "\n");
+			FUNCTIONS.append("mov rbp, rsp" + "\n");
+
+			for (int i = 0; i < functionReturn.getVarListSize(); i++) {
+				DATA.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
+			}
+
+			functionReturn.getReturnExpr().accept(this);
+
+			FUNCTIONS.append("pop rbp" + "\n");
+			FUNCTIONS.append("ret" + "\n");
 		}
 
-
-		sectionFUNCTIONS.append("pop rbp" + "\n");
-		sectionFUNCTIONS.append("ret" + "\n");
-
+		FUNCTIONS.append("\n\n");
 		return null;
 	}
 
@@ -305,11 +326,10 @@ public class CodeGenerator implements Visitor<String>
 	{
 		StringBuilder code = new StringBuilder();
 
-		sectionBSS.append("section .bss\n");
-		sectionDATA.append("section .data\n");
-		sectionTEXT.append("section .text\n");
-		sectionTEXT.append("global _start\n");
-		sectionTEXT.append("_start:\n");
+		code.append("BITS 64 \nCPU X64 \n\n");
+
+		BSS.append("section .bss \n");
+		DATA.append("section .data \n");
 
 		for (int i = 0; i < program.getIncludeListSize(); i++) {
 			program.getIncludeAt(i).accept(this);
@@ -319,11 +339,12 @@ public class CodeGenerator implements Visitor<String>
 			program.getClassDeclAt(i).accept(this);
 		}
 
-		code.append(sectionBSS.append("\n"));
-		code.append(sectionDATA.append("\n"));
-		code.append(sectionTEXT);
-		code.append(sectionEXIT);
-		code.append(sectionFUNCTIONS);
+		code.append(BSS.append("\n\n"));
+		code.append(DATA.append("\n\n"));
+		code.append(FUNCTIONS.append("\n\n"));
+		code.append("section .text \nglobal _start \n\n_start: \n\n");
+		code.append(MAIN);
+		code.append(EXIT);
 
 		write(currClass.getId(), code);
 
@@ -343,6 +364,11 @@ public class CodeGenerator implements Visitor<String>
 		}
 
 		return null;
+	}
+
+	private void setContext(CGContext context)
+	{
+		this.currentContext = context;
 	}
 
 	private int getLocalVarIndex(Binding b)
