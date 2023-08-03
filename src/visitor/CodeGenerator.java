@@ -206,7 +206,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VarDecl vd)
 	{
-		BSS.append(vd.getId().getVarID() + " resb 10\n");
+		BSS.append(vd.getId().getVarID() + ": resb 10\n");
 
 		return null;
 	}
@@ -216,12 +216,12 @@ public class CodeGenerator implements Visitor<String>
 	{
 		if (currentContext == CGContext.MAIN) {
 			if (vd.getExpr() instanceof CallFunctionExpr) {
-				BSS.append(vd.getId().getVarID() + " resb 10\n");
+				BSS.append(vd.getId().getVarID() + ": resq 10\n");
 				MAIN.append("call " + ((CallFunctionExpr) vd.getExpr()).getMethodId() + "\n");
 				MAIN.append("mov [" + vd.getId().getVarID() + "], rax");
 			}
 		} else {
-			DATA.append(vd.getId().getVarID() + " db " + vd.getExpr().accept(this));
+			DATA.append(vd.getId().getVarID() + ": db " + vd.getExpr().accept(this));
 			FUNCTIONS.append("mov rax, " + vd.getId().getVarID() + "\n");
 		}
 		
@@ -249,7 +249,10 @@ public class CodeGenerator implements Visitor<String>
 				MAIN.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
 			}
 
-			
+			MAIN.append("\n");
+			MAIN.append("mov rax, 60\n");
+			MAIN.append("mov rdi, " + functionReturn.getReturnExpr().accept(this) + "\n");
+			MAIN.append("syscall\n");
 		} else {
 			setContext(CGContext.FUNCTION);
 			FUNCTIONS.append(functionReturn.getFunctionName().getVarID() + ":" + "\n");
@@ -266,8 +269,9 @@ public class CodeGenerator implements Visitor<String>
 			FUNCTIONS.append("ret" + "\n");
 		}
 
-		FUNCTIONS.append("\n\n");
-		return null;
+		FUNCTIONS.append("\n");
+
+		return "";
 	}
 
 	@Override
@@ -341,10 +345,11 @@ public class CodeGenerator implements Visitor<String>
 
 		code.append(BSS.append("\n\n"));
 		code.append(DATA.append("\n\n"));
+		code.append("section .text\nglobal _start\n\n");
 		code.append(FUNCTIONS.append("\n\n"));
-		code.append("section .text \nglobal _start \n\n_start: \n\n");
+		code.append("_start:\n");
 		code.append(MAIN);
-		code.append(EXIT);
+		code.append(EXIT.append("\n\n"));
 
 		write(currClass.getId(), code);
 
