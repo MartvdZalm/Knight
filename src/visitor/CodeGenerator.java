@@ -2,9 +2,13 @@ package src.visitor;
 
 import java.io.File;
 import java.io.PrintWriter;
+
+import javax.print.attribute.standard.OutputDeviceAssigned;
+
 import java.io.FileOutputStream;
 
 import src.ast.*;
+import src.lexer.Tokens;
 import src.semantics.*;
 import src.symbol.*;
 
@@ -19,6 +23,10 @@ public class CodeGenerator implements Visitor<String>
 
 	// Variables related to ASM
 	private ClassWriter classWriter;
+	private MethodVisitor methodVisitor;
+	
+	private int maxStack;
+	private int maxLocal;
 
 	public CodeGenerator(String progPath)
 	{
@@ -244,6 +252,77 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
+		String functionName = functionReturn.getFunctionName().getVarID();
+		int access = Opcodes.ACC_PUBLIC;
+
+		// Set both maxStack and maxLocal to 0
+		maxStack = 0;
+		maxLocal = 0;
+
+		// Check the access of the function (Public, Private, Protected)
+		if (functionReturn.getAccess().getToken() == Tokens.PRIVATE) {
+			access = Opcodes.ACC_PRIVATE;
+		} else if (functionReturn.getAccess().getToken() == Tokens.PROTECTED) {
+			access = Opcodes.ACC_PROTECTED;
+		}
+	
+		// Check if function is the main function. (This will be changed later on)
+		if (functionName.equals("main")) {
+			methodVisitor = classWriter.visitMethod(access + Opcodes.ACC_STATIC, functionName, "([Ljava/lang/String;)V", null, null);
+		} else {
+			StringBuilder sb = new StringBuilder();
+
+			sb.append("(");
+			for (int i = 0; i < functionReturn.getArgListSize(); i++) {
+				String type = functionReturn.getArgDeclAt(i).getType().toString();
+				sb.append(type);
+				maxLocal++;
+			}
+			sb.append(")");
+
+			String returnType = functionReturn.getReturnType().toString();
+			sb.append(returnType);
+
+			String methodDescriptor = sb.toString();
+
+			methodVisitor = classWriter.visitMethod(access + Opcodes.ACC_SUPER, functionName, methodDescriptor, null, null);
+		}
+
+		// Start the class code definition
+		methodVisitor.visitCode();
+
+		// Loop through all the variables in the function 
+		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
+			functionReturn.getVarDeclAt(i).accept(this);
+			maxLocal++;
+		}
+
+		// Loop through all the statements in the function
+		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
+			functionReturn.getStatAt(i).accept(this);
+			maxLocal++;
+		}
+
+		// Check the exit value for example 0 is success and 1 is with error. Only for main method.
+		if (functionName.equals("main")) {
+			int value = ((IntLiteral) functionReturn.getReturnExpr()).getValue();
+			int exit = 0;
+
+			switch (value) {
+				case 0:	exit = Opcodes.ICONST_0; break;
+				case 1:	exit = Opcodes.ICONST_1; break;
+			}
+
+			methodVisitor.visitInsn(exit); maxLocal++;
+			methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "exit", "(I)V", false); maxStack++;
+			methodVisitor.visitInsn(Opcodes.RETURN);
+		}
+
+		methodVisitor.visitMaxs(maxStack, maxLocal);
+
+		// End the class definition
+		methodVisitor.visitEnd();
+
 		return null;
 	}
 
@@ -256,12 +335,7 @@ public class CodeGenerator implements Visitor<String>
 		classWriter = new ClassWriter(0);
 
 		// Define the class header.
-		// V1_8: The class version.
-		// ACC_PUBLIC + ACC_SUPER: The class access flags.
-		// currentClass.getId(): Class name.
-		// "java/lang/object": The internal name of the superclass.
-		// null: The names of the interfaces implemented by the class.
-		classWriter.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, currentClass.getId(), null, "java/lang/Object", null);
+		classWriter.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, currentClass.getId(), null, "java/lang/Object", null);
 		
 		// Loop through all the declarations like functions, variables, etc.
 		for (int i = 0; i < classDecl.getDeclListSize(); i++) {
