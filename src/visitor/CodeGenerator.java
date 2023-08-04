@@ -2,25 +2,23 @@ package src.visitor;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.io.FileOutputStream;
 
 import src.ast.*;
 import src.semantics.*;
 import src.symbol.*;
 
+import org.objectweb.asm.*;
+
 public class CodeGenerator implements Visitor<String>
 {
-	private Klass currClass;
-	private Function currFunc;
+	private Klass currentClass;
+	private Function currentFunction;
 	private int slot;
-	private int labelCount;
 	private final String PATH;
-	private CGContext currentContext;
 
-	private StringBuilder BSS = new StringBuilder();
-	private StringBuilder DATA = new StringBuilder();
-	private StringBuilder MAIN = new StringBuilder();
-	private StringBuilder FUNCTIONS = new StringBuilder();
-	private StringBuilder EXIT = new StringBuilder();
+	// Variables related to ASM
+	private ClassWriter classWriter;
 
 	public CodeGenerator(String progPath)
 	{
@@ -156,21 +154,8 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(CallFunctionStat cm)
 	{
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append(cm.getMethodId() + "\n");
-
-		if (cm.getMethodId().getVarID().equals("print")) {
-			MAIN.append("mov rax, 1 \n");
-			MAIN.append("mov rdi, 1 \n");
-			MAIN.append("mov rsi, [" + ((IdentifierExpr) cm.getArgExprAt(0)).getVarID() + "] \n");
-			MAIN.append("mov rdx, 10 \n");
-			MAIN.append("syscall \n");
-		}
-
-		return "";
+		return null;
 	}
-
 
 	@Override
 	public String visit(IntType intType)
@@ -211,26 +196,13 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VarDecl vd)
 	{
-		BSS.append(vd.getId().getVarID() + ": resb 10\n");
-
 		return null;
 	}
 
 	@Override
 	public String visit(VarDeclInit vd)
 	{
-		if (currentContext == CGContext.MAIN) {
-			if (vd.getExpr() instanceof CallFunctionExpr) {
-				BSS.append(vd.getId().getVarID() + ": resq 10\n");
-				MAIN.append("call " + ((CallFunctionExpr) vd.getExpr()).getMethodId() + "\n");
-				MAIN.append("mov [" + vd.getId().getVarID() + "], rax \n");
-			}
-		} else {
-			DATA.append(vd.getId().getVarID() + ": db " + vd.getExpr().accept(this));
-			FUNCTIONS.append("mov rax, [" + vd.getId().getVarID() + "]\n");
-		}
-		
-		return "";
+		return null;
 	}
 
 	@Override
@@ -240,61 +212,9 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(FunctionVoid functionVoid)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(FunctionReturn functionReturn)
-	{	
-		if (functionReturn.getFunctionName().getVarID().equals("main")) {
-			setContext(CGContext.MAIN);
-
-			for (int i = 0; i < functionReturn.getVarListSize(); i++) {
-				MAIN.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
-			}
-
-			for (int i = 0; i < functionReturn.getStatListSize(); i++) {
-				MAIN.append(functionReturn.getStatAt(i).accept(this) + "\n");
-			}
-
-			MAIN.append("\n");
-			MAIN.append("mov rax, 60\n");
-			MAIN.append("mov rdi, " + functionReturn.getReturnExpr().accept(this) + "\n");
-			MAIN.append("syscall\n");
-
-		} else {
-			
-			setContext(CGContext.FUNCTION);
-			FUNCTIONS.append(functionReturn.getFunctionName().getVarID() + ":" + "\n");
-			FUNCTIONS.append("push rbp" + "\n");
-			FUNCTIONS.append("mov rbp, rsp" + "\n");
-
-			for (int i = 0; i < functionReturn.getVarListSize(); i++) {
-				DATA.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
-			}
-
-			if (functionReturn.getReturnExpr() instanceof StringLiteral) {
-				DATA.append(functionReturn.getFunctionName().getVarID() + "FuncReturnValue: dq " + functionReturn.getReturnExpr().accept(this) + "\n");
-				FUNCTIONS.append("mov rax, [" + functionReturn.getFunctionName().getVarID() + "FuncReturnValue]\n");
-			} else {
-				functionReturn.getReturnExpr().accept(this);
-			}
-
-			FUNCTIONS.append("pop rbp" + "\n");
-			FUNCTIONS.append("ret" + "\n");
-		}
-
-		FUNCTIONS.append("\n");
-
-		return "";
-	}
-
-	@Override
 	public String visit(Identifier id)
 	{
-		return id.getVarID();
+		return null;
 	}
 
 	@Override
@@ -312,22 +232,46 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(StringLiteral stringLiteral)
 	{
-		return "\"" + stringLiteral.getValue() + "\"";
+		return null;
 	}
 
 	@Override
-	public String visit(ClassDeclSimple cd)
+	public String visit(FunctionVoid functionVoid)
 	{
-		Binding b = cd.getId().getB();
-		currClass = (Klass) b;
+		return null;
+	}
 
-		StringBuilder sb = new StringBuilder();
+	@Override
+	public String visit(FunctionReturn functionReturn)
+	{	
+		return null;
+	}
 
-		for (int i = 0; i < cd.getDeclListSize(); i++) {
-			cd.getDeclAt(i).accept(this);
+	@Override
+	public String visit(ClassDeclSimple classDecl)
+	{
+		Binding b = classDecl.getId().getB();
+		currentClass = (Klass) b;
+
+		classWriter = new ClassWriter(0);
+
+		// Define the class header.
+		// V1_8: The class version.
+		// ACC_PUBLIC + ACC_SUPER: The class access flags.
+		// currentClass.getId(): Class name.
+		// "java/lang/object": The internal name of the superclass.
+		// null: The names of the interfaces implemented by the class.
+		classWriter.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, currentClass.getId(), null, "java/lang/Object", null);
+		
+		// Loop through all the declarations like functions, variables, etc.
+		for (int i = 0; i < classDecl.getDeclListSize(); i++) {
+			classDecl.getDeclAt(i).accept(this);
 		}
 
-		return sb.toString();
+		// End the class definition
+		classWriter.visitEnd();
+
+		return null;
 	}
 
 	@Override
@@ -342,55 +286,37 @@ public class CodeGenerator implements Visitor<String>
 		return null;
 	}
 
+	/*
+	 * Entry of the code generation
+	 */
 	@Override
 	public String visit(Program program)
 	{
-		StringBuilder code = new StringBuilder();
-
-		code.append("BITS 64 \nCPU X64 \n\n");
-
-		BSS.append("section .bss \n");
-		DATA.append("section .data \n");
-
 		for (int i = 0; i < program.getIncludeListSize(); i++) {
 			program.getIncludeAt(i).accept(this);
 		}
 
 		for (int i = 0; i < program.getClassListSize(); i++) {
 			program.getClassDeclAt(i).accept(this);
+			write(currentClass.getId(), classWriter.toByteArray());
 		}
-
-		code.append(BSS.append("\n\n"));
-		code.append(DATA.append("\n\n"));
-		code.append("section .text\nglobal _start\n\n");
-		code.append(FUNCTIONS.append("\n\n"));
-		code.append("_start:\n");
-		code.append(MAIN);
-		code.append(EXIT.append("\n\n"));
-
-		write(currClass.getId(), code);
 
 		return null;
 	}
 
-	private File write(String name, StringBuilder code)
+	private File write(String name, byte[] code)
 	{
 		try {
-			File f = new File(PATH + name + ".asm");
-			PrintWriter writer = new PrintWriter(f, "UTF-8");
-			writer.println(code);
-			writer.close();
+			File f = new File(PATH + name + ".class");
+			FileOutputStream output = new FileOutputStream(f);
+			output.write(code);
+			output.close();
 			return f;
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
 
 		return null;
-	}
-
-	private void setContext(CGContext context)
-	{
-		this.currentContext = context;
 	}
 
 	private int getLocalVarIndex(Binding b)
