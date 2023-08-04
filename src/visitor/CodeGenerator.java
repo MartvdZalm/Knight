@@ -159,11 +159,16 @@ public class CodeGenerator implements Visitor<String>
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append(cm.getMethodId() + "\n");
-		for (int i = 0; i < cm.getArgExprListSize(); i++) {
-			sb.append(cm.getArgExprAt(i).accept(this) + "\n");
+
+		if (cm.getMethodId().getVarID().equals("print")) {
+			MAIN.append("mov rax, 1 \n");
+			MAIN.append("mov rdi, 1 \n");
+			MAIN.append("mov rsi, [" + ((IdentifierExpr) cm.getArgExprAt(0)).getVarID() + "] \n");
+			MAIN.append("mov rdx, 10 \n");
+			MAIN.append("syscall \n");
 		}
 
-		return sb.toString();
+		return "";
 	}
 
 
@@ -218,11 +223,11 @@ public class CodeGenerator implements Visitor<String>
 			if (vd.getExpr() instanceof CallFunctionExpr) {
 				BSS.append(vd.getId().getVarID() + ": resq 10\n");
 				MAIN.append("call " + ((CallFunctionExpr) vd.getExpr()).getMethodId() + "\n");
-				MAIN.append("mov [" + vd.getId().getVarID() + "], rax");
+				MAIN.append("mov [" + vd.getId().getVarID() + "], rax \n");
 			}
 		} else {
 			DATA.append(vd.getId().getVarID() + ": db " + vd.getExpr().accept(this));
-			FUNCTIONS.append("mov rax, " + vd.getId().getVarID() + "\n");
+			FUNCTIONS.append("mov rax, [" + vd.getId().getVarID() + "]\n");
 		}
 		
 		return "";
@@ -244,16 +249,23 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(FunctionReturn functionReturn)
 	{	
 		if (functionReturn.getFunctionName().getVarID().equals("main")) {
+			setContext(CGContext.MAIN);
+
 			for (int i = 0; i < functionReturn.getVarListSize(); i++) {
-				setContext(CGContext.MAIN);
 				MAIN.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
+			}
+
+			for (int i = 0; i < functionReturn.getStatListSize(); i++) {
+				MAIN.append(functionReturn.getStatAt(i).accept(this) + "\n");
 			}
 
 			MAIN.append("\n");
 			MAIN.append("mov rax, 60\n");
 			MAIN.append("mov rdi, " + functionReturn.getReturnExpr().accept(this) + "\n");
 			MAIN.append("syscall\n");
+
 		} else {
+			
 			setContext(CGContext.FUNCTION);
 			FUNCTIONS.append(functionReturn.getFunctionName().getVarID() + ":" + "\n");
 			FUNCTIONS.append("push rbp" + "\n");
@@ -263,7 +275,12 @@ public class CodeGenerator implements Visitor<String>
 				DATA.append(functionReturn.getVarDeclAt(i).accept(this) + "\n");
 			}
 
-			functionReturn.getReturnExpr().accept(this);
+			if (functionReturn.getReturnExpr() instanceof StringLiteral) {
+				DATA.append(functionReturn.getFunctionName().getVarID() + "FuncReturnValue: dq " + functionReturn.getReturnExpr().accept(this) + "\n");
+				FUNCTIONS.append("mov rax, [" + functionReturn.getFunctionName().getVarID() + "FuncReturnValue]\n");
+			} else {
+				functionReturn.getReturnExpr().accept(this);
+			}
 
 			FUNCTIONS.append("pop rbp" + "\n");
 			FUNCTIONS.append("ret" + "\n");
