@@ -1,6 +1,5 @@
 package src.visitor;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +14,7 @@ public class TypeAnalyser implements Visitor<Type>
 {
 	private SymbolTable st;
 	private Klass currClass;
-	private Function currFunc;
+	private Function currentFunction;
 	private Set<String> hsKlass = new HashSet<>();
 	private Set<String> hsFunc = new HashSet<>();
 
@@ -497,7 +496,7 @@ public class TypeAnalyser implements Visitor<Type>
 		}
 		hsFunc.add(functionName);
 
-		currFunc = (Function) functionVoid.getFunctionName().getB();
+		currentFunction = (Function) functionVoid.getFunctionName().getB();
 
 		for (int i = 0; i < functionVoid.getStatListSize(); i++) {
 			Statement st = functionVoid.getStatAt(i);
@@ -509,7 +508,7 @@ public class TypeAnalyser implements Visitor<Type>
 			decl.accept(this);
 		}
 
-		currFunc = null;
+		currentFunction = null;
 		return null;
 	}
 
@@ -523,7 +522,7 @@ public class TypeAnalyser implements Visitor<Type>
 		}
 		hsFunc.add(functionName);
 
-		currFunc = (Function) functionReturn.getFunctionName().getB();
+		currentFunction = (Function) functionReturn.getFunctionName().getB();
 
 		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
 			Statement st = functionReturn.getStatAt(i);
@@ -544,7 +543,7 @@ public class TypeAnalyser implements Visitor<Type>
 		}
 
 		functionReturn.getReturnExpr().setType(t2);
-		currFunc = null;
+		currentFunction = null;
 		return null;
 	}
 

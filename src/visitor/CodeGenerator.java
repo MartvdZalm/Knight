@@ -1,10 +1,6 @@
 package src.visitor;
 
 import java.io.File;
-import java.io.PrintWriter;
-
-import javax.print.attribute.standard.OutputDeviceAssigned;
-
 import java.io.FileOutputStream;
 
 import src.ast.*;
@@ -90,6 +86,16 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Times n)
 	{
+		// Load the arguments to the stack with the right local variable index
+		Binding blh = ((IdentifierExpr) n.getLhs()).getB();
+		Binding brh = ((IdentifierExpr) n.getRhs()).getB();
+
+		methodVisitor.visitVarInsn(Opcodes.ILOAD, getLocalVarIndex(blh)); // Load first parameter tot the stack.
+		methodVisitor.visitVarInsn(Opcodes.ILOAD, getLocalVarIndex(brh)); // Load second parameter tot the stack.
+
+		methodVisitor.visitInsn(Opcodes.IMUL); // Multiply the top two values on the stack as an int
+		maxStack++;
+
 		return null;
 	}
 
@@ -253,6 +259,11 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(FunctionReturn functionReturn)
 	{	
 		String functionName = functionReturn.getFunctionName().getVarID();
+
+		// Set the current function
+		Binding bFuncName = functionReturn.getFunctionName().getB();
+		currentFunction = (Function) bFuncName;
+
 		int access = Opcodes.ACC_PUBLIC;
 
 		// Set both maxStack and maxLocal to 0
@@ -269,6 +280,10 @@ public class CodeGenerator implements Visitor<String>
 		// Check if function is the main function. (This will be changed later on)
 		if (functionName.equals("main")) {
 			methodVisitor = classWriter.visitMethod(access + Opcodes.ACC_STATIC, functionName, "([Ljava/lang/String;)V", null, null);
+
+			// Start the class code definition
+			methodVisitor.visitCode();
+
 		} else {
 			StringBuilder sb = new StringBuilder();
 
@@ -276,6 +291,10 @@ public class CodeGenerator implements Visitor<String>
 			for (int i = 0; i < functionReturn.getArgListSize(); i++) {
 				String type = functionReturn.getArgDeclAt(i).getType().toString();
 				sb.append(type);
+
+				Binding bFuncArg = functionReturn.getArgDeclAt(i).getId().getB();
+				setLocalVarIndex(bFuncArg);
+
 				maxLocal++;
 			}
 			sb.append(")");
@@ -285,11 +304,11 @@ public class CodeGenerator implements Visitor<String>
 
 			String methodDescriptor = sb.toString();
 
-			methodVisitor = classWriter.visitMethod(access + Opcodes.ACC_SUPER, functionName, methodDescriptor, null, null);
-		}
+			methodVisitor = classWriter.visitMethod(access, functionName, methodDescriptor, null, null);
 
-		// Start the class code definition
-		methodVisitor.visitCode();
+			// Start the class code definition
+			methodVisitor.visitCode();
+		}
 
 		// Loop through all the variables in the function 
 		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
@@ -303,7 +322,7 @@ public class CodeGenerator implements Visitor<String>
 			maxLocal++;
 		}
 
-		// Check the exit value for example 0 is success and 1 is with error. Only for main method.
+		// Check the return value for example 0 is success and 1 is with error. Only for main method.
 		if (functionName.equals("main")) {
 			int value = ((IntLiteral) functionReturn.getReturnExpr()).getValue();
 			int exit = 0;
@@ -316,6 +335,11 @@ public class CodeGenerator implements Visitor<String>
 			methodVisitor.visitInsn(exit); maxLocal++;
 			methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "exit", "(I)V", false); maxStack++;
 			methodVisitor.visitInsn(Opcodes.RETURN);
+		} else {
+			functionReturn.getReturnExpr().accept(this);
+
+			// Return the result of the multiplication
+			methodVisitor.visitInsn(Opcodes.IRETURN);
 		}
 
 		methodVisitor.visitMaxs(maxStack, maxLocal);
