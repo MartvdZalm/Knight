@@ -129,7 +129,6 @@ public class Parser
 	private Declaration parseFunction() throws ParseException
 	{
 		eat(Tokens.FUNCTION);
-		Type returnType = parseType();
 		IdentifierExpr functionName = new IdentifierExpr(token, token.getSymbol());
 		eat(Tokens.IDENTIFIER);
 
@@ -145,6 +144,8 @@ public class Parser
 			}
 		}
 		eat(Tokens.RIGHTPAREN);
+		eat(Tokens.COLON);
+		Type returnType = parseType();
 		eat(Tokens.LEFTBRACE);
 
 		List<Declaration> varList = new ArrayList<>();
@@ -206,10 +207,12 @@ public class Parser
 	private Declaration parseVariable() throws ParseException
 	{
 		Declaration decl = null;
-		Type type = parseType();
-		Identifier id = new Identifier(token, token.getSymbol());
 
-		eat(Tokens.IDENTIFIER);
+		Identifier id = new Identifier(token, token.getSymbol());
+		eat(Tokens.IDENTIFIER);	
+		eat(Tokens.COLON);
+		Type type = parseType();
+
 		if (token.getToken() == Tokens.SEMICOLON) {
 			decl = new VarDecl(token, type, id, currentAccessModifier);
 			eat(Tokens.SEMICOLON);
@@ -284,12 +287,13 @@ public class Parser
      */
 	private ArgDecl parseArgument() throws ParseException
 	{
-		Type argType = parseType();
 		Identifier argId = null;
 		if (token.getToken() == Tokens.IDENTIFIER) {
 			argId = new Identifier(token, token.getSymbol());
 		}
 		eat(Tokens.IDENTIFIER);
+		eat(Tokens.COLON);
+		Type argType = parseType();
 
 		return new ArgDecl(argId.getToken(), argType, argId);
 	}
@@ -472,7 +476,10 @@ public class Parser
 			return type;
 		}
 
-		case IDENTIFIER: {
+		case IDENTIFIER:
+		case LEFTBRACE:
+		case ASSIGN:
+		case RIGHTPAREN: {
 			return null;
 		}
 

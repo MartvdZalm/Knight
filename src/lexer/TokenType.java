@@ -30,11 +30,11 @@ public class TokenType
         Symbol.symbol("protected", Tokens.PROTECTED);
         Symbol.symbol("private", Tokens.PRIVATE);
 
-        Symbol.symbol("class", Tokens.CLASS);
+        Symbol.symbol("obj", Tokens.CLASS);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("new", Tokens.NEW);
         Symbol.symbol("include", Tokens.INCLUDE);
-        Symbol.symbol("func", Tokens.FUNCTION);
+        Symbol.symbol("fn", Tokens.FUNCTION);
                 
         Symbol.symbol("if", Tokens.IF);
         Symbol.symbol("else", Tokens.ELSE);
@@ -52,7 +52,7 @@ public class TokenType
         Symbol.symbol("*", Tokens.TIMES);
         Symbol.symbol("/", Tokens.DIV);
         
-        Symbol.symbol("return", Tokens.RETURN);
+        Symbol.symbol("ret", Tokens.RETURN);
         Symbol.symbol("void", Tokens.VOID);       
     }
 }
