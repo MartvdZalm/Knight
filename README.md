@@ -40,4 +40,4 @@ Knight is released under the [MIT License](https://github.com/MartvdZalm/Knight/
 
 You can contact me for any questions, feedback, or collaboration opportunities:
 
-- Email: [your.email@example.com](martvanderzalm@gmail.com)
+- Email: [martvanderzalm@gmail.com](martvanderzalm@gmail.com)
