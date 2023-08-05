@@ -197,6 +197,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(CallFunctionStat cm)
 	{
+		for (int i = 0; i < cm.getArgExprListSize(); i++) {
+			Expression e = cm.getArgExprAt(i);
+			e.accept(this);
+		}
 		return null;
 	}
 

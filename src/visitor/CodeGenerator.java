@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import src.ast.*;
+import src.lexer.Token;
 import src.lexer.Tokens;
 import src.semantics.*;
 import src.symbol.*;
@@ -166,8 +167,38 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(CallFunctionStat cm)
+	public String visit(CallFunctionStat callFunctionStat)
 	{
+		// This is for testing. Will be removed later.
+		if (callFunctionStat.getMethodId().getVarID().equals("print")) {
+			IdentifierExpr expr = (IdentifierExpr) callFunctionStat.getArgExprAt(0);
+			Binding b = expr.getB();
+			String descriptor = expr.type().toString();
+
+			// Get the reference to the standard output stream
+			methodVisitor.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+
+			// Create a new instance of MyClass
+			methodVisitor.visitTypeInsn(Opcodes.NEW, currentClass.getId());
+
+			// Duplicate the reference on the stack
+			methodVisitor.visitInsn(Opcodes.DUP);
+
+			// Invoke the constructor of MyClass
+			methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, currentClass.getId(), "<init>", "()V", false);
+
+			// Get the value of the field 'a'
+			methodVisitor.visitFieldInsn(Opcodes.GETFIELD, currentClass.getId(), expr.getVarID(), descriptor);
+
+			// Invoke the println method with the int argument
+			methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(" + descriptor + ")V", false);
+
+
+			// Increment maxStack and maxLocal
+			maxStack = Math.max(maxStack, 2); // 2 stack elements required for println
+			maxLocal = Math.max(maxLocal, getLocalVarIndex(b) + 1); // 1 local variable required for b
+		}
+
 		return null;
 	}
 
@@ -208,21 +239,11 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(VarDecl vd)
+	public String visit(ArgDecl argDecl)
 	{
-		return null;
-	}
-
-	@Override
-	public String visit(VarDeclInit vd)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ArgDecl ad)
-	{
-		return null;
+		Binding b = argDecl.getId().getB();
+		setLocalVarIndex(b);
+		return argDecl.getType().accept(this);
 	}
 
 	@Override
@@ -246,6 +267,31 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(StringLiteral stringLiteral)
 	{
+		return null;
+	}
+
+	@Override
+	public String visit(VarDecl vd)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(VarDeclInit varDeclInit)
+	{
+		FieldVisitor fv = classWriter.visitField(Opcodes.ACC_PUBLIC, varDeclInit.getId().getVarID(), varDeclInit.getType().toString(), null, null);
+		fv.visitEnd();	
+		
+		// Load 'this' onto the stack
+		methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+		maxStack++; // Increase maxStack by 1
+		// Load the int value onto the stack
+		methodVisitor.visitIntInsn(Opcodes.BIPUSH, ((IntLiteral) varDeclInit.getExpr()).getValue());
+		maxStack++; // Increase maxStack by 1 again
+		// Store the value into the field 'a'
+		methodVisitor.visitFieldInsn(Opcodes.PUTFIELD, currentClass.getId(), varDeclInit.getId().getVarID(), varDeclInit.getType().toString());
+		maxLocal++; // Increase maxLocal by 1
+
 		return null;
 	}
 
@@ -337,16 +383,7 @@ public class CodeGenerator implements Visitor<String>
 			methodVisitor.visitInsn(Opcodes.RETURN);
 		} else {
 			functionReturn.getReturnExpr().accept(this);
-
-			// Return the result of the multiplication
-			methodVisitor.visitInsn(Opcodes.IRETURN);
 		}
-
-		methodVisitor.visitMaxs(maxStack, maxLocal);
-
-		// End the class definition
-		methodVisitor.visitEnd();
-
 		return null;
 	}
 
@@ -359,11 +396,24 @@ public class CodeGenerator implements Visitor<String>
 		classWriter = new ClassWriter(0);
 
 		// Define the class header.
-		classWriter.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, currentClass.getId(), null, "java/lang/Object", null);
-		
+		classWriter.visit(Opcodes.V18, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, currentClass.getId(), null, "java/lang/Object", null);
+
+		// Create the empty constructor
+		methodVisitor = classWriter.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
+		methodVisitor.visitCode();
+		// Invoke the superclass constructor
+		methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+		methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+		maxLocal++; maxStack++;
+		// Return from the constructor
+		methodVisitor.visitInsn(Opcodes.RETURN);
+
 		// Loop through all the declarations like functions, variables, etc.
 		for (int i = 0; i < classDecl.getDeclListSize(); i++) {
 			classDecl.getDeclAt(i).accept(this);
+
+			methodVisitor.visitMaxs(maxLocal, maxStack);
+			methodVisitor.visitEnd();
 		}
 
 		// End the class definition
@@ -384,9 +434,6 @@ public class CodeGenerator implements Visitor<String>
 		return null;
 	}
 
-	/*
-	 * Entry of the code generation
-	 */
 	@Override
 	public String visit(Program program)
 	{
@@ -415,6 +462,21 @@ public class CodeGenerator implements Visitor<String>
 		}
 
 		return null;
+	}
+
+	private int getAccessModifier(Token token)
+	{
+		Tokens tok = token.getToken();
+
+		if (tok == Tokens.PUBLIC) {
+			return Opcodes.ACC_PUBLIC;
+		} else if (tok == Tokens.PRIVATE) {
+			return Opcodes.ACC_PRIVATE;
+		} else if (tok == Tokens.PROTECTED) {
+			return Opcodes.ACC_PROTECTED;
+		} else {
+			return Opcodes.ACC_SUPER;
+		}
 	}
 
 	private int getLocalVarIndex(Binding b)

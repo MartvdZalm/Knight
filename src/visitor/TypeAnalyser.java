@@ -354,6 +354,10 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(CallFunctionStat cm)
 	{
+		for (int i = 0; i < cm.getArgExprListSize(); i++) {
+			cm.getArgExprAt(i).accept(this);
+		}
+
 		return null;
 	}
 
