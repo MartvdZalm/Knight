@@ -39,7 +39,7 @@ obj Test {
     }
 
     fn apply_twice(func: fn(int): int, x: int): int {
-        ret func(func(x));
+        ret func(x);
     }
 
     fn main(): int {
