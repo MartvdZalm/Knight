@@ -479,7 +479,8 @@ public class Parser
 		case IDENTIFIER:
 		case LEFTBRACE:
 		case ASSIGN:
-		case RIGHTPAREN: {
+		case RIGHTPAREN:
+		case COMMA: {
 			return null;
 		}
 
@@ -646,6 +647,30 @@ public class Parser
 			stOperand.push(lessThan);
 		}
 		break;
+
+		case LESSTHANOREQUAL: {
+			Expression rhs = stOperand.pop();
+			Expression lhs = stOperand.pop();
+			LessThanOrEqual lessThanOrEqual = new LessThanOrEqual(tok, lhs, rhs);
+			stOperand.push(lessThanOrEqual);
+		}
+		break;
+
+		case GREATERTHAN: {
+			Expression rhs = stOperand.pop();
+			Expression lhs = stOperand.pop();
+			GreaterThan GreaterThan = new GreaterThan(tok, lhs, rhs);
+			stOperand.push(GreaterThan);
+		}
+		break;
+
+		case GREATERTHANOREQUAL: {
+			Expression rhs = stOperand.pop();
+			Expression lhs = stOperand.pop();
+			GreaterThanOrEqual greaterThanOrEqual = new GreaterThanOrEqual(tok, lhs, rhs);
+			stOperand.push(greaterThanOrEqual);
+		}
+		break;
 		
 		case PLUS: {
 			Expression rhs = stOperand.pop();
@@ -715,6 +740,7 @@ public class Parser
 		case AND:
 		case EQUALS:
 		case LESSTHAN:
+		case LESSTHANOREQUAL:
 		case PLUS:
 		case MINUS:
 		case TIMES:
@@ -841,12 +867,36 @@ public class Parser
 		}
 		break;
 
+		case LESSTHANOREQUAL: {
+			pushOperator(token);
+			eat(Tokens.LESSTHANOREQUAL);
+			parseExpr();
+			parseTerm1();
+		}
+		break;
+
+		case GREATERTHAN: {
+			pushOperator(token);
+			eat(Tokens.GREATERTHAN);
+			parseExpr();
+			parseTerm1();
+
+		}
+		break;
+
+		case GREATERTHANOREQUAL: {
+			pushOperator(token);
+			eat(Tokens.GREATERTHANOREQUAL);
+			parseExpr();
+			parseTerm1();
+		}
+		break;
+
 		case PLUS: {
 			pushOperator(token);
 			eat(Tokens.PLUS);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 
@@ -898,7 +948,7 @@ public class Parser
 		break;
 
 		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getSymbol());
+			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
 	}
 

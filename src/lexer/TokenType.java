@@ -45,8 +45,12 @@ public class TokenType
         Symbol.symbol("==", Tokens.EQUALS);
         Symbol.symbol("and", Tokens.AND);
         Symbol.symbol("or", Tokens.OR);
+
         Symbol.symbol("<", Tokens.LESSTHAN);
+        Symbol.symbol("<=", Tokens.LESSTHANOREQUAL);
         Symbol.symbol(">", Tokens.GREATERTHAN);
+        Symbol.symbol(">=", Tokens.GREATERTHANOREQUAL);
+
         Symbol.symbol("+", Tokens.PLUS);
         Symbol.symbol("-", Tokens.MINUS);
         Symbol.symbol("*", Tokens.TIMES);

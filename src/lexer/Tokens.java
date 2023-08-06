@@ -43,8 +43,11 @@ public enum Tokens
     EQUALS,  
     OR,
     AND, 
+
     LESSTHAN,
+    LESSTHANOREQUAL,
     GREATERTHAN,
+    GREATERTHANOREQUAL,
     PLUS,
     MINUS,
     TIMES,

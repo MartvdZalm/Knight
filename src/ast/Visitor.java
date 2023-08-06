@@ -84,4 +84,10 @@ public interface Visitor<R>
 
     public R visit(FunctionReturn functionReturn);
 
+    public R visit(LessThanOrEqual lessThanOrEqual);
+
+    public R visit(GreaterThan greaterThan);
+
+    public R visit(GreaterThanOrEqual greaterThanOrEqual);
+
 }
