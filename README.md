@@ -13,21 +13,44 @@ Knight is an object-oriented programming language designed with a focus on havin
 
 ## Syntax
 ```knight
-obj FactorialCalculator {
+obj Test {
 
-    fn factorial(n: int): int
-    {
+    fn multiply(a: int, b: int): int {
+        ret a * b;
+    }
+
+    fn is_prime(n: int): bool {
+        if (n <= 1) {
+            ret false;
+        }
+        for (i: int = 2; i * i <= n; i++) {
+            if (n % i == 0) {
+                ret false;
+            }
+        }  
+        ret true;
+    }
+
+    fn factorial(n: int): int {
         if (n < 1) {
             ret 1;
         }
         ret n * factorial(n - 1);
     }
 
-    fn main(): int
-    {
-        number: int = 5;
-        result: int = factorial(number);
-        print('Factorial of' . number . 'is' . result);
+    fn apply_twice(func: fn(int): int, x: int): int {
+        ret func(func(x));
+    }
+
+    fn main(): int {
+
+        square: fn(int): int = fn (x: int): int {
+            ret x * x;
+        };
+
+        squared_result: int = square(3);
+        result: int = apply_twice(square, 3);
+
         ret 0;
     }
 }
