@@ -9,17 +9,15 @@ public class ForLoop extends Statement
     private Declaration initialization;
     private Expression condition;
     private Expression increment;
-	private List<Declaration> varList;
-	private List<Statement> statList;
+	private List<Declaration> declList;
 
-    public ForLoop(Token token, Declaration initialization, Expression condition, Expression increment, List<Declaration> varList, List<Statement> statList)
+    public ForLoop(Token token, Declaration initialization, Expression condition, Expression increment, List<Declaration> declList)
     {
         super(token);
         this.initialization = initialization;
         this.condition = condition;
         this.increment = increment;
-        this.varList = varList;
-        this.statList = statList;
+        this.declList = declList;
     }
 
     public Declaration getInitialization()
@@ -52,28 +50,15 @@ public class ForLoop extends Statement
         this.increment = increment;
     }
 
-    public int getVarListSize()
+    public int getDeclListSize()
 	{
-		return varList.size();
+		return declList.size();
 	}
 
-	public int getStatListSize()
+	public Declaration getDeclAt(int index)
 	{
-		return statList.size();
-	}
-
-	public Declaration getVarDeclAt(int index)
-	{
-		if (index < varList.size()) {
-			return varList.get(index);
-		}
-		return null;
-	}
-
-	public Statement getStatAt(int index)
-	{
-		if (index < statList.size()) {
-			return statList.get(index);
+		if (index < declList.size()) {
+			return declList.get(index);
 		}
 		return null;
 	}

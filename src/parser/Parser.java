@@ -148,15 +148,33 @@ public class Parser
 		Type returnType = parseType();
 		eat(Tokens.LEFTBRACE);
 
-		List<Declaration> varList = new ArrayList<>();
-		List<Statement> statList = new ArrayList<>();
+		List<Declaration> declList = parseBody();
+
+		Expression returnExpr = null;
+		if (returnType.getToken().getToken() != Tokens.VOID) {
+			eat(Tokens.RETURN);
+			returnExpr = parseExpression();
+			eat(Tokens.SEMICOLON);
+		} 
+		eat(Tokens.RIGHTBRACE);
+
+		if (returnExpr != null) {
+			return new FunctionReturn(token, currentAccessModifier, returnType, functionName, argList, declList, returnExpr);
+		} else {
+			return new FunctionVoid(token, currentAccessModifier, returnType, functionName, argList, declList);
+		}
+	}
+
+	private List<Declaration> parseBody() throws ParseException
+	{
+		List<Declaration> declList = new ArrayList<>();
 
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
 
 			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {	
 				
 				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
-					varList.add(parseVariable());
+					declList.add(parseVariable());
 				}
 	
 				while (token.getToken() == Tokens.IDENTIFIER) {
@@ -168,34 +186,22 @@ public class Parser
 						Identifier identifier2 = new Identifier(token, token.getSymbol());
 						eat(Tokens.IDENTIFIER);
 						if (token.getToken() == Tokens.SEMICOLON) {
-							varList.add(new VarDecl(token, identifierType, identifier2, currentAccessModifier));
+							declList.add(new VarDecl(token, identifierType, identifier2, currentAccessModifier));
 						} else {
-							varList.add(new VarDeclInit(token, identifierType, identifier2, parseExpression(), currentAccessModifier));
+							declList.add(new VarDeclInit(token, identifierType, identifier2, parseExpression(), currentAccessModifier));
 						}
 						eat(Tokens.SEMICOLON);
 					} else {		
 						Statement stat = parseState1(identifier);
-						statList.add(stat);
+						declList.add(stat);
 					}
 				}
 			} else {
-				statList.add(parseStatement());
+				declList.add(parseStatement());
 			}
 		}
 
-		Expression returnExpr = null;
-		if (returnType.getToken().getToken() != Tokens.VOID) {
-			eat(Tokens.RETURN);
-			returnExpr = parseExpression();
-			eat(Tokens.SEMICOLON);
-		} 
-		eat(Tokens.RIGHTBRACE);
-
-		if (returnExpr != null) {
-			return new FunctionReturn(token, currentAccessModifier, returnType, functionName, argList, varList, statList, returnExpr);
-		} else {
-			return new FunctionVoid(token, currentAccessModifier, returnType, functionName, argList, varList, statList);
-		}
+		return declList;
 	}
 
 	/**
@@ -224,6 +230,8 @@ public class Parser
 		if (token.getToken() == Tokens.SEMICOLON) {
 			eat(Tokens.SEMICOLON);
 		}
+
+		System.out.println(token);
 
 		return decl;
 	}
@@ -346,6 +354,30 @@ public class Parser
 				Statement body = parseStatement();
 				While result = new While(tok, expr, body);
 				return result;
+			}
+
+			case FOR: {
+				Token tok = token;
+				eat(Tokens.FOR);
+				eat(Tokens.LEFTPAREN);
+				Declaration decl = parseVariable();
+				Expression condition = parseExpression();
+				eat(Tokens.SEMICOLON);
+				Expression increment = parseExpression();
+				eat(Tokens.RIGHTPAREN);
+				eat(Tokens.LEFTBRACKET);
+				List<Declaration> declList = parseBody();
+				ForLoop forLoop = new ForLoop(tok, decl, condition, increment, declList);
+				return forLoop;
+			}
+
+			case RETURN: {
+				Token tok = token;
+				eat(Tokens.RETURN);
+				Expression returnExpr = parseExpression();
+				eat(Tokens.SEMICOLON);
+				ReturnStatement returnStatement = new ReturnStatement(tok, returnExpr);
+				return returnStatement;
 			}
 
 			default:
@@ -836,7 +868,6 @@ public class Parser
 			eat(Tokens.AND);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 
@@ -845,7 +876,6 @@ public class Parser
 			eat(Tokens.OR);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 
@@ -854,7 +884,6 @@ public class Parser
 			eat(Tokens.EQUALS);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 
@@ -863,7 +892,6 @@ public class Parser
 			eat(Tokens.LESSTHAN);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 

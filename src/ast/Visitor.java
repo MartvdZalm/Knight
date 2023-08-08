@@ -90,4 +90,6 @@ public interface Visitor<R>
 
     public R visit(GreaterThanOrEqual greaterThanOrEqual);
 
+    public R visit(ReturnStatement returnStatement);
+
 }

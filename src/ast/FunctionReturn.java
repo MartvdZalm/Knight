@@ -10,19 +10,17 @@ public class FunctionReturn extends Declaration
     private Type returnType;
     private IdentifierExpr functionName;
     private List<ArgDecl> argList;
-	private List<Declaration> varList;
-	private List<Statement> statList;
+	private List<Declaration> declList;
     private Expression returnExpr;
 
-    public FunctionReturn(Token token, Token access, Type returnType, IdentifierExpr functionName, List<ArgDecl> argList, List<Declaration> varList, List<Statement> statList, Expression returnExpr)
+    public FunctionReturn(Token token, Token access, Type returnType, IdentifierExpr functionName, List<ArgDecl> argList, List<Declaration> declList, Expression returnExpr)
     {
 		super(token);
 		this.access = access;
         this.returnType = returnType;
 		this.functionName = functionName;
 		this.argList = argList;
-		this.varList = varList;
-		this.statList = statList;
+		this.declList = declList;
         this.returnExpr = returnExpr;
     }
 
@@ -61,14 +59,9 @@ public class FunctionReturn extends Declaration
 		return argList.size();
 	}
 
-	public int getVarListSize()
+	public int getDeclListSize()
 	{
-		return varList.size();
-	}
-
-	public int getStatListSize()
-	{
-		return statList.size();
+		return declList.size();
 	}
 
 	public ArgDecl getArgDeclAt(int index)
@@ -79,27 +72,12 @@ public class FunctionReturn extends Declaration
 		return null;
 	}
 
-	public Declaration getVarDeclAt(int index)
+	public Declaration getDeclAt(int index)
 	{
-		if (index < varList.size()) {
-			return varList.get(index);
+		if (index < declList.size()) {
+			return declList.get(index);
 		}
 		return null;
-	}
-
-	public Statement getStatAt(int index)
-	{
-		if (index < statList.size()) {
-			return statList.get(index);
-		}
-		return null;
-	}
-
-	public void setStatAt(int index, Statement stat)
-	{
-		if (index < statList.size()) {
-			statList.set(index, stat);
-		}
 	}
 
     public Expression getReturnExpr()

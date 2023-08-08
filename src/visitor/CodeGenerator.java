@@ -119,6 +119,24 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
+	public String visit(LessThanOrEqual lessThanOrEqual)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(GreaterThan greaterThan)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(GreaterThanOrEqual greaterThanOrEqual)
+	{
+		return null;
+	}
+
+	@Override
 	public String visit(And n)
 	{
 		return null;
@@ -356,15 +374,9 @@ public class CodeGenerator implements Visitor<String>
 			methodVisitor.visitCode();
 		}
 
-		// Loop through all the variables in the function 
-		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
-			functionReturn.getVarDeclAt(i).accept(this);
-			maxLocal++;
-		}
-
-		// Loop through all the statements in the function
-		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
-			functionReturn.getStatAt(i).accept(this);
+		// Loop through all the declaration in the function 
+		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
+			functionReturn.getDeclAt(i).accept(this);
 			maxLocal++;
 		}
 
@@ -494,5 +506,11 @@ public class CodeGenerator implements Visitor<String>
 			return slot;
 		}
 		return -1;
+	}
+
+	@Override
+	public String visit(ReturnStatement returnStatement)
+	{
+		return null;
 	}
 }

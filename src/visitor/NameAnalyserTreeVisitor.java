@@ -127,6 +127,24 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(LessThanOrEqual lessThanOrEqual)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(GreaterThan greaterThan)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(GreaterThanOrEqual greaterThanOrEqual)
+	{
+		return null;
+	}
+
+	@Override
 	public Type visit(And n)
 	{
 		n.getLhs().accept(this);
@@ -343,14 +361,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < functionVoid.getVarListSize(); i++) {
-			Declaration vd = functionVoid.getVarDeclAt(i);
+		for (int i = 0; i < functionVoid.getDeclListSize(); i++) {
+			Declaration vd = functionVoid.getDeclAt(i);
 			vd.accept(this);
-		}
-
-		for (int i = 0; i < functionVoid.getStatListSize(); i++) {
-			Statement st = functionVoid.getStatAt(i);
-			st.accept(this);
 		}
 
 		currFunc = null;
@@ -377,14 +390,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
-			Declaration vd = functionReturn.getVarDeclAt(i);
+		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
+			Declaration vd = functionReturn.getDeclAt(i);
 			vd.accept(this);
-		}
-
-		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
-			Statement st = functionReturn.getStatAt(i);
-			st.accept(this);
 		}
 
 		functionReturn.getReturnExpr().accept(this);
@@ -558,6 +566,12 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 
 	@Override
 	public Type visit(Include include)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(ReturnStatement returnStatement)
 	{
 		return null;
 	}

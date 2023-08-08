@@ -241,6 +241,24 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(LessThanOrEqual lessThanOrEqual)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(GreaterThan greaterThan)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(GreaterThanOrEqual greaterThanOrEqual)
+	{
+		return null;
+	}
+
+	@Override
 	public Type visit(And n)
 	{
 		Type t1 = n.getLhs().accept(this);
@@ -502,13 +520,8 @@ public class TypeAnalyser implements Visitor<Type>
 
 		currentFunction = (Function) functionVoid.getFunctionName().getB();
 
-		for (int i = 0; i < functionVoid.getStatListSize(); i++) {
-			Statement st = functionVoid.getStatAt(i);
-			st.accept(this);
-		}
-
-		for (int i = 0; i < functionVoid.getVarListSize(); i++) {
-			Declaration decl = functionVoid.getVarDeclAt(i);
+		for (int i = 0; i < functionVoid.getDeclListSize(); i++) {
+			Declaration decl = functionVoid.getDeclAt(i);
 			decl.accept(this);
 		}
 
@@ -528,9 +541,9 @@ public class TypeAnalyser implements Visitor<Type>
 
 		currentFunction = (Function) functionReturn.getFunctionName().getB();
 
-		for (int i = 0; i < functionReturn.getStatListSize(); i++) {
-			Statement st = functionReturn.getStatAt(i);
-			st.accept(this);
+		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
+			Declaration decl = functionReturn.getDeclAt(i);
+			decl.accept(this);
 		}
 
 		Type t1 = functionReturn.getReturnType();
@@ -539,11 +552,6 @@ public class TypeAnalyser implements Visitor<Type>
 		if (!st.compareTypes(t1, t2)) {
 			Token tok = functionReturn.getReturnExpr().getToken();
 			addError(tok.getRow(), tok.getCol(), "Function " + functionName + " must return a result of Type " + t1);
-		}
-
-		for (int i = 0; i < functionReturn.getVarListSize(); i++) {
-			Declaration decl = functionReturn.getVarDeclAt(i);
-			decl.accept(this);
 		}
 
 		functionReturn.getReturnExpr().setType(t2);
@@ -683,6 +691,12 @@ public class TypeAnalyser implements Visitor<Type>
 
 	@Override
 	public Type visit(Include include)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(ReturnStatement returnStatement)
 	{
 		return null;
 	}
