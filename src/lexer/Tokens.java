@@ -48,10 +48,13 @@ public enum Tokens
     LESSTHANOREQUAL,
     GREATERTHAN,
     GREATERTHANOREQUAL,
+
     PLUS,
+    INCREMENT,
     MINUS,
     TIMES,
     DIV,
+    MODULUS,
     
     RETURN, 
     VOID,

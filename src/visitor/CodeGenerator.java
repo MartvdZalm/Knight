@@ -513,4 +513,16 @@ public class CodeGenerator implements Visitor<String>
 	{
 		return null;
 	}
+
+	@Override
+	public String visit(Increment increment)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(Modulus modulus)
+	{
+		return null;
+	}
 }

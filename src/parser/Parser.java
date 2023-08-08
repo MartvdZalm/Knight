@@ -231,8 +231,6 @@ public class Parser
 			eat(Tokens.SEMICOLON);
 		}
 
-		System.out.println(token);
-
 		return decl;
 	}
 
@@ -365,8 +363,9 @@ public class Parser
 				eat(Tokens.SEMICOLON);
 				Expression increment = parseExpression();
 				eat(Tokens.RIGHTPAREN);
-				eat(Tokens.LEFTBRACKET);
+				eat(Tokens.LEFTBRACE);
 				List<Declaration> declList = parseBody();
+				eat(Tokens.RIGHTBRACE);
 				ForLoop forLoop = new ForLoop(tok, decl, condition, increment, declList);
 				return forLoop;
 			}
@@ -712,6 +711,13 @@ public class Parser
 		}
 		break;
 
+		case INCREMENT: {
+			Expression expr = stOperand.pop();
+			Increment inc = new Increment(tok, expr);
+			stOperand.push(inc);
+		}
+		break;
+
 		case MINUS: {
 			Expression rhs = stOperand.pop();
 			Expression lhs = stOperand.pop();
@@ -733,6 +739,14 @@ public class Parser
 			Expression lhs = stOperand.pop();
 			Division div = new Division(tok, lhs, rhs);
 			stOperand.push(div);
+		}
+		break;
+
+		case MODULUS: {
+			Expression rhs = stOperand.pop();
+			Expression lhs = stOperand.pop();
+			Modulus modulus = new Modulus(tok, lhs, rhs);
+			stOperand.push(modulus);
 		}
 		break;
 
@@ -827,6 +841,10 @@ public class Parser
 			return 4;
 		}
 
+		case MODULUS: {
+			return 4;
+		}
+
 		case TIMES: {
 			return 5;
 		}
@@ -849,9 +867,7 @@ public class Parser
 
 		default:
 			return 0;
-
 		}
-
 	}
 
 	/**
@@ -908,7 +924,6 @@ public class Parser
 			eat(Tokens.GREATERTHAN);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 
@@ -928,12 +943,18 @@ public class Parser
 		}
 		break;
 
+		case INCREMENT: {
+			pushOperator(token);
+			eat(Tokens.INCREMENT);
+			parseTerm1();
+		}
+		break;
+
 		case MINUS: {
 			pushOperator(token);
 			eat(Tokens.MINUS);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 
@@ -942,7 +963,6 @@ public class Parser
 			eat(Tokens.TIMES);
 			parseExpr();
 			parseTerm1();
-
 		}
 		break;
 
@@ -951,7 +971,14 @@ public class Parser
 			eat(Tokens.DIV);
 			parseExpr();
 			parseTerm1();
+		}
+		break;
 
+		case MODULUS: {
+			pushOperator(token);
+			eat(Tokens.MODULUS);
+			parseExpr();
+			parseTerm1();
 		}
 		break;
 

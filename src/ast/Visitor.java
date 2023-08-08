@@ -92,4 +92,8 @@ public interface Visitor<R>
 
     public R visit(ReturnStatement returnStatement);
 
+    public R visit(Increment increment);
+
+    public R visit(Modulus modulus);
+
 }

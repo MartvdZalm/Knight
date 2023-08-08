@@ -52,9 +52,11 @@ public class TokenType
         Symbol.symbol(">=", Tokens.GREATERTHANOREQUAL);
 
         Symbol.symbol("+", Tokens.PLUS);
+        Symbol.symbol("++", Tokens.INCREMENT);
         Symbol.symbol("-", Tokens.MINUS);
         Symbol.symbol("*", Tokens.TIMES);
         Symbol.symbol("/", Tokens.DIV);
+        Symbol.symbol("%", Tokens.MODULUS);
         
         Symbol.symbol("ret", Tokens.RETURN);
         Symbol.symbol("void", Tokens.VOID);       

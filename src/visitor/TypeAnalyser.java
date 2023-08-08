@@ -700,4 +700,16 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		return null;
 	}
+
+	@Override
+	public Type visit(Increment increment)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(Modulus modulus)
+	{
+		return null;
+	}
 }
