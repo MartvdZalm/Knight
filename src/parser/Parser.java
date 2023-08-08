@@ -154,7 +154,6 @@ public class Parser
 		if (returnType.getToken().getToken() != Tokens.VOID) {
 			eat(Tokens.RETURN);
 			returnExpr = parseExpression();
-			eat(Tokens.SEMICOLON);
 		} 
 		eat(Tokens.RIGHTBRACE);
 
@@ -187,10 +186,10 @@ public class Parser
 						eat(Tokens.IDENTIFIER);
 						if (token.getToken() == Tokens.SEMICOLON) {
 							declList.add(new VarDecl(token, identifierType, identifier2, currentAccessModifier));
+							eat(Tokens.SEMICOLON);
 						} else {
 							declList.add(new VarDeclInit(token, identifierType, identifier2, parseExpression(), currentAccessModifier));
 						}
-						eat(Tokens.SEMICOLON);
 					} else {		
 						Statement stat = parseState1(identifier);
 						declList.add(stat);
@@ -227,10 +226,6 @@ public class Parser
 			decl = new VarDeclInit(token, type, id, parseExpression(), currentAccessModifier);
 		}
 
-		if (token.getToken() == Tokens.SEMICOLON) {
-			eat(Tokens.SEMICOLON);
-		}
-
 		return decl;
 	}
 
@@ -249,6 +244,11 @@ public class Parser
 				popOperator();
 				tok = stOperator.peek();
 			}
+
+			if (token.getToken() == Tokens.SEMICOLON) {
+				eat(Tokens.SEMICOLON);
+			}
+
 			return stOperand.pop();
 
         } catch (ParseException pe) {
@@ -360,7 +360,6 @@ public class Parser
 				eat(Tokens.LEFTPAREN);
 				Declaration decl = parseVariable();
 				Expression condition = parseExpression();
-				eat(Tokens.SEMICOLON);
 				Expression increment = parseExpression();
 				eat(Tokens.RIGHTPAREN);
 				eat(Tokens.LEFTBRACE);
@@ -374,7 +373,6 @@ public class Parser
 				Token tok = token;
 				eat(Tokens.RETURN);
 				Expression returnExpr = parseExpression();
-				eat(Tokens.SEMICOLON);
 				ReturnStatement returnStatement = new ReturnStatement(tok, returnExpr);
 				return returnStatement;
 			}
@@ -399,7 +397,6 @@ public class Parser
 			Token tok = token;
 			eat(Tokens.ASSIGN);
 			Expression expr = parseExpression();
-			eat(Tokens.SEMICOLON);
 			Assign assign = new Assign(tok, id, expr);
 			return assign;
 		}
@@ -410,7 +407,6 @@ public class Parser
 			eat(Tokens.RIGHTBRACKET);
 			eat(Tokens.ASSIGN);
 			Expression expr2 = parseExpression();
-			eat(Tokens.SEMICOLON);
 			ArrayAssign assign = new ArrayAssign(id.getToken(), id, expr1, expr2);
 			return assign;
 		}
@@ -632,7 +628,7 @@ public class Parser
 		break;
 
 		default: {
-			System.err.println("parseUnary(): Error in parsing");
+			System.err.println("parseUnary(): Error in parsing " + token.getToken() + " " + token.getRow());
 		}
 		break;
 		}
@@ -788,9 +784,11 @@ public class Parser
 		case LESSTHAN:
 		case LESSTHANOREQUAL:
 		case PLUS:
+		case INCREMENT:
 		case MINUS:
 		case TIMES:
 		case DIV:
+		case MODULUS:
 		case DOT:
 		case LEFTBRACKET: {
 			return true;
