@@ -804,6 +804,8 @@ public class Parser
 		case EQUALS:
 		case LESSTHAN:
 		case LESSTHANOREQUAL:
+		case GREATERTHAN:
+		case GREATERTHANOREQUAL:
 		case PLUS:
 		case INCREMENT:
 		case MINUS:

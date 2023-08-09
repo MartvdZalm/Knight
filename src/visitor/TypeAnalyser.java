@@ -14,13 +14,19 @@ public class TypeAnalyser implements Visitor<Type>
 {
 	private SymbolTable st;
 	private Klass currClass;
-	private Function currentFunction;
+	private Function currFunction;
 	private Set<String> hsKlass = new HashSet<>();
 	private Set<String> hsFunc = new HashSet<>();
 
 	public TypeAnalyser(SymbolTable table)
 	{
 		this.st = table;
+	}
+
+	@Override
+	public Type visit(Include include)
+	{
+		return null;
 	}
 
 	@Override
@@ -180,6 +186,43 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(Increment increment)
+	{
+		Type expr = increment.getExpr().accept(this);
+
+		if (!(expr instanceof IntType)) {
+			Token sym = increment.getExpr().getToken();
+			addError(sym.getRow(), sym.getCol(), "Operator ++ cannot be applied to " + expr);
+		}
+
+		Type t = new IntType(increment.getToken());
+		increment.setType(t);
+		return t;
+	}
+
+	@Override
+	public Type visit(Modulus modulus)
+	{
+		Type lhs = modulus.getLhs().accept(this);
+		Type rhs = modulus.getRhs().accept(this);
+
+		if (lhs == null || rhs == null) {
+			Token sym = modulus.getToken();
+			addError(sym.getRow(), sym.getCol(), "Improper Type used with % operator");
+			return new IntType(modulus.getToken());
+		}
+
+		if (!(lhs instanceof IntType) || !(rhs instanceof IntType)) {
+			Token sym = modulus.getLhs().getToken();
+			addError(sym.getRow(), sym.getCol(), "Operator % cannot be applied to " + lhs + ", " + rhs);
+		}
+
+		Type t = new IntType(modulus.getToken());
+		modulus.setType(t);
+		return t;
+	}
+
+	@Override
 	public Type visit(Division n)
 	{
 		Type lhs = n.getLhs().accept(this);
@@ -223,74 +266,111 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(LessThan n)
+	public Type visit(LessThan lessThan)
 	{
-		Type t1 = n.getLhs().accept(this);
-		Type t2 = n.getRhs().accept(this);
+		Type t1 = lessThan.getLhs().accept(this);
+		Type t2 = lessThan.getRhs().accept(this);
 
 		if (t1 == null || t2 == null) {
-			Token sym = n.getToken();
+			Token sym = lessThan.getToken();
 			addError(sym.getRow(), sym.getCol(), "Incorrect types used with < oprator");
 		} else if (!(t1 instanceof IntType) || !(t2 instanceof IntType)) {
-			Token sym = n.getToken();
+			Token sym = lessThan.getToken();
 			addError(sym.getRow(), sym.getCol(), "Operator < cannot be applied to " + t1 + ", " + t2);
 		}
-		Type t = new BooleanType(n.getToken());
-		n.setType(t);
+
+		Type t = new BooleanType(lessThan.getToken());
+		lessThan.setType(t);
 		return t;
 	}
 
 	@Override
 	public Type visit(LessThanOrEqual lessThanOrEqual)
 	{
-		return null;
+		Type t1 = lessThanOrEqual.getLhs().accept(this);
+		Type t2 = lessThanOrEqual.getRhs().accept(this);
+
+		if (t1 == null || t2 == null) {
+			Token sym = lessThanOrEqual.getToken();
+			addError(sym.getRow(), sym.getCol(), "Incorrect types used with <= oprator");
+		} else if (!(t1 instanceof IntType) || !(t2 instanceof IntType)) {
+			Token sym = lessThanOrEqual.getToken();
+			addError(sym.getRow(), sym.getCol(), "Operator <= cannot be applied to " + t1 + ", " + t2);
+		}
+		Type t = new BooleanType(lessThanOrEqual.getToken());
+		lessThanOrEqual.setType(t);
+		return t;
 	}
 
 	@Override
 	public Type visit(GreaterThan greaterThan)
 	{
-		return null;
+		Type t1 = greaterThan.getLhs().accept(this);
+		Type t2 = greaterThan.getRhs().accept(this);
+
+		if (t1 == null || t2 == null) {
+			Token sym = greaterThan.getToken();
+			addError(sym.getRow(), sym.getCol(), "Incorrect types used with > oprator");
+		} else if (!(t1 instanceof IntType) || !(t2 instanceof IntType)) {
+			Token sym = greaterThan.getToken();
+			addError(sym.getRow(), sym.getCol(), "Operator > cannot be applied to " + t1 + ", " + t2);
+		}
+		Type t = new BooleanType(greaterThan.getToken());
+		greaterThan.setType(t);
+		return t;
 	}
 
 	@Override
 	public Type visit(GreaterThanOrEqual greaterThanOrEqual)
 	{
-		return null;
-	}
-
-	@Override
-	public Type visit(And n)
-	{
-		Type t1 = n.getLhs().accept(this);
-		Type t2 = n.getRhs().accept(this);
+		Type t1 = greaterThanOrEqual.getLhs().accept(this);
+		Type t2 = greaterThanOrEqual.getRhs().accept(this);
 
 		if (t1 == null || t2 == null) {
-			Token sym = n.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with && oprator");
-		} else if (!(t1 instanceof BooleanType) || !(t2 instanceof BooleanType)) {
-			Token sym = n.getLhs().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator && cannot be applied to " + t1 + ", " + t2);
+			Token sym = greaterThanOrEqual.getToken();
+			addError(sym.getRow(), sym.getCol(), "Incorrect types used with >= oprator");
+		} else if (!(t1 instanceof IntType) || !(t2 instanceof IntType)) {
+			Token sym = greaterThanOrEqual.getToken();
+			addError(sym.getRow(), sym.getCol(), "Operator >= cannot be applied to " + t1 + ", " + t2);
 		}
-		Type t = new BooleanType(n.getToken());
-		n.setType(t);
+		Type t = new BooleanType(greaterThanOrEqual.getToken());
+		greaterThanOrEqual.setType(t);
 		return t;
 	}
 
 	@Override
-	public Type visit(Or n)
+	public Type visit(And and)
 	{
-		Type t1 = n.getLhs().accept(this);
-		Type t2 = n.getRhs().accept(this);
+		Type t1 = and.getLhs().accept(this);
+		Type t2 = and.getRhs().accept(this);
 
 		if (t1 == null || t2 == null) {
-			Token sym = n.getToken();
+			Token sym = and.getToken();
+			addError(sym.getRow(), sym.getCol(), "Incorrect types used with && oprator");
+		} else if (!(t1 instanceof BooleanType) || !(t2 instanceof BooleanType)) {
+			Token sym = and.getLhs().getToken();
+			addError(sym.getRow(), sym.getCol(), "Operator && cannot be applied to " + t1 + ", " + t2);
+		}
+		Type t = new BooleanType(and.getToken());
+		and.setType(t);
+		return t;
+	}
+
+	@Override
+	public Type visit(Or or)
+	{
+		Type t1 = or.getLhs().accept(this);
+		Type t2 = or.getRhs().accept(this);
+
+		if (t1 == null || t2 == null) {
+			Token sym = or.getToken();
 			addError(sym.getRow(), sym.getCol(), "Incorrect types used with || oprator");
 		} else if (!(t1 instanceof BooleanType) || !(t2 instanceof BooleanType)) {
-			Token sym = n.getLhs().getToken();
+			Token sym = or.getLhs().getToken();
 			addError(sym.getRow(), sym.getCol(), "Operator || cannot be applied to " + t1 + ", " + t2);
 		}
-		Type t = new BooleanType(n.getToken());
-		n.setType(t);
+		Type t = new BooleanType(or.getToken());
+		or.setType(t);
 		return t;
 	}
 
@@ -428,6 +508,12 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(FunctionType functionType)
+	{
+		return functionType;
+	}
+
+	@Override
 	public Type visit(IntType intType)
 	{
 		return intType;
@@ -509,6 +595,36 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(FunctionAnonymous functionAnonymous)
+	{
+		String functionName = functionAnonymous.getFunctionName().getVarID();
+
+		if (hsFunc.contains(functionName)) {
+			return functionAnonymous.getReturnType();
+		}
+		hsFunc.add(functionName);
+
+		currFunction = (Function) functionAnonymous.getFunctionName().getB();
+
+		for (int i = 0; i < functionAnonymous.getDeclListSize(); i++) {
+			Declaration decl = functionAnonymous.getDeclAt(i);
+			decl.accept(this);
+		}
+
+		Type t1 = functionAnonymous.getReturnType();
+		Type t2 = functionAnonymous.getReturnExpr().accept(this);
+
+		if (!st.compareTypes(t1, t2)) {
+			Token tok = functionAnonymous.getReturnExpr().getToken();
+			addError(tok.getRow(), tok.getCol(), "Function " + functionName + " must return a result of Type " + t1);
+		}
+
+		functionAnonymous.getReturnExpr().setType(t2);
+		currFunction = null;
+		return null;
+	}
+
+	@Override
 	public Type visit(FunctionVoid functionVoid)
 	{
 		String functionName = functionVoid.getFunctionName().getVarID();
@@ -518,14 +634,14 @@ public class TypeAnalyser implements Visitor<Type>
 		}
 		hsFunc.add(functionName);
 
-		currentFunction = (Function) functionVoid.getFunctionName().getB();
+		currFunction = (Function) functionVoid.getFunctionName().getB();
 
 		for (int i = 0; i < functionVoid.getDeclListSize(); i++) {
 			Declaration decl = functionVoid.getDeclAt(i);
 			decl.accept(this);
 		}
 
-		currentFunction = null;
+		currFunction = null;
 		return null;
 	}
 
@@ -539,7 +655,7 @@ public class TypeAnalyser implements Visitor<Type>
 		}
 		hsFunc.add(functionName);
 
-		currentFunction = (Function) functionReturn.getFunctionName().getB();
+		currFunction = (Function) functionReturn.getFunctionName().getB();
 
 		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
 			Declaration decl = functionReturn.getDeclAt(i);
@@ -555,7 +671,7 @@ public class TypeAnalyser implements Visitor<Type>
 		}
 
 		functionReturn.getReturnExpr().setType(t2);
-		currentFunction = null;
+		currFunction = null;
 		return null;
 	}
 
@@ -569,9 +685,9 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Identifier id)
+	public Type visit(Identifier identifier)
 	{
-		Binding b = id.getB();
+		Binding b = identifier.getB();
 		if (b != null) {
 			return ((Variable) b).getType();
 		}
@@ -579,57 +695,64 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArrayIndexExpr ia)
+	public Type visit(ReturnStatement returnStatement)
+	{
+		returnStatement.getReturnExpr().accept(this);
+		return null;
+	}
+
+	@Override
+	public Type visit(ArrayIndexExpr arrayIndexExpr)
 	{
 		// Check array type
-		Type tid = ia.getArray().accept(this);
+		Type tid = arrayIndexExpr.getArray().accept(this);
 		if (tid == null || !(tid instanceof IntArrayType)) {
-			Token sym = ia.getArray().getToken();
+			Token sym = arrayIndexExpr.getArray().getToken();
 			addError(sym.getRow(), sym.getCol(), "Array expression must evaluate to be of Type int[]");
 		} else {
-			ia.getArray().setType(tid);
+			arrayIndexExpr.getArray().setType(tid);
 		}
 
 		// Check index type
-		Type tin = ia.getIndex().accept(this);
+		Type tin = arrayIndexExpr.getIndex().accept(this);
 		if (tin == null || !(tin instanceof IntType)) {
-			Token sym = ia.getIndex().getToken();
+			Token sym = arrayIndexExpr.getIndex().getToken();
 			addError(sym.getRow(), sym.getCol(), "Index expression must evaluate to be of Type int");
 		} else {
-			ia.getIndex().setType(tin);
+			arrayIndexExpr.getIndex().setType(tin);
 		}
 
-		Type t = new IntType(ia.getToken());
-		ia.setType(t);
+		Type t = new IntType(arrayIndexExpr.getToken());
+		arrayIndexExpr.setType(t);
 		return t;
 	}
 
 	@Override
-	public Type visit(ArrayAssign aa)
+	public Type visit(ArrayAssign arrayAssign)
 	{
 		// Check identifier type
-		Type tid = aa.getIdentifier().accept(this);
+		Type tid = arrayAssign.getIdentifier().accept(this);
 		if (tid == null || !(tid instanceof IntArrayType)) {
-			Token sym = aa.getIdentifier().getToken();
+			Token sym = arrayAssign.getIdentifier().getToken();
 			addError(sym.getRow(), sym.getCol(), "Identifier must be of Type int[]");
 		}
 
 		// Check expression type
-		Type texp1 = aa.getE1().accept(this);
+		Type texp1 = arrayAssign.getE1().accept(this);
 		if (texp1 == null || !(texp1 instanceof IntType)) {
-			Token sym = aa.getE1().getToken();
+			Token sym = arrayAssign.getE1().getToken();
 			addError(sym.getRow(), sym.getCol(), "Expression must be of Type int");
 		} else {
-			aa.getE1().setType(texp1);
+			arrayAssign.getE1().setType(texp1);
 		}
 
 		// Check assigned expression type
-		Type texp2 = aa.getE2().accept(this);
+		Type texp2 = arrayAssign.getE2().accept(this);
 		if (texp2 == null || !(texp2 instanceof IntType)) {
-			Token sym = aa.getE2().getToken();
+			Token sym = arrayAssign.getE2().getToken();
 			addError(sym.getRow(), sym.getCol(), "Expression must be of Type int");
 		} else {
-			aa.getE2().setType(texp2);
+			arrayAssign.getE2().setType(texp2);
 		}
 
 		return null;
@@ -644,20 +767,20 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ClassDeclSimple cd)
+	public Type visit(ClassDeclSimple classDeclSimple)
 	{
-		String id = cd.getId().getVarID();
+		String id = classDeclSimple.getId().getVarID();
 		if (hsKlass.contains(id)) {
 			return null;
 		}
 		hsKlass.add(id);
 
-		Binding b = cd.getId().getB();
+		Binding b = classDeclSimple.getId().getB();
 		currClass = (Klass) b;
 
 		hsFunc.clear();
-		for (int i = 0; i < cd.getDeclListSize(); i++) {
-			Declaration decl = cd.getDeclAt(i);
+		for (int i = 0; i < classDeclSimple.getDeclListSize(); i++) {
+			Declaration decl = classDeclSimple.getDeclAt(i);
 			decl.accept(this);
 		}
 
@@ -665,19 +788,19 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ClassDeclExtends cd)
+	public Type visit(ClassDeclExtends classDeclExtends)
 	{
-		String id = cd.getId().getVarID();
+		String id = classDeclExtends.getId().getVarID();
 		if (hsKlass.contains(id)) { // Duplicate class
 			return null;
 		}
 		hsKlass.add(id);
-		Binding b = cd.getId().getB();
+		Binding b = classDeclExtends.getId().getB();
 		currClass = (Klass) b;
 
 		hsFunc.clear();
-		for (int i = 0; i < cd.getDeclListSize(); i++) {
-			Declaration decl = cd.getDeclAt(i);
+		for (int i = 0; i < classDeclExtends.getDeclListSize(); i++) {
+			Declaration decl = classDeclExtends.getDeclAt(i);
 			decl.accept(this);
 		}
 
@@ -687,41 +810,5 @@ public class TypeAnalyser implements Visitor<Type>
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
-	}
-
-	@Override
-	public Type visit(Include include)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(ReturnStatement returnStatement)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Increment increment)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Modulus modulus)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(FunctionType functionType)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(FunctionAnonymous functionAnonymous)
-	{
-		return null;
 	}
 }

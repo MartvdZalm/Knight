@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Hashtable;
 
+import src.ast.BooleanType;
 import src.ast.IdentifierType;
 import src.ast.IntArrayType;
 import src.ast.IntType;
@@ -209,6 +210,9 @@ public class SymbolTable
 		}
 
 		if (t1 instanceof IntType && t2 instanceof IntType) {
+			return true;
+		}
+		if (t1 instanceof BooleanType && t2 instanceof BooleanType) {
 			return true;
 		}
 		if (t1 instanceof IntArrayType && t2 instanceof IntArrayType) {
