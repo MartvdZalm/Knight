@@ -296,7 +296,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(VarDecl vd)
+	public Type visit(VarDeclNoInit vd)
 	{
 		String id = vd.getId().getVarID();
 		
@@ -584,6 +584,18 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 
 	@Override
 	public Type visit(Modulus modulus)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionType functionType)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionAnonymous functionAnonymous)
 	{
 		return null;
 	}

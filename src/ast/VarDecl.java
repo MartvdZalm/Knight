@@ -2,26 +2,26 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class VarDecl extends Declaration
+public abstract class VarDecl extends Declaration
 {
-	private Type type;
+    private Type type;
 	private Identifier id;
 	private Token access;
 
-	public VarDecl(Token token, Type type, Identifier id, Token access)
-	{
-		super(token);
-		this.type = type;
+    public VarDecl(Token token, Type type, Identifier id, Token access)
+    {
+        super(token);
+        this.type = type;
 		this.id = id;
 		this.access = access;
-	}
+    }
 
-	public Type getType()
+    public Type getType()
 	{
 		return type;
 	}
 
-	public void setType(Type type)
+    public void setType(Type type)
 	{
 		this.type = type;
 	}
@@ -44,11 +44,5 @@ public class VarDecl extends Declaration
 	public void setAccess(Token access)
 	{
 		this.access = access;
-	}
-
-	@Override
-	public <R> R accept(Visitor<R> v)
-	{
-		return v.visit(this);
 	}
 }

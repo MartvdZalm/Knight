@@ -464,7 +464,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(VarDecl vd)
+	public Type visit(VarDeclNoInit vd)
 	{
 		return vd.getType();
 	}
@@ -709,6 +709,18 @@ public class TypeAnalyser implements Visitor<Type>
 
 	@Override
 	public Type visit(Modulus modulus)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionType functionType)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionAnonymous functionAnonymous)
 	{
 		return null;
 	}

@@ -108,7 +108,7 @@ public class Parser
 			if (token.getToken() == Tokens.FUNCTION) {
 				declList.add(parseFunction());
 			} else {
-				declList.add(parseVariable());
+				declList.add(parseDeclaration());
 			}
 		}
 		eat(Tokens.RIGHTBRACE);
@@ -170,30 +170,9 @@ public class Parser
 
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
 
-			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.IDENTIFIER) {	
-				
-				while (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
-					declList.add(parseVariable());
-				}
-	
+			if (token.getToken() == Tokens.IDENTIFIER) {
 				while (token.getToken() == Tokens.IDENTIFIER) {
-					IdentifierType identifierType = new IdentifierType(token, token.getSymbol());
-					Identifier identifier = new Identifier(token, token.getSymbol());
-					eat(Tokens.IDENTIFIER);
-	
-					if (token.getToken() == Tokens.IDENTIFIER) {
-						Identifier identifier2 = new Identifier(token, token.getSymbol());
-						eat(Tokens.IDENTIFIER);
-						if (token.getToken() == Tokens.SEMICOLON) {
-							declList.add(new VarDecl(token, identifierType, identifier2, currentAccessModifier));
-							eat(Tokens.SEMICOLON);
-						} else {
-							declList.add(new VarDeclInit(token, identifierType, identifier2, parseExpression(), currentAccessModifier));
-						}
-					} else {		
-						Statement stat = parseState1(identifier);
-						declList.add(stat);
-					}
+					declList.add(parseDeclaration());	
 				}
 			} else {
 				declList.add(parseStatement());
@@ -209,21 +188,57 @@ public class Parser
      * @return The parsed Declaration object representing the variable declaration.
      * @throws ParseException If there's an error during the parsing process.
      */
-	private Declaration parseVariable() throws ParseException
+	private Declaration parseDeclaration() throws ParseException
 	{
 		Declaration decl = null;
-
 		Identifier id = new Identifier(token, token.getSymbol());
+
 		eat(Tokens.IDENTIFIER);	
+		if (token.getToken() != Tokens.COLON) {
+			return parseState1(id);
+		}
+
 		eat(Tokens.COLON);
 		Type type = parseType();
 
 		if (token.getToken() == Tokens.SEMICOLON) {
-			decl = new VarDecl(token, type, id, currentAccessModifier);
+			decl = new VarDeclNoInit(token, type, id, currentAccessModifier);
 			eat(Tokens.SEMICOLON);
 		} else {
 			eat(Tokens.ASSIGN);
-			decl = new VarDeclInit(token, type, id, parseExpression(), currentAccessModifier);
+
+			if (token.getToken() == Tokens.LEFTPAREN) {
+				eat(Tokens.LEFTPAREN);
+				List<ArgDecl> argList = new ArrayList<ArgDecl>();
+
+				if (token.getToken() != Tokens.RIGHTPAREN) {
+					argList.add(parseArgument());
+
+					while (token.getToken() == Tokens.COMMA) {
+						eat(Tokens.COMMA);;
+						argList.add(parseArgument());
+					}
+				}
+				eat(Tokens.RIGHTPAREN);
+				eat(Tokens.COLON);
+				Type returnType = parseType();
+				eat(Tokens.LEFTBRACE);
+
+				List<Declaration> declList = parseBody();
+
+				Expression returnExpr = null;
+				if (returnType.getToken().getToken() != Tokens.VOID) {
+					eat(Tokens.RETURN);
+					returnExpr = parseExpression();
+				} 
+				eat(Tokens.RIGHTBRACE);
+
+				if (returnExpr != null) {
+					return new FunctionAnonymous(token, currentAccessModifier, returnType, new IdentifierExpr(token, id.getVarID()), argList, declList, returnExpr);
+				}
+			} else {
+				decl = new VarDeclInit(token, type, id, parseExpression(), currentAccessModifier);
+			}
 		}
 
 		return decl;
@@ -358,7 +373,7 @@ public class Parser
 				Token tok = token;
 				eat(Tokens.FOR);
 				eat(Tokens.LEFTPAREN);
-				Declaration decl = parseVariable();
+				Declaration decl = parseDeclaration();
 				Expression condition = parseExpression();
 				Expression increment = parseExpression();
 				eat(Tokens.RIGHTPAREN);
@@ -472,6 +487,12 @@ public class Parser
 			VoidType vt = new VoidType(token);
 			eat(Tokens.VOID);
 			return vt;
+		}
+
+		case FUNCTION: {
+			FunctionType functionType = new FunctionType(token);
+			eat(Tokens.FUNCTION);
+			return functionType;
 		}
 
 		case IDENTIFIER: {

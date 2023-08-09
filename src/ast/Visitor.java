@@ -16,7 +16,7 @@ public interface Visitor<R>
 
     public R visit(ArgDecl argDecl);
 
-    public R visit(VarDecl varDecl);
+    public R visit(VarDeclNoInit varDecl);
 
     public R visit(Program program);
 
@@ -95,5 +95,9 @@ public interface Visitor<R>
     public R visit(Increment increment);
 
     public R visit(Modulus modulus);
+
+    public R visit(FunctionType functionType);
+
+    public R visit(FunctionAnonymous functionAnonymous);
 
 }

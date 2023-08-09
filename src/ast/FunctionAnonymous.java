@@ -4,11 +4,11 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class FunctionReturn extends FunctionDecl
+public class FunctionAnonymous extends FunctionDecl
 {
     private Expression returnExpr;
 
-    public FunctionReturn(Token token, Token access, Type returnType, IdentifierExpr functionName, List<ArgDecl> argList, List<Declaration> declList, Expression returnExpr)
+    public FunctionAnonymous(Token token, Token access, Type returnType, IdentifierExpr functionName, List<ArgDecl> argList, List<Declaration> declList, Expression returnExpr)
     {
 		super(token, access, returnType, functionName, argList, declList);
         this.returnExpr = returnExpr;

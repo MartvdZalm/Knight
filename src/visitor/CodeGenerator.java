@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import src.ast.*;
+import src.ast.VarDecl;
 import src.lexer.Token;
 import src.lexer.Tokens;
 import src.semantics.*;
@@ -289,7 +290,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(VarDecl vd)
+	public String visit(VarDeclNoInit vd)
 	{
 		return null;
 	}
@@ -522,6 +523,18 @@ public class CodeGenerator implements Visitor<String>
 
 	@Override
 	public String visit(Modulus modulus)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(FunctionType functionType)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(FunctionAnonymous functionAnonymous)
 	{
 		return null;
 	}

@@ -9,7 +9,7 @@ import src.symbol.Function;
 public class BuildSymbolTableVisitor implements Visitor<Type>
 {
 	private Klass currClass;
-	private Function currFunc;
+	private Function currFunction;
 	private SymbolTable symbolTable;
 	private String mKlassId;
 
@@ -24,11 +24,17 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Program n)
+	public Type visit(Program program)
 	{
-		for (int i = 0; i < n.getClassListSize(); i++) {
-			n.getClassList().get(i).accept(this);
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			program.getClassList().get(i).accept(this);
 		}
+		return null;
+	}
+
+	@Override
+	public Type visit(Include include)
+	{
 		return null;
 	}
 
@@ -39,25 +45,25 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Assign n)
+	public Type visit(Assign assign)
 	{
 		return null;
 	}
 	
 	@Override
-	public Type visit(Block n)
+	public Type visit(Block block)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IfThenElse n)
+	public Type visit(IfThenElse ifThenElse)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(While n)
+	public Type visit(While while1)
 	{
 		return null;
 	}
@@ -69,84 +75,102 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IntLiteral n)
+	public Type visit(IntLiteral intLiteral)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Plus n)
+	public Type visit(Plus plus)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Minus n)
+	public Type visit(Minus minus)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Times n)
+	public Type visit(Times times)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Division n)
+	public Type visit(Increment increment)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Equals n)
+	public Type visit(Modulus modulus)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(LessThan n)
+	public Type visit(Division division)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		division.getLhs().accept(this);
+		division.getRhs().accept(this);
+		return null;
+	}
+
+	@Override
+	public Type visit(Equals equals)
+	{
+		equals.getLhs().accept(this);
+		equals.getRhs().accept(this);
+		return null;
+	}
+
+	@Override
+	public Type visit(LessThan lessThan)
+	{
+		lessThan.getLhs().accept(this);
+		lessThan.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
 	public Type visit(LessThanOrEqual lessThanOrEqual)
 	{
+		lessThanOrEqual.getLhs().accept(this);
+		lessThanOrEqual.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
 	public Type visit(GreaterThan greaterThan)
 	{
+		greaterThan.getLhs().accept(this);
+		greaterThan.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
 	public Type visit(GreaterThanOrEqual greaterThanOrEqual)
 	{
+		greaterThanOrEqual.getLhs().accept(this);
+		greaterThanOrEqual.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(And n)
+	public Type visit(And and)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		and.getLhs().accept(this);
+		and.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Or n)
+	public Type visit(Or or)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		or.getLhs().accept(this);
+		or.getRhs().accept(this);
 		return null;
 	}
 
@@ -163,7 +187,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IdentifierExpr identifier)
+	public Type visit(IdentifierExpr identifierExpr)
 	{
 		return null;
 	}
@@ -181,13 +205,25 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunctionExpr cf)
+	public Type visit(CallFunctionExpr callFunctionExpr)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(CallFunctionStat cf)
+	public Type visit(CallFunctionStat callFunctionStat)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(ReturnStatement returnStatement)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionType functionType)
 	{
 		return null;
 	}
@@ -223,69 +259,59 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IdentifierType refType)
+	public Type visit(IdentifierType identifierType)
 	{
-		String id = refType.getVarID();
+		String id = identifierType.getVarID();
 		if (id != null && id.equals(mKlassId)) {
-			Token tok = refType.getToken();
+			Token tok = identifierType.getToken();
 			addError(tok.getRow(), tok.getCol(), "main class " + id + " cannot be used as a type in class " + currClass.getId());
 		}
 
-		return refType;
+		return identifierType;
 	}
 
-	@Override
-	public Type visit(VarDecl vd)
+	public void checkIfVariableExist(VarDecl varDecl)
 	{
-		Type t = vd.getType().accept(this);
-		String id = vd.getId().getVarID();
+		Type t = varDecl.getType().accept(this);
+		String id = varDecl.getId().getVarID();
 
-		if (currFunc != null) {
-			if (!currFunc.addVar(id, t)) {
-				Token tok = vd.getId().getToken();
-				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + currFunc.getId() + " in class " + currClass.getId());
+		if (currFunction != null) {
+			if (!currFunction.addVar(id, t)) {
+				Token tok = varDecl.getId().getToken();
+				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + currFunction.getId() + " in class " + currClass.getId());
 			}
 		} else {
 			if (!currClass.addVar(id, t)) {
-				Token sym = vd.getId().getToken();
+				Token sym = varDecl.getId().getToken();
 				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + currClass.getId());
 			}
 		}
+	}
 
+	@Override
+	public Type visit(VarDeclNoInit varDecl)
+	{
+		checkIfVariableExist(varDecl);
 		return null;
 	}
 
 	@Override
-	public Type visit(VarDeclInit vd)
+	public Type visit(VarDeclInit varDeclInit)
 	{
-		Type t = vd.getType().accept(this);
-		String id = vd.getId().getVarID();
-
-		if (currFunc != null) {
-			if (!currFunc.addVar(id, t)) {
-				Token tok = vd.getId().getToken();
-				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + currFunc.getId() + " in class " + currClass.getId());
-			}
-		} else {
-			if (!currClass.addVar(id, t)) {
-				Token sym = vd.getId().getToken();
-				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + currClass.getId());
-			}
-		}
-		
+		checkIfVariableExist(varDeclInit);
 		return null;
 	}
 
 	@Override
-	public Type visit(ArgDecl ad)
+	public Type visit(ArgDecl argDecl)
 	{
-		Type t = ad.getType().accept(this);
-		String id = ad.getId().getVarID();
-		if (!currFunc.addParam(id, t)) {
-			Token sym = ad.getId().getToken();
-			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + currFunc.getId() + " in class " + currClass.getId());
-		}
+		Type t = argDecl.getType().accept(this);
+		String id = argDecl.getId().getVarID();
 
+		if (!currFunction.addParam(id, t)) {
+			Token sym = argDecl.getId().getToken();
+			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + currFunction.getId() + " in class " + currClass.getId());
+		}
 		return null;
 	}
 
@@ -313,58 +339,51 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		return null;
 	}
 
-	@Override
-	public Type visit(FunctionVoid functionVoid)
+	public void checkFunction(FunctionDecl funcDecl)
 	{
-		Type type = functionVoid.getReturnType().accept(this);
-		String functionName = functionVoid.getFunctionName().getVarID();
+		Type type = funcDecl.getReturnType().accept(this);
+		String functionName = funcDecl.getFunctionName().getVarID();
 
 		if (!currClass.addFunction(functionName, type)) {
-			Token tok = functionVoid.getToken();
+			Token tok = funcDecl.getToken();
 			addError(tok.getRow(), tok.getCol(), "Function " + functionName + "  already defined in class " + currClass.getId());
 		} else {
-			currFunc = currClass.getFunction(functionName);
+			currFunction = currClass.getFunction(functionName);
 		}
 
-		for (int i = 0; i < functionVoid.getArgListSize(); i++) {
-			ArgDecl ad = functionVoid.getArgDeclAt(i);
+		for (int i = 0; i < funcDecl.getArgListSize(); i++) {
+			ArgDecl ad = funcDecl.getArgDeclAt(i);
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < functionVoid.getDeclListSize(); i++) {
-			Declaration vd = functionVoid.getDeclAt(i);
+		for (int i = 0; i < funcDecl.getDeclListSize(); i++) {
+			Declaration vd = funcDecl.getDeclAt(i);
 			vd.accept(this);
 		}
+	}
 
-		currFunc = null;
+	@Override
+	public Type visit(FunctionAnonymous functionAnonymous)
+	{
+		checkFunction(functionAnonymous);
+		currFunction = null;
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionVoid functionVoid)
+	{
+		checkFunction(functionVoid);
+		currFunction = null;
 		return null;
 	}
 
 	@Override
 	public Type visit(FunctionReturn functionReturn)
 	{
-		Type type = functionReturn.getReturnType().accept(this);
-		String functionName = functionReturn.getFunctionName().getVarID();
-
-		if (!currClass.addFunction(functionName, type)) {
-			Token tok = functionReturn.getToken();
-			addError(tok.getRow(), tok.getCol(), "Function " + functionName + "  already defined in class " + currClass.getId());
-		} else {
-			currFunc = currClass.getFunction(functionName);
-		}
-
-		for (int i = 0; i < functionReturn.getArgListSize(); i++) {
-			ArgDecl ad = functionReturn.getArgDeclAt(i);
-			ad.accept(this);
-		}
-
-		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
-			Declaration vd = functionReturn.getDeclAt(i);
-			vd.accept(this);
-		}
-
+		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
-		currFunc = null;
+		currFunction = null;
 		return null;
 	}
 
@@ -418,29 +437,5 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
-	}
-
-	@Override
-	public Type visit(Include include)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(ReturnStatement returnStatement)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Increment increment)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Modulus modulus)
-	{
-		return null;
 	}
 }

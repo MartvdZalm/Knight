@@ -64,11 +64,11 @@ public class Lexer
             return newNumberToken(number);
         }   
 
-        if (charachter == '\'') {
+        if (charachter == '\"') {
             StringBuilder str = new StringBuilder();
             try {
                 charachter = source.read(); // consume the first single quote
-                while (charachter != '\'') {
+                while (charachter != '\"') {
                     str.append(charachter);
                     charachter = source.read();
                 }

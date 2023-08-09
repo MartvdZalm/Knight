@@ -2,60 +2,24 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class VarDeclInit extends Declaration
+public class VarDeclInit extends VarDecl
 {
-    private Type type;
-    private Identifier id;
-    private Expression expr;
-	private Token access;
+	private Expression expr;
 
     public VarDeclInit(Token token, Type type, Identifier id, Expression expr, Token access)
-    {
-        super(token);
-        this.type = type;
-        this.id = id;
-        this.expr = expr;
-		this.access = access;
-    }
-
-	public Type getType()
-    {
-		return type;
-	}
-
-	public void setType(Type type)
-    {
-		this.type = type;
-	}
-
-	public Identifier getId()
 	{
-		return id;
+		super(token, type, id, access);
+		this.expr = expr;
 	}
 
-	public void setId(Identifier id)
+	public void setExpr(Expression expr)
 	{
-		this.id = id;
+		this.expr = expr;
 	}
 
     public Expression getExpr()
 	{
 		return expr;
-	}
-
-	public void setId(Expression expr)
-	{
-		this.expr = expr;
-	}
-
-	public Token getAccess()
-	{
-		return access;
-	}
-
-	public void setAccess(Token access)
-	{
-		this.access = access;
 	}
 
 	@Override
