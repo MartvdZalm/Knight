@@ -26,29 +26,35 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Assign n)
+	public Type visit(Include include)
 	{
-		n.getId().accept(this);
-		n.getExpr().accept(this);
+		return null;
+	}
+
+	@Override
+	public Type visit(Assign assign)
+	{
+		assign.getId().accept(this);
+		assign.getExpr().accept(this);
 		return null;
 	}
 	
 	@Override
-	public Type visit(Block n)
+	public Type visit(Block block)
 	{
-		for (int i = 0; i < n.getStatListSize(); i++) {
-			Statement st = n.getStatAt(i);
+		for (int i = 0; i < block.getStatListSize(); i++) {
+			Statement st = block.getStatAt(i);
 			st.accept(this);
 		}
 		return null;
 	}
 
 	@Override
-	public Type visit(IfThenElse n)
+	public Type visit(IfThenElse ifThenElse)
 	{
-		n.getExpr().accept(this);
-		n.getThen().accept(this);
-		n.getElze().accept(this);
+		ifThenElse.getExpr().accept(this);
+		ifThenElse.getThen().accept(this);
+		ifThenElse.getElze().accept(this);
 		return null;
 	}
 
@@ -59,10 +65,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(While n)
+	public Type visit(While while1)
 	{
-		n.getExpr().accept(this);
-		n.getBody().accept(this);
+		while1.getExpr().accept(this);
+		while1.getBody().accept(this);
 		return null;
 	}
 
@@ -73,90 +79,111 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IntLiteral n)
+	public Type visit(IntLiteral intLiteral)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Plus n)
+	public Type visit(Plus plus)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		plus.getLhs().accept(this);
+		plus.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Minus n)
+	public Type visit(Minus minus)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		minus.getLhs().accept(this);
+		minus.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Times n)
+	public Type visit(Times times)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		times.getLhs().accept(this);
+		times.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Division n)
+	public Type visit(Increment increment)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		increment.getExpr().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Equals n)
+	public Type visit(Modulus modulus)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		modulus.getLhs().accept(this);
+		modulus.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(LessThan n)
+	public Type visit(Division division)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		division.getLhs().accept(this);
+		division.getRhs().accept(this);
+		return null;
+	}
+
+	@Override
+	public Type visit(Equals equals)
+	{
+		equals.getLhs().accept(this);
+		equals.getRhs().accept(this);
+		return null;
+	}
+
+	@Override
+	public Type visit(LessThan lessThan)
+	{
+		lessThan.getLhs().accept(this);
+		lessThan.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
 	public Type visit(LessThanOrEqual lessThanOrEqual)
 	{
+		lessThanOrEqual.getLhs().accept(this);
+		lessThanOrEqual.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
 	public Type visit(GreaterThan greaterThan)
 	{
+		greaterThan.getLhs().accept(this);
+		greaterThan.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
 	public Type visit(GreaterThanOrEqual greaterThanOrEqual)
 	{
+		greaterThanOrEqual.getLhs().accept(this);
+		greaterThanOrEqual.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(And n)
+	public Type visit(And and)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		and.getLhs().accept(this);
+		and.getRhs().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Or n)
+	public Type visit(Or or)
 	{
-		n.getLhs().accept(this);
-		n.getRhs().accept(this);
+		or.getLhs().accept(this);
+		or.getRhs().accept(this);
 		return null;
 	}
 
@@ -173,9 +200,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(NewArray na)
+	public Type visit(NewArray newArray)
 	{
-		na.getArrayLength().accept(this);
+		newArray.getArrayLength().accept(this);
 		return null;
 	}
 
@@ -223,6 +250,12 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
+	public Type visit(FunctionType functionType)
+	{
+		return null;
+	}
+
+	@Override
 	public Type visit(IntType intType)
 	{
 		return null;
@@ -253,84 +286,76 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Identifier i)
+	public Type visit(Identifier identifier)
 	{
-		String id = i.getVarID();
+		String id = identifier.getVarID();
 		Variable var = symbolTable.getVar(currFunc, currClass, id);
 
 		if (var == null) {
-			Token sym = i.getToken();
+			Token sym = identifier.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
 		}
 
-		i.setB(var);
+		identifier.setB(var);
 		return null;
 	}
 
 	@Override
-	public Type visit(IdentifierType ref)
+	public Type visit(IdentifierType identifierType)
 	{
-		String id = ref.getVarID();
+		String id = identifierType.getVarID();
 		Klass klass = symbolTable.getKlass(id);
 		if (klass == null) {
-			Token sym = ref.getToken();
+			Token sym = identifierType.getToken();
 			addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
 		}
 
-		ref.setB(klass);
+		identifierType.setB(klass);
 		return null;
 	}
 
 	@Override
-	public Type visit(IdentifierExpr i)
+	public Type visit(IdentifierExpr identifierExpr)
 	{
-		String id = i.getVarID();
+		String id = identifierExpr.getVarID();
 		Variable var = symbolTable.getVar(currFunc, currClass, id);
 		if (var == null) {
-			Token sym = i.getToken();
+			Token sym = identifierExpr.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
 		}
 		
-		i.setB(var);
+		identifierExpr.setB(var);
 		return null;
 	}
 
-	@Override
-	public Type visit(VarDeclNoInit vd)
+	public void checkVariable(VarDecl varDecl)
 	{
-		String id = vd.getId().getVarID();
+		String id = varDecl.getId().getVarID();
 		
-		vd.getType().accept(this);
-		vd.getId().accept(this);
+		varDecl.getType().accept(this);
+		varDecl.getId().accept(this);
 
 		if (currFunc == null) {
 			Klass parent = symbolTable.getKlass(currClass.parent());
 			if (symbolTable.containsVar(null, parent, id)) {
-				Token sym = vd.getId().getToken();
+				Token sym = varDecl.getId().getToken();
 				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in parent class");
 			}
 		}
+	}
 
+	@Override
+	public Type visit(VarDeclNoInit varDeclNoInit)
+	{	
+		checkVariable(varDeclNoInit);
 		return null;
 	}
 	
 	@Override
-	public Type visit(VarDeclInit vd)
+	public Type visit(VarDeclInit varDeclInit)
 	{
-		String id = vd.getId().getVarID();
-
-		vd.getType().accept(this); 
-		vd.getId().accept(this);
-
-		if (currFunc == null) {
-			Klass parent = symbolTable.getKlass(currClass.parent());
-			if (symbolTable.containsVar(null, parent, id)) {
-				Token sym = vd.getId().getToken();
-				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in parent class");
-			}
-		}
-
-		vd.getExpr().accept(this);
+		checkVariable(varDeclInit);
+		varDeclInit.getExpr().accept(this);
 		return null;
 	}
 
@@ -341,31 +366,44 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		return null;
 	}
 
-	@Override
-	public Type visit(FunctionVoid functionVoid)
+	public void checkFunction(FunctionDecl functionDecl)
 	{
-		String functionName = functionVoid.getFunctionName().getVarID();
+		String functionName = functionDecl.getFunctionName().getVarID();
 
 		if (hsFunc.contains(functionName)) {
-			return null;
+			return;
 		} else {
 			hsFunc.add(functionName);
 		}
 
-		functionVoid.getReturnType().accept(this);
+		functionDecl.getReturnType().accept(this);
 		currFunc = currClass.getFunction(functionName);
-		functionVoid.getFunctionName().setB(currFunc);
+		functionDecl.getFunctionName().setB(currFunc);
 
-		for (int i = 0; i < functionVoid.getArgListSize(); i++) {
-			ArgDecl ad = functionVoid.getArgDeclAt(i);
+		for (int i = 0; i < functionDecl.getArgListSize(); i++) {
+			ArgDecl ad = functionDecl.getArgDeclAt(i);
 			ad.accept(this);
 		}
 
-		for (int i = 0; i < functionVoid.getDeclListSize(); i++) {
-			Declaration vd = functionVoid.getDeclAt(i);
+		for (int i = 0; i < functionDecl.getDeclListSize(); i++) {
+			Declaration vd = functionDecl.getDeclAt(i);
 			vd.accept(this);
 		}
+	}
 
+	@Override
+	public Type visit(FunctionAnonymous functionAnonymous)
+	{
+		checkFunction(functionAnonymous);
+		functionAnonymous.getReturnExpr().accept(this);
+		currFunc = null;
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionVoid functionVoid)
+	{
+		checkFunction(functionVoid);
 		currFunc = null;
 		return null;
 	}
@@ -373,28 +411,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	@Override
 	public Type visit(FunctionReturn functionReturn)
 	{
-		String functionName = functionReturn.getFunctionName().getVarID();
-
-		if (hsFunc.contains(functionName)) {
-			return null;
-		} else {
-			hsFunc.add(functionName);
-		}
-
-		functionReturn.getReturnType().accept(this);
-		currFunc = currClass.getFunction(functionName);
-		functionReturn.getFunctionName().setB(currFunc);
-
-		for (int i = 0; i < functionReturn.getArgListSize(); i++) {
-			ArgDecl ad = functionReturn.getArgDeclAt(i);
-			ad.accept(this);
-		}
-
-		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
-			Declaration vd = functionReturn.getDeclAt(i);
-			vd.accept(this);
-		}
-
+		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
 		currFunc = null;
 		return null;
@@ -411,12 +428,12 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		return null;
 	}
 
-	private void checkInheritanceCycle(Program p)
+	private void checkInheritanceCycle(Program program)
 	{
 		Map<String, List<String>> adjList = new HashMap<>();
 
-		for (int i = 0; i < p.getClassListSize(); i++) {
-			ClassDecl cd = p.getClassDeclAt(i);
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			ClassDecl cd = program.getClassDeclAt(i);
 			if (cd instanceof ClassDeclExtends) {
 				String cid = ((ClassDeclExtends) cd).getId().getVarID();
 				String pid = ((ClassDeclExtends) cd).getParent().getVarID();
@@ -434,7 +451,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		for (int i = 0; i < nodes.length; i++) {
 			if (!visited.contains(nodes[i])) {
 				List<String> rStack = new ArrayList<>();
-				dfs(nodes[i], adjList, visited, rStack, p);
+				dfs(nodes[i], adjList, visited, rStack, program);
 			}
 		}
 	}
@@ -478,6 +495,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 				}
 			}
 		}
+		return null;
+	}
+
+	@Override
+	public Type visit(ReturnStatement returnStatement)
+	{
+		returnStatement.getReturnExpr().accept(this);
 		return null;
 	}
 
@@ -562,41 +586,5 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
-	}
-
-	@Override
-	public Type visit(Include include)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(ReturnStatement returnStatement)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Increment increment)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Modulus modulus)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(FunctionType functionType)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(FunctionAnonymous functionAnonymous)
-	{
-		return null;
 	}
 }
