@@ -2,9 +2,7 @@ package src.visitor;
 
 import java.io.File;
 import java.io.FileOutputStream;
-
 import src.ast.*;
-import src.ast.VarDecl;
 import src.lexer.Token;
 import src.lexer.Tokens;
 import src.semantics.*;
