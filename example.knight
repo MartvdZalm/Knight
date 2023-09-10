@@ -1,0 +1,45 @@
+obj Test {
+
+    num: int = 6;
+    lol: string = "hello";
+
+    fn multiply(a: int, b: int): int {
+        ret a * b;
+    }
+
+    fn is_prime(n: int): bool {
+        if (n <= 1) {
+            ret false;
+        }
+        for (i: int = 2; i * i <= n; i++) {
+            if (n % i == 0) {
+                ret false;
+            }
+        }  
+        ret true; 
+    }
+
+    fn factorial(n: int): int {
+        if (n < 1) {
+            ret 1;
+        }
+
+        ret n * factorial(n - 1);
+    }
+
+    fn apply_twice(function: fn, x: int): int {
+        ret function(x);
+    }
+
+    fn main(): int {
+
+        square: fn = (x: int): int {
+            ret x * x;
+        }
+
+        squared_result: int = square(3);
+        result: int = apply_twice(square, 3);
+
+        ret 0;
+    }
+}
