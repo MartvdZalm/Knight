@@ -9,7 +9,7 @@ Knight is an object-oriented programming language designed with a focus on havin
 
 - **Cross-Platform Compatibility:** Thanks to the JVM, Knight code can be executed on any platform with JVM support, ensuring broad reach across different operating systems.
 
-- **Under Active Development:** Knight is an ongoing project, with continuous improvements, new features, and optimizations being added regularly.
+- **Under Active Development:** Knight is an ongoing project, with continuous improvements, new features, and optimizations being added regularly and is currently not in a working state.
 
 ## Syntax
 ```knight
