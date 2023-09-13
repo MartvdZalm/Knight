@@ -17,6 +17,7 @@ import src.visitor.TypeAnalyser;
  */
 public class Main
 {
+
 	/**
 	 * The entry point of the compiler.
 	 * @param args Command-line arguments. Expects a single argument: the filename of the Knight source code.
