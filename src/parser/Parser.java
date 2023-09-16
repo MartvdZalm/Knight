@@ -41,44 +41,59 @@ public class Parser
         Program program = null;
 
         try {
-			List<ClassDecl> classList = new ArrayList<>();
 			List<Include> includeList = new ArrayList<>();
+			List<ClassDecl> classList = new ArrayList<>();
+			List<EnumDecl> enumList = new ArrayList<>();
+			List<Declaration> declList = new ArrayList<>();
 
 			token = lexer.nextToken();
 			currentAccessModifier = token;
+
             do {
 
                 switch (token.getToken()) {
 					case INCLUDE: {
-						while (token != null && token.getToken() == Tokens.INCLUDE) {
-							eat(Tokens.INCLUDE);
-							includeList.add(new Include(token, new IdentifierExpr(token, token.getSymbol())));
-							eat(Tokens.IDENTIFIER);
-						}
-					}	
-					break;
+						includeList.add(parseInclude());
+					} break;
 
 					case CLASS: {
-						while (token != null) {
-							classList.add(parseClassDecl());
-						}
-					} 
-					break;
-    
-                	default:
-                    	throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+						classList.add(parseClassDecl());
+					} break;
+
+					case ENUM: {
+						enumList.add(parseEnum());
+					} break;
+
+					case FUNCTION: {
+						declList.add(parseFunction());
+					} break;
+
+					case IDENTIFIER: {
+						declList.add(parseDeclaration());
+					} break;
+					
+					default: {
+						throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+					}
                 }
                 
             } while (token != null);
 			
-            program = new Program(currentAccessModifier, classList, includeList);
+            program = new Program(currentAccessModifier, includeList, classList, enumList, declList);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return program;
     }
+
+	private Include parseInclude() throws ParseException
+	{
+		eat(Tokens.INCLUDE);
+		Include include = new Include(token, new IdentifierExpr(token, token.getSymbol()));
+		eat(Tokens.IDENTIFIER);
+		return include;
+	}
 
 	/**
      * Parses a class declaration in the source file.
@@ -118,6 +133,11 @@ public class Parser
 		} else {
 			return new ClassDeclExtends(className.getToken(), className, parent, declList);
 		}
+	}
+
+	private EnumDecl parseEnum() throws ParseException
+	{
+		return null;
 	}
 
 	/**

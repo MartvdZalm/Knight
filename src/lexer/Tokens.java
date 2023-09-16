@@ -33,6 +33,7 @@ public enum Tokens
     NEW,
     INCLUDE,
     FUNCTION,
+    ENUM,
 
     IF,
     ELSE,

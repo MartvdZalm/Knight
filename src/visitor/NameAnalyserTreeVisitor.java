@@ -587,4 +587,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		SemanticErrors.addError(line, col, errorText);
 	}
+
+	@Override
+	public Type visit(EnumDecl enumDecl) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
 }

@@ -6,14 +6,18 @@ import src.lexer.Token;
 
 public class Program extends Tree
 {
-	private List<ClassDecl> classList;
 	private List<Include> includeList;
+    private List<ClassDecl> classList;
+	private List<EnumDecl> enumList;
+    private List<Declaration> declList;
 
-	public Program(Token token, List<ClassDecl> classList, List<Include> includeList)
+	public Program(Token token, List<Include> includeList, List<ClassDecl> classList, List<EnumDecl> enumList, List<Declaration> declList)
 	{
 		super(token);
+        this.includeList = includeList;
 		this.classList = classList;
-		this.includeList = includeList;
+		this.enumList = enumList;
+		this.declList = declList;
 	}
 
 	public List<ClassDecl> getClassList()
@@ -58,6 +62,52 @@ public class Program extends Tree
 	{
 		if (index < includeList.size()) {
 			return includeList.get(index);
+		}
+		return null;
+	}
+
+	public List<EnumDecl> getEnumList()
+	{
+		return enumList;
+	}
+
+	public void setEnumList(List<EnumDecl> enumList)
+	{
+		this.enumList = enumList;
+	}
+
+	public int getEnumListSize()
+	{
+		return declList.size();
+	}
+
+	public EnumDecl getEnumAt(int index)
+	{
+		if (index < enumList.size()) {
+			return enumList.get(index);
+		}
+		return null;
+	}
+
+	public List<Declaration> getDeclList()
+	{
+		return declList;
+	}
+
+	public void setDeclList(List<Declaration> declList)
+	{
+		this.declList = declList;
+	}
+
+	public int getDeclListSize()
+	{
+		return declList.size();
+	}
+
+	public Declaration getDeclAt(int index)
+	{
+		if (index < declList.size()) {
+			return declList.get(index);
 		}
 		return null;
 	}

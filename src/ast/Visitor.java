@@ -100,4 +100,6 @@ public interface Visitor<R>
 
     public R visit(FunctionAnonymous functionAnonymous);
 
+    public R visit(EnumDecl enumDecl);
+
 }

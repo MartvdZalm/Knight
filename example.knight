@@ -1,14 +1,11 @@
-obj Test {
-
-    num: int = 6;
-    lol: string = "hello";
-
+obj Test
+{
     fn multiply(a: int, b: int): int {
         ret a * b;
     }
 
     fn is_prime(n: int): bool {
-        if (n <= 1) {
+       if (n <= 1) {
             ret false;
         }
         for (i: int = 2; i * i <= n; i++) {
@@ -20,26 +17,30 @@ obj Test {
     }
 
     fn factorial(n: int): int {
-        if (n < 1) {
-            ret 1;
-        }
-
-        ret n * factorial(n - 1);
+        ret n * n;
     }
+}
 
-    fn apply_twice(function: fn, x: int): int {
-        ret function(x);
-    }
+// enum Foods
+// {
+//     Ramen,
+//     Noodles,
+//     Udon,
+//     Sushi
+// }
 
-    fn main(): int {
+// myFood: Foods = Foods.Ramen;
 
-        square: fn = (x: int): int {
-            ret x * x;
-        }
+// if (myFood == Foods.Ramen) {
+//     print("My food is ramen!");
+// }
 
-        squared_result: int = square(3);
-        result: int = apply_twice(square, 3);
+num1: int = 10;
+num2: int = 20;
+result: int = num1 * num2;
 
-        ret 0;
-    }
+fn main(): int {
+    result: int = is_prime(10);
+
+    ret 0;
 }

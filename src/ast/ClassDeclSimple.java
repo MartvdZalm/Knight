@@ -9,9 +9,9 @@ public class ClassDeclSimple extends ClassDecl
 	private IdentifierExpr id;
 	private List<Declaration> declList;
 
-	public ClassDeclSimple(Token jSymbol, IdentifierExpr className, List<Declaration> declList)
+	public ClassDeclSimple(Token token, IdentifierExpr className, List<Declaration> declList)
 	{
-		super(jSymbol);
+		super(token);
 		this.id = className;
 		this.declList = declList;
 	}

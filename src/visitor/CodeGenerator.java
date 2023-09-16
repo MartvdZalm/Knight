@@ -296,19 +296,6 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VarDeclInit varDeclInit)
 	{
-		FieldVisitor fv = classWriter.visitField(Opcodes.ACC_PUBLIC, varDeclInit.getId().getVarID(), varDeclInit.getType().toString(), null, null);
-		fv.visitEnd();	
-		
-		// Load 'this' onto the stack
-		methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-		maxStack++; // Increase maxStack by 1
-		// Load the int value onto the stack
-		methodVisitor.visitIntInsn(Opcodes.BIPUSH, ((IntLiteral) varDeclInit.getExpr()).getValue());
-		maxStack++; // Increase maxStack by 1 again
-		// Store the value into the field 'a'
-		methodVisitor.visitFieldInsn(Opcodes.PUTFIELD, currentClass.getId(), varDeclInit.getId().getVarID(), varDeclInit.getType().toString());
-		maxLocal++; // Increase maxLocal by 1
-
 		return null;
 	}
 
@@ -535,5 +522,11 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(FunctionAnonymous functionAnonymous)
 	{
 		return null;
+	}
+
+	@Override
+	public String visit(EnumDecl enumDecl) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
 	}
 }

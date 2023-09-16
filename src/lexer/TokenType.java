@@ -35,7 +35,8 @@ public class TokenType
         Symbol.symbol("new", Tokens.NEW);
         Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("fn", Tokens.FUNCTION);
-                
+        Symbol.symbol("enum", Tokens.ENUM);
+
         Symbol.symbol("if", Tokens.IF);
         Symbol.symbol("else", Tokens.ELSE);
         Symbol.symbol("while", Tokens.WHILE);
