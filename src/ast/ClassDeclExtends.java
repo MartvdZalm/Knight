@@ -6,36 +6,36 @@ import src.lexer.Token;
 
 public class ClassDeclExtends extends ClassDecl
 {
-	private IdentifierExpr id;
-	private IdentifierExpr parent;
+	private Identifier id;
+	private Inheritance parentId;
 	private List<Declaration> declList;
 
-	public ClassDeclExtends(Token token, IdentifierExpr className, IdentifierExpr parentClassName, List<Declaration> declList)
+	public ClassDeclExtends(Token token, Identifier classId, Inheritance parentId, List<Declaration> declList)
 	{
 		super(token);
-		this.id = className;
-		this.parent = parentClassName;
+		this.id = classId;
+		this.parentId = parentId;
 		this.declList = declList;
 	}
 
-	public IdentifierExpr getId()
+	public Identifier getId()
 	{
 		return id;
 	}
 
-	public void setId(IdentifierExpr id)
+	public void setId(Identifier id)
 	{
 		this.id = id;
 	}
 
-	public IdentifierExpr getParent()
+	public Inheritance getParent()
 	{
-		return parent;
+		return parentId;
 	}
 
-	public void setParent(IdentifierExpr parent)
+	public void setParent(Inheritance parentId)
 	{
-		this.parent = parent;
+		this.parentId = parentId;
 	}
 
 	public int getDeclListSize()

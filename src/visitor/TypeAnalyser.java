@@ -817,4 +817,16 @@ public class TypeAnalyser implements Visitor<Type>
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'visit'");
 	}
+
+	@Override
+	public Type visit(Extends extends1) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
+
+	@Override
+	public Type visit(Implements implements1) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
 }

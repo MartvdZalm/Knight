@@ -436,7 +436,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			ClassDecl cd = program.getClassDeclAt(i);
 			if (cd instanceof ClassDeclExtends) {
 				String cid = ((ClassDeclExtends) cd).getId().getVarID();
-				String pid = ((ClassDeclExtends) cd).getParent().getVarID();
+				String pid = ((ClassDeclExtends) cd).getParent().getId().getVarID();
 				List<String> cList = adjList.get(pid);
 				if (cList == null) {
 					cList = new ArrayList<String>();
@@ -570,7 +570,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			Token sym = cd.getParent().getToken();
 			addError(sym.getRow(), sym.getCol(), "parent class " + parent + " not declared");
 		} else {
-			cd.getParent().setB(parentKlass);
+			cd.getParent().getId().setB(parentKlass);
 		}
 
 		for (int i = 0; i < cd.getDeclListSize(); i++) {
@@ -590,6 +590,18 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 
 	@Override
 	public Type visit(EnumDecl enumDecl) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
+
+	@Override
+	public Type visit(Extends extends1) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
+
+	@Override
+	public Type visit(Implements implements1) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'visit'");
 	}

@@ -4,20 +4,20 @@ import src.lexer.Token;
 
 public class Include extends Tree
 {
-    private IdentifierExpr id;
+    private Identifier id;
 
-    public Include(Token token, IdentifierExpr id)
+    public Include(Token token, Identifier id)
     {
         super(token);
         this.id = id;
     }
 
-	public IdentifierExpr getId()
+	public Identifier getId()
 	{
 		return id;
 	}
 
-	public void setId(IdentifierExpr id)
+	public void setId(Identifier id)
 	{
 		this.id = id;
 	}

@@ -1,4 +1,4 @@
-obj Test
+obj Test ext Example
 {
     fn multiply(a: int, b: int): int {
         ret a * b;
@@ -21,13 +21,23 @@ obj Test
     }
 }
 
-// enum Foods
+// enum Foods 
 // {
-//     Ramen,
-//     Noodles,
-//     Udon,
-//     Sushi
-// }
+//     Ramen("Ramen"),
+//     Noodles("Noodles"),
+//     Udon("Udon"),
+//     Sushi("Sushi"),
+
+    // name: string; 
+
+    // fn Foods(name: string) {
+    //     obj::name = name;
+    // }
+
+    // fn getName(): string {
+    //     ret obj::name;
+    // }
+//}
 
 // myFood: Foods = Foods.Ramen;
 

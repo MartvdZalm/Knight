@@ -102,4 +102,8 @@ public interface Visitor<R>
 
     public R visit(EnumDecl enumDecl);
 
+    public R visit(Extends extends1);
+
+    public R visit(Implements implements1);
+
 }

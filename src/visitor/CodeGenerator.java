@@ -529,4 +529,16 @@ public class CodeGenerator implements Visitor<String>
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'visit'");
 	}
+
+	@Override
+	public String visit(Extends extends1) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
+
+	@Override
+	public String visit(Implements implements1) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
 }

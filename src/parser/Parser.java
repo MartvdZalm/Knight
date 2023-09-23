@@ -53,7 +53,7 @@ public class Parser
 
                 switch (token.getToken()) {
 					case INCLUDE: {
-						includeList.add(parseInclude());
+						includeList.add(parseIncludeDecl());
 					} break;
 
 					case CLASS: {
@@ -87,36 +87,20 @@ public class Parser
         return program;
     }
 
-	private Include parseInclude() throws ParseException
+	private Include parseIncludeDecl() throws ParseException
 	{
 		eat(Tokens.INCLUDE);
-		Include include = new Include(token, new IdentifierExpr(token, token.getSymbol()));
-		eat(Tokens.IDENTIFIER);
-		return include;
+		return new Include(token, parseIdentifier());
 	}
 
-	/**
-     * Parses a class declaration in the source file.
-     *
-     * @return The parsed ClassDecl object representing the class declaration.
-     * @throws ParseException If there's an error during the parsing process.
-     */
 	private ClassDecl parseClassDecl() throws ParseException
 	{
 		eat(Tokens.CLASS);
-		IdentifierExpr className = new IdentifierExpr(token, token.getSymbol());
-		eat(Tokens.IDENTIFIER);
-
-		IdentifierExpr parent = null;
-		if (token.getToken() == Tokens.LESSTHAN) {
-			eat(Tokens.LESSTHAN);
-			parent = new IdentifierExpr(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-		}
+		Identifier className = parseIdentifier();
+		Inheritance inheritance = parseInheritanceStatement();
 		eat(Tokens.LEFTBRACE);
 
 		List<Declaration> declList = new ArrayList<>();
-
 		while (token.getToken() != Tokens.RIGHTBRACE) {
 			parseAccess();
 
@@ -128,15 +112,67 @@ public class Parser
 		}
 		eat(Tokens.RIGHTBRACE);
 
-		if (parent == null) {
+		if (inheritance == null) {
 			return new ClassDeclSimple(className.getToken(), className, declList);
 		} else {
-			return new ClassDeclExtends(className.getToken(), className, parent, declList);
+			return new ClassDeclExtends(className.getToken(), className, inheritance, declList);
+		}
+	}
+
+	private Inheritance parseInheritanceStatement() throws ParseException
+	{
+		switch (token.getToken()) {
+
+			case EXTENDS: {
+				eat(Tokens.EXTENDS);
+				Identifier id = parseIdentifier();
+				return new Extends(token, id);
+			}
+
+			case IMPLEMENTS: {
+				eat(Tokens.IMPLEMENTS);
+				Identifier id = parseIdentifier();
+				return new Implements(token, id);
+			}
+
+			default: {
+				return null;
+			}
 		}
 	}
 
 	private EnumDecl parseEnum() throws ParseException
 	{
+		eat(Tokens.ENUM);
+		IdentifierExpr enumName = new IdentifierExpr(token, token.getSymbol());
+		eat(Tokens.IDENTIFIER);
+		eat(Tokens.LEFTBRACE);
+
+		while (token.getToken() != Tokens.RIGHTBRACE) {
+
+			if (token.getToken() == Tokens.IDENTIFIER) {
+				IdentifierExpr identifierExpr = new IdentifierExpr(token, token.getSymbol());
+				eat(Tokens.IDENTIFIER);
+				if (token.getToken() == Tokens.ASSIGN) { // Check for assign
+					eat(Tokens.ASSIGN);
+					Expression expr = parseExpression();
+				} else if (token.getToken() == Tokens.LEFTPAREN) { // check for leftparen
+					eat(Tokens.LEFTPAREN);
+					Expression expr = parseExpression();
+					eat(Tokens.RIGHTPAREN);
+				}
+
+				if (token.getToken() == Tokens.COLON) {
+
+				}
+				eat(Tokens.COMMA);
+			} else if (token.getToken() == Tokens.FUNCTION) {
+				Declaration function = parseFunction();
+			}
+		}
+
+		eat(Tokens.RIGHTBRACE);
+
 		return null;
 	}
 
@@ -226,39 +262,7 @@ public class Parser
 			eat(Tokens.SEMICOLON);
 		} else {
 			eat(Tokens.ASSIGN);
-
-			if (token.getToken() == Tokens.LEFTPAREN) {
-				eat(Tokens.LEFTPAREN);
-				List<ArgDecl> argList = new ArrayList<ArgDecl>();
-
-				if (token.getToken() != Tokens.RIGHTPAREN) {
-					argList.add(parseArgument());
-
-					while (token.getToken() == Tokens.COMMA) {
-						eat(Tokens.COMMA);;
-						argList.add(parseArgument());
-					}
-				}
-				eat(Tokens.RIGHTPAREN);
-				eat(Tokens.COLON);
-				Type returnType = parseType();
-				eat(Tokens.LEFTBRACE);
-
-				List<Declaration> declList = parseBody();
-
-				Expression returnExpr = null;
-				if (returnType.getToken().getToken() != Tokens.VOID) {
-					eat(Tokens.RETURN);
-					returnExpr = parseExpression();
-				} 
-				eat(Tokens.RIGHTBRACE);
-
-				if (returnExpr != null) {
-					return new FunctionAnonymous(token, currentAccessModifier, returnType, new IdentifierExpr(token, id.getVarID()), argList, declList, returnExpr);
-				}
-			} else {
-				decl = new VarDeclInit(token, type, id, parseExpression(), currentAccessModifier);
-			}
+			decl = new VarDeclInit(token, type, id, parseExpression(), currentAccessModifier);
 		}
 
 		return decl;
@@ -1082,6 +1086,13 @@ public class Parser
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
+	}
+
+	private Identifier parseIdentifier() throws ParseException
+	{
+		Identifier id = new Identifier(token, token.getSymbol());
+		eat(Tokens.IDENTIFIER);
+		return id;
 	}
 
 	/**

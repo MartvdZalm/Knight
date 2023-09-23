@@ -6,22 +6,22 @@ import src.lexer.Token;
 
 public class ClassDeclSimple extends ClassDecl
 {
-	private IdentifierExpr id;
+	private Identifier id;
 	private List<Declaration> declList;
 
-	public ClassDeclSimple(Token token, IdentifierExpr className, List<Declaration> declList)
+	public ClassDeclSimple(Token token, Identifier className, List<Declaration> declList)
 	{
 		super(token);
 		this.id = className;
 		this.declList = declList;
 	}
 
-	public IdentifierExpr getId()
+	public Identifier getId()
 	{
 		return id;
 	}
 
-	public void setId(IdentifierExpr id)
+	public void setId(Identifier id)
 	{
 		this.id = id;
 	}

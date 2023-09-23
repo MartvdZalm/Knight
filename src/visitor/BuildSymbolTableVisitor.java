@@ -411,7 +411,7 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	public Type visit(ClassDeclExtends classDeclExtends)
 	{
 		String identifier = classDeclExtends.getId().getVarID();
-		String parent = classDeclExtends.getParent().getVarID();
+		String parent = classDeclExtends.getParent().getId().getVarID();
 		if (!symbolTable.addKlass(identifier, parent)) {
 			Token sym = classDeclExtends.getToken();
 			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
@@ -441,6 +441,18 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 
 	@Override
 	public Type visit(EnumDecl enumDecl) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
+
+	@Override
+	public Type visit(Extends extends1) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
+
+	@Override
+	public Type visit(Implements implements1) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'visit'");
 	}

@@ -19,7 +19,7 @@ public class TokenType
         Symbol.symbol(",", Tokens.COMMA);
         Symbol.symbol(".", Tokens.DOT);
  
-        Symbol.symbol("IDENTIFIER", Tokens.IDENTIFIER);
+        Symbol.symbol("id", Tokens.IDENTIFIER);
         Symbol.symbol("int", Tokens.INTEGER);
         Symbol.symbol("string", Tokens.STRING);
         Symbol.symbol("bool", Tokens.BOOLEAN);
@@ -36,6 +36,8 @@ public class TokenType
         Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("fn", Tokens.FUNCTION);
         Symbol.symbol("enum", Tokens.ENUM);
+        Symbol.symbol("ext", Tokens.EXTENDS);
+        Symbol.symbol("use", Tokens.IMPLEMENTS);
 
         Symbol.symbol("if", Tokens.IF);
         Symbol.symbol("else", Tokens.ELSE);

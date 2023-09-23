@@ -34,6 +34,8 @@ public enum Tokens
     INCLUDE,
     FUNCTION,
     ENUM,
+    EXTENDS,
+    IMPLEMENTS,
 
     IF,
     ELSE,
