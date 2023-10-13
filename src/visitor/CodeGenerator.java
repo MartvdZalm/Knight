@@ -312,13 +312,13 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(ClassDeclSimple classDecl)
+	public String visit(ClassDecl classDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(ClassDeclExtends cd)
+	public String visit(ClassDeclInheritance cd)
 	{
 		return null;
 	}
@@ -332,14 +332,10 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Program program)
 	{
-		for (int i = 0; i < program.getIncludeListSize(); i++) {
-			program.getIncludeAt(i).accept(this);
-		}
-
-		for (int i = 0; i < program.getClassListSize(); i++) {
-			program.getClassDeclAt(i).accept(this);
-			write(currentClass.getId(), classWriter.toByteArray());
-		}
+		// for (int i = 0; i < program.getDeclListSize(); i++) {
+		// 	program.getDeclAt(i).accept(this);
+		// 	write(currentClass.getId(), classWriter.toByteArray());
+		// }
 
 		return null;
 	}

@@ -6,29 +6,129 @@ import src.semantics.SemanticErrors;
 import src.symbol.*;
 import src.symbol.Function;
 
-public class BuildSymbolTableVisitor implements Visitor<Type>
+public class BuildSProgramVisitor implements Visitor<Type>
 {
-	private Klass currClass;
-	private Function currFunction;
-	private SymbolTable symbolTable;
+	private SProgram sProgram;
+	private SClass sClass;
+	private SFunction sFunction;
+
 	private String mKlassId;
 
-	public BuildSymbolTableVisitor()
+	public BuildSProgramVisitor()
 	{
-		symbolTable = new SymbolTable();
+		sProgram = new SProgram();
 	}
 
-	public SymbolTable getSymTab()
+	public SProgram getSProgram()
 	{
-		return symbolTable;
+		return sProgram;
 	}
 
 	@Override
 	public Type visit(Program program)
 	{
-		for (int i = 0; i < program.getClassListSize(); i++) {
-			program.getClassList().get(i).accept(this);
+		for (int i = 0; i < program.getDeclListSize(); i++) {
+			program.getDeclAt(i).accept(this);
 		}
+		return null;
+	}
+
+
+	@Override
+	public Type visit(ClassDecl classDecl)
+	{
+		String identifier = classDecl.getId().getVarID();
+
+		if (!sProgram.addClass(identifier, null)) {
+			Token sym = classDecl.getToken();
+			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
+			sClass = new SClass(identifier, null);
+		} else {
+			sClass = sProgram.getClass(identifier);
+		}
+
+		for (int i = 0; i < classDecl.getDeclListSize(); i++) {
+			Declaration vd = classDecl.getDeclAt(i);
+			vd.accept(this);
+		}
+
+		return null;
+	}
+
+	@Override
+	public Type visit(ClassDeclInheritance classDeclInheritance)
+	{
+		String identifier = classDeclInheritance.getId().getVarID();
+		String parent = classDeclInheritance.getParent().getId().getVarID();
+
+		if (!sProgram.addClass(identifier, parent)) {
+			Token sym = classDeclInheritance.getToken();
+			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
+			sClass = new SClass(identifier, parent);
+		} else {
+			sClass = sProgram.getClass(identifier);
+		}
+
+		if (parent != null && parent.equals(mKlassId)) {
+			Token sym = classDeclInheritance.getParent().getToken();
+			addError(sym.getRow(), sym.getCol(), "class " + identifier + " cannot inherit main class");
+		}
+
+		for (int i = 0; i < classDeclInheritance.getDeclListSize(); i++) {
+			Declaration vd = classDeclInheritance.getDeclAt(i);
+			vd.accept(this);
+		}
+
+		sClass = null;
+		return null;
+	}
+
+	public void checkFunction(FunctionDecl funcDecl)
+	{
+		Type type = funcDecl.getReturnType().accept(this);
+		String functionName = funcDecl.getFunctionName().getVarID();
+
+		if (sClass == null) {
+			if (!sProgram.addFunction(functionName, type)) {
+				Token tok = funcDecl.getToken();
+				addError(tok.getRow(), tok.getCol(), "Function " + functionName + " already defined");
+			} else {
+				sFunction = sProgram.getFunction(functionName);
+			}
+		} else {
+			if (!sClass.addFunction(functionName, type)) {
+				Token tok = funcDecl.getToken();
+				addError(tok.getRow(), tok.getCol(), "Function " + functionName + " already defined in class " + sClass.getId());
+			} else {
+				sFunction = sClass.getFunction(functionName);
+			}
+		}	
+
+		for (int i = 0; i < funcDecl.getArgListSize(); i++) {
+			ArgDecl ad = funcDecl.getArgDeclAt(i);
+			ad.accept(this);
+		}
+
+		for (int i = 0; i < funcDecl.getDeclListSize(); i++) {
+			Declaration vd = funcDecl.getDeclAt(i);
+			vd.accept(this);
+		}
+	}
+
+	@Override
+	public Type visit(FunctionVoid functionVoid)
+	{
+		checkFunction(functionVoid);
+		sFunction = null;
+		return null;
+	}
+
+	@Override
+	public Type visit(FunctionReturn functionReturn)
+	{
+		checkFunction(functionReturn);
+		functionReturn.getReturnExpr().accept(this);
+		sFunction = null;
 		return null;
 	}
 
@@ -262,9 +362,10 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	public Type visit(IdentifierType identifierType)
 	{
 		String id = identifierType.getVarID();
+
 		if (id != null && id.equals(mKlassId)) {
 			Token tok = identifierType.getToken();
-			addError(tok.getRow(), tok.getCol(), "main class " + id + " cannot be used as a type in class " + currClass.getId());
+			addError(tok.getRow(), tok.getCol(), "main class " + id + " cannot be used as a type in class " + sClass.getId());
 		}
 
 		return identifierType;
@@ -275,15 +376,20 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		Type t = varDecl.getType().accept(this);
 		String id = varDecl.getId().getVarID();
 
-		if (currFunction != null) {
-			if (!currFunction.addVar(id, t)) {
+		if (sFunction != null) {
+			if (!sFunction.addVariable(id, t)) {
 				Token tok = varDecl.getId().getToken();
-				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + currFunction.getId() + " in class " + currClass.getId());
+				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + sFunction.getId() + " in class " + sClass.getId());
+			}
+		} else if (sClass != null) {
+			if (!sClass.addVariable(id, t)) {
+				Token sym = varDecl.getId().getToken();
+				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + sClass.getId());
 			}
 		} else {
-			if (!currClass.addVar(id, t)) {
+			if (!sProgram.addVariable(id, t)) {
 				Token sym = varDecl.getId().getToken();
-				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + currClass.getId());
+				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined");
 			}
 		}
 	}
@@ -308,9 +414,9 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 		Type t = argDecl.getType().accept(this);
 		String id = argDecl.getId().getVarID();
 
-		if (!currFunction.addParam(id, t)) {
+		if (!sFunction.addParam(id, t)) {
 			Token sym = argDecl.getId().getToken();
-			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + currFunction.getId() + " in class " + currClass.getId());
+			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + sFunction.getId() + " in class " + sClass.getId());
 		}
 		return null;
 	}
@@ -336,93 +442,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	@Override
 	public Type visit(StringLiteral stringLiteral)
 	{
-		return null;
-	}
-
-	public void checkFunction(FunctionDecl funcDecl)
-	{
-		Type type = funcDecl.getReturnType().accept(this);
-		String functionName = funcDecl.getFunctionName().getVarID();
-
-		if (!currClass.addFunction(functionName, type)) {
-			Token tok = funcDecl.getToken();
-			addError(tok.getRow(), tok.getCol(), "Function " + functionName + "  already defined in class " + currClass.getId());
-		} else {
-			currFunction = currClass.getFunction(functionName);
-		}
-
-		for (int i = 0; i < funcDecl.getArgListSize(); i++) {
-			ArgDecl ad = funcDecl.getArgDeclAt(i);
-			ad.accept(this);
-		}
-
-		for (int i = 0; i < funcDecl.getDeclListSize(); i++) {
-			Declaration vd = funcDecl.getDeclAt(i);
-			vd.accept(this);
-		}
-	}
-
-	@Override
-	public Type visit(FunctionVoid functionVoid)
-	{
-		checkFunction(functionVoid);
-		currFunction = null;
-		return null;
-	}
-
-	@Override
-	public Type visit(FunctionReturn functionReturn)
-	{
-		checkFunction(functionReturn);
-		functionReturn.getReturnExpr().accept(this);
-		currFunction = null;
-		return null;
-	}
-
-	@Override
-	public Type visit(ClassDeclSimple classDeclSimple)
-	{
-		String identifier = classDeclSimple.getId().getVarID();
-		if (!symbolTable.addKlass(identifier, null)) {
-			Token sym = classDeclSimple.getToken();
-			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
-			currClass = new Klass(identifier, null);
-		} else {
-			currClass = symbolTable.getKlass(identifier);
-		}
-
-		for (int i = 0; i < classDeclSimple.getDeclListSize(); i++) {
-			Declaration vd = classDeclSimple.getDeclAt(i);
-			vd.accept(this);
-		}
-
-		return null;
-	}
-
-	@Override
-	public Type visit(ClassDeclExtends classDeclExtends)
-	{
-		String identifier = classDeclExtends.getId().getVarID();
-		String parent = classDeclExtends.getParent().getId().getVarID();
-		if (!symbolTable.addKlass(identifier, parent)) {
-			Token sym = classDeclExtends.getToken();
-			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
-			currClass = new Klass(identifier, parent);
-		} else {
-			currClass = symbolTable.getKlass(identifier);
-		}
-
-		if (parent != null && parent.equals(mKlassId)) {
-			Token sym = classDeclExtends.getParent().getToken();
-			addError(sym.getRow(), sym.getCol(), "class " + identifier + " cannot inherit main class");
-		}
-
-		for (int i = 0; i < classDeclExtends.getDeclListSize(); i++) {
-			Declaration vd = classDeclExtends.getDeclAt(i);
-			vd.accept(this);
-		}
-
-		currClass = null;
 		return null;
 	}
 
