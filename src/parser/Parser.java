@@ -29,9 +29,9 @@ public class Parser
         Program program = null;
 
         try {
-			List<Include> includeList = new ArrayList<>(); // Include = Includes
-			List<ClassDecl> classList = new ArrayList<>(); // ClassDecl = Classes
-			List<EnumDecl> enumList = new ArrayList<>(); // EnumDecl = Enums
+			// List<Include> includeList = new ArrayList<>(); // Include = Includes
+			// List<ClassDecl> classList = new ArrayList<>(); // ClassDecl = Classes
+			// List<EnumDecl> enumList = new ArrayList<>(); // EnumDecl = Enums
 			List<Declaration> declList = new ArrayList<>(); // Declaration = Statements, Variables, Functions
 
 			token = lexer.nextToken();
@@ -39,15 +39,15 @@ public class Parser
             do {
                 switch (token.getToken()) {
 					case INCLUDE: {
-						includeList.add(parseIncludeDecl());
+						declList.add(parseIncludeDecl());
 					} break;
 
 					case CLASS: {
-						classList.add(parseClassDecl());
+						declList.add(parseClassDecl());
 					} break;
 
 					case ENUM: {
-						enumList.add(parseEnum());
+						declList.add(parseEnum());
 					} break;
 
 					case FUNCTION: {
@@ -65,7 +65,7 @@ public class Parser
                 
             } while (token != null);
 			
-            program = new Program(token, includeList, classList, enumList, declList);
+            program = new Program(token, declList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -97,9 +97,9 @@ public class Parser
 		eat(Tokens.RIGHTBRACE);
 
 		if (inheritance == null) {
-			return new ClassDeclSimple(className.getToken(), className, declList);
+			return new ClassDecl(className.getToken(), className, declList);
 		} else {
-			return new ClassDeclExtends(className.getToken(), className, inheritance, declList);
+			return new ClassDeclInheritance(className.getToken(), className, declList, inheritance);
 		}
 	}
 
@@ -107,7 +107,7 @@ public class Parser
 	private EnumDecl parseEnum() throws ParseException
 	{
 		eat(Tokens.ENUM);
-		IdentifierExpr enumName = new IdentifierExpr(token, token.getSymbol());
+		Identifier enumName = new Identifier(token, token.getSymbol());
 		eat(Tokens.IDENTIFIER);
 		eat(Tokens.LEFTBRACE);
 
