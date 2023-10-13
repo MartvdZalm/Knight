@@ -308,115 +308,12 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
-		String functionName = functionReturn.getFunctionName().getVarID();
-
-		// Set the current function
-		Binding bFuncName = functionReturn.getFunctionName().getB();
-		currentFunction = (Function) bFuncName;
-
-		int access = Opcodes.ACC_PUBLIC;
-
-		// Set both maxStack and maxLocal to 0
-		maxStack = 0;
-		maxLocal = 0;
-
-		// Check the access of the function (Public, Private, Protected)
-		if (functionReturn.getAccess().getToken() == Tokens.PRIVATE) {
-			access = Opcodes.ACC_PRIVATE;
-		} else if (functionReturn.getAccess().getToken() == Tokens.PROTECTED) {
-			access = Opcodes.ACC_PROTECTED;
-		}
-	
-		// Check if function is the main function. (This will be changed later on)
-		if (functionName.equals("main")) {
-			methodVisitor = classWriter.visitMethod(access + Opcodes.ACC_STATIC, functionName, "([Ljava/lang/String;)V", null, null);
-
-			// Start the class code definition
-			methodVisitor.visitCode();
-
-		} else {
-			StringBuilder sb = new StringBuilder();
-
-			sb.append("(");
-			for (int i = 0; i < functionReturn.getArgListSize(); i++) {
-				String type = functionReturn.getArgDeclAt(i).getType().toString();
-				sb.append(type);
-
-				Binding bFuncArg = functionReturn.getArgDeclAt(i).getId().getB();
-				setLocalVarIndex(bFuncArg);
-
-				maxLocal++;
-			}
-			sb.append(")");
-
-			String returnType = functionReturn.getReturnType().toString();
-			sb.append(returnType);
-
-			String methodDescriptor = sb.toString();
-
-			methodVisitor = classWriter.visitMethod(access, functionName, methodDescriptor, null, null);
-
-			// Start the class code definition
-			methodVisitor.visitCode();
-		}
-
-		// Loop through all the declaration in the function 
-		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
-			functionReturn.getDeclAt(i).accept(this);
-			maxLocal++;
-		}
-
-		// Check the return value for example 0 is success and 1 is with error. Only for main method.
-		if (functionName.equals("main")) {
-			int value = ((IntLiteral) functionReturn.getReturnExpr()).getValue();
-			int exit = 0;
-
-			switch (value) {
-				case 0:	exit = Opcodes.ICONST_0; break;
-				case 1:	exit = Opcodes.ICONST_1; break;
-			}
-
-			methodVisitor.visitInsn(exit); maxLocal++;
-			methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "exit", "(I)V", false); maxStack++;
-			methodVisitor.visitInsn(Opcodes.RETURN);
-		} else {
-			functionReturn.getReturnExpr().accept(this);
-		}
 		return null;
 	}
 
 	@Override
 	public String visit(ClassDeclSimple classDecl)
 	{
-		Binding b = classDecl.getId().getB();
-		currentClass = (Klass) b;
-
-		classWriter = new ClassWriter(0);
-
-		// Define the class header.
-		classWriter.visit(Opcodes.V18, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, currentClass.getId(), null, "java/lang/Object", null);
-
-		// Create the empty constructor
-		methodVisitor = classWriter.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
-		methodVisitor.visitCode();
-		// Invoke the superclass constructor
-		methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-		methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-		maxLocal++; maxStack++;
-		// Return from the constructor
-		methodVisitor.visitInsn(Opcodes.RETURN);
-
-		// Loop through all the declarations like functions, variables, etc.
-		for (int i = 0; i < classDecl.getDeclListSize(); i++) {
-			classDecl.getDeclAt(i).accept(this);
-
-			methodVisitor.visitMaxs(maxLocal, maxStack);
-			methodVisitor.visitEnd();
-		}
-
-		// End the class definition
-		classWriter.visitEnd();
-
 		return null;
 	}
 
@@ -461,22 +358,7 @@ public class CodeGenerator implements Visitor<String>
 
 		return null;
 	}
-
-	private int getAccessModifier(Token token)
-	{
-		Tokens tok = token.getToken();
-
-		if (tok == Tokens.PUBLIC) {
-			return Opcodes.ACC_PUBLIC;
-		} else if (tok == Tokens.PRIVATE) {
-			return Opcodes.ACC_PRIVATE;
-		} else if (tok == Tokens.PROTECTED) {
-			return Opcodes.ACC_PROTECTED;
-		} else {
-			return Opcodes.ACC_SUPER;
-		}
-	}
-
+	
 	private int getLocalVarIndex(Binding b)
 	{
 		if (b != null && b instanceof Variable) {
@@ -514,12 +396,6 @@ public class CodeGenerator implements Visitor<String>
 
 	@Override
 	public String visit(FunctionType functionType)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(FunctionAnonymous functionAnonymous)
 	{
 		return null;
 	}

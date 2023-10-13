@@ -595,36 +595,6 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionAnonymous functionAnonymous)
-	{
-		String functionName = functionAnonymous.getFunctionName().getVarID();
-
-		if (hsFunc.contains(functionName)) {
-			return functionAnonymous.getReturnType();
-		}
-		hsFunc.add(functionName);
-
-		currFunction = (Function) functionAnonymous.getFunctionName().getB();
-
-		for (int i = 0; i < functionAnonymous.getDeclListSize(); i++) {
-			Declaration decl = functionAnonymous.getDeclAt(i);
-			decl.accept(this);
-		}
-
-		Type t1 = functionAnonymous.getReturnType();
-		Type t2 = functionAnonymous.getReturnExpr().accept(this);
-
-		if (!st.compareTypes(t1, t2)) {
-			Token tok = functionAnonymous.getReturnExpr().getToken();
-			addError(tok.getRow(), tok.getCol(), "Function " + functionName + " must return a result of Type " + t1);
-		}
-
-		functionAnonymous.getReturnExpr().setType(t2);
-		currFunction = null;
-		return null;
-	}
-
-	@Override
 	public Type visit(FunctionVoid functionVoid)
 	{
 		String functionName = functionVoid.getFunctionName().getVarID();

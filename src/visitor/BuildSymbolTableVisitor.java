@@ -363,14 +363,6 @@ public class BuildSymbolTableVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionAnonymous functionAnonymous)
-	{
-		checkFunction(functionAnonymous);
-		currFunction = null;
-		return null;
-	}
-
-	@Override
 	public Type visit(FunctionVoid functionVoid)
 	{
 		checkFunction(functionVoid);

@@ -4,9 +4,9 @@ import src.lexer.Token;
 
 public class VarDeclNoInit extends VarDecl
 {
-	public VarDeclNoInit(Token token, Type type, Identifier id, Token access)
+	public VarDeclNoInit(Token token, Type type, Identifier id)
 	{
-		super(token, type, id, access);
+		super(token, type, id);
 	}
 
 	@Override

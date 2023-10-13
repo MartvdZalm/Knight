@@ -6,14 +6,12 @@ public abstract class VarDecl extends Declaration
 {
     private Type type;
 	private Identifier id;
-	private Token access;
 
-    public VarDecl(Token token, Type type, Identifier id, Token access)
+    public VarDecl(Token token, Type type, Identifier id)
     {
         super(token);
         this.type = type;
 		this.id = id;
-		this.access = access;
     }
 
     public Type getType()
@@ -34,15 +32,5 @@ public abstract class VarDecl extends Declaration
 	public void setId(Identifier id)
 	{
 		this.id = id;
-	}
-
-	public Token getAccess()
-	{
-		return access;
-	}
-
-	public void setAccess(Token access)
-	{
-		this.access = access;
 	}
 }

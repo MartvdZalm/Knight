@@ -6,9 +6,9 @@ import src.lexer.Token;
 
 public class FunctionVoid extends FunctionDecl
 {
-    public FunctionVoid(Token token, Token access, Type returnType, IdentifierExpr functionName, List<ArgDecl> argList, List<Declaration> declList)
+    public FunctionVoid(Token token, Type returnType, Identifier functionName, List<ArgDecl> argList, List<Declaration> declList)
     {
-       	super(token, access, returnType, functionName, argList, declList);
+       	super(token, returnType, functionName, argList, declList);
     }
 
     @Override

@@ -98,8 +98,6 @@ public interface Visitor<R>
 
     public R visit(FunctionType functionType);
 
-    public R visit(FunctionAnonymous functionAnonymous);
-
     public R visit(EnumDecl enumDecl);
 
     public R visit(Extends extends1);

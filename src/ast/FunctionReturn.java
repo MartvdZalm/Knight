@@ -8,9 +8,9 @@ public class FunctionReturn extends FunctionDecl
 {
     private Expression returnExpr;
 
-    public FunctionReturn(Token token, Token access, Type returnType, IdentifierExpr functionName, List<ArgDecl> argList, List<Declaration> declList, Expression returnExpr)
+    public FunctionReturn(Token token, Type returnType, Identifier functionName, List<ArgDecl> argList, List<Declaration> declList, Expression returnExpr)
     {
-		super(token, access, returnType, functionName, argList, declList);
+		super(token, returnType, functionName, argList, declList);
         this.returnExpr = returnExpr;
     }
 

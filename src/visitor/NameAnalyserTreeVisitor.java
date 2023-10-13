@@ -392,15 +392,6 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionAnonymous functionAnonymous)
-	{
-		checkFunction(functionAnonymous);
-		functionAnonymous.getReturnExpr().accept(this);
-		currFunc = null;
-		return null;
-	}
-
-	@Override
 	public Type visit(FunctionVoid functionVoid)
 	{
 		checkFunction(functionVoid);

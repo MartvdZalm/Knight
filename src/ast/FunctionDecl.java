@@ -6,31 +6,19 @@ import src.lexer.Token;
 
 public abstract class FunctionDecl extends Declaration
 {
-    private Token access;
     private Type returnType;
-    private IdentifierExpr functionName;
+    private Identifier functionName;
     private List<ArgDecl> argList;
 	private List<Declaration> declList;
 
-    public FunctionDecl(Token token, Token access, Type returnType, IdentifierExpr functionName, List<ArgDecl> argList, List<Declaration> declList)
+    public FunctionDecl(Token token, Type returnType, Identifier functionName, List<ArgDecl> argList, List<Declaration> declList)
     {
         super(token);
-        this.access = access;
         this.returnType = returnType;
         this.functionName = functionName;
         this.argList = argList;
         this.declList = declList;
     }
-
-    public Token getAccess()
-	{
-		return access;
-	}
-
-	public void setAccess(Token access)
-	{
-		this.access = access;
-	}
 
     public Type getReturnType()
     {
@@ -42,12 +30,12 @@ public abstract class FunctionDecl extends Declaration
         this.returnType = returnType;
     }
 
-    public IdentifierExpr getFunctionName()
+    public Identifier getFunctionName()
     {
         return functionName;
     }
 
-    public void setFunctionName(IdentifierExpr functionName)
+    public void setFunctionName(Identifier functionName)
     {
         this.functionName = functionName;
     }

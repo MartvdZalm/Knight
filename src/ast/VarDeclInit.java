@@ -6,9 +6,9 @@ public class VarDeclInit extends VarDecl
 {
 	private Expression expr;
 
-    public VarDeclInit(Token token, Type type, Identifier id, Expression expr, Token access)
+    public VarDeclInit(Token token, Type type, Identifier id, Expression expr)
 	{
-		super(token, type, id, access);
+		super(token, type, id);
 		this.expr = expr;
 	}
 
