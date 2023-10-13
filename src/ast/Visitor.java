@@ -2,6 +2,12 @@ package src.ast;
 
 public interface Visitor<R>
 {
+    public R visit(Program program);
+
+    public R visit(ClassDecl classDecl);
+
+    public R visit(ClassDeclInheritance classDeclInheritance);
+
     public R visit(And and);
 
     public R visit(IdentifierExpr identifierExpr);
@@ -17,8 +23,6 @@ public interface Visitor<R>
     public R visit(ArgDecl argDecl);
 
     public R visit(VarDeclNoInit varDecl);
-
-    public R visit(Program program);
 
     public R visit(IdentifierType identifierType);
 
@@ -57,10 +61,6 @@ public interface Visitor<R>
     public R visit(Identifier identifier);
 
     public R visit(BooleanType booleanType);
-
-    public R visit(ClassDeclExtends classDeclExtends);
-
-    public R visit(ClassDeclSimple classDeclSimple);
 
     public R visit(StringLiteral stringLiteral);
 

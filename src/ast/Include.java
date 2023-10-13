@@ -2,7 +2,7 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class Include extends Tree
+public class Include extends Declaration
 {
     private Identifier id;
 

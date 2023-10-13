@@ -4,26 +4,26 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class EnumDecl extends Tree
+public class EnumDecl extends Declaration
 {
-    private IdentifierExpr enumName;
+    private Identifier id;
     private List<Declaration> declList;
 
-    public EnumDecl(Token token, IdentifierExpr enumName, List<Declaration> declList)
+    public EnumDecl(Token token, Identifier id, List<Declaration> declList)
     {
         super(token);
-        this.enumName = enumName;
+        this.id = id;
         this.declList = declList;
     }
 
-    public IdentifierExpr getId()
+    public Identifier getId()
     {
-        return enumName;
+        return id;
     }
 
-    public void setId(IdentifierExpr enumName)
+    public void setId(Identifier id)
     {
-        this.enumName = enumName;
+        this.id = id;
     }
 
     public int getDeclListSize()
