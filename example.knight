@@ -12,3 +12,16 @@ fn main(): int
 
     ret 0;
 }
+
+obj Hello
+{
+    fn lol(): int
+    {
+        ret 1;
+    }
+
+    fn helloWorld(): string
+    {
+        ret "Hello World";
+    }
+}

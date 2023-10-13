@@ -1,6 +1,8 @@
 /bin/
 /lib/
 /reports/
+/test/
+/doc/
 /.vscode/
 
 *.class
