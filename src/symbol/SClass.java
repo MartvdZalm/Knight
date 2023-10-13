@@ -11,11 +11,11 @@ import src.semantics.Binding;
  * Represents a class declaration in the program's symbol handling phase.
  * Klass class extends the Binding class and is used to store information about a class, including its methods and global variables.
  */
-public class Klass extends Binding
+public class SClass extends Binding
 {
 	private String id; // The identifier (name) of the class
-	private Hashtable<String, Function> methods; // Hashtable to store the class's methods (Function objects) with their identifiers as keys
-	private Hashtable<String, Variable> globals; // Hashtable to store the class's global variables (Variable objects) with their identifiers as keys
+	private Hashtable<String, SFunction> methods; // Hashtable to store the class's methods (Function objects) with their identifiers as keys
+	private Hashtable<String, SVariable> globals; // Hashtable to store the class's global variables (Variable objects) with their identifiers as keys
 	private String parent; // The name of the parent class (if any) that this class extends
 
 	/**
@@ -24,7 +24,7 @@ public class Klass extends Binding
      * @param id     The identifier (name) of the class.
      * @param parent The name of the parent class that this class extends (can be null for no parent).
      */
-	public Klass(String id, String p)
+	public SClass(String id, String p)
 	{
 		super(new IdentifierType(null, id));
 		this.id = id;
@@ -65,7 +65,7 @@ public class Klass extends Binding
 		if (containsFunction(id)) {
 			return false;
 		} else {
-			methods.put(id, new Function(id, type));
+			methods.put(id, new SFunction(id, type));
 			return true;
 		}
 	}
@@ -86,7 +86,7 @@ public class Klass extends Binding
      * @param id The identifier (name) of the method to retrieve.
      * @return The Function object representing the method with the specified identifier, or null if it does not exist.
      */
-	public Function getFunction(String id)
+	public SFunction getFunction(String id)
 	{
 		if (containsFunction(id)) {
 			return methods.get(id);
@@ -102,12 +102,12 @@ public class Klass extends Binding
      * @param type The Type associated with the global variable.
      * @return True if the global variable is successfully added, false if a global variable with the same identifier already exists.
      */
-	public boolean addVar(String id, Type type)
+	public boolean addVariable(String id, Type type)
 	{
-		if (containsVar(id)) {
+		if (containsVariable(id)) {
 			return false;
 		} else {
-			globals.put(id, new Variable(id, type));
+			globals.put(id, new SVariable(id, type));
 			return true;
 		}
 	}
@@ -118,9 +118,9 @@ public class Klass extends Binding
      * @param id The identifier (name) of the global variable to retrieve.
      * @return The Variable object representing the global variable with the specified identifier, or null if it does not exist.
      */
-	public Variable getVar(String id)
+	public SVariable getVariable(String id)
 	{
-		if (containsVar(id)) {
+		if (containsVariable(id)) {
 			return globals.get(id);
 		} else {
 			return null;
@@ -133,7 +133,7 @@ public class Klass extends Binding
      * @param id The identifier (name) of the global variable to check.
      * @return True if the class contains the global variable, false otherwise.
      */
-	public boolean containsVar(String id)
+	public boolean containsVariable(String id)
 	{
 		return globals.containsKey(id);
 	}

@@ -11,11 +11,11 @@ import src.semantics.Binding;
  * Represents a function declaration in the program's symbol handling phase.
  * Function class extends the Decl class and is used to store information about a function, including its parameters and variables.
  */
-public class Function extends Binding
+public class SFunction extends Binding
 {
 	private String id;
-	private Vector<Variable> params; // Vector to store the function's parameters (Variable objects)
-	private Hashtable<String, Variable> vars; // Hashtable to store the function's variables (Variable objects) with their identifiers as keys
+	private Vector<SVariable> params; // Vector to store the function's parameters (Variable objects)
+	private Hashtable<String, SVariable> vars; // Hashtable to store the function's variables (Variable objects) with their identifiers as keys
 
 	/**
      * Constructor to create a new function declaration with the specified identifier and return type.
@@ -23,7 +23,7 @@ public class Function extends Binding
      * @param id   The identifier (name) of the function.
      * @param type The return Type associated with the function.
      */
-	public Function(String id, Type type)
+	public SFunction(String id, Type type)
 	{
 		super(type);
 		this.id = id;
@@ -48,7 +48,7 @@ public class Function extends Binding
 		if (containsParam(id)) {
 			return false;
 		} else {
-			params.addElement(new Variable(id, type));
+			params.addElement(new SVariable(id, type));
 			return true;
 		}
 	}
@@ -58,7 +58,7 @@ public class Function extends Binding
      *
      * @return An Enumeration of the function's parameters.
      */
-	public Enumeration<Variable> getParams()
+	public Enumeration<SVariable> getParams()
 	{
 		return params.elements();
 	}
@@ -69,7 +69,7 @@ public class Function extends Binding
      * @param i The index of the parameter to retrieve.
      * @return The Variable object representing the parameter at the specified index, or null if the index is out of bounds.
      */
-	public Variable getParamAt(int i)
+	public SVariable getParamAt(int i)
 	{
 		if (i < params.size()) {
 			return params.elementAt(i);
@@ -85,12 +85,12 @@ public class Function extends Binding
      * @param type The Type associated with the variable.
      * @return True if the variable is successfully added, false if a variable with the same identifier already exists.
      */
-	public boolean addVar(String id, Type type)
+	public boolean addVariable(String id, Type type)
 	{
-		if (containsVar(id)) {
+		if (containsVariable(id)) {
 			return false;
 		} else {
-			vars.put(id, new Variable(id, type));
+			vars.put(id, new SVariable(id, type));
 			return true;
 		}
 	}
@@ -101,7 +101,7 @@ public class Function extends Binding
      * @param id The identifier (name) of the variable to check.
      * @return True if the function contains a variable with the specified identifier, false otherwise.
      */
-	public boolean containsVar(String id)
+	public boolean containsVariable(String id)
 	{
 		return containsParam(id) || vars.containsKey(id);
 	}
@@ -128,9 +128,9 @@ public class Function extends Binding
      * @param id The identifier (name) of the variable to retrieve.
      * @return The Variable object representing the variable with the specified identifier, or null if it does not exist.
      */
-	public Variable getVar(String id)
+	public SVariable getVariable(String id)
 	{
-		if (containsVar(id)) {
+		if (containsVariable(id)) {
 			return vars.get(id);
 		} else {
 			return null;
@@ -143,7 +143,7 @@ public class Function extends Binding
      * @param id The identifier (name) of the parameter to retrieve.
      * @return The Variable object representing the parameter with the specified identifier, or null if it does not exist.
      */
-	public Variable getParam(String id)
+	public SVariable getParam(String id)
 	{
 		for (int i = 0; i < params.size(); i++) {
 			if (params.elementAt(i).getId().equals(id)) {

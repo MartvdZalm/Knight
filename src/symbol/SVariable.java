@@ -7,7 +7,7 @@ import src.semantics.Binding;
  * The Variable class represents a variable declaration in the symbol table.
  * It extends the Decl class, which contains common properties and methods for declarations.
  */
-public class Variable extends Binding
+public class SVariable extends Binding
 {
 	private String id;
 	private int lvIndex = -1; // The local variable index in the activation record (initialized to -1)
@@ -18,7 +18,7 @@ public class Variable extends Binding
      * @param id   The identifier (name) of the variable.
      * @param type The Type object representing the type of the variable.
      */
-	public Variable(String id, Type type)
+	public SVariable(String id, Type type)
 	{
 		super(type);
 		this.id = id;
