@@ -12,8 +12,8 @@ import org.objectweb.asm.*;
 
 public class CodeGenerator implements Visitor<String>
 {
-	private Klass currentClass;
-	private Function currentFunction;
+	private SymbolClass currentClass;
+	private SymbolFunction currentFunction;
 	private int slot;
 	private final String PATH;
 
@@ -256,7 +256,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(ArgDecl argDecl)
+	public String visit(ArgumentDecl argDecl)
 	{
 		Binding b = argDecl.getId().getB();
 		setLocalVarIndex(b);
@@ -288,25 +288,25 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(VarDeclNoInit vd)
+	public String visit(VariableDecl vd)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(VarDeclInit varDeclInit)
+	public String visit(VariableDeclInit varDeclInit)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(FunctionVoid functionVoid)
+	public String visit(FunctionDecl functionVoid)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(FunctionReturn functionReturn)
+	public String visit(FunctionDeclReturn functionReturn)
 	{	
 		return null;
 	}
@@ -324,7 +324,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Include include)
+	public String visit(IncludeDecl include)
 	{
 		return null;
 	}
@@ -357,16 +357,16 @@ public class CodeGenerator implements Visitor<String>
 	
 	private int getLocalVarIndex(Binding b)
 	{
-		if (b != null && b instanceof Variable) {
-			return ((Variable) b).getLvIndex();
+		if (b != null && b instanceof SymbolVariable) {
+			return ((SymbolVariable) b).getLvIndex();
 		}
 		return -1;
 	}
 
 	private int setLocalVarIndex(Binding b)
 	{
-		if (b != null && b instanceof Variable) {
-			((Variable) b).setLvIndex(++slot);
+		if (b != null && b instanceof SymbolVariable) {
+			((SymbolVariable) b).setLvIndex(++slot);
 			return slot;
 		}
 		return -1;
@@ -410,6 +410,12 @@ public class CodeGenerator implements Visitor<String>
 
 	@Override
 	public String visit(Implements implements1) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	}
+
+	@Override
+	public String visit(InterDecl interDecl) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'visit'");
 	}

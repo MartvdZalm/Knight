@@ -26,9 +26,30 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	@Override
 	public Type visit(Program program)
 	{
-		for (int i = 0; i < program.getDeclListSize(); i++) {
-			program.getDeclAt(i).accept(this);
+		for (int i = 0; i < program.getIncludeListSize(); i++) {
+			program.getIncludeDeclAt(i).accept(this);
 		}
+
+		for (int i = 0; i < program.getEnumListSize(); i++) {
+			program.getEnumDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getInterListSize(); i++) {
+			program.getInterDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			program.getClassDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getFunctionListSize(); i++) {
+			program.getFunctionDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getVariableListSize(); i++) {
+			program.getVariableDeclAt(i).accept(this);
+		}
+
 		return null;
 	}
 
@@ -46,9 +67,12 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 			symbolClass = symbolProgram.getClass(identifier);
 		}
 
-		for (int i = 0; i < classDecl.getDeclListSize(); i++) {
-			Declaration vd = classDecl.getDeclAt(i);
-			vd.accept(this);
+		for (int i = 0; i < classDecl.getVariableListSize(); i++) {
+			classDecl.getVariableDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < classDecl.getFunctionListSize(); i++) {
+			classDecl.getFunctionDeclAt(i).accept(this);
 		}
 
 		return null;
@@ -57,26 +81,26 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	@Override
 	public Type visit(ClassDeclInheritance classDeclInheritance)
 	{
-		String identifier = classDeclInheritance.getId().getVarID();
-		String parent = classDeclInheritance.getParent().getId().getVarID();
+		// String identifier = classDeclInheritance.getId().getVarID();
+		// String parent = classDeclInheritance.getParent().getId().getVarID();
 
-		if (!symbolProgram.addClass(identifier, parent)) {
-			Token sym = classDeclInheritance.getToken();
-			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
-			symbolClass = new SymbolClass(identifier, parent);
-		} else {
-			symbolClass = symbolProgram.getClass(identifier);
-		}
+		// if (!symbolProgram.addClass(identifier, parent)) {
+		// 	Token sym = classDeclInheritance.getToken();
+		// 	addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
+		// 	symbolClass = new SymbolClass(identifier, parent);
+		// } else {
+		// 	symbolClass = symbolProgram.getClass(identifier);
+		// }
 
-		if (parent != null && parent.equals(mKlassId)) {
-			Token sym = classDeclInheritance.getParent().getToken();
-			addError(sym.getRow(), sym.getCol(), "class " + identifier + " cannot inherit main class");
-		}
+		// if (parent != null && parent.equals(mKlassId)) {
+		// 	Token sym = classDeclInheritance.getParent().getToken();
+		// 	addError(sym.getRow(), sym.getCol(), "class " + identifier + " cannot inherit main class");
+		// }
 
-		for (int i = 0; i < classDeclInheritance.getDeclListSize(); i++) {
-			Declaration vd = classDeclInheritance.getDeclAt(i);
-			vd.accept(this);
-		}
+		// for (int i = 0; i < classDeclInheritance.getDeclListSize(); i++) {
+		// 	Declaration vd = classDeclInheritance.getDeclAt(i);
+		// 	vd.accept(this);
+		// }
 
 		symbolClass = null;
 		return null;
@@ -85,7 +109,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	public void checkFunction(FunctionDecl funcDecl)
 	{
 		Type type = funcDecl.getReturnType().accept(this);
-		String functionName = funcDecl.getFunctionName().getVarID();
+		String functionName = funcDecl.getId().getVarID();
 
 		if (symbolClass == null) {
 			if (!symbolProgram.addFunction(functionName, type)) {
@@ -103,27 +127,29 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 			}
 		}	
 
-		for (int i = 0; i < funcDecl.getArgListSize(); i++) {
-			ArgDecl ad = funcDecl.getArgDeclAt(i);
-			ad.accept(this);
+		for (int i = 0; i < funcDecl.getArgumentListSize(); i++) {
+			funcDecl.getArgumentDeclAt(i).accept(this);
 		}
 
-		for (int i = 0; i < funcDecl.getDeclListSize(); i++) {
-			Declaration vd = funcDecl.getDeclAt(i);
-			vd.accept(this);
+		for (int i = 0; i < funcDecl.getVariableListSize(); i++) {
+			funcDecl.getVariableDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < funcDecl.getStatementListSize(); i++) {
+			funcDecl.getStatementDeclAt(i).accept(this);
 		}
 	}
 
 	@Override
-	public Type visit(FunctionVoid functionVoid)
+	public Type visit(FunctionDecl functionDecl)
 	{
-		checkFunction(functionVoid);
+		checkFunction(functionDecl);
 		symbolFunction = null;
 		return null;
 	}
 
 	@Override
-	public Type visit(FunctionReturn functionReturn)
+	public Type visit(FunctionDeclReturn functionReturn)
 	{
 		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
@@ -132,7 +158,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Include include)
+	public Type visit(IncludeDecl include)
 	{
 		return null;
 	}
@@ -370,7 +396,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 		return identifierType;
 	}
 
-	public void checkIfVariableExist(VarDecl varDecl)
+	public void checkIfVariableExist(VariableDecl varDecl)
 	{
 		Type t = varDecl.getType().accept(this);
 		String id = varDecl.getId().getVarID();
@@ -394,21 +420,21 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(VarDeclNoInit varDecl)
+	public Type visit(VariableDecl varDecl)
 	{
 		checkIfVariableExist(varDecl);
 		return null;
 	}
 
 	@Override
-	public Type visit(VarDeclInit varDeclInit)
+	public Type visit(VariableDeclInit varDeclInit)
 	{
 		checkIfVariableExist(varDeclInit);
 		return null;
 	}
 
 	@Override
-	public Type visit(ArgDecl argDecl)
+	public Type visit(ArgumentDecl argDecl)
 	{
 		Type t = argDecl.getType().accept(this);
 		String id = argDecl.getId().getVarID();
@@ -450,20 +476,26 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(EnumDecl enumDecl) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public Type visit(EnumDecl enumDecl)
+	{
+		return null;
 	}
 
 	@Override
-	public Type visit(Extends extends1) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public Type visit(Extends extends1)
+	{
+		return null;
 	}
 
 	@Override
-	public Type visit(Implements implements1) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public Type visit(Implements implements1)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(InterDecl interDecl)
+	{
+		return null;
 	}
 }

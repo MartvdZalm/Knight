@@ -25,7 +25,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Include include)
+	public Type visit(IncludeDecl include)
 	{
 		return null;
 	}
@@ -55,7 +55,7 @@ public class TypeAnalyser implements Visitor<Type>
 	public Type visit(Block n)
 	{
 		for (int i = 0; i < n.getStatListSize(); i++) {
-			Statement st = n.getStatAt(i);
+			StatementDecl st = n.getStatAt(i);
 			st.accept(this);
 		}
 		return null;
@@ -557,13 +557,13 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(VarDeclNoInit vd)
+	public Type visit(VariableDecl vd)
 	{
 		return vd.getType();
 	}
 
 	@Override
-	public Type visit(VarDeclInit vd)
+	public Type visit(VariableDeclInit vd)
 	{
 		Type rhs = vd.getExpr().accept(this);
 		Type lhs = vd.getId().accept(this);
@@ -602,26 +602,33 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArgDecl ad)
+	public Type visit(ArgumentDecl ad)
 	{
 		return ad.getType();
 	}
 
 	@Override
-	public Type visit(FunctionVoid functionVoid)
+	public Type visit(FunctionDecl functionDecl)
 	{
-		String functionName = functionVoid.getFunctionName().getVarID();
+		String functionName = functionDecl.getId().getVarID();
 
 		if (hsymbolFunction.contains(functionName)) {
-			return functionVoid.getReturnType();
+			return functionDecl.getReturnType();
 		}
 		hsymbolFunction.add(functionName);
 
-		symbolFunction = (SymbolFunction) functionVoid.getFunctionName().getB();
+		symbolFunction = (SymbolFunction) functionDecl.getId().getB();
 
-		for (int i = 0; i < functionVoid.getDeclListSize(); i++) {
-			Declaration decl = functionVoid.getDeclAt(i);
-			decl.accept(this);
+		for (int i = 0; i < functionDecl.getArgumentListSize(); i++) {
+			functionDecl.getArgumentDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < functionDecl.getVariableListSize(); i++) {
+			functionDecl.getVariableDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < functionDecl.getStatementListSize(); i++) {
+			functionDecl.getStatementDeclAt(i).accept(this);
 		}
 
 		symbolFunction = null;
@@ -629,20 +636,27 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionReturn functionReturn)
+	public Type visit(FunctionDeclReturn functionReturn)
 	{
-		String functionName = functionReturn.getFunctionName().getVarID();
+		String functionName = functionReturn.getId().getVarID();
 
 		if (hsymbolFunction.contains(functionName)) {
 			return functionReturn.getReturnType();
 		}
 		hsymbolFunction.add(functionName);
 
-		symbolFunction = (SymbolFunction) functionReturn.getFunctionName().getB();
+		symbolFunction = (SymbolFunction) functionReturn.getId().getB();
 
-		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
-			Declaration decl = functionReturn.getDeclAt(i);
-			decl.accept(this);
+		for (int i = 0; i < functionReturn.getArgumentListSize(); i++) {
+			functionReturn.getArgumentDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < functionReturn.getVariableListSize(); i++) {
+			functionReturn.getVariableDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < functionReturn.getStatementListSize(); i++) {
+			functionReturn.getStatementDeclAt(i).accept(this);
 		}
 
 		Type t1 = functionReturn.getReturnType();
@@ -660,12 +674,31 @@ public class TypeAnalyser implements Visitor<Type>
 
 	@Override
 	public Type visit(Program program)
-	{
-		
-
-		for (int i = 0; i < program.getDeclListSize(); i++) {
-			program.getDeclAt(i).accept(this);
+	{	
+		for (int i = 0; i < program.getIncludeListSize(); i++) {
+			program.getIncludeDeclAt(i).accept(this);
 		}
+
+		for (int i = 0; i < program.getEnumListSize(); i++) {
+			program.getEnumDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getInterListSize(); i++) {
+			program.getInterDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			program.getClassDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getFunctionListSize(); i++) {
+			program.getFunctionDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < program.getVariableListSize(); i++) {
+			program.getVariableDeclAt(i).accept(this);
+		}
+
 		return null;
 	}
 
@@ -752,21 +785,25 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ClassDecl classDeclSimple)
+	public Type visit(ClassDecl classDecl)
 	{
-		String id = classDeclSimple.getId().getVarID();
+		String id = classDecl.getId().getVarID();
 		if (hsymbolClass.contains(id)) {
 			return null;
 		}
 		hsymbolClass.add(id);
 
-		Binding b = classDeclSimple.getId().getB();
+		Binding b = classDecl.getId().getB();
 		symbolClass = (SymbolClass) b;
 
 		hsymbolFunction.clear();
-		for (int i = 0; i < classDeclSimple.getDeclListSize(); i++) {
-			Declaration decl = classDeclSimple.getDeclAt(i);
-			decl.accept(this);
+
+		for (int i = 0; i < classDecl.getVariableListSize(); i++) {
+			classDecl.getVariableDeclAt(i).accept(this);
+		}
+
+		for (int i = 0; i < classDecl.getFunctionListSize(); i++) {
+			classDecl.getFunctionDeclAt(i).accept(this);
 		}
 
 		return null;
@@ -775,19 +812,20 @@ public class TypeAnalyser implements Visitor<Type>
 	@Override
 	public Type visit(ClassDeclInheritance classDeclExtends)
 	{
-		String id = classDeclExtends.getId().getVarID();
-		if (hsymbolClass.contains(id)) { // Duplicate class
-			return null;
-		}
-		hsymbolClass.add(id);
-		Binding b = classDeclExtends.getId().getB();
-		symbolClass = (SymbolClass) b;
+		// String id = classDeclExtends.getId().getVarID();
+		// if (hsymbolClass.contains(id)) { // Duplicate class
+		// 	return null;
+		// }
+		// hsymbolClass.add(id);
+		// Binding b = classDeclExtends.getId().getB();
+		// symbolClass = (SymbolClass) b;
 
-		hsymbolFunction.clear();
-		for (int i = 0; i < classDeclExtends.getDeclListSize(); i++) {
-			Declaration decl = classDeclExtends.getDeclAt(i);
-			decl.accept(this);
-		}
+		// hsymbolFunction.clear();
+
+		// for (int i = 0; i < classDeclExtends.getDeclListSize(); i++) {
+		// 	Declaration decl = classDeclExtends.getDeclAt(i);
+		// 	decl.accept(this);
+		// }
 
 		return null;
 	}
@@ -798,20 +836,26 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(EnumDecl enumDecl) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public Type visit(EnumDecl enumDecl)
+	{
+		return null;
 	}
 
 	@Override
-	public Type visit(Extends extends1) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public Type visit(Extends extends1)
+	{
+		return null;
 	}
 
 	@Override
-	public Type visit(Implements implements1) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public Type visit(Implements implements1)
+	{
+		return null;
+	}
+
+	@Override
+	public Type visit(InterDecl interDecl)
+	{
+		return null;
 	}
 }
