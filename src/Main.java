@@ -6,8 +6,8 @@ import src.ast.Tree;
 import src.parser.Parser;
 import src.semantics.NameError;
 import src.semantics.SemanticErrors;
-import src.symbol.SProgram;
-import src.visitor.BuildSProgramVisitor;
+import src.symbol.SymbolProgram;
+import src.visitor.BuildSymbolProgramVisitor;
 import src.visitor.CodeGenerator;
 import src.visitor.NameAnalyserTreeVisitor;
 import src.visitor.TypeAnalyser;
@@ -46,27 +46,17 @@ public class Main
 			Tree tree = p.parse();
 
 			if (tree != null) {
-				BuildSProgramVisitor bstv = new BuildSProgramVisitor(); // Build the symbol program.
-				bstv.visit((Program) tree); // This will build the symbol table and will check if there are duplicated variables or functions in the code.
+				BuildSymbolProgramVisitor bspv = new BuildSymbolProgramVisitor();
+				bspv.visit((Program) tree);
 
-				SProgram sProgram = bstv.getSProgram(); // Get the symbol table that was build in the previous step and give this to the variable 'sProgram'.
+				SymbolProgram symbolProgram = bspv.getSymbolProgram();
 				
-				NameAnalyserTreeVisitor natv = new NameAnalyserTreeVisitor(sProgram); // Use the variable 'sProgram' that contains the whole symbol table and give this to the name analyser class. 
-				/*
-				 * This will put bindings on all the names. For example the variable declaration here 'int a = 5' has a variable named 'a' with type of 'int' and the value '5'. 
-				 * When some other variable will use the variable 'a' like this 'int b = a', then we need to check what kind of type the variable 'a' is. We do this by binding the 
-				 * value '5' and the type to the variable 'a'. With this we can easily help the programmer by giving an error if the types don't match.
-				 */
+				NameAnalyserTreeVisitor natv = new NameAnalyserTreeVisitor(symbolProgram);
 				natv.visit((Program) tree);  
 
-				TypeAnalyser ta = new TypeAnalyser(sProgram); // Use the variable 'sProgram' that contains the whole symbol table and give this to the name analyser class. 
-			
-				ta.visit((Program) tree); // This will use the bindings that were set on the previous step and check if every type is correct in the code.
+				TypeAnalyser ta = new TypeAnalyser(symbolProgram);
+				ta.visit((Program) tree);
 
-				/*
-				 * This will check if there were any error while compiling. If there were errors while compiling the compiler prints them. Else the abstract syntax tree that has been made by the parser
-				 * will be put in the code generator and generate the assembly.
-				 */
 				if (SemanticErrors.errorList.size() == 0) {
 					String path = getFileDirPath(str);
 					CodeGenerator cg = new CodeGenerator(path);
