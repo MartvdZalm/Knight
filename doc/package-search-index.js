@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"ast"},{"l":"lexer"},{"l":"parser"},{"l":"semantics"},{"l":"symbol"},{"l":"visitor"}];updateSearchResults();
