@@ -14,16 +14,16 @@ import src.symbol.*;
 
 public class NameAnalyserTreeVisitor implements Visitor<Type>
 {
-	private SProgram sProgram;
-	private SClass sClass;
-	private SFunction sFunction;
+	private SymbolProgram symbolProgram;
+	private SymbolClass symbolClass;
+	private SymbolFunction symbolFunction;
 
-	private Set<String> hsClass = new HashSet<>();
-	private Set<String> hsFunction = new HashSet<>();
+	private Set<String> hsymbolClass = new HashSet<>();
+	private Set<String> hsymbolFunction = new HashSet<>();
 
-	public NameAnalyserTreeVisitor(SProgram sProgram)
+	public NameAnalyserTreeVisitor(SymbolProgram symbolProgram)
 	{
-		this.sProgram = sProgram;
+		this.symbolProgram = symbolProgram;
 	}
 
 	@Override
@@ -211,7 +211,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(NewInstance ni)
 	{
 		String id = ni.getClassName().getVarID();
-		SClass klass = sProgram.getClass(id);
+		SymbolClass klass = symbolProgram.getClass(id);
 		if (klass == null) {
 			Token sym = ni.getClassName().getToken();
 		 	addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
@@ -290,7 +290,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(Identifier identifier)
 	{
 		String id = identifier.getVarID();
-		SVariable var = sProgram.getVariable(id, sClass, sFunction);
+		SymbolVariable var = symbolProgram.getVariable(id, symbolClass, symbolFunction);
 
 		if (var == null) {
 			Token sym = identifier.getToken();
@@ -305,7 +305,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(IdentifierType identifierType)
 	{
 		String id = identifierType.getVarID();
-		SClass klass = sProgram.getClass(id);
+		SymbolClass klass = symbolProgram.getClass(id);
 		if (klass == null) {
 			Token sym = identifierType.getToken();
 			addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
@@ -319,7 +319,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(IdentifierExpr identifierExpr)
 	{
 		String id = identifierExpr.getVarID();
-		SVariable var = sProgram.getVariable(id, sClass, sFunction);
+		SymbolVariable var = symbolProgram.getVariable(id, symbolClass, symbolFunction);
 		if (var == null) {
 			Token sym = identifierExpr.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
@@ -363,21 +363,21 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		String functionName = functionDecl.getFunctionName().getVarID();
 
-		if (hsFunction.contains(functionName)) {
+		if (hsymbolFunction.contains(functionName)) {
 			return;
 		} else {
-			hsFunction.add(functionName);
+			hsymbolFunction.add(functionName);
 		}
 
 		functionDecl.getReturnType().accept(this);
 
-		if (sClass == null) {
-			sFunction = sProgram.getFunction(functionName);
+		if (symbolClass == null) {
+			symbolFunction = symbolProgram.getFunction(functionName);
 		} else {
-			sFunction = sClass.getFunction(functionName);
+			symbolFunction = symbolClass.getFunction(functionName);
 		}
 
-		functionDecl.getFunctionName().setB(sFunction);
+		functionDecl.getFunctionName().setB(symbolFunction);
 
 		for (int i = 0; i < functionDecl.getArgListSize(); i++) {
 			ArgDecl ad = functionDecl.getArgDeclAt(i);
@@ -394,7 +394,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(FunctionVoid functionVoid)
 	{
 		checkFunction(functionVoid);
-		sFunction = null;
+		symbolFunction = null;
 		return null;
 	}
 
@@ -403,7 +403,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
-		sFunction = null;
+		symbolFunction = null;
 		return null;
 	}
 
@@ -522,21 +522,21 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(ClassDecl cd)
 	{
 		String id = cd.getId().getVarID();
-		if (hsClass.contains(id)) { 
+		if (hsymbolClass.contains(id)) { 
 			return null;
 		} else {
-			hsClass.add(id);
+			hsymbolClass.add(id);
 		}
 
-		sClass = sProgram.getClass(id);
-		cd.getId().setB(sClass);
+		symbolClass = symbolProgram.getClass(id);
+		cd.getId().setB(symbolClass);
 
 		for (int i = 0; i < cd.getDeclListSize(); i++) {
 			Declaration vd = cd.getDeclAt(i);
 			vd.accept(this);
 		}
 
-		hsFunction.clear();
+		hsymbolFunction.clear();
 
 		return null;
 	}
@@ -545,17 +545,17 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	public Type visit(ClassDeclInheritance cd)
 	{
 		String id = cd.getId().getVarID();
-		if (hsClass.contains(id)) {
+		if (hsymbolClass.contains(id)) {
 			return null;
 		} else {
-			hsClass.add(id);
+			hsymbolClass.add(id);
 		}
 
-		sClass = sProgram.getClass(id);
-		cd.getId().setB(sClass);
+		symbolClass = symbolProgram.getClass(id);
+		cd.getId().setB(symbolClass);
 
-		String parent = sClass.parent();
-		SClass parentKlass = sProgram.getClass(parent);
+		String parent = symbolClass.parent();
+		SymbolClass parentKlass = symbolProgram.getClass(parent);
 		if (parentKlass == null) {
 			Token sym = cd.getParent().getToken();
 			addError(sym.getRow(), sym.getCol(), "parent class " + parent + " not declared");
@@ -568,7 +568,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 			vd.accept(this);
 		}
 
-		hsFunction.clear();
+		hsymbolFunction.clear();
 
 		return null;
 	}

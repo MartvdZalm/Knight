@@ -12,16 +12,16 @@ import src.symbol.*;
 
 public class TypeAnalyser implements Visitor<Type>
 {
-	private SProgram sProgram;
-	private SClass sClass;
-	private SFunction sFunction;
+	private SymbolProgram symbolProgram;
+	private SymbolClass symbolClass;
+	private SymbolFunction symbolFunction;
 
-	private Set<String> hsKlass = new HashSet<>();
-	private Set<String> hsFunc = new HashSet<>();
+	private Set<String> hsymbolClass = new HashSet<>();
+	private Set<String> hsymbolFunction = new HashSet<>();
 
-	public TypeAnalyser(SProgram sProgram)
+	public TypeAnalyser(SymbolProgram symbolProgram)
 	{
-		this.sProgram = sProgram;
+		this.symbolProgram = symbolProgram;
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class TypeAnalyser implements Visitor<Type>
 		Type rhs = n.getExpr().accept(this);
 		Type lhs = n.getId().accept(this);
 
-		if (!sProgram.compareTypes(lhs, rhs)) {
+		if (!symbolProgram.compareTypes(lhs, rhs)) {
 			Token sym = n.getToken();
 			if (lhs == null || rhs == null) {
 				addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
@@ -396,7 +396,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = i.getB();
 		if (b != null) {
-			Type t = ((SVariable) b).getType();
+			Type t = ((SymbolVariable) b).getType();
 			i.setType(t);
 			return t;
 		}
@@ -422,7 +422,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = ni.getClassName().getB();
 		if (b != null) {
-			SClass klass = (SClass) b;
+			SymbolClass klass = (SymbolClass) b;
 			ni.setType(klass.type());
 			return klass.type();
 		}
@@ -435,11 +435,11 @@ public class TypeAnalyser implements Visitor<Type>
 		if (cm.getInstanceName() == null) {
 			IdentifierExpr callFunc = cm.getMethodId();
 
-			SFunction func = null;
-			if (sClass == null) {
-				func = sProgram.getFunction(callFunc.toString());
+			SymbolFunction func = null;
+			if (symbolClass == null) {
+				func = symbolProgram.getFunction(callFunc.toString());
 			} else {
-				func = sProgram.getFunction(callFunc.toString(), sClass.getId());
+				func = symbolProgram.getFunction(callFunc.toString(), symbolClass.getId());
 			}
 			
 			if (func == null) {
@@ -466,7 +466,7 @@ public class TypeAnalyser implements Visitor<Type>
 		return null;
 	}
 
-	private void checkCallArguments(CallFunctionExpr cm, SFunction m)
+	private void checkCallArguments(CallFunctionExpr cm, SymbolFunction m)
 	{
 		List<Type> argTypes = new ArrayList<>();
 		for (int i = 0; i < cm.getArgExprListSize(); i++) {
@@ -484,11 +484,11 @@ public class TypeAnalyser implements Visitor<Type>
 
 		// Check argument types
 		for (int i = 0; i < argTypes.size(); i++) {
-			SVariable var = m.getParamAt(i);
+			SymbolVariable var = m.getParamAt(i);
 			Type t1 = var.getType();
 			Type t2 = argTypes.get(i);
 
-			if (!sProgram.compareTypes(t1, t2)) {
+			if (!symbolProgram.compareTypes(t1, t2)) {
 				Token sym = cm.getArgExprAt(i).getToken();
 				addError(sym.getRow(), sym.getCol(), "The method " + m.toString()
 						+ " is not applicable for the arguments (" + getArguments(argTypes) + ")");
@@ -571,11 +571,11 @@ public class TypeAnalyser implements Visitor<Type>
 		if (vd.getExpr() instanceof CallFunctionExpr) {
 			CallFunctionExpr callFunc = (CallFunctionExpr) vd.getExpr();
 			if (callFunc.getInstanceName() == null) {
-				SFunction func = null;
-				if (sClass != null) {
-					func = sProgram.getFunction(callFunc.getMethodId().toString(), sClass.getId());
+				SymbolFunction func = null;
+				if (symbolClass != null) {
+					func = symbolProgram.getFunction(callFunc.getMethodId().toString(), symbolClass.getId());
 				} else {
-					func = sProgram.getFunction(callFunc.getMethodId().toString());
+					func = symbolProgram.getFunction(callFunc.getMethodId().toString());
 				}
 
 				if (func != null) {
@@ -586,7 +586,7 @@ public class TypeAnalyser implements Visitor<Type>
 			}
 		}
 
-		if (!sProgram.compareTypes(lhs, rhs)) {
+		if (!symbolProgram.compareTypes(lhs, rhs)) {
 			Token sym = vd.getToken();
 			if (lhs == null || rhs == null) {
 				addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
@@ -612,19 +612,19 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		String functionName = functionVoid.getFunctionName().getVarID();
 
-		if (hsFunc.contains(functionName)) {
+		if (hsymbolFunction.contains(functionName)) {
 			return functionVoid.getReturnType();
 		}
-		hsFunc.add(functionName);
+		hsymbolFunction.add(functionName);
 
-		sFunction = (SFunction) functionVoid.getFunctionName().getB();
+		symbolFunction = (SymbolFunction) functionVoid.getFunctionName().getB();
 
 		for (int i = 0; i < functionVoid.getDeclListSize(); i++) {
 			Declaration decl = functionVoid.getDeclAt(i);
 			decl.accept(this);
 		}
 
-		sFunction = null;
+		symbolFunction = null;
 		return null;
 	}
 
@@ -633,12 +633,12 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		String functionName = functionReturn.getFunctionName().getVarID();
 
-		if (hsFunc.contains(functionName)) {
+		if (hsymbolFunction.contains(functionName)) {
 			return functionReturn.getReturnType();
 		}
-		hsFunc.add(functionName);
+		hsymbolFunction.add(functionName);
 
-		sFunction = (SFunction) functionReturn.getFunctionName().getB();
+		symbolFunction = (SymbolFunction) functionReturn.getFunctionName().getB();
 
 		for (int i = 0; i < functionReturn.getDeclListSize(); i++) {
 			Declaration decl = functionReturn.getDeclAt(i);
@@ -648,13 +648,13 @@ public class TypeAnalyser implements Visitor<Type>
 		Type t1 = functionReturn.getReturnType();
 		Type t2 = functionReturn.getReturnExpr().accept(this);
 
-		if (!sProgram.compareTypes(t1, t2)) {
+		if (!symbolProgram.compareTypes(t1, t2)) {
 			Token tok = functionReturn.getReturnExpr().getToken();
 			addError(tok.getRow(), tok.getCol(), "Function " + functionName + " must return a result of Type " + t1);
 		}
 
 		functionReturn.getReturnExpr().setType(t2);
-		sFunction = null;
+		symbolFunction = null;
 		return null;
 	}
 
@@ -674,7 +674,7 @@ public class TypeAnalyser implements Visitor<Type>
 	{
 		Binding b = identifier.getB();
 		if (b != null) {
-			return ((SVariable) b).getType();
+			return ((SymbolVariable) b).getType();
 		}
 		return null;
 	}
@@ -755,15 +755,15 @@ public class TypeAnalyser implements Visitor<Type>
 	public Type visit(ClassDecl classDeclSimple)
 	{
 		String id = classDeclSimple.getId().getVarID();
-		if (hsKlass.contains(id)) {
+		if (hsymbolClass.contains(id)) {
 			return null;
 		}
-		hsKlass.add(id);
+		hsymbolClass.add(id);
 
 		Binding b = classDeclSimple.getId().getB();
-		sClass = (SClass) b;
+		symbolClass = (SymbolClass) b;
 
-		hsFunc.clear();
+		hsymbolFunction.clear();
 		for (int i = 0; i < classDeclSimple.getDeclListSize(); i++) {
 			Declaration decl = classDeclSimple.getDeclAt(i);
 			decl.accept(this);
@@ -776,14 +776,14 @@ public class TypeAnalyser implements Visitor<Type>
 	public Type visit(ClassDeclInheritance classDeclExtends)
 	{
 		String id = classDeclExtends.getId().getVarID();
-		if (hsKlass.contains(id)) { // Duplicate class
+		if (hsymbolClass.contains(id)) { // Duplicate class
 			return null;
 		}
-		hsKlass.add(id);
+		hsymbolClass.add(id);
 		Binding b = classDeclExtends.getId().getB();
-		sClass = (SClass) b;
+		symbolClass = (SymbolClass) b;
 
-		hsFunc.clear();
+		hsymbolFunction.clear();
 		for (int i = 0; i < classDeclExtends.getDeclListSize(); i++) {
 			Declaration decl = classDeclExtends.getDeclAt(i);
 			decl.accept(this);

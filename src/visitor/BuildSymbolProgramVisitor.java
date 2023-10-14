@@ -4,24 +4,23 @@ import src.ast.*;
 import src.lexer.*;
 import src.semantics.SemanticErrors;
 import src.symbol.*;
-import src.symbol.Function;
 
-public class BuildSProgramVisitor implements Visitor<Type>
+public class BuildSymbolProgramVisitor implements Visitor<Type>
 {
-	private SProgram sProgram;
-	private SClass sClass;
-	private SFunction sFunction;
+	private SymbolProgram symbolProgram;
+	private SymbolClass symbolClass;
+	private SymbolFunction symbolFunction;
 
 	private String mKlassId;
 
-	public BuildSProgramVisitor()
+	public BuildSymbolProgramVisitor()
 	{
-		sProgram = new SProgram();
+		symbolProgram = new SymbolProgram();
 	}
 
-	public SProgram getSProgram()
+	public SymbolProgram getSymbolProgram()
 	{
-		return sProgram;
+		return symbolProgram;
 	}
 
 	@Override
@@ -39,12 +38,12 @@ public class BuildSProgramVisitor implements Visitor<Type>
 	{
 		String identifier = classDecl.getId().getVarID();
 
-		if (!sProgram.addClass(identifier, null)) {
+		if (!symbolProgram.addClass(identifier, null)) {
 			Token sym = classDecl.getToken();
 			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
-			sClass = new SClass(identifier, null);
+			symbolClass = new SymbolClass(identifier, null);
 		} else {
-			sClass = sProgram.getClass(identifier);
+			symbolClass = symbolProgram.getClass(identifier);
 		}
 
 		for (int i = 0; i < classDecl.getDeclListSize(); i++) {
@@ -61,12 +60,12 @@ public class BuildSProgramVisitor implements Visitor<Type>
 		String identifier = classDeclInheritance.getId().getVarID();
 		String parent = classDeclInheritance.getParent().getId().getVarID();
 
-		if (!sProgram.addClass(identifier, parent)) {
+		if (!symbolProgram.addClass(identifier, parent)) {
 			Token sym = classDeclInheritance.getToken();
 			addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
-			sClass = new SClass(identifier, parent);
+			symbolClass = new SymbolClass(identifier, parent);
 		} else {
-			sClass = sProgram.getClass(identifier);
+			symbolClass = symbolProgram.getClass(identifier);
 		}
 
 		if (parent != null && parent.equals(mKlassId)) {
@@ -79,7 +78,7 @@ public class BuildSProgramVisitor implements Visitor<Type>
 			vd.accept(this);
 		}
 
-		sClass = null;
+		symbolClass = null;
 		return null;
 	}
 
@@ -88,19 +87,19 @@ public class BuildSProgramVisitor implements Visitor<Type>
 		Type type = funcDecl.getReturnType().accept(this);
 		String functionName = funcDecl.getFunctionName().getVarID();
 
-		if (sClass == null) {
-			if (!sProgram.addFunction(functionName, type)) {
+		if (symbolClass == null) {
+			if (!symbolProgram.addFunction(functionName, type)) {
 				Token tok = funcDecl.getToken();
 				addError(tok.getRow(), tok.getCol(), "Function " + functionName + " already defined");
 			} else {
-				sFunction = sProgram.getFunction(functionName);
+				symbolFunction = symbolProgram.getFunction(functionName);
 			}
 		} else {
-			if (!sClass.addFunction(functionName, type)) {
+			if (!symbolClass.addFunction(functionName, type)) {
 				Token tok = funcDecl.getToken();
-				addError(tok.getRow(), tok.getCol(), "Function " + functionName + " already defined in class " + sClass.getId());
+				addError(tok.getRow(), tok.getCol(), "Function " + functionName + " already defined in class " + symbolClass.getId());
 			} else {
-				sFunction = sClass.getFunction(functionName);
+				symbolFunction = symbolClass.getFunction(functionName);
 			}
 		}	
 
@@ -119,7 +118,7 @@ public class BuildSProgramVisitor implements Visitor<Type>
 	public Type visit(FunctionVoid functionVoid)
 	{
 		checkFunction(functionVoid);
-		sFunction = null;
+		symbolFunction = null;
 		return null;
 	}
 
@@ -128,7 +127,7 @@ public class BuildSProgramVisitor implements Visitor<Type>
 	{
 		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
-		sFunction = null;
+		symbolFunction = null;
 		return null;
 	}
 
@@ -365,7 +364,7 @@ public class BuildSProgramVisitor implements Visitor<Type>
 
 		if (id != null && id.equals(mKlassId)) {
 			Token tok = identifierType.getToken();
-			addError(tok.getRow(), tok.getCol(), "main class " + id + " cannot be used as a type in class " + sClass.getId());
+			addError(tok.getRow(), tok.getCol(), "main class " + id + " cannot be used as a type in class " + symbolClass.getId());
 		}
 
 		return identifierType;
@@ -376,18 +375,18 @@ public class BuildSProgramVisitor implements Visitor<Type>
 		Type t = varDecl.getType().accept(this);
 		String id = varDecl.getId().getVarID();
 
-		if (sFunction != null) {
-			if (!sFunction.addVariable(id, t)) {
+		if (symbolFunction != null) {
+			if (!symbolFunction.addVariable(id, t)) {
 				Token tok = varDecl.getId().getToken();
-				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + sFunction.getId() + " in class " + sClass.getId());
+				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + symbolFunction.getId() + " in class " + symbolClass.getId());
 			}
-		} else if (sClass != null) {
-			if (!sClass.addVariable(id, t)) {
+		} else if (symbolClass != null) {
+			if (!symbolClass.addVariable(id, t)) {
 				Token sym = varDecl.getId().getToken();
-				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + sClass.getId());
+				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined in class " + symbolClass.getId());
 			}
 		} else {
-			if (!sProgram.addVariable(id, t)) {
+			if (!symbolProgram.addVariable(id, t)) {
 				Token sym = varDecl.getId().getToken();
 				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined");
 			}
@@ -414,9 +413,9 @@ public class BuildSProgramVisitor implements Visitor<Type>
 		Type t = argDecl.getType().accept(this);
 		String id = argDecl.getId().getVarID();
 
-		if (!sFunction.addParam(id, t)) {
+		if (!symbolFunction.addParam(id, t)) {
 			Token sym = argDecl.getId().getToken();
-			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + sFunction.getId() + " in class " + sClass.getId());
+			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + symbolFunction.getId() + " in class " + symbolClass.getId());
 		}
 		return null;
 	}
