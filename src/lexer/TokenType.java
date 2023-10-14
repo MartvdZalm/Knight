@@ -30,7 +30,8 @@ public class TokenType
         Symbol.symbol("protected", Tokens.PROTECTED);
         Symbol.symbol("private", Tokens.PRIVATE);
 
-        Symbol.symbol("obj", Tokens.CLASS);
+        Symbol.symbol("class", Tokens.CLASS);
+        Symbol.symbol("inter", Tokens.INTER);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("new", Tokens.NEW);
         Symbol.symbol("include", Tokens.INCLUDE);

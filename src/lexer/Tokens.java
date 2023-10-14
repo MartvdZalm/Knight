@@ -28,12 +28,13 @@ public enum Tokens
     PROTECTED,
     PRIVATE,
 
+    INCLUDE,
     CLASS,
+    ENUM,
+    INTER,
     COMMENT,
     NEW,
-    INCLUDE,
     FUNCTION,
-    ENUM,
     EXTENDS,
     IMPLEMENTS,
 
