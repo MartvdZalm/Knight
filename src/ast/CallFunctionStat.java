@@ -4,7 +4,7 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class CallFunctionStat extends Statement
+public class CallFunctionStat extends StatementDecl
 {
 	private Expression instanceName;
 	private IdentifierExpr methodId;

@@ -4,20 +4,22 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public abstract class FunctionDecl extends Declaration
+public class FunctionDecl extends Tree
 {
     private Type returnType;
-    private Identifier functionName;
-    private List<ArgDecl> argList;
-	private List<Declaration> declList;
+    private Identifier id;
+    private List<ArgumentDecl> argumentList;
+    private List<VariableDecl> variableList;
+	private List<StatementDecl> statementList;
 
-    public FunctionDecl(Token token, Type returnType, Identifier functionName, List<ArgDecl> argList, List<Declaration> declList)
+    public FunctionDecl(Token token, Type returnType, Identifier id, List<ArgumentDecl> argumentList, List<VariableDecl> variableList, List<StatementDecl> statementList)
     {
         super(token);
         this.returnType = returnType;
-        this.functionName = functionName;
-        this.argList = argList;
-        this.declList = declList;
+        this.id = id;
+        this.argumentList = argumentList;
+        this.variableList = variableList;
+        this.statementList = statementList;
     }
 
     public Type getReturnType()
@@ -25,44 +27,68 @@ public abstract class FunctionDecl extends Declaration
         return returnType;
     }
 
-    public void setReturnType(Type returnType)
+    public Identifier getId()
     {
-        this.returnType = returnType;
+    	return id;
     }
 
-    public Identifier getFunctionName()
+    public List<ArgumentDecl> getArgumentList()
     {
-        return functionName;
+    	return argumentList;
     }
 
-    public void setFunctionName(Identifier functionName)
+    public List<VariableDecl> getVariableList()
     {
-        this.functionName = functionName;
+    	return variableList;
     }
 
-	public int getArgListSize()
+    public List<StatementDecl> getStatementList()
+    {
+    	return statementList;
+    }
+
+	public int getArgumentListSize()
 	{
-		return argList.size();
+		return argumentList.size();
 	}
 
-	public int getDeclListSize()
+	public int getVariableListSize()
 	{
-		return declList.size();
+		return variableList.size();
 	}
 
-	public ArgDecl getArgDeclAt(int index)
+	public int getStatementListSize()
 	{
-		if (index < argList.size()) {
-			return argList.get(index);
+		return statementList.size();
+	}
+
+	public ArgumentDecl getArgumentDeclAt(int index)
+	{
+		if (index < getArgumentListSize()) {
+			return argumentList.get(index);
 		}
 		return null;
 	}
 
-	public Declaration getDeclAt(int index)
+	public VariableDecl getVariableDeclAt(int index)
 	{
-		if (index < declList.size()) {
-			return declList.get(index);
+		if (index < getVariableListSize()) {
+			return variableList.get(index);
 		}
 		return null;
+	}
+
+	public StatementDecl getStatementDeclAt(int index)
+	{
+		if (index < getStatementListSize()) {
+			return statementList.get(index);
+		}
+		return null;
+	}
+
+	@Override
+	public <R> R accept(Visitor<R> v)
+	{
+		return v.visit(this);
 	}
 }

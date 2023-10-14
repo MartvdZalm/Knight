@@ -1,14 +1,12 @@
 package src.ast;
 
-import java.util.List;
-
 import src.lexer.Token;
 
-public class EnumDecl extends Tree
+public abstract class InheritanceDecl extends Tree
 {
     private Identifier id;
 
-    public EnumDecl(Token token, Identifier id)
+    public InheritanceDecl(Token token, Identifier id)
     {
         super(token);
         this.id = id;
@@ -22,11 +20,5 @@ public class EnumDecl extends Tree
     public void setId(Identifier id)
     {
         this.id = id;
-    }
-
-    @Override
-    public <R> R accept(Visitor<R> v)
-    {
-        return v.visit(this);
     }
 }

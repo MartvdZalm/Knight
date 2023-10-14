@@ -2,7 +2,7 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class Implements extends Inheritance
+public class Implements extends InheritanceDecl
 {
     public Implements(Token token, Identifier id)
     {

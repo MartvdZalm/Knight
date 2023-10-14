@@ -3,17 +3,18 @@ package src.ast;
 import java.util.List;
 import src.lexer.Token;
 
-// Base class for class declaration
-public class ClassDecl extends Declaration
+public class ClassDecl extends Tree
 {
 	private Identifier id;
-	private List<Declaration> declList;
+	private List<FunctionDecl> functionList;
+	private List<VariableDecl> variableList;
 
-	public ClassDecl(Token token, Identifier id, List<Declaration> declList)
+	public ClassDecl(Token token, Identifier id, List<FunctionDecl> functionList, List<VariableDecl> variableList)
 	{
 		super(token);
 		this.id = id;
-		this.declList = declList;
+		this.functionList = functionList;
+		this.variableList = variableList;
 	}
 
 	public Identifier getId()
@@ -21,20 +22,38 @@ public class ClassDecl extends Declaration
 		return id;
 	}
 
-	public void setId(Identifier id)
+	public List<FunctionDecl> getFunctionList()
 	{
-		this.id = id;
+		return functionList;
 	}
 
-	public int getDeclListSize()
+	public List<VariableDecl> getVariableList()
 	{
-		return declList.size();
+		return variableList;
 	}
 
-	public Declaration getDeclAt(int index)
+	public int getFunctionListSize()
 	{
-		if (index < declList.size()) {
-			return declList.get(index);
+		return functionList.size();
+	}
+
+	public int getVariableListSize()
+	{
+		return variableList.size();
+	}
+
+	public FunctionDecl getFunctionDeclAt(int index)
+	{
+		if  (index < getFunctionListSize()) {
+			return functionList.get(index);
+		}
+		return null;
+	}
+
+	public VariableDecl getVariableDeclAt(int index)
+	{
+		if (index < getVariableListSize()) {
+			return variableList.get(index);
 		}
 		return null;
 	}

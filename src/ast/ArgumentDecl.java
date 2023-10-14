@@ -2,12 +2,12 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class ArgDecl extends Declaration
+public class ArgumentDecl extends Tree
 {
 	private Type type;
 	private Identifier id;
 
-	public ArgDecl(Token token, Type type, Identifier id)
+	public ArgumentDecl(Token token, Type type, Identifier id)
 	{
 		super(token);
 		this.type = type;

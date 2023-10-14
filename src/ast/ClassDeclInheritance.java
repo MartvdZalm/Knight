@@ -3,25 +3,32 @@ package src.ast;
 import java.util.List;
 import src.lexer.Token;
 
-// Extends the base class
 public class ClassDeclInheritance extends ClassDecl
 {
-	private Inheritance parentId;
+	private List<InheritanceDecl> inheritanceList;
 
-	public ClassDeclInheritance(Token token, Identifier id, List<Declaration> declList, Inheritance parentId)
+	public ClassDeclInheritance(Token token, Identifier id, List<FunctionDecl> functionList, List<VariableDecl> variableList, List<InheritanceDecl> inheritanceList)
 	{
-		super(token, id, declList);
-		this.parentId = parentId;
+		super(token, id, functionList, variableList);
+		this.inheritanceList = inheritanceList;
 	}
 
-	public Inheritance getParent()
+	public List<InheritanceDecl> getInheritanceList()
 	{
-		return parentId;
+		return inheritanceList;
 	}
 
-	public void setParent(Inheritance parentId)
+	public int getInheritanceListSize()
 	{
-		this.parentId = parentId;
+		return inheritanceList.size();
+	}
+
+	public InheritanceDecl getInheritanceAt(int index)
+	{
+		if (index < getInheritanceListSize()) {
+			return inheritanceList.get(index);
+		}
+		return null;
 	}
 
 	@Override

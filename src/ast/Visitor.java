@@ -8,6 +8,8 @@ public interface Visitor<R>
 
     public R visit(ClassDeclInheritance classDeclInheritance);
 
+    public R visit(FunctionDecl functionDecl);
+
     public R visit(And and);
 
     public R visit(IdentifierExpr identifierExpr);
@@ -20,9 +22,7 @@ public interface Visitor<R>
 
     public R visit(False false1);
 
-    public R visit(ArgDecl argDecl);
-
-    public R visit(VarDeclNoInit varDecl);
+    public R visit(ArgumentDecl argDecl);
 
     public R visit(IdentifierType identifierType);
 
@@ -68,9 +68,11 @@ public interface Visitor<R>
 
     public R visit(NewInstance newInstance);
 
-    public R visit(VarDeclInit varDeclInit);
+    public R visit(VariableDecl variableDecl);
 
-    public R visit(Include include);
+    public R visit(VariableDeclInit variableDeclInit);
+
+    public R visit(IncludeDecl includeDecl);
 
     public R visit(VoidType voidType);
 
@@ -80,9 +82,7 @@ public interface Visitor<R>
 
     public R visit(ForLoop forLoop);
 
-    public R visit(FunctionVoid functionVoid);
-
-    public R visit(FunctionReturn functionReturn);
+    public R visit(FunctionDeclReturn functionDeclReturn);
 
     public R visit(LessThanOrEqual lessThanOrEqual);
 
@@ -104,4 +104,5 @@ public interface Visitor<R>
 
     public R visit(Implements implements1);
 
+    public R visit(InterDecl interDecl);
 }

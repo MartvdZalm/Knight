@@ -2,7 +2,7 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class ReturnStatement extends Statement
+public class ReturnStatement extends StatementDecl
 {
     private Expression returnExpr;
 
