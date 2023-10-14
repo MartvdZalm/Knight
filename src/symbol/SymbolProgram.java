@@ -12,15 +12,15 @@ import src.ast.IntType;
 import src.ast.StringType;
 import src.ast.Type;
 
-public class SProgram
+public class SymbolProgram
 {
-	private Hashtable<String, SClass> classes; 
-	private Hashtable<String, SFunction> functions;
-	private Hashtable<String, SVariable> variables;
+	private Hashtable<String, SymbolClass> classes; 
+	private Hashtable<String, SymbolFunction> functions;
+	private Hashtable<String, SymbolVariable> variables;
 
 	private Deque<String> rstack = new ArrayDeque<String>();
 
-	public SProgram()
+	public SymbolProgram()
 	{
 		classes = new Hashtable<>();
 		functions = new Hashtable<>();
@@ -32,7 +32,7 @@ public class SProgram
 		if (containsClass(id)) {
 			return false;
 		} else {
-			classes.put(id, new SClass(id, parent));
+			classes.put(id, new SymbolClass(id, parent));
 		}
 		return true;
 	}
@@ -42,7 +42,7 @@ public class SProgram
 		if (containsFunction(id)) {
 			return false;
 		} else {
-			functions.put(id, new SFunction(id, type));
+			functions.put(id, new SymbolFunction(id, type));
 			return true;
 		}
 	}
@@ -52,12 +52,12 @@ public class SProgram
 		if (containsVariable(id)) {
 			return false;
 		} else {
-			variables.put(id, new SVariable(id, type));
+			variables.put(id, new SymbolVariable(id, type));
 			return true;
 		}
 	}
 
-	public SClass getClass(String id)
+	public SymbolClass getClass(String id)
 	{
 		if (containsClass(id)) {
 			return classes.get(id);
@@ -66,7 +66,7 @@ public class SProgram
 		}
 	}
 
-	public SFunction getFunction(String id)
+	public SymbolFunction getFunction(String id)
 	{
 		if (containsFunction(id)) {
 			return functions.get(id);
@@ -75,13 +75,13 @@ public class SProgram
 		}
 	}
 
-	public SFunction getFunction(String id, String classScope)
+	public SymbolFunction getFunction(String id, String classScope)
 	{
 		if (getClass(classScope) == null) {
 			return null;
 		}
 
-		SClass c = getClass(classScope);
+		SymbolClass c = getClass(classScope);
 		while (c != null && !rstack.contains(c.getId())) {
 			rstack.push(c.getId());
 			if (c.getFunction(id) != null) {
@@ -107,7 +107,7 @@ public class SProgram
 
 	public Type getFunctionType(String id, String classScope)
 	{
-		SFunction m = getFunction(id, classScope);
+		SymbolFunction m = getFunction(id, classScope);
 		if (m == null) {
 			return null;
 		} else {
@@ -115,12 +115,12 @@ public class SProgram
 		}
 	}
 
-	public SVariable getVariable(String id)
+	public SymbolVariable getVariable(String id)
 	{
 		return variables.get(id);
 	}
 
-	public SVariable getVariable(String id, SClass sClass, SFunction sFunction)
+	public SymbolVariable getVariable(String id, SymbolClass sClass, SymbolFunction sFunction)
 	{
 		if (sFunction != null) {
 			if (sFunction.getVariable(id) != null) {
@@ -153,7 +153,7 @@ public class SProgram
 
 	public Type getVariableType(String id)
 	{
-		SVariable var = getVariable(id);
+		SymbolVariable var = getVariable(id);
 		if (var != null) {
 			return var.getType();
 		}
@@ -175,7 +175,7 @@ public class SProgram
 
 	public boolean containsVariable(String id)
 	{
-		SVariable var = getVariable(id);
+		SymbolVariable var = getVariable(id);
 		if (var != null) {
 			return true;
 		}
@@ -204,7 +204,7 @@ public class SProgram
 			IdentifierType i1 = (IdentifierType) t1;
 			IdentifierType i2 = (IdentifierType) t2;
 
-			SClass c = getClass(i2.getVarID());
+			SymbolClass c = getClass(i2.getVarID());
 			while (c != null && !rstack.contains(c.getId())) {
 				rstack.push(c.getId());
 				if (i1.getVarID().equals(c.getId())) {
