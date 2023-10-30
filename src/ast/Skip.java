@@ -2,7 +2,7 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class Skip extends StatementDecl
+public class Skip extends Statement
 {
 	public Skip(Token token)
 	{

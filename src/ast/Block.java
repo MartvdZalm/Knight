@@ -4,11 +4,11 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class Block extends StatementDecl
+public class Block extends Statement
 {
-	private List<StatementDecl> body;
+	private List<Statement> body;
 
-	public Block(Token token, List<StatementDecl> body)
+	public Block(Token token, List<Statement> body)
 	{
 		super(token);
 		this.body = body;
@@ -19,7 +19,7 @@ public class Block extends StatementDecl
 		return body.size();
 	}
 
-	public StatementDecl getStatAt(int index)
+	public Statement getStatAt(int index)
 	{
 		if (index < body.size()) {
 			return body.get(index);
@@ -27,7 +27,7 @@ public class Block extends StatementDecl
 		return null;
 	}
 
-	public void setStatAt(int index, StatementDecl stat)
+	public void setStatAt(int index, Statement stat)
 	{
 		if (index < body.size()) {
 			body.set(index, stat);

@@ -2,12 +2,12 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class While extends StatementDecl
+public class While extends Statement
 {
 	private Expression expr;
-	private StatementDecl body;
+	private Statement body;
 
-	public While(Token token, Expression expr, StatementDecl body)
+	public While(Token token, Expression expr, Statement body)
 	{
 		super(token);
 		this.expr = expr;
@@ -24,12 +24,12 @@ public class While extends StatementDecl
 		this.expr = expr;
 	}
 
-	public StatementDecl getBody()
+	public Statement getBody()
 	{
 		return body;
 	}
 
-	public void setBody(StatementDecl body)
+	public void setBody(Statement body)
 	{
 		this.body = body;
 	}

@@ -4,7 +4,7 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class ForLoop extends StatementDecl
+public class ForLoop extends Statement
 {
     // private Declaration initialization;
     private Expression condition;

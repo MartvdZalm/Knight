@@ -2,13 +2,13 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class IfThenElse extends StatementDecl
+public class IfThenElse extends Statement
 {
 	private Expression expr;
-	private StatementDecl then;
-	private StatementDecl elze; 
+	private Statement then;
+	private Statement elze; 
 
-	public IfThenElse(Token token, Expression expr, StatementDecl then, StatementDecl elze)
+	public IfThenElse(Token token, Expression expr, Statement then, Statement elze)
 	{
 		super(token);
 		this.expr = expr;
@@ -26,22 +26,22 @@ public class IfThenElse extends StatementDecl
 		this.expr = expr;
 	}
 
-	public StatementDecl getThen()
+	public Statement getThen()
 	{
 		return then;
 	}
 
-	public void setThen(StatementDecl then)
+	public void setThen(Statement then)
 	{
 		this.then = then;
 	}
 
-	public StatementDecl getElze()
+	public Statement getElze()
 	{
 		return elze;
 	}
 
-	public void setElze(StatementDecl elze)
+	public void setElze(Statement elze)
 	{
 		this.elze = elze;
 	}

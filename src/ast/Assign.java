@@ -2,7 +2,7 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class Assign extends StatementDecl
+public class Assign extends Statement
 {
 	private Identifier id;
 	private Expression expr;
