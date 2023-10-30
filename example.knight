@@ -1,20 +1,24 @@
 include test
 
-enum Food {
-    
-}
-
-inter Movies
-{
-    
-}
+(int) EXIT_SUCCESS = 0;
 
 class Person
 {
     (string) name;
     (int) age;
-}
 
+    fn hello(): string
+    {
+        (string) str1 = "Hello";
+        (string) str2 = world();
+        ret str1 + str2;
+    }
+
+    fn world(): string
+    {
+        ret "World";
+    }
+}
 
 fn main(): int
 {
@@ -23,4 +27,6 @@ fn main(): int
     (string) name = "Mart";
 
     num3 = num + num;
+
+    ret 0;
 }
