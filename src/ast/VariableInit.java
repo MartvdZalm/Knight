@@ -2,11 +2,11 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class VariableDeclInit extends VariableDecl
+public class VariableInit extends Variable
 {
 	private Expression expr;
 
-    public VariableDeclInit(Token token, Type type, Identifier id, Expression expr)
+    public VariableInit(Token token, Type type, Identifier id, Expression expr)
 	{
 		super(token, type, id);
 		this.expr = expr;

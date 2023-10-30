@@ -3,13 +3,13 @@ package src.ast;
 import java.util.List;
 import src.lexer.Token;
 
-public class ClassDecl extends Tree
+public class Class extends Tree
 {
 	private Identifier id;
-	private List<FunctionDecl> functionList;
-	private List<VariableDecl> variableList;
+	private List<Function> functionList;
+	private List<Variable> variableList;
 
-	public ClassDecl(Token token, Identifier id, List<FunctionDecl> functionList, List<VariableDecl> variableList)
+	public Class(Token token, Identifier id, List<Function> functionList, List<Variable> variableList)
 	{
 		super(token);
 		this.id = id;
@@ -22,12 +22,12 @@ public class ClassDecl extends Tree
 		return id;
 	}
 
-	public List<FunctionDecl> getFunctionList()
+	public List<Function> getFunctionList()
 	{
 		return functionList;
 	}
 
-	public List<VariableDecl> getVariableList()
+	public List<Variable> getVariableList()
 	{
 		return variableList;
 	}
@@ -42,7 +42,7 @@ public class ClassDecl extends Tree
 		return variableList.size();
 	}
 
-	public FunctionDecl getFunctionDeclAt(int index)
+	public Function getFunctionDeclAt(int index)
 	{
 		if  (index < getFunctionListSize()) {
 			return functionList.get(index);
@@ -50,7 +50,7 @@ public class ClassDecl extends Tree
 		return null;
 	}
 
-	public VariableDecl getVariableDeclAt(int index)
+	public Variable getVariableDeclAt(int index)
 	{
 		if (index < getVariableListSize()) {
 			return variableList.get(index);

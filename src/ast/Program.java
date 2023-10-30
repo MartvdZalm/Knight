@@ -6,14 +6,14 @@ import src.lexer.Token;
 
 public class Program extends Tree
 {
-	private List<IncludeDecl> includeList;
-	private List<EnumDecl> enumList;
-	private List<InterDecl> interList;
-	private List<ClassDecl> classList;
-	private List<FunctionDecl> functionList;
-	private List<VariableDecl> variableList;
+	private List<Include> includeList;
+	private List<Enumeration> enumList;
+	private List<Interface> interList;
+	private List<Class> classList;
+	private List<Function> functionList;
+	private List<Variable> variableList;
 
-	public Program(Token token, List<IncludeDecl> includeList, List<EnumDecl> enumList, List<InterDecl> interList, List<ClassDecl> classList, List<FunctionDecl> functionList, List<VariableDecl> variableList)
+	public Program(Token token, List<Include> includeList, List<Enumeration> enumList, List<Interface> interList, List<Class> classList, List<Function> functionList, List<Variable> variableList)
 	{
 		super(token);
 		this.includeList = includeList;
@@ -24,32 +24,32 @@ public class Program extends Tree
 		this.variableList = variableList;
 	}
 
-	public List<IncludeDecl> getIncludeList()
+	public List<Include> getIncludeList()
 	{
 		return includeList;
 	}
 
-	public List<EnumDecl> getEnumList()
+	public List<Enumeration> getEnumList()
 	{
 		return enumList;
 	}
 
-	public List<InterDecl> getInterList()
+	public List<Interface> getInterList()
 	{
 		return interList;
 	}
 
-	public List<ClassDecl> getClassList()
+	public List<Class> getClassList()
 	{
 		return classList;
 	}
 
-	public List<FunctionDecl> getFunctionList()
+	public List<Function> getFunctionList()
 	{
 		return functionList;
 	}
 
-	public List<VariableDecl> getVariableList()
+	public List<Variable> getVariableList()
 	{
 		return variableList;
 	}
@@ -84,7 +84,7 @@ public class Program extends Tree
 		return variableList.size();
 	}
 
-	public IncludeDecl getIncludeDeclAt(int index)
+	public Include getIncludeDeclAt(int index)
 	{
 		if (index < getIncludeListSize()) {
 			return includeList.get(index);
@@ -92,7 +92,7 @@ public class Program extends Tree
 		return null;
 	}
 
-	public EnumDecl getEnumDeclAt(int index)
+	public Enumeration getEnumDeclAt(int index)
 	{
 		if (index < getEnumListSize()) {
 			return enumList.get(index);
@@ -100,7 +100,7 @@ public class Program extends Tree
 		return null;
 	}
 
-	public InterDecl getInterDeclAt(int index)
+	public Interface getInterDeclAt(int index)
 	{
 		if (index < getInterListSize()) {
 			return interList.get(index);
@@ -108,7 +108,7 @@ public class Program extends Tree
 		return null;
 	}
 
-	public ClassDecl getClassDeclAt(int index)
+	public Class getClassDeclAt(int index)
 	{
 		if (index < getClassListSize()) {
 			return classList.get(index);
@@ -116,7 +116,7 @@ public class Program extends Tree
 		return null;
 	}
 
-	public FunctionDecl getFunctionDeclAt(int index)
+	public Function getFunctionDeclAt(int index)
 	{
 		if  (index < getFunctionListSize()) {
 			return functionList.get(index);
@@ -124,7 +124,7 @@ public class Program extends Tree
 		return null;
 	}
 
-	public VariableDecl getVariableDeclAt(int index)
+	public Variable getVariableDeclAt(int index)
 	{
 		if (index < getVariableListSize()) {
 			return variableList.get(index);

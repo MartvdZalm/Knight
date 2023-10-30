@@ -2,11 +2,11 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class IncludeDecl extends Tree
+public class Include extends Tree
 {
     private Identifier id;
 
-    public IncludeDecl(Token token, Identifier id)
+    public Include(Token token, Identifier id)
     {
         super(token);
         this.id = id;

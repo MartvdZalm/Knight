@@ -2,12 +2,12 @@ package src.ast;
 
 import src.lexer.Token;
 
-public class VariableDecl extends Tree
+public class Variable extends Tree
 {
     private Type type;
 	private Identifier id;
 
-    public VariableDecl(Token token, Type type, Identifier id)
+    public Variable(Token token, Type type, Identifier id)
     {
         super(token);
         this.type = type;

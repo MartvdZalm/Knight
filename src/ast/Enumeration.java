@@ -4,11 +4,11 @@ import java.util.List;
 
 import src.lexer.Token;
 
-public class InterDecl extends Tree
+public class Enumeration extends Tree
 {
     private Identifier id;
 
-    public InterDecl(Token token, Identifier id)
+    public Enumeration(Token token, Identifier id)
     {
         super(token);
         this.id = id;
