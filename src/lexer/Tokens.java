@@ -30,8 +30,8 @@ public enum Tokens
 
     INCLUDE,
     CLASS,
-    ENUM,
-    INTER,
+    ENUMERATION,
+    INTERFACE,
     COMMENT,
     NEW,
     FUNCTION,

@@ -18,7 +18,7 @@ public class TokenType
         Symbol.symbol(":", Tokens.COLON);
         Symbol.symbol(",", Tokens.COMMA);
         Symbol.symbol(".", Tokens.DOT);
- 
+
         Symbol.symbol("id", Tokens.IDENTIFIER);
         Symbol.symbol("int", Tokens.INTEGER);
         Symbol.symbol("string", Tokens.STRING);
@@ -31,12 +31,12 @@ public class TokenType
         Symbol.symbol("private", Tokens.PRIVATE);
 
         Symbol.symbol("class", Tokens.CLASS);
-        Symbol.symbol("inter", Tokens.INTER);
+        Symbol.symbol("inter", Tokens.INTERFACE);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("new", Tokens.NEW);
         Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("fn", Tokens.FUNCTION);
-        Symbol.symbol("enum", Tokens.ENUM);
+        Symbol.symbol("enum", Tokens.ENUMERATION);
         Symbol.symbol("ext", Tokens.EXTENDS);
         Symbol.symbol("use", Tokens.IMPLEMENTS);
 
