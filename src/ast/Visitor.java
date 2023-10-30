@@ -78,8 +78,6 @@ public interface Visitor<R>
 
     public R visit(CallFunctionStat callFunction);
 
-    public R visit(ForLoop forLoop);
-
     public R visit(FunctionReturn functionDeclReturn);
 
     public R visit(LessThanOrEqual lessThanOrEqual);
