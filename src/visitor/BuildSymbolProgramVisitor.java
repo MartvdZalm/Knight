@@ -1,16 +1,19 @@
 package src.visitor;
 
 import src.ast.*;
+import src.ast.Class;
 import src.lexer.*;
 import src.semantics.SemanticErrors;
-import src.symbol.*;
+
+import src.symbol.SymbolClass;
+import src.symbol.SymbolFunction;
+import src.symbol.SymbolProgram;
 
 public class BuildSymbolProgramVisitor implements Visitor<Type>
 {
 	private SymbolProgram symbolProgram;
 	private SymbolClass symbolClass;
 	private SymbolFunction symbolFunction;
-
 	private String mKlassId;
 
 	public BuildSymbolProgramVisitor()
@@ -55,7 +58,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 
 
 	@Override
-	public Type visit(ClassDecl classDecl)
+	public Type visit(Class classDecl)
 	{
 		String identifier = classDecl.getId().getVarID();
 
@@ -75,55 +78,28 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 			classDecl.getFunctionDeclAt(i).accept(this);
 		}
 
-		return null;
-	}
-
-	@Override
-	public Type visit(ClassDeclInheritance classDeclInheritance)
-	{
-		// String identifier = classDeclInheritance.getId().getVarID();
-		// String parent = classDeclInheritance.getParent().getId().getVarID();
-
-		// if (!symbolProgram.addClass(identifier, parent)) {
-		// 	Token sym = classDeclInheritance.getToken();
-		// 	addError(sym.getRow(), sym.getCol(), "Class " + identifier + " is already defined!");
-		// 	symbolClass = new SymbolClass(identifier, parent);
-		// } else {
-		// 	symbolClass = symbolProgram.getClass(identifier);
-		// }
-
-		// if (parent != null && parent.equals(mKlassId)) {
-		// 	Token sym = classDeclInheritance.getParent().getToken();
-		// 	addError(sym.getRow(), sym.getCol(), "class " + identifier + " cannot inherit main class");
-		// }
-
-		// for (int i = 0; i < classDeclInheritance.getDeclListSize(); i++) {
-		// 	Declaration vd = classDeclInheritance.getDeclAt(i);
-		// 	vd.accept(this);
-		// }
-
 		symbolClass = null;
 		return null;
 	}
 
-	public void checkFunction(FunctionDecl funcDecl)
+	public void checkFunction(Function funcDecl)
 	{
 		Type type = funcDecl.getReturnType().accept(this);
-		String functionName = funcDecl.getId().getVarID();
+		String id = funcDecl.getId().getVarID();
 
 		if (symbolClass == null) {
-			if (!symbolProgram.addFunction(functionName, type)) {
+			if (!symbolProgram.addFunction(id, type)) {
 				Token tok = funcDecl.getToken();
-				addError(tok.getRow(), tok.getCol(), "Function " + functionName + " already defined");
+				addError(tok.getRow(), tok.getCol(), "Function " + id + " already defined");
 			} else {
-				symbolFunction = symbolProgram.getFunction(functionName);
+				symbolFunction = symbolProgram.getFunction(id);
 			}
 		} else {
-			if (!symbolClass.addFunction(functionName, type)) {
+			if (!symbolClass.addFunction(id, type)) {
 				Token tok = funcDecl.getToken();
-				addError(tok.getRow(), tok.getCol(), "Function " + functionName + " already defined in class " + symbolClass.getId());
+				addError(tok.getRow(), tok.getCol(), "Function " + id + " already defined in class " + symbolClass.getId());
 			} else {
-				symbolFunction = symbolClass.getFunction(functionName);
+				symbolFunction = symbolClass.getFunction(id);
 			}
 		}	
 
@@ -141,7 +117,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionDecl functionDecl)
+	public Type visit(Function functionDecl)
 	{
 		checkFunction(functionDecl);
 		symbolFunction = null;
@@ -149,7 +125,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionDeclReturn functionReturn)
+	public Type visit(FunctionReturn functionReturn)
 	{
 		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
@@ -158,7 +134,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IncludeDecl include)
+	public Type visit(Include include)
 	{
 		return null;
 	}
@@ -192,13 +168,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	{
 		return null;
 	}
-
-	@Override
-	public Type visit(ForLoop forLoop)
-	{
-		return null;
-	}
-
+	
 	@Override
 	public Type visit(IntLiteral intLiteral)
 	{
@@ -390,13 +360,13 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 
 		if (id != null && id.equals(mKlassId)) {
 			Token tok = identifierType.getToken();
-			addError(tok.getRow(), tok.getCol(), "main class " + id + " cannot be used as a type in class " + symbolClass.getId());
+			addError(tok.getRow(), tok.getCol(), "Class " + id + " cannot be used as a type in class " + symbolClass.getId());
 		}
 
 		return identifierType;
 	}
 
-	public void checkIfVariableExist(VariableDecl varDecl)
+	public void checkIfVariableExist(Variable varDecl)
 	{
 		Type t = varDecl.getType().accept(this);
 		String id = varDecl.getId().getVarID();
@@ -420,21 +390,21 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(VariableDecl varDecl)
+	public Type visit(Variable varDecl)
 	{
 		checkIfVariableExist(varDecl);
 		return null;
 	}
 
 	@Override
-	public Type visit(VariableDeclInit varDeclInit)
+	public Type visit(VariableInit varDeclInit)
 	{
 		checkIfVariableExist(varDeclInit);
 		return null;
 	}
 
 	@Override
-	public Type visit(ArgumentDecl argDecl)
+	public Type visit(Argument argDecl)
 	{
 		Type t = argDecl.getType().accept(this);
 		String id = argDecl.getId().getVarID();
@@ -476,25 +446,13 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(EnumDecl enumDecl)
+	public Type visit(Enumeration enumDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Extends extends1)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Implements implements1)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(InterDecl interDecl)
+	public Type visit(Interface interDecl)
 	{
 		return null;
 	}

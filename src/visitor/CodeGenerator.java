@@ -2,11 +2,15 @@ package src.visitor;
 
 import java.io.File;
 import java.io.FileOutputStream;
+
 import src.ast.*;
-import src.lexer.Token;
-import src.lexer.Tokens;
+import src.ast.Class;
 import src.semantics.*;
-import src.symbol.*;
+import src.symbol.SymbolClass;
+import src.symbol.SymbolFunction;
+import src.symbol.SymbolProgram;
+import src.symbol.SymbolVariable;
+
 
 import org.objectweb.asm.*;
 
@@ -55,12 +59,6 @@ public class CodeGenerator implements Visitor<String>
 
 	@Override
 	public String visit(While n)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ForLoop forLoop)
 	{
 		return null;
 	}
@@ -256,7 +254,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(ArgumentDecl argDecl)
+	public String visit(Argument argDecl)
 	{
 		Binding b = argDecl.getId().getB();
 		setLocalVarIndex(b);
@@ -288,43 +286,37 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(VariableDecl vd)
+	public String visit(Variable vd)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(VariableDeclInit varDeclInit)
+	public String visit(VariableInit varDeclInit)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(FunctionDecl functionVoid)
+	public String visit(Function functionVoid)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(FunctionDeclReturn functionReturn)
+	public String visit(FunctionReturn functionReturn)
 	{	
 		return null;
 	}
 
 	@Override
-	public String visit(ClassDecl classDecl)
+	public String visit(Class classDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(ClassDeclInheritance cd)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(IncludeDecl include)
+	public String visit(Include include)
 	{
 		return null;
 	}
@@ -397,26 +389,14 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(EnumDecl enumDecl) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public String visit(Enumeration enumDecl)
+	{
+		return null;
 	}
 
 	@Override
-	public String visit(Extends extends1) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
-	}
-
-	@Override
-	public String visit(Implements implements1) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
-	}
-
-	@Override
-	public String visit(InterDecl interDecl) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'visit'");
+	public String visit(Interface interDecl)
+	{
+		return null;
 	}
 }

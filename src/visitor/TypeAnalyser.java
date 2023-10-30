@@ -6,9 +6,14 @@ import java.util.List;
 import java.util.Set;
 
 import src.ast.*;
+import src.ast.Class;
 import src.lexer.*;
 import src.semantics.*;
-import src.symbol.*;
+
+import src.symbol.SymbolClass;
+import src.symbol.SymbolFunction;
+import src.symbol.SymbolProgram;
+import src.symbol.SymbolVariable;
 
 public class TypeAnalyser implements Visitor<Type>
 {
@@ -25,7 +30,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IncludeDecl include)
+	public Type visit(Include include)
 	{
 		return null;
 	}
@@ -55,7 +60,7 @@ public class TypeAnalyser implements Visitor<Type>
 	public Type visit(Block n)
 	{
 		for (int i = 0; i < n.getStatListSize(); i++) {
-			StatementDecl st = n.getStatAt(i);
+			Statement st = n.getStatAt(i);
 			st.accept(this);
 		}
 		return null;
@@ -99,13 +104,7 @@ public class TypeAnalyser implements Visitor<Type>
 
 		return null;
 	}
-
-	@Override
-	public Type visit(ForLoop forLoop)
-	{
-		return null;
-	}
-
+	
 	@Override
 	public Type visit(IntLiteral n)
 	{
@@ -557,13 +556,14 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(VariableDecl vd)
+	public Type visit(Variable vd)
 	{
+		
 		return vd.getType();
 	}
 
 	@Override
-	public Type visit(VariableDeclInit vd)
+	public Type visit(VariableInit vd)
 	{
 		Type rhs = vd.getExpr().accept(this);
 		Type lhs = vd.getId().accept(this);
@@ -577,7 +577,7 @@ public class TypeAnalyser implements Visitor<Type>
 				} else {
 					func = symbolProgram.getFunction(callFunc.getMethodId().toString());
 				}
-
+				
 				if (func != null) {
 					rhs = func.getType();
 				}
@@ -602,19 +602,25 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArgumentDecl ad)
+	public Type visit(Argument ad)
 	{
 		return ad.getType();
 	}
 
 	@Override
-	public Type visit(FunctionDecl functionDecl)
+	public Type visit(Function functionDecl)
 	{
 		String functionName = functionDecl.getId().getVarID();
 
 		if (hsymbolFunction.contains(functionName)) {
 			return functionDecl.getReturnType();
 		}
+
+		if (!(functionDecl.getReturnType() instanceof VoidType)) {
+			Token tok = functionDecl.getReturnType().getToken();
+			addError(tok.getRow(), tok.getCol(), "Function " + functionName + " must return a result of Type " + functionDecl.getReturnType());
+		}
+
 		hsymbolFunction.add(functionName);
 
 		symbolFunction = (SymbolFunction) functionDecl.getId().getB();
@@ -636,13 +642,14 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionDeclReturn functionReturn)
+	public Type visit(FunctionReturn functionReturn)
 	{
 		String functionName = functionReturn.getId().getVarID();
 
 		if (hsymbolFunction.contains(functionName)) {
 			return functionReturn.getReturnType();
 		}
+
 		hsymbolFunction.add(functionName);
 
 		symbolFunction = (SymbolFunction) functionReturn.getId().getB();
@@ -785,7 +792,7 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ClassDecl classDecl)
+	public Type visit(Class classDecl)
 	{
 		String id = classDecl.getId().getVarID();
 		if (hsymbolClass.contains(id)) {
@@ -808,53 +815,20 @@ public class TypeAnalyser implements Visitor<Type>
 
 		return null;
 	}
-
-	@Override
-	public Type visit(ClassDeclInheritance classDeclExtends)
-	{
-		// String id = classDeclExtends.getId().getVarID();
-		// if (hsymbolClass.contains(id)) { // Duplicate class
-		// 	return null;
-		// }
-		// hsymbolClass.add(id);
-		// Binding b = classDeclExtends.getId().getB();
-		// symbolClass = (SymbolClass) b;
-
-		// hsymbolFunction.clear();
-
-		// for (int i = 0; i < classDeclExtends.getDeclListSize(); i++) {
-		// 	Declaration decl = classDeclExtends.getDeclAt(i);
-		// 	decl.accept(this);
-		// }
-
-		return null;
-	}
-
+	
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
 	}
 
 	@Override
-	public Type visit(EnumDecl enumDecl)
+	public Type visit(Enumeration enumDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Extends extends1)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(Implements implements1)
-	{
-		return null;
-	}
-
-	@Override
-	public Type visit(InterDecl interDecl)
+	public Type visit(Interface interDecl)
 	{
 		return null;
 	}
