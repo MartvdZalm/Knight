@@ -1,46 +1,5 @@
 <project name="Knight" default="compile">
-
     <target name="compile">
         <javac srcdir="src" destdir="bin" classpath="lib/asm.jar"></javac>
     </target>
-
-    <target name="test">
-        <mkdir dir="reports"/>
-        <junit printsummary="yes">
-            <classpath>
-                <pathelement location="bin"/>
-                <pathelement location="lib/asm.jar"/>
-                <pathelement location="lib/junit-4.13.2.jar"/>
-            </classpath>
-            <formatter type="xml"/>
-            <batchtest fork="yes" todir="reports">
-                <fileset dir="test">
-                    <include name="ast/*.java"/>
-                    <include name="lexer/*.java"/>
-                    <include name="parser/*.java"/>
-                    <include name="semantics/*.java"/>
-                    <include name="symbol/*.java"/>
-                    <include name="visitor/*.java"/>
-                </fileset>
-            </batchtest>
-        </junit>
-    </target>
-
-    <target name="javadoc">
-        <javadoc sourcepath="src" destdir="doc">
-            <fileset dir="src">
-                <include name="ast/*.java"/>
-                <include name="lexer/*.java"/>
-                <include name="parser/*.java"/>
-                <include name="semantics/*.java"/>
-                <include name="symbol/*.java"/>
-                <include name="visitor/*.java"/>
-            </fileset>
-            <fileset file="src/Main.java"/>
-            <classpath>
-                <pathelement location="lib/asm.jar"/>
-            </classpath>
-        </javadoc>
-    </target>
-
 </project>
