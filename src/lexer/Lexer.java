@@ -67,12 +67,12 @@ public class Lexer
         if (charachter == '\"') {
             StringBuilder str = new StringBuilder();
             try {
-                charachter = source.read(); // consume the first single quote
+                charachter = source.read();
                 while (charachter != '\"') {
                     str.append(charachter);
                     charachter = source.read();
                 }
-                charachter = source.read(); // consume the second single quote
+                charachter = source.read();
             } catch (Exception e) {
                 exception = true;
             }

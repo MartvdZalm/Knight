@@ -16,7 +16,7 @@ public class Symbol
 
     public String getSymbol() 
     {
-	    return symbol;
+        return symbol;
     }
 
     public Tokens getToken() 
