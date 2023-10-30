@@ -4,8 +4,13 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+
 import src.ast.*;
-import src.lexer.*;
+import src.ast.Class;
+import src.lexer.Lexer;
+import src.lexer.Symbol;
+import src.lexer.Token;
+import src.lexer.Tokens;
 
 public class Parser
 {
@@ -26,12 +31,12 @@ public class Parser
         Program program = null;
 
         try {
-			List<IncludeDecl> includeList = new ArrayList<>();
-			List<EnumDecl> enumList = new ArrayList<>();
-			List<InterDecl> interList = new ArrayList<>();
-			List<ClassDecl> classList = new ArrayList<>();
-			List<FunctionDecl> functionList = new ArrayList<>();
-			List<VariableDecl> variableList = new ArrayList<>();
+			List<Include> includeList = new ArrayList<>();
+			List<Enumeration> enumerationList = new ArrayList<>();
+			List<Interface> interfaceList = new ArrayList<>();
+			List<Class> classList = new ArrayList<>();
+			List<Function> functionList = new ArrayList<>();
+			List<Variable> variableList = new ArrayList<>();
 
 			token = lexer.nextToken();
 
@@ -41,12 +46,12 @@ public class Parser
 						includeList.add(parseInclude());
 					} break;
 
-					case ENUM: {
-						enumList.add(parseEnum());
+					case ENUMERATION: {
+						enumerationList.add(parseEnumeration());
 					} break;
 
-					case INTER: {
-						interList.add(parseInter());
+					case INTERFACE: {
+						interfaceList.add(parseInterface());
 					} break;
 
 					case CLASS: {
@@ -68,7 +73,7 @@ public class Parser
                 
             } while (token != null);
 			
-            program = new Program(token, includeList, enumList, interList, classList, functionList, variableList);
+            program = new Program(token, includeList, enumerationList, interfaceList, classList, functionList, variableList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,40 +81,39 @@ public class Parser
         return program;
     }
 
-	private IncludeDecl parseInclude() throws ParseException
+	private Include parseInclude() throws ParseException
 	{
 		eat(Tokens.INCLUDE);
-		return new IncludeDecl(token, parseIdentifier());
+		return new Include(token, parseIdentifier());
 	}
 
-	private EnumDecl parseEnum() throws ParseException
+	private Enumeration parseEnumeration() throws ParseException
 	{
-		eat(Tokens.ENUM);
+		eat(Tokens.ENUMERATION);
 		Identifier id = parseIdentifier();
 		eat(Tokens.LEFTBRACE);
 		eat(Tokens.RIGHTBRACE);
 
-		return new EnumDecl(token, id);
+		return new Enumeration(token, id);
 	}
 
-	private InterDecl parseInter() throws ParseException
+	private Interface parseInterface() throws ParseException
 	{
-		eat(Tokens.INTER);
+		eat(Tokens.INTERFACE);
 		Identifier id = parseIdentifier();
 		eat(Tokens.LEFTBRACE);
 		eat(Tokens.RIGHTBRACE);
 
-		return new InterDecl(token, id);
+		return new Interface(token, id);
 	}
 
-	private ClassDecl parseClass() throws ParseException
+	private Class parseClass() throws ParseException
 	{
-		List<FunctionDecl> functions = new ArrayList<>();
-		List<VariableDecl> variables = new ArrayList<>();
+		List<Function> functions = new ArrayList<>();
+		List<Variable> variables = new ArrayList<>();
 
 		eat(Tokens.CLASS);
 		Identifier id = parseIdentifier();
-		List<InheritanceDecl> inheritance = parseInheritances();
 		eat(Tokens.LEFTBRACE);
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
@@ -120,22 +124,17 @@ public class Parser
 			}
 		}
 		eat(Tokens.RIGHTBRACE);
-
-		if (inheritance == null) {
-			return new ClassDecl(id.getToken(), id, functions, variables);
-		} else {
-			return new ClassDeclInheritance(id.getToken(), id, functions, variables, inheritance);
-		}
+		return new Class(id.getToken(), id, functions, variables);
 	}
 
-	private FunctionDecl parseFunction() throws ParseException
+	private Function parseFunction() throws ParseException
 	{
-		List<VariableDecl> variables = new ArrayList<>();
-		List<StatementDecl> statements = new ArrayList<>();
+		List<Variable> variables = new ArrayList<>();
+		List<Statement> statements = new ArrayList<>();
 
 		eat(Tokens.FUNCTION);
 		Identifier id = parseIdentifier();
-		List<ArgumentDecl> argumentList = parseArguments();
+		List<Argument> argumentList = parseArguments();
 		eat(Tokens.COLON);
 		Type returnType = parseType();
 		eat(Tokens.LEFTBRACE);
@@ -152,26 +151,26 @@ public class Parser
 		eat(Tokens.RIGHTBRACE);
 
 		if (returnExpr != null) {
-			return new FunctionDeclReturn(token, returnType, id, argumentList, variables, statements, returnExpr);
+			return new FunctionReturn(token, returnType, id, argumentList, variables, statements, returnExpr);
 		}
 
-		return new FunctionDecl(token, returnType, id, argumentList, variables, statements);
+		return new Function(token, returnType, id, argumentList, variables, statements);
 	}
 
-	private VariableDecl parseVariable() throws ParseException
+	private Variable parseVariable() throws ParseException
 	{
 		eat(Tokens.LEFTPAREN);
 		Type type = parseType();
 		eat(Tokens.RIGHTPAREN);
 		Identifier id = parseIdentifier();
 
-		VariableDecl variable = null;
+		Variable variable = null;
 		if (token.getToken() == Tokens.SEMICOLON) {
-			variable = new VariableDecl(token, type, id);
+			variable = new Variable(token, type, id);
 			eat(Tokens.SEMICOLON);
 		} else {
 			eat(Tokens.ASSIGN);
-			variable = new VariableDeclInit(token, type, id, parseExpression());
+			variable = new VariableInit(token, type, id, parseExpression());
 		}
 		return variable;
 	}
@@ -228,9 +227,9 @@ public class Parser
 		return new CallFunctionExpr(tok, null, methodId, exprList);
 	}
 
-	private List<ArgumentDecl> parseArguments() throws ParseException
+	private List<Argument> parseArguments() throws ParseException
 	{
-		List<ArgumentDecl> argumentList = new ArrayList<>();
+		List<Argument> argumentList = new ArrayList<>();
 		eat(Tokens.LEFTPAREN);
 		if (token.getToken() != Tokens.RIGHTPAREN) {
 			argumentList.add(parseArgument());
@@ -244,7 +243,7 @@ public class Parser
 		return argumentList;
 	}
 
-	private ArgumentDecl parseArgument() throws ParseException
+	private Argument parseArgument() throws ParseException
 	{
 		Identifier argumentId = null;
 		if (token.getToken() == Tokens.IDENTIFIER) {
@@ -254,44 +253,19 @@ public class Parser
 		eat(Tokens.COLON);
 		Type argumentType = parseType();
 
-		return new ArgumentDecl(argumentId.getToken(), argumentType, argumentId);
+		return new Argument(argumentId.getToken(), argumentType, argumentId);
 	}
 
-	private List<InheritanceDecl> parseInheritances() throws ParseException
-	{
-		List<InheritanceDecl> inheritances = new ArrayList<>();
-
-		if (token.getToken() == Tokens.EXTENDS) {
-			eat(Tokens.EXTENDS);
-			Identifier id = parseIdentifier();
-			inheritances.add(new Extends(token, id));
-		}
-
-		if (token.getToken() == Tokens.IMPLEMENTS) {
-			do {
-				if (token.getToken() == Tokens.COMMA) {
-					eat(Tokens.COMMA);
-				} else {
-					eat(Tokens.IMPLEMENTS);
-				}
-				Identifier id = parseIdentifier();
-				inheritances.add(new Implements(token, id));
-			} while (token.getToken() == Tokens.COMMA);
-		}
-
-		return inheritances;
-	}
-
-	private StatementDecl parseStatement() throws ParseException
+	private Statement parseStatement() throws ParseException
     {
 		switch (token.getToken()) {
 
 			case LEFTBRACE: {
 				Token tok = token;
 				eat(Tokens.LEFTBRACE);
-				List<StatementDecl> body = new ArrayList<>();
+				List<Statement> body = new ArrayList<>();
 				while (token.getToken() != Tokens.RIGHTBRACE) {
-					StatementDecl stat = parseStatement();
+					Statement stat = parseStatement();
 					body.add(stat);
 				}
 				eat(Tokens.RIGHTBRACE);
@@ -305,8 +279,8 @@ public class Parser
 				eat(Tokens.LEFTPAREN);
 				Expression expr = parseExpression();
 				eat(Tokens.RIGHTPAREN);
-				StatementDecl then = parseStatement();
-				StatementDecl elze = new Skip(then.getToken()); 
+				Statement then = parseStatement();
+				Statement elze = new Skip(then.getToken()); 
 				if (token.getToken() == Tokens.ELSE) {
 					eat(Tokens.ELSE);
 					elze = parseStatement();
@@ -321,25 +295,9 @@ public class Parser
 				eat(Tokens.LEFTPAREN);
 				Expression expr = parseExpression();
 				eat(Tokens.RIGHTPAREN);
-				StatementDecl body = parseStatement();
+				Statement body = parseStatement();
 				While result = new While(tok, expr, body);
 				return result;
-			}
-
-			case FOR: {
-				// Token tok = token;
-				// eat(Tokens.FOR);
-				// eat(Tokens.LEFTPAREN);
-				// Declaration decl = parseDeclaration();
-				// Expression condition = parseExpression();
-				// Expression increment = parseExpression();
-				// eat(Tokens.RIGHTPAREN);
-				// eat(Tokens.LEFTBRACE);
-				// List<Declaration> declList = parseBody();
-				// eat(Tokens.RIGHTBRACE);
-				// ForLoop forLoop = new ForLoop(tok, decl, condition, increment, declList);
-				// return forLoop;
-				return null;
 			}
 
 			case RETURN: {
@@ -360,7 +318,7 @@ public class Parser
 		}
     }
 
-	private StatementDecl parseState(Identifier id) throws ParseException
+	private Statement parseState(Identifier id) throws ParseException
 	{
 		switch (token.getToken()) {
 
