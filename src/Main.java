@@ -59,7 +59,7 @@ public class Main
 
 				if (SemanticErrors.errorList.size() == 0) {
 					String path = getFileDirPath(str);
-					CodeGenerator cg = new CodeGenerator(path);
+					CodeGenerator cg = new CodeGenerator(path, str);
 					cg.visit((Program) tree);
 				}
 			}
