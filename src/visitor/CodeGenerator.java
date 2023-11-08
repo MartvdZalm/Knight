@@ -1,7 +1,7 @@
 package src.visitor;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.PrintWriter;
 
 import src.ast.*;
 import src.ast.Class;
@@ -18,18 +18,20 @@ public class CodeGenerator implements Visitor<String>
 {
 	private SymbolClass currentClass;
 	private SymbolFunction currentFunction;
-	private int slot;
 	private final String PATH;
-
-	// Variables related to ASM
-	private ClassWriter classWriter;
-	private MethodVisitor methodVisitor;
+	private final String FILENAME;
 	
-	private int maxStack;
-	private int maxLocal;
+	private int bytes;
+	private int slot;
+	private int stack;
+	private int localStack;
 
-	public CodeGenerator(String progPath)
+	public CodeGenerator(String progPath, String filename)
 	{
+		File f = new File(filename);
+		String name = f.getName();
+
+		FILENAME = name.substring(0, name.lastIndexOf("."));
 		PATH = progPath;
 	}
 
@@ -66,7 +68,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IntLiteral n)
 	{
-		return String.valueOf(n.getValue());
+		return "DW " + String.valueOf(n.getValue());
 	}
 
 	@Override
@@ -84,16 +86,8 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Times n)
 	{
-		// Load the arguments to the stack with the right local variable index
 		Binding blh = ((IdentifierExpr) n.getLhs()).getB();
 		Binding brh = ((IdentifierExpr) n.getRhs()).getB();
-
-		methodVisitor.visitVarInsn(Opcodes.ILOAD, getLocalVarIndex(blh)); // Load first parameter tot the stack.
-		methodVisitor.visitVarInsn(Opcodes.ILOAD, getLocalVarIndex(brh)); // Load second parameter tot the stack.
-
-		methodVisitor.visitInsn(Opcodes.IMUL); // Multiply the top two values on the stack as an int
-		maxStack++;
-
 		return null;
 	}
 
@@ -184,36 +178,6 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(CallFunctionStat callFunctionStat)
 	{
-		// This is for testing. Will be removed later.
-		if (callFunctionStat.getMethodId().getVarID().equals("print")) {
-			IdentifierExpr expr = (IdentifierExpr) callFunctionStat.getArgExprAt(0);
-			Binding b = expr.getB();
-			String descriptor = expr.type().toString();
-
-			// Get the reference to the standard output stream
-			methodVisitor.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-
-			// Create a new instance of MyClass
-			methodVisitor.visitTypeInsn(Opcodes.NEW, currentClass.getId());
-
-			// Duplicate the reference on the stack
-			methodVisitor.visitInsn(Opcodes.DUP);
-
-			// Invoke the constructor of MyClass
-			methodVisitor.visitMethodInsn(Opcodes.INVOKESPECIAL, currentClass.getId(), "<init>", "()V", false);
-
-			// Get the value of the field 'a'
-			methodVisitor.visitFieldInsn(Opcodes.GETFIELD, currentClass.getId(), expr.getVarID(), descriptor);
-
-			// Invoke the println method with the int argument
-			methodVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(" + descriptor + ")V", false);
-
-
-			// Increment maxStack and maxLocal
-			maxStack = Math.max(maxStack, 2); // 2 stack elements required for println
-			maxLocal = Math.max(maxLocal, getLocalVarIndex(b) + 1); // 1 local variable required for b
-		}
-
 		return null;
 	}
 
@@ -256,9 +220,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Argument argDecl)
 	{
-		Binding b = argDecl.getId().getB();
-		setLocalVarIndex(b);
-		return argDecl.getType().accept(this);
+		return null;
 	}
 
 	@Override
@@ -294,7 +256,14 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VariableInit varDeclInit)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(varDeclInit.getId() + ": " + varDeclInit.getExpr().accept(this) + "\n");
+
+		stack++;
+		bytes += 2;
+
+		return sb.toString();
 	}
 
 	@Override
@@ -306,6 +275,15 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(functionReturn.getId() + ":\n");
+		sb.append("push rbp\n");
+		sb.append("mov rbp, rsp\n");
+		sb.append("sub rbp, 16\n");
+
+
+
 		return null;
 	}
 
@@ -324,21 +302,29 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Program program)
 	{
-		// for (int i = 0; i < program.getDeclListSize(); i++) {
-		// 	program.getDeclAt(i).accept(this);
-		// 	write(currentClass.getId(), classWriter.toByteArray());
-		// }
+		StringBuilder sb = new StringBuilder();
+		sb.append("jmp start \n");
+		for (int i = 0; i < program.getVariableListSize(); i++) {
+			sb.append(program.getVariableDeclAt(i).accept(this));
+		}
+
+		sb.append("start:\n");
+		for (int i = 0; i < program.getFunctionListSize(); i++) {
+			sb.append(program.getFunctionDeclAt(i).accept(this));
+		}
+
+		write(sb.toString());
 
 		return null;
 	}
 
-	private File write(String name, byte[] code)
+	private File write(String code)
 	{
 		try {
-			File f = new File(PATH + name + ".class");
-			FileOutputStream output = new FileOutputStream(f);
-			output.write(code);
-			output.close();
+			File f = new File(PATH + FILENAME + ".asm");
+			PrintWriter writer = new PrintWriter(f, "UTF-8");
+			writer.println(code);
+			writer.close();
 			return f;
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
