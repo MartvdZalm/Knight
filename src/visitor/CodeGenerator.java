@@ -178,7 +178,12 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(CallFunctionStat callFunctionStat)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+	
+		sb.append("mov si, [" + callFunctionStat.getArgExprAt(0) + "]\n");
+		sb.append("call " + callFunctionStat.getMethodId() + "\n");
+
+		return sb.toString();
 	}
 
 	@Override
@@ -277,14 +282,11 @@ public class CodeGenerator implements Visitor<String>
 	{	
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(functionReturn.getId() + ":\n");
-		sb.append("push rbp\n");
-		sb.append("mov rbp, rsp\n");
-		sb.append("sub rbp, 16\n");
+		for (int i = 0; i < functionReturn.getStatementListSize(); i++) {
+			sb.append(functionReturn.getStatementDeclAt(i).accept(this));
+		}
 
-
-
-		return null;
+		return sb.toString();
 	}
 
 	@Override
