@@ -1,5 +1,5 @@
 # Knight
-I will change the language from Java to C++. 
+Under development
 
 ## License
 Knight is released under the [MIT License](https://github.com/MartvdZalm/Knight/blob/master/LICENSE).
