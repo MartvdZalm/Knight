@@ -91,8 +91,11 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Minus n)
-	{
+	public String visit(Minus minus)
+	{	
+		text.append("movq " + minus.getLhs() + ", %rax\n");
+		text.append("subq " + minus.getRhs() + ", %rax\n");
+
 		return null;
 	}
 
