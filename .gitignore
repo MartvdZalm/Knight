@@ -1,5 +1,7 @@
+*
+!*.*
+!*/
+*.o
+*.s
 /bin/
 /lib/
-/.vscode/
-
-*.class

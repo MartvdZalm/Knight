@@ -2,6 +2,7 @@ package src.visitor;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.io.*;
 
 import src.ast.*;
 import src.ast.Class;
@@ -11,8 +12,6 @@ import src.symbol.SymbolFunction;
 import src.symbol.SymbolProgram;
 import src.symbol.SymbolVariable;
 
-
-import org.objectweb.asm.*;
 
 public class CodeGenerator implements Visitor<String>
 {
@@ -26,6 +25,10 @@ public class CodeGenerator implements Visitor<String>
 	private int stack;
 	private int localStack;
 
+	StringBuilder data = new StringBuilder();
+	StringBuilder bss = new StringBuilder();
+	StringBuilder text = new StringBuilder();
+
 	public CodeGenerator(String progPath, String filename)
 	{
 		File f = new File(filename);
@@ -36,8 +39,12 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Assign n)
+	public String visit(Assign assign)
 	{
+		assign.getExpr().accept(this);
+		text.append("movq %rax, " + assign.getId() + "\n");
+		text.append("movq $0, %rax\n");
+
 		return null;
 	}
 
@@ -68,12 +75,18 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IntLiteral n)
 	{
-		return "DW " + String.valueOf(n.getValue());
+		StringBuilder sb = new StringBuilder();
+		sb.append(n.getValue());
+
+		return sb.toString();
 	}
 
 	@Override
-	public String visit(Plus n)
+	public String visit(Plus plus)
 	{
+		text.append("movq " + plus.getLhs() + ", %rax\n");
+		text.append("addq " + plus.getRhs() + ", %rax\n");
+
 		return null;
 	}
 
@@ -179,9 +192,8 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(CallFunctionStat callFunctionStat)
 	{
 		StringBuilder sb = new StringBuilder();
-	
-		sb.append("mov si, [" + callFunctionStat.getArgExprAt(0) + "]\n");
-		sb.append("call " + callFunctionStat.getMethodId() + "\n");
+
+		sb.append("std::cout << " + callFunctionStat.getArgExprAt(0) + ";\n");
 
 		return sb.toString();
 	}
@@ -249,26 +261,32 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(StringLiteral stringLiteral)
 	{
-		return null;
+		return "\"" + stringLiteral.getValue() + "\"";
 	}
 
 	@Override
-	public String visit(Variable vd)
+	public String visit(Variable variable)
 	{
+		bss.append(".lcomm " + variable.getId() + " 32\n");
+
 		return null;
 	}
 
 	@Override
 	public String visit(VariableInit varDeclInit)
 	{
-		StringBuilder sb = new StringBuilder();
+		data.append(varDeclInit.getId() + ":\n");
 
-		sb.append(varDeclInit.getId() + ": " + varDeclInit.getExpr().accept(this) + "\n");
+		Expression expr = varDeclInit.getExpr();
 
-		stack++;
-		bytes += 2;
+		if (expr.type() instanceof IntType) {
+			data.append(".int " + varDeclInit.getExpr().accept(this) + "\n");
+		}
+		else if (expr instanceof Plus) {
+			text.append("movq %rax, " + varDeclInit.getId() + "\n");
+		}
 
-		return sb.toString();
+		return null;
 	}
 
 	@Override
@@ -280,13 +298,15 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
-		StringBuilder sb = new StringBuilder();
-
 		for (int i = 0; i < functionReturn.getStatementListSize(); i++) {
-			sb.append(functionReturn.getStatementDeclAt(i).accept(this));
+			functionReturn.getStatementDeclAt(i).accept(this);
 		}
 
-		return sb.toString();
+		text.append("movq $1, %rax\n");
+		text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rbx\n");
+		text.append("int $0x80\n");
+
+		return null;
 	}
 
 	@Override
@@ -305,16 +325,22 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(Program program)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("jmp start \n");
+
+		data.append(".section .data\n");
+		bss.append(".section .bss\n");
+		text.append(".section .text\n");
+		text.append(".globl _start\n");
+		text.append("_start:\n");
+
 		for (int i = 0; i < program.getVariableListSize(); i++) {
-			sb.append(program.getVariableDeclAt(i).accept(this));
+			program.getVariableDeclAt(i).accept(this);
 		}
 
-		sb.append("start:\n");
 		for (int i = 0; i < program.getFunctionListSize(); i++) {
-			sb.append(program.getFunctionDeclAt(i).accept(this));
+			program.getFunctionDeclAt(i).accept(this);
 		}
 
+		sb.append(data).append(bss).append(text);
 		write(sb.toString());
 
 		return null;
@@ -323,7 +349,7 @@ public class CodeGenerator implements Visitor<String>
 	private File write(String code)
 	{
 		try {
-			File f = new File(PATH + FILENAME + ".asm");
+			File f = new File(PATH + FILENAME + ".s");
 			PrintWriter writer = new PrintWriter(f, "UTF-8");
 			writer.println(code);
 			writer.close();

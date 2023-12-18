@@ -1,32 +1,10 @@
-include test
-
-(int) EXIT_SUCCESS = 0;
-
-class Person
-{
-    (string) name;
-    (int) age;
-
-    fn hello(): string
-    {
-        (string) str1 = "Hello";
-        (string) str2 = world();
-        ret str1 + str2;
-    }
-
-    fn world(): string
-    {
-        ret "World";
-    }
-}
+(int) num1 = 20;
+(int) num2 = 30;
+(int) result;
 
 fn main(): int
 {
-    (int) num = 20;
-    (int) num3;
-    (string) name = "Mart";
+	result = num1 + num2;
 
-    num3 = num + num;
-
-    ret 0;
+	ret 0;
 }
