@@ -49,14 +49,25 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Block n)
+	public String visit(Block block)
 	{
+		for (int i = 0; i < block.getStatListSize(); i++) {
+			block.getStatAt(i).accept(this);
+		}
+
 		return null;
 	}
 
 	@Override
-	public String visit(IfThenElse n)
+	public String visit(IfThenElse ifThenElse)
 	{
+		ifThenElse.getExpr().accept(this);
+		ifThenElse.getThen().accept(this);
+		text.append("jmp end\n");
+		text.append("else:\n");
+		ifThenElse.getElze().accept(this);
+		text.append("end:\n");
+
 		return null;
 	}
 
@@ -100,22 +111,30 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Times n)
+	public String visit(Times times)
 	{
-		Binding blh = ((IdentifierExpr) n.getLhs()).getB();
-		Binding brh = ((IdentifierExpr) n.getRhs()).getB();
+		text.append("movq " + times.getLhs() + ", %rax\n");
+		text.append("imulq " + times.getRhs() + "\n");
+
 		return null;
 	}
 
 	@Override
-	public String visit(Division n)
+	public String visit(Division division)
 	{
+		text.append("movq " + division.getLhs() + ", %rax\n");
+		text.append("idivq " + division.getRhs() + "\n");
+
 		return null;
 	}
 
 	@Override
-	public String visit(Equals n)
+	public String visit(Equals equals)
 	{
+		text.append("movl " + equals.getLhs() + ", %eax\n");
+		text.append("cmpl $" + equals.getRhs().accept(this) + ", %eax\n");
+		text.append("jne else\n");
+
 		return null;
 	}
 
@@ -194,11 +213,7 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(CallFunctionStat callFunctionStat)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("std::cout << " + callFunctionStat.getArgExprAt(0) + ";\n");
-
-		return sb.toString();
+		return null;
 	}
 
 	@Override
