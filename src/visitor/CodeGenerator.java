@@ -113,8 +113,13 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Times times)
 	{
-		text.append("movq " + times.getLhs() + ", %rax\n");
-		text.append("imulq " + times.getRhs() + "\n");
+		if (currentFunction == null) {
+			text.append("movq " + times.getLhs() + ", %rax\n");
+			text.append("imulq " + times.getRhs() + "\n");
+		} else {
+			text.append("movq 24(%rbp), %rax\n");
+			text.append("imulq 16(%rbp), %rax\n");
+		}
 
 		return null;
 	}
@@ -205,8 +210,13 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(CallFunctionExpr cm)
+	public String visit(CallFunctionExpr callFunctionExpr)
 	{
+		for (int i = 0; i < callFunctionExpr.getArgExprListSize(); i++) {
+			text.append("push $" + callFunctionExpr.getArgExprAt(i).accept(this) + "\n");
+		}
+		text.append("call " + callFunctionExpr.getMethodId() + "\n");
+
 		return null;
 	}
 
@@ -316,13 +326,33 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
+		if (functionReturn.getId().getVarID().equals("main")) {
+			text.append("_start:\n");
+		} else {
+
+			currentFunction = (SymbolFunction) functionReturn.getId().getB();
+
+			text.append(functionReturn.getId() + ":\n");
+			text.append("push %rbp\n");
+			text.append("movq %rsp, %rbp\n");
+		}
+
 		for (int i = 0; i < functionReturn.getStatementListSize(); i++) {
 			functionReturn.getStatementDeclAt(i).accept(this);
 		}
 
-		text.append("movq $1, %rax\n");
-		text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rbx\n");
-		text.append("int $0x80\n");
+		if (functionReturn.getId().getVarID().equals("main")) {
+			text.append("movq $1, %rax\n");
+			text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rbx\n");
+			text.append("int $0x80\n");
+		} else {
+			functionReturn.getReturnExpr().accept(this);
+
+			text.append("movq %rbp, %rsp\n");
+			text.append("pop %rbp\n");
+			text.append("ret\n");
+			currentFunction = null;
+		}
 
 		return null;
 	}
@@ -348,7 +378,7 @@ public class CodeGenerator implements Visitor<String>
 		bss.append(".section .bss\n");
 		text.append(".section .text\n");
 		text.append(".globl _start\n");
-		text.append("_start:\n");
+		// text.append("_start:\n");
 
 		for (int i = 0; i < program.getVariableListSize(); i++) {
 			program.getVariableDeclAt(i).accept(this);
