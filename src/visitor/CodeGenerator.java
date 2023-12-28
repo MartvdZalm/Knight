@@ -42,7 +42,16 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(Assign assign)
 	{
 		assign.getExpr().accept(this);
-		text.append("movq %rax, " + assign.getId() + "\n");
+
+		Binding b = assign.getId().getB();
+		int lvIndex = getLocalVarIndex(b);
+
+		if (lvIndex == -1) {
+			text.append("movq %rax, " + assign.getId() + "\n");
+		} else {
+			text.append("movq %rax, -" + (lvIndex * 8) + "(%rbp)\n");
+		}
+
 		text.append("movq $0, %rax\n");
 
 		return null;
@@ -99,8 +108,36 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Plus plus)
 	{
-		text.append("movq " + plus.getLhs() + ", %rax\n");
-		text.append("addq " + plus.getRhs() + ", %rax\n");
+		Expression lhsExpr = plus.getLhs();
+		Expression rhsExpr = plus.getRhs();
+
+		if (lhsExpr instanceof IdentifierExpr) {
+			IdentifierExpr lhs = (IdentifierExpr) lhsExpr;
+			Binding b = lhs.getB();
+			int lvIndex = getLocalVarIndex(b);
+
+			if (lvIndex == -1) {
+				text.append("movq " + plus.getLhs() + ", %rax\n");
+			} else {
+				text.append("movq -" + (lvIndex * 8) + "(%rbp), %rax\n");
+			}
+		} else {
+			text.append("movq $" + plus.getLhs() + ", %rax\n");
+		}
+
+		if (rhsExpr instanceof IdentifierExpr) {
+			IdentifierExpr rhs = (IdentifierExpr) rhsExpr;
+			Binding b = rhs.getB();
+			int lvIndex = getLocalVarIndex(b);
+
+			if (lvIndex == -1) {
+				text.append("addq " + plus.getRhs() + ", %rax\n");
+			} else {
+				text.append("addq -" + (lvIndex * 8) + "(%rbp), %rax\n");
+			}
+		} else {
+			text.append("addq $" + plus.getRhs().accept(this) + ", %rax\n");
+		}
 
 		return null;
 	}
@@ -171,9 +208,20 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(LessThan lessThan)
 	{
-		text.append("movl " + lessThan.getLhs() + ", %eax\n");
+		Expression lhsExpr = lessThan.getLhs();
+
+		if (lhsExpr instanceof IdentifierExpr) {
+			IdentifierExpr lhs = (IdentifierExpr) lhsExpr;
+			Binding b = lhs.getB();
+			int lvIndex = getLocalVarIndex(b);
+
+			text.append("movl -" + (lvIndex * 8) + "(%rbp), %eax\n");
+		} else {
+			text.append("movl " + lessThan.getLhs() + ", %eax\n");
+		}
+
 		text.append("cmpl $" + lessThan.getRhs().accept(this) + ", %eax\n");
-		text.append("jg while\n");
+		text.append("jl while\n");
 
 		return null;
 	}
@@ -336,9 +384,6 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VariableInit varDeclInit)
 	{
-		Binding b = varDeclInit.getId().getB();
-		setLocalVarIndex(b);
-
 		if (currentFunction == null) {
 			data.append(varDeclInit.getId() + ":\n");
 
@@ -350,6 +395,8 @@ public class CodeGenerator implements Visitor<String>
 				text.append("movq %rax, " + varDeclInit.getId() + "\n");
 			}
 		} else {
+			Binding b = varDeclInit.getId().getB();
+			setLocalVarIndex(b);
 
 			int lvIndex = getLocalVarIndex(b);
 			text.append("movq $" + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
@@ -367,8 +414,10 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
-		currentFunction = (SymbolFunction) functionReturn.getId().getB();
+		slot = 0;
 
+		currentFunction = (SymbolFunction) functionReturn.getId().getB();
+		text.append(".globl " + functionReturn.getId() + "\n");
 		text.append(".type " + functionReturn.getId() + ", @function\n");
 		text.append(functionReturn.getId() + ":\n");
 		text.append("pushq %rbp\n");
@@ -423,7 +472,7 @@ public class CodeGenerator implements Visitor<String>
 		data.append(".section .data\n");
 		bss.append(".section .bss\n");
 		text.append(".section .text\n");
-		text.append(".globl main\n");
+		// text.append(".globl main\n");
 
 		for (int i = 0; i < program.getVariableListSize(); i++) {
 			program.getVariableDeclAt(i).accept(this);
