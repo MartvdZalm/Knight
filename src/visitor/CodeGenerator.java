@@ -336,6 +336,9 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VariableInit varDeclInit)
 	{
+		Binding b = varDeclInit.getId().getB();
+		setLocalVarIndex(b);
+
 		if (currentFunction == null) {
 			data.append(varDeclInit.getId() + ":\n");
 
@@ -348,6 +351,8 @@ public class CodeGenerator implements Visitor<String>
 			}
 		} else {
 
+			int lvIndex = getLocalVarIndex(b);
+			text.append("movq $" + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
 		}
 
 		return null;
@@ -362,17 +367,12 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{	
-		if (functionReturn.getId().getVarID().equals("main")) {
-			text.append("_start:\n");
-		} else {
+		currentFunction = (SymbolFunction) functionReturn.getId().getB();
 
-			currentFunction = (SymbolFunction) functionReturn.getId().getB();
-
-			text.append(".type " + functionReturn.getId() + ", @function\n");
-			text.append(functionReturn.getId() + ":\n");
-			text.append("pushq %rbp\n");
-			text.append("movq %rsp, %rbp\n");
-		}
+		text.append(".type " + functionReturn.getId() + ", @function\n");
+		text.append(functionReturn.getId() + ":\n");
+		text.append("pushq %rbp\n");
+		text.append("movq %rsp, %rbp\n");
 
 		for (int i = 0; i < functionReturn.getArgumentListSize(); i++) {
 			functionReturn.getArgumentDeclAt(i).accept(this);
@@ -423,8 +423,7 @@ public class CodeGenerator implements Visitor<String>
 		data.append(".section .data\n");
 		bss.append(".section .bss\n");
 		text.append(".section .text\n");
-		text.append(".globl _start\n");
-		// text.append("_start:\n");
+		text.append(".globl main\n");
 
 		for (int i = 0; i < program.getVariableListSize(); i++) {
 			program.getVariableDeclAt(i).accept(this);
