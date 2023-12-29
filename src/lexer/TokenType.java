@@ -43,6 +43,7 @@ public class TokenType
         Symbol.symbol("if", Tokens.IF);
         Symbol.symbol("else", Tokens.ELSE);
         Symbol.symbol("while", Tokens.WHILE);
+        Symbol.symbol("for", Tokens.FOR);
         
         Symbol.symbol("=", Tokens.ASSIGN);
         Symbol.symbol("==", Tokens.EQUALS);
