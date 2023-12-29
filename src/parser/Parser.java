@@ -300,6 +300,19 @@ public class Parser
 				return result;
 			}
 
+			case FOR: {
+				Token tok = token;
+				eat(Tokens.FOR);
+				eat(Tokens.LEFTPAREN);
+				Variable initialization = parseVariable();
+				Expression condition = parseExpression();
+				Statement increment = parseStatement();
+				eat(Tokens.RIGHTPAREN);
+				Statement body = parseStatement();
+				ForLoop forLoop = new ForLoop(tok, initialization, condition, increment, body);
+				return forLoop;
+			}
+
 			case RETURN: {
 				Token tok = token;
 				eat(Tokens.RETURN);
@@ -490,8 +503,8 @@ public class Parser
 				stOperand.push(expr);	
 			} else {
 				stOperand.push(id);
-				parseTerm1();
 			}
+			parseTerm1();
 		}
 		break;
 
