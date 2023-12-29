@@ -1,10 +1,19 @@
-(int) num1 = 20;
-(int) num2 = 30;
-(int) result;
+fn fibonacci(n: int): int {
+    if (n <= 1) {
+        ret n;
+    }
+    else {
+        ret fibonacci(n - 1) + fibonacci(n - 2);
+    }
+}
 
-fn main(): int
-{
-	result = num1 + num2;
+fn main(): int {
 
-	ret 0;
+    for ((int) i = 0; i < 10; i = i + 1) {
+        (int) fibResult = fibonacci(i);
+
+        print("Fibonacci of ", i, " is: ", fibResult);
+    }
+
+    ret 0;
 }
