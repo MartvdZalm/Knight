@@ -555,4 +555,10 @@ public class CodeGenerator implements Visitor<String>
 	{
 		return null;
 	}
+
+	@Override
+	public String visit(ForLoop forLoop)
+	{
+		return null;
+	}
 }

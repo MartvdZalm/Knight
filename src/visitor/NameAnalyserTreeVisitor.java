@@ -510,4 +510,10 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	{
 		return null;
 	}
+
+	@Override
+	public Type visit(ForLoop forLoop)
+	{
+		return null;
+	}
 }

@@ -456,4 +456,10 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	{
 		return null;
 	}
+
+	@Override
+	public Type visit(ForLoop forLoop)
+	{
+		return null;
+	}
 }
