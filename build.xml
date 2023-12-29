@@ -1,5 +1,5 @@
 <project name="Knight" default="compile">
     <target name="compile">
-        <javac srcdir="src" destdir="bin" classpath="lib/asm.jar"></javac>
+        <javac srcdir="src" destdir="bin"></javac>
     </target>
 </project>
