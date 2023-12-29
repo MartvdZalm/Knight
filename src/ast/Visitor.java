@@ -32,6 +32,8 @@ public interface Visitor<R>
 
     public R visit(While while1);
 
+    public R visit(ForLoop forLoop);
+
     public R visit(Assign assign);
 
     public R visit(ArrayAssign arrayAssign);
