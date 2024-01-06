@@ -1,6 +1,7 @@
 package src.lexer;
 
 import java.io.IOException;
+import java.io.*;
 
 public class Lexer 
 {
@@ -12,7 +13,8 @@ public class Lexer
     {
         new TokenType();
         try {
-            source = new SourceReader(sourceFile);
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(sourceFile));
+            source = new SourceReader(bufferedReader);
             charachter = source.read();
         } catch (IOException e) {
             e.printStackTrace();

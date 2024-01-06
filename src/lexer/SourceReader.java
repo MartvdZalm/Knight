@@ -10,9 +10,9 @@ public class SourceReader
     private boolean isPriorEndLine = true; // if true then last character read was newline
     private String nextLine; // so read in the next line
 
-    public SourceReader(String sourceFile) throws IOException 
+    public SourceReader(BufferedReader bufferedReader) throws IOException 
     {
-        source = new BufferedReader(new FileReader(sourceFile));
+        source = bufferedReader;
     }
 
     public char read() throws IOException
