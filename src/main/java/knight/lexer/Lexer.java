@@ -9,11 +9,10 @@ public class Lexer
     private char charachter; 
     private SourceReader source;
 
-    public Lexer(String sourceFile)  
+    public Lexer(BufferedReader bufferedReader) 
     {
         new TokenType();
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(sourceFile));
             source = new SourceReader(bufferedReader);
             charachter = source.read();
         } catch (IOException e) {

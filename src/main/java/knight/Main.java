@@ -1,6 +1,6 @@
 package knight;
 
-import java.io.File;
+import java.io.*;
 
 import knight.ast.Program;
 import knight.ast.Tree;
@@ -43,7 +43,8 @@ public class Main
 				return;
 			}
 
-			Parser p = new Parser(str);
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(str));
+			Parser p = new Parser(bufferedReader);
 			Tree tree = p.parse();
 
 			if (tree != null) {

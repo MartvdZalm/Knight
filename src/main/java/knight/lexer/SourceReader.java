@@ -5,12 +5,12 @@ import java.io.*;
 public class SourceReader
 {
     private BufferedReader source;
-    private int lineNumber = 0; // line number of source program
-    private int positionLastChar; // position of last character processed
-    private boolean isPriorEndLine = true; // if true then last character read was newline
-    private String nextLine; // so read in the next line
+    private int lineNumber = 0;
+    private int positionLastChar;
+    private boolean isPriorEndLine = true;
+    private String nextLine;
 
-    public SourceReader(BufferedReader bufferedReader) throws IOException 
+    public SourceReader(BufferedReader bufferedReader) 
     {
         source = bufferedReader;
     }

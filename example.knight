@@ -1,5 +1,5 @@
-(int) num1 = 20;
-(int) result;
+int num1 = 20;
+int result;
 
 fn main(): int
 {

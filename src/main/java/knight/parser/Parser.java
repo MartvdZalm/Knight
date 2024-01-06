@@ -1,5 +1,6 @@
 package knight.parser;
 
+import java.io.*;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -20,9 +21,9 @@ public class Parser
     private Deque<Token> stOperator = new ArrayDeque<>();
     private Deque<Expression> stOperand = new ArrayDeque<>();
 
-    public Parser(String sourceFile)
+    public Parser(BufferedReader bufferedReader)
     {
-        lexer = new Lexer(sourceFile);
+        lexer = new Lexer(bufferedReader);
         stOperator.push(SENTINEL);
     }
 
@@ -62,7 +63,8 @@ public class Parser
 						functionList.add(parseFunction());
 					} break;
 
-					case LEFTPAREN: {
+					case INTEGER:
+					case STRING: {
 						variableList.add(parseVariable());
 					} break;
 					
@@ -140,7 +142,7 @@ public class Parser
 		eat(Tokens.LEFTBRACE);
 
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
-			if (token.getToken() == Tokens.LEFTPAREN) {
+			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
 				variables.add(parseVariable());
 			} else {
 				statements.add(parseStatement());
@@ -159,9 +161,7 @@ public class Parser
 
 	private Variable parseVariable() throws ParseException
 	{
-		eat(Tokens.LEFTPAREN);
 		Type type = parseType();
-		eat(Tokens.RIGHTPAREN);
 		Identifier id = parseIdentifier();
 
 		Variable variable = null;
