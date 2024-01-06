@@ -1,10 +1,9 @@
 (int) num1 = 20;
-(int) num2 = 30;
 (int) result;
 
 fn main(): int
 {
-    result = num1 + num2;
+    result = num1 + num1;
 
     ret 0;
 }
