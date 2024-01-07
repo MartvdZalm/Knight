@@ -1,0 +1,12 @@
+include print
+include math
+
+int num1 = 20;
+int result;
+
+fn main(): int
+{
+    result = num1 + num1;
+
+    ret 0;
+}
