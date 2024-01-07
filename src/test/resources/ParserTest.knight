@@ -1,0 +1,21 @@
+include print
+include math
+
+int num1 = 20;
+int result;
+
+class person
+{
+    
+}
+
+fn calculate(): int
+{
+    
+}
+
+fn main(): int
+{
+
+
+}
