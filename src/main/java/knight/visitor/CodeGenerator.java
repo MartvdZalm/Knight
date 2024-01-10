@@ -22,8 +22,11 @@ public class CodeGenerator implements Visitor<String>
 	
 	private int bytes;
 	private int slot;
+
 	private int stack;
 	private int localStack;
+
+	private int counter = 0; // This will get removed later on.
 
 	StringBuilder data = new StringBuilder();
 	StringBuilder bss = new StringBuilder();
@@ -300,6 +303,19 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(CallFunctionStat callFunctionStat)
 	{
+		for (int i = callFunctionStat.getArgExprListSize() - 1; i >= 0; i--) {
+
+			Expression expr = callFunctionStat.getArgExprAt(i);
+
+			if (expr instanceof StringLiteral) {
+				data.append(".LC" + counter + ":\n");
+				data.append(".string " + expr.accept(this) + "\n");
+				text.append("push .LC" + counter + "(%rip)\n");
+				counter++;
+			}
+		}
+		text.append("call " + callFunctionStat.getMethodId() + "\n");
+
 		return null;
 	}
 
@@ -351,7 +367,6 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Identifier id)
 	{
-
 		return null;
 	}
 
@@ -437,7 +452,7 @@ public class CodeGenerator implements Visitor<String>
 
 		if (functionReturn.getId().getVarID().equals("main")) {
 			text.append("movq $60, %rax\n");
-			text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rbx\n");
+			text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
 			text.append("syscall\n");
 		} else {
 			functionReturn.getReturnExpr().accept(this);
@@ -472,7 +487,6 @@ public class CodeGenerator implements Visitor<String>
 		data.append(".section .data\n");
 		bss.append(".section .bss\n");
 		text.append(".section .text\n");
-		// text.append(".globl main\n");
 
 		for (int i = 0; i < program.getVariableListSize(); i++) {
 			program.getVariableDeclAt(i).accept(this);
@@ -483,6 +497,42 @@ public class CodeGenerator implements Visitor<String>
 		}
 
 		sb.append(data).append(bss).append(text);
+
+		sb.append(".globl length\n");
+		sb.append(".type length, @function\n");
+		sb.append("length:\n");
+		sb.append("pushq %rbp\n");
+		sb.append("pushq %rax\n");
+		sb.append("movq %rsp, %rbp\n");
+		sb.append("xor %rcx, %rcx\n");
+		sb.append("movq 16(%rbp), %rax\n");
+		sb.append("loop:\n");
+		sb.append("movb (%rax), %dl\n");
+		sb.append("test %dl, %dl\n");
+		sb.append("jz end_loop\n");
+		sb.append("inc %rcx\n");
+		sb.append("inc %rax\n");
+		sb.append("jmp loop\n");
+		sb.append("end_loop:\n");
+		sb.append("popq %rax\n");
+		sb.append("popq %rbp\n");
+		sb.append("ret\n");
+
+		sb.append(".globl print\n");
+		sb.append(".type print, @function\n");
+		sb.append("print:\n");
+		sb.append("pushq %rbp\n");
+		sb.append("movq %rsp, %rbp\n");
+		sb.append("movq $1, %rax\n");
+		sb.append("pushq 16(%rbp)\n");
+		sb.append("call length\n");
+		sb.append("movq 16(%rbp), %rsi\n");
+		sb.append("movq %rcx, %rdx\n");
+		sb.append("syscall\n");
+		sb.append("movq %rbp, %rsp\n");
+		sb.append("pop %rbp\n");
+		sb.append("ret\n");
+
 		write(sb.toString());
 
 		return null;
