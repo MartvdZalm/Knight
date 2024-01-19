@@ -13,37 +13,29 @@ import knight.visitor.CodeGenerator;
 import knight.visitor.NameAnalyserTreeVisitor;
 import knight.visitor.TypeAnalyser;
 
-/**
- * This is the main class/file of the whole compilers source code that has the main method.
- */
 public class Main
 {
-	/**
-	 * The entry point of the compiler.
-	 * @param args Command-line arguments. Expects a single argument: the filename of the Knight source code.
-	 */
-	public static void main(String[] args) {
-		if (args.length != 1) {
+	public static void main(String[] args)
+	{
+		if (args.length < 1) {
 			System.err.println("Usage: java Main <filename>.knight");
 			System.exit(1);
 		}
-	
+
 		Main main = new Main();
-		main.codeGen(args[0]);
+		main.codeGen(args);
 	}
 
-	/**
-	 * Generates code based on the provided input string.
-	 * @param str The input string containing the file name.
-	 */
-	public void codeGen(String str)
+	public void codeGen(String[] args)
 	{
+		String filename = args[0];
+
 		try {
-			if (!isFileValid(str)) {
+			if (!isFileValid(filename)) {
 				return;
 			}
 
-			BufferedReader bufferedReader = new BufferedReader(new FileReader(str));
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
 			Parser p = new Parser(bufferedReader);
 			Tree tree = p.parse();
 
@@ -60,9 +52,13 @@ public class Main
 				ta.visit((Program) tree);
 
 				if (SemanticErrors.errorList.size() == 0) {
-					String path = getFileDirPath(str);
-					CodeGenerator cg = new CodeGenerator(path, str);
+					String path = getFileDirPath(filename);
+					CodeGenerator cg = new CodeGenerator(path, filename);
 					cg.visit((Program) tree);
+
+					if (!containsFlag(args, "-s")) {
+						compileAssemblyFile(path, filename);
+	                }
 				}
 			}
 		} catch (Exception e) {
@@ -78,11 +74,43 @@ public class Main
 		}
 	}
 
-	/**
-	 * Checks whether a file is valid based on specific criteria.
-	 * @param filename The name of the file to be checked.
-	 * @return true if the file is valid, false otherwise.
-	 */
+	private boolean containsFlag(String[] args, String flag)
+	{
+	    for (String arg : args) {
+	        if (arg.equals(flag)) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+
+	private void compileAssemblyFile(String path, String fileName)
+	{
+		String filename = removeFileExtension(fileName);
+
+	    try {
+	        ProcessBuilder assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename + ".o", path + filename + ".s");
+	        Process assemblerProcess = assemblerProcessBuilder.start();
+	        int assemblerExitCode = assemblerProcess.waitFor();
+
+	        if (assemblerExitCode == 0) {
+	            ProcessBuilder linkerProcessBuilder = new ProcessBuilder("ld", "-o", path + filename, path + filename + ".o", "-e", "main");
+	            Process linkerProcess = linkerProcessBuilder.start();
+	            int linkerExitCode = linkerProcess.waitFor();
+	        }
+
+        	ProcessBuilder removeAssemblyFileBuilder = new ProcessBuilder("rm", path + filename + ".s");
+            removeAssemblyFileBuilder.start();
+
+            ProcessBuilder removeObjectFileBuilder = new ProcessBuilder("rm", path + filename + ".o");
+            removeObjectFileBuilder.start();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        System.exit(1);
+	    }
+	}
+
     private boolean isFileValid(String filename)
 	{
 		File f = new File(filename);
@@ -101,11 +129,6 @@ public class Main
 		return true;
 	}
 
-	/**
-	 * Retrieves the file extension from the given File object.
-	 * @param file
-	 * @return The file extension as a String.
-	 */
     private String getFileExtension(File file)
 	{
 		String name = file.getName();
@@ -116,11 +139,17 @@ public class Main
 		}
 	}
 
-	/**
-	 * Retrieves the directory path from the given filename.
-	 * @param filename The name of the file from which to extract the directory path.
-	 * @return The directory path as a String, including the file separator at the end.
-	 */
+	private String removeFileExtension(String fileName)
+	{
+        int lastIndex = fileName.lastIndexOf(".");
+
+        if (lastIndex != -1) {
+            return fileName.substring(0, lastIndex);
+        }
+
+        return fileName;
+    }
+
 	private String getFileDirPath(String filename)
 	{
 		try {
