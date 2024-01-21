@@ -164,25 +164,25 @@ public class TypeAnalyser implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Times n)
-	{
-		Type lhs = n.getLhs().accept(this);
-		Type rhs = n.getRhs().accept(this);
+	public Type visit(Times times)
+	{	
+		Type lhs = times.getLhs().accept(this);
+		Type rhs = times.getRhs().accept(this);
 
 		if (lhs == null || rhs == null) { 
-			Token sym = n.getToken();
+			Token sym = times.getToken();
 			addError(sym.getRow(), sym.getCol(), "Improper Type used with * operator");
-			return new IntType(n.getToken());
+			return new IntType(times.getToken());
 		}
 
 		if (!(lhs instanceof IntType) || !(rhs instanceof IntType)) {
-			Token sym = n.getLhs().getToken();
+			Token sym = times.getLhs().getToken();
 			addError(sym.getRow(), sym.getCol(), "Operator * cannot be applied to " + lhs + ", " + rhs);
 		}
 
-		Type t = new IntType(n.getToken());
-		n.setType(t);
-		return t;
+		Type type = new IntType(times.getToken());
+		times.setType(type);
+		return type;
 	}
 
 	@Override
