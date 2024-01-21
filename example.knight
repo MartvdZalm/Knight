@@ -1,11 +1,11 @@
-fn calculate(int a, int b, int c, int d, int e, int f): int
+fn calculate(int a, int b, int c, int d, int e): int
 {
-    ret a * b * c * d * e * f;
+    ret a * b * c + d * e;
 }
 
 fn main(): int
 {
-    calculate(5, 10, 15, 20, 25, 30);
+    calculate(5, 10, 15, 20, 25);
 
     ret 0;
 }
