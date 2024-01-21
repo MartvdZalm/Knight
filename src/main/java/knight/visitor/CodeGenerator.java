@@ -100,10 +100,10 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(IntLiteral n)
+	public String visit(IntLiteral intLiteral)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(n.getValue());
+		sb.append(intLiteral.getValue());
 
 		return sb.toString();
 	}
@@ -111,38 +111,60 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Plus plus)
 	{
-		Expression lhsExpr = plus.getLhs();
-		Expression rhsExpr = plus.getRhs();
+		// Expression lhsExpr = plus.getLhs();
+		// Expression rhsExpr = plus.getRhs();
 
-		if (lhsExpr instanceof IdentifierExpr) {
-			IdentifierExpr lhs = (IdentifierExpr) lhsExpr;
-			Binding b = lhs.getB();
-			int lvIndex = getLocalVarIndex(b);
+		// if (lhsExpr instanceof IdentifierExpr) {
+		// 	IdentifierExpr lhs = (IdentifierExpr) lhsExpr;
+		// 	Binding b = lhs.getB();
+		// 	int lvIndex = getLocalVarIndex(b);
 
-			if (lvIndex == -1) {
-				text.append("movq " + plus.getLhs() + ", %rax\n");
-			} else {
-				text.append("movq -" + (lvIndex * 8) + "(%rbp), %rax\n");
-			}
+		// 	if (lvIndex == -1) {
+		// 		text.append("movq " + plus.getLhs() + ", %rax\n");
+		// 	} else {
+		// 		text.append("movq -" + (lvIndex * 8) + "(%rbp), %rax\n");
+		// 	}
+		// } else {
+		// 	text.append("movq $" + plus.getLhs().accept(this) + ", %rax\n");
+		// }
+
+		// if (rhsExpr instanceof IdentifierExpr) {
+		// 	IdentifierExpr rhs = (IdentifierExpr) rhsExpr;
+		// 	Binding b = rhs.getB();
+		// 	int lvIndex = getLocalVarIndex(b);
+
+		// 	if (lvIndex == -1) {
+		// 		text.append("addq " + plus.getRhs() + ", %rax\n");
+		// 	} else {
+		// 		text.append("addq -" + (lvIndex * 8) + "(%rbp), %rax\n");
+		// 	}
+		// } else {
+		// 	text.append("addq $" + plus.getRhs().accept(this) + ", %rax\n");
+		// }
+
+		// return null;
+
+		StringBuilder sb = new StringBuilder();
+
+		if (plus.getLhs() instanceof Plus) {
+			plus.getLhs().accept(this);
+		} else if (plus.getLhs() instanceof Times) {
+			plus.getLhs().accept(this);
+			text.append("movq %rax, %rdx" + "\n");
 		} else {
-			text.append("movq $" + plus.getLhs().accept(this) + ", %rax\n");
+			text.append("movq " + plus.getLhs().accept(this) + ", %rax" + "\n");
 		}
 
-		if (rhsExpr instanceof IdentifierExpr) {
-			IdentifierExpr rhs = (IdentifierExpr) rhsExpr;
-			Binding b = rhs.getB();
-			int lvIndex = getLocalVarIndex(b);
-
-			if (lvIndex == -1) {
-				text.append("addq " + plus.getRhs() + ", %rax\n");
-			} else {
-				text.append("addq -" + (lvIndex * 8) + "(%rbp), %rax\n");
-			}
+		if (plus.getRhs() instanceof Plus) {
+			plus.getRhs().accept(this);
+		} else if (plus.getRhs() instanceof Times) {
+			plus.getRhs().accept(this);
+			text.append("addq %rdx, %rax" + "\n");
 		} else {
-			text.append("addq $" + plus.getRhs().accept(this) + ", %rax\n");
+			text.append("movq " + plus.getRhs().accept(this) + ", %rax" + "\n");
 		}
 
-		return null;
+		return sb.toString();
 	}
 
 	@Override
@@ -157,36 +179,19 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Times times)
 	{
-		if (currentFunction == null) {
-			text.append("movq " + times.getLhs() + ", %rax\n");
-			text.append("imulq " + times.getRhs() + "\n");
+		StringBuilder sb = new StringBuilder();
+
+		if (times.getLhs() instanceof Times) {
+			times.getLhs().accept(this);
+		} else if (times.getLhs() instanceof Plus) {
+			text.append("movq " + times.getLhs().accept(this) + ", %rax" + "\n");
 		} else {
-
-			Expression lhsExpr = times.getLhs();
-			Expression rhsExpr = times.getRhs();
-
-			if (lhsExpr instanceof IdentifierExpr) {
-				IdentifierExpr lhs = (IdentifierExpr) lhsExpr;
-				Binding b = lhs.getB();
-				int lvIndex = getLocalVarIndex(b);
-
-				text.append("movq " + (8 + (lvIndex * 8)) + "(%rbp), %rax\n");
-			} else {
-				text.append("movq 16(%rbp), %rax\n");
-			}
-
-			if (rhsExpr instanceof IdentifierExpr) {
-				IdentifierExpr rhs = (IdentifierExpr) rhsExpr;
-				Binding b = rhs.getB();
-				int lvIndex = getLocalVarIndex(b);
-
-				text.append("imulq " + (8 + (lvIndex * 8)) + "(%rbp), %rax\n");
-			} else {
-				text.append("imulq 24(%rbp), %rax\n");
-			}
+			text.append("movq " + times.getLhs().accept(this) + ", %rax" + "\n");
 		}
+		
+		text.append("imulq " + times.getRhs().accept(this) + ", %rax" + "\n");
 
-		return null;
+		return sb.toString();
 	}
 
 	@Override
@@ -274,7 +279,14 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(IdentifierExpr id)
 	{
-		return id.getVarID();
+		StringBuilder sb = new StringBuilder();
+
+		Binding b = id.getB();
+		int lvIndex = getLocalVarIndex(b);
+
+		sb.append("-" + lvIndex * 8 + "(%rbp)");
+
+		return sb.toString();
 	}
 
 	@Override
@@ -537,7 +549,7 @@ public class CodeGenerator implements Visitor<String>
 	        text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
 	        text.append("syscall\n");
 	    } else {
-	        functionReturn.getReturnExpr().accept(this);
+	        text.append(functionReturn.getReturnExpr().accept(this));
 
 	        text.append("movq %rbp, %rsp\n");
 	        text.append("pop %rbp\n");
