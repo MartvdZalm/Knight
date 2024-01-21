@@ -1,9 +1,11 @@
-int num1 = 20;
-int result;
+fn calculate(int a, int b, int c, int d, int e, int f): int
+{
+    ret a * b * c * d * e * f;
+}
 
 fn main(): int
 {
-    result = num1 + num1;
+    calculate(5, 10, 15, 20, 25, 30);
 
     ret 0;
 }
