@@ -246,12 +246,11 @@ public class Parser
 	private Argument parseArgument() throws ParseException
 	{
 		Identifier argumentId = null;
+		Type argumentType = parseType();
 		if (token.getToken() == Tokens.IDENTIFIER) {
 			argumentId = new Identifier(token, token.getSymbol());
 		}
 		eat(Tokens.IDENTIFIER);
-		eat(Tokens.COLON);
-		Type argumentType = parseType();
 
 		return new Argument(argumentId.getToken(), argumentType, argumentId);
 	}
