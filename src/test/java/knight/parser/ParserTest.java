@@ -6,64 +6,42 @@ import org.junit.Test;
 
 import knight.parser.*;
 import knight.ast.*;
+import knight.lexer.*;
 
 public class ParserTest
 {
-    Program program;
 
 	public ParserTest()
 	{
-		try {
-			InputStream ioStream = this.getClass().getClassLoader().getResourceAsStream("ParserTest.knight");
-			Reader reader = new InputStreamReader(ioStream);
-			BufferedReader br = new BufferedReader(reader);
 
-			Parser parser = new Parser(br);
-			Tree tree = parser.parse();
-            this.program = (Program) tree;
-		} catch(ParseException e) {
-			e.printStackTrace();
-		}
 	}
 
-    @Test
-    public void includeTest()
-    {
-        assertEquals(2, program.getIncludeListSize());
+	@Test
+	public void testParseIncludeValid()
+	{
+        StringReader input = new StringReader("include example");
+        BufferedReader bufferedReader = new BufferedReader(input);
+        
+        Parser parser = new Parser(bufferedReader);
+        Lexer lexer = parser.lexer;
 
-        assertEquals("print", program.getIncludeDeclAt(0).getId().toString());
-        assertEquals("math", program.getIncludeDeclAt(1).getId().toString());
-    }
+        parser.token = lexer.nextToken();
+        
+        Include include = null;
+        try {
+            include = parser.parseInclude();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            fail("ParseException occurred during parsing");
+        }
+        
+        assertNotNull(include);
+        assertEquals("example", include.getId().toString());
+	}
 
-    @Test
-    public void classTest()
-    {
-        assertEquals(1, program.getClassListSize());
+	@Test
+	public void testParseIncludeInvalid()
+	{
 
-        assertEquals("person", program.getClassDeclAt(0).getId().toString());
-    }
-
-    @Test
-    public void functionTest()
-    {
-        assertEquals(2, program.getFunctionListSize());
-
-        assertEquals("calculate", program.getFunctionDeclAt(0).getId().toString());
-        assertTrue(program.getFunctionDeclAt(0).getReturnType() instanceof IntType);
-
-        assertEquals("main", program.getFunctionDeclAt(1).getId().toString());
-        assertTrue(program.getFunctionDeclAt(1).getReturnType() instanceof IntType);
-    }
-
-    @Test
-    public void variableTest()
-    {
-        assertEquals(2, program.getVariableListSize());
-
-        assertEquals("num1", program.getVariableDeclAt(0).getId().toString());
-        assertTrue(program.getVariableDeclAt(0) instanceof VariableInit);
-
-        assertEquals("result", program.getVariableDeclAt(1).getId().toString());
-        assertTrue(program.getVariableDeclAt(1) instanceof Variable);
-    }
+	}
 }

@@ -22,7 +22,7 @@ public class LexerTest
 	}
 
     @Test
-    public void tokenizationTest()
+    public void testTokenization()
     {
     	assertToken(Tokens.LEFTPAREN, "(");
 		assertToken(Tokens.RIGHTPAREN, ")");

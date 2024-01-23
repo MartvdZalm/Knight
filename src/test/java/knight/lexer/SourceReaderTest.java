@@ -9,7 +9,7 @@ import knight.lexer.SourceReader;
 public class SourceReaderTest
 {
 	@Test
-	public void SourceTest()
+	public void testSourceReader()
 	{   
 		try {
 			InputStream ioStream = this.getClass().getClassLoader().getResourceAsStream("SourceReaderTest.txt");
