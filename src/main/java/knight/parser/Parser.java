@@ -15,8 +15,8 @@ import knight.lexer.Tokens;
 
 public class Parser
 {
-    private Lexer lexer;
-    private Token token;
+    public Lexer lexer;
+    public Token token;
     private static final Token SENTINEL = new Token(Symbol.symbol("SENTINEL", Tokens.SENTINEL), 0, 0);
     private Deque<Token> stOperator = new ArrayDeque<>();
     private Deque<Expression> stOperand = new ArrayDeque<>();
@@ -83,7 +83,7 @@ public class Parser
         return program;
     }
 
-	private Include parseInclude() throws ParseException
+	public Include parseInclude() throws ParseException
 	{
 		eat(Tokens.INCLUDE);
 		return new Include(token, parseIdentifier());
