@@ -10,12 +10,6 @@ import knight.lexer.*;
 
 public class ParserTest
 {
-
-	public ParserTest()
-	{
-
-	}
-
 	@Test
 	public void testParseIncludeValid()
 	{
@@ -32,7 +26,6 @@ public class ParserTest
             include = parser.parseInclude();
         } catch (ParseException e) {
             e.printStackTrace();
-            fail("ParseException occurred during parsing");
         }
         
         assertNotNull(include);
@@ -40,8 +33,18 @@ public class ParserTest
 	}
 
 	@Test
-	public void testParseIncludeInvalid()
+	public void testParseIncludeInvalid() throws ParseException
 	{
+		StringReader input = new StringReader("include");
+		BufferedReader bufferedReader = new BufferedReader(input);
 
+		Parser parser = new Parser(bufferedReader);
+		Lexer lexer = parser.lexer;
+
+		parser.token = lexer.nextToken();
+
+		Exception exception = assertThrows(ParseException.class, () ->
+			parser.parseInclude());
+        assertEquals("0:0 Token is null, cannot perform operation.", exception.getMessage());
 	}
 }
