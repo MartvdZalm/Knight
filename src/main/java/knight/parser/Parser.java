@@ -109,7 +109,7 @@ public class Parser
 		return new Interface(token, id);
 	}
 
-	private Class parseClass() throws ParseException
+	public Class parseClass() throws ParseException
 	{
 		List<Function> functions = new ArrayList<>();
 		List<Variable> variables = new ArrayList<>();
@@ -380,6 +380,8 @@ public class Parser
 
 	private Identifier parseIdentifier() throws ParseException
 	{
+		checkNotNull(token);
+
 		Identifier id = new Identifier(token, token.getSymbol());
 		eat(Tokens.IDENTIFIER);
 		return id;
@@ -938,6 +940,13 @@ public class Parser
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
+	}
+
+	private void checkNotNull(Token token) throws ParseException
+	{
+	    if (token == null) {
+	        throw new ParseException(0, 0, "Token is null, cannot perform operation.");
+	    }
 	}
 
 	private void advance()
