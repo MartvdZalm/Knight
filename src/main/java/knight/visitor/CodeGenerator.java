@@ -111,58 +111,10 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Plus plus)
 	{
-		// Expression lhsExpr = plus.getLhs();
-		// Expression rhsExpr = plus.getRhs();
-
-		// if (lhsExpr instanceof IdentifierExpr) {
-		// 	IdentifierExpr lhs = (IdentifierExpr) lhsExpr;
-		// 	Binding b = lhs.getB();
-		// 	int lvIndex = getLocalVarIndex(b);
-
-		// 	if (lvIndex == -1) {
-		// 		text.append("movq " + plus.getLhs() + ", %rax\n");
-		// 	} else {
-		// 		text.append("movq -" + (lvIndex * 8) + "(%rbp), %rax\n");
-		// 	}
-		// } else {
-		// 	text.append("movq $" + plus.getLhs().accept(this) + ", %rax\n");
-		// }
-
-		// if (rhsExpr instanceof IdentifierExpr) {
-		// 	IdentifierExpr rhs = (IdentifierExpr) rhsExpr;
-		// 	Binding b = rhs.getB();
-		// 	int lvIndex = getLocalVarIndex(b);
-
-		// 	if (lvIndex == -1) {
-		// 		text.append("addq " + plus.getRhs() + ", %rax\n");
-		// 	} else {
-		// 		text.append("addq -" + (lvIndex * 8) + "(%rbp), %rax\n");
-		// 	}
-		// } else {
-		// 	text.append("addq $" + plus.getRhs().accept(this) + ", %rax\n");
-		// }
-
-		// return null;
-
 		StringBuilder sb = new StringBuilder();
 
-		if (plus.getLhs() instanceof Plus) {
-			plus.getLhs().accept(this);
-		} else if (plus.getLhs() instanceof Times) {
-			plus.getLhs().accept(this);
-			text.append("movq %rax, %rdx" + "\n");
-		} else {
-			text.append("movq " + plus.getLhs().accept(this) + ", %rax" + "\n");
-		}
-
-		if (plus.getRhs() instanceof Plus) {
-			plus.getRhs().accept(this);
-		} else if (plus.getRhs() instanceof Times) {
-			plus.getRhs().accept(this);
-			text.append("addq %rdx, %rax" + "\n");
-		} else {
-			text.append("movq " + plus.getRhs().accept(this) + ", %rax" + "\n");
-		}
+		text.append("movq " + plus.getLhs().accept(this) + ", %rax" + "\n");
+		text.append("addq " + plus.getRhs().accept(this) + ", %rax" + "\n");
 
 		return sb.toString();
 	}
@@ -170,10 +122,12 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Minus minus)
 	{	
-		text.append("movq " + minus.getLhs() + ", %rax\n");
-		text.append("subq " + minus.getRhs() + ", %rax\n");
+		StringBuilder sb = new StringBuilder();
 
-		return null;
+		text.append("movq " + minus.getLhs().accept(this) + ", %rax" + "\n");
+		text.append("subq " + minus.getRhs().accept(this) + ", %rax" + "\n");
+
+		return sb.toString();
 	}
 
 	@Override
@@ -181,14 +135,7 @@ public class CodeGenerator implements Visitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		if (times.getLhs() instanceof Times) {
-			times.getLhs().accept(this);
-		} else if (times.getLhs() instanceof Plus) {
-			text.append("movq " + times.getLhs().accept(this) + ", %rax" + "\n");
-		} else {
-			text.append("movq " + times.getLhs().accept(this) + ", %rax" + "\n");
-		}
-		
+		text.append("movq " + times.getLhs().accept(this) + ", %rax" + "\n");
 		text.append("imulq " + times.getRhs().accept(this) + ", %rax" + "\n");
 
 		return sb.toString();
@@ -197,10 +144,12 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Division division)
 	{
-		text.append("movq " + division.getLhs() + ", %rax\n");
-		text.append("idivq " + division.getRhs() + "\n");
+		StringBuilder sb = new StringBuilder();
 
-		return null;
+		text.append("movq " + division.getLhs().accept(this) + ", %rax\n");
+		text.append("idivq " + division.getRhs().accept(this) + "\n");
+
+		return sb.toString();
 	}
 
 	@Override
@@ -304,17 +253,32 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(CallFunctionExpr callFunctionExpr)
 	{
-		for (int i = callFunctionExpr.getArgExprListSize() - 1; i >= 0; i--) {
-			text.append("push $" + callFunctionExpr.getArgExprAt(i).accept(this) + "\n");
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = callFunctionExpr.getArgExprListSize() - 1; i >= 6; i--) {
+			String arg = "$" + callFunctionExpr.getArgExprAt(i).accept(this);
+			text.append("pushq " + arg + "\n");
 		}
+
+		for (int i = Math.min(callFunctionExpr.getArgExprListSize(), 6) - 1; i >= 0; i--) {
+			String arg = "$" + callFunctionExpr.getArgExprAt(i).accept(this);
+			text.append("movq " + arg + ", %" + getArgumentRegister(i) + "\n");
+		}
+
 		text.append("call " + callFunctionExpr.getMethodId() + "\n");
 
-		return null;
+		if (callFunctionExpr.getArgExprListSize() > 6) {
+			int stackCleanup = (callFunctionExpr.getArgExprListSize() - 6) * 8;
+			text.append("addq $" + stackCleanup + ", %rsp\n");
+		}
+
+		return sb.toString();
 	}
 
 	@Override
 	public String visit(CallFunctionStat callFunctionStat)
 	{
+		StringBuilder sb = new StringBuilder();
 
 		for (int i = callFunctionStat.getArgExprListSize() - 1; i >= 6; i--) {
 			String arg = "$" + callFunctionStat.getArgExprAt(i).accept(this);
@@ -333,6 +297,8 @@ public class CodeGenerator implements Visitor<String>
 			text.append("addq $" + stackCleanup + ", %rsp\n");
 		}
 
+		return sb.toString();
+
 		// for (int i = callFunctionStat.getArgExprListSize() - 1; i >= 0; i--) {
 
 		// 	Expression expr = callFunctionStat.getArgExprAt(i);
@@ -350,7 +316,7 @@ public class CodeGenerator implements Visitor<String>
 		// text.append("call " + callFunctionStat.getMethodId() + "\n");
 		// text.append("movq $0, %r9\n");
 
-		return null;
+		// return sb.toString();
 	}
 
 	private String getArgumentRegister(int index)
@@ -447,6 +413,8 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(VariableInit varDeclInit)
 	{
+		StringBuilder sb = new StringBuilder();
+
 		if (currentFunction == null) {
 			data.append(varDeclInit.getId() + ":\n");
 
@@ -462,10 +430,17 @@ public class CodeGenerator implements Visitor<String>
 			setLocalVarIndex(b);
 
 			int lvIndex = getLocalVarIndex(b);
-			text.append("movq $" + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
+
+			// Need to be changed
+			if (varDeclInit.getExpr() instanceof CallFunctionExpr) {
+				varDeclInit.getExpr().accept(this);
+				text.append("movq %rax" + ", -" + (lvIndex * 8) + "(%rbp)\n");
+			} else {
+				text.append("movq $" + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
+			}
 		}
 
-		return null;
+		return sb.toString();
 	}
 
 	@Override
@@ -549,8 +524,12 @@ public class CodeGenerator implements Visitor<String>
 	        text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
 	        text.append("syscall\n");
 	    } else {
-	        text.append(functionReturn.getReturnExpr().accept(this));
-
+	    	if (functionReturn.getReturnExpr() instanceof IdentifierExpr) {
+	    		text.append("movq " + functionReturn.getReturnExpr().accept(this) + ", %rax" + "\n");
+	    	} else {
+	    		functionReturn.getReturnExpr().accept(this);
+	    	}
+	    	
 	        text.append("movq %rbp, %rsp\n");
 	        text.append("pop %rbp\n");
 	        text.append("ret\n");
@@ -598,40 +577,40 @@ public class CodeGenerator implements Visitor<String>
 
 		sb.append(data).append(bss).append(text);
 
-		sb.append(".globl length\n");
-		sb.append(".type length, @function\n");
-		sb.append("length:\n");
-		sb.append("pushq %rbp\n");
-		sb.append("pushq %rax\n");
-		sb.append("movq %rsp, %rbp\n");
-		sb.append("xor %rcx, %rcx\n");
-		sb.append("movq 16(%rbp), %rax\n");
-		sb.append("loop:\n");
-		sb.append("movb (%rax), %dl\n");
-		sb.append("test %dl, %dl\n");
-		sb.append("jz end_loop\n");
-		sb.append("inc %rcx\n");
-		sb.append("inc %rax\n");
-		sb.append("jmp loop\n");
-		sb.append("end_loop:\n");
-		sb.append("popq %rax\n");
-		sb.append("popq %rbp\n");
-		sb.append("ret\n");
+		// sb.append(".globl length\n");
+		// sb.append(".type length, @function\n");
+		// sb.append("length:\n");
+		// sb.append("pushq %rbp\n");
+		// sb.append("pushq %rax\n");
+		// sb.append("movq %rsp, %rbp\n");
+		// sb.append("xor %rcx, %rcx\n");
+		// sb.append("movq 16(%rbp), %rax\n");
+		// sb.append("loop:\n");
+		// sb.append("movb (%rax), %dl\n");
+		// sb.append("test %dl, %dl\n");
+		// sb.append("jz end_loop\n");
+		// sb.append("inc %rcx\n");
+		// sb.append("inc %rax\n");
+		// sb.append("jmp loop\n");
+		// sb.append("end_loop:\n");
+		// sb.append("popq %rax\n");
+		// sb.append("popq %rbp\n");
+		// sb.append("ret\n");
 
-		sb.append(".globl print\n");
-		sb.append(".type print, @function\n");
-		sb.append("print:\n");
-		sb.append("pushq %rbp\n");
-		sb.append("movq %rsp, %rbp\n");
-		sb.append("movq $1, %rax\n");
-		sb.append("pushq %r9\n");
-		sb.append("call length\n");
-		sb.append("movq %r9, %rsi\n");
-		sb.append("movq %rcx, %rdx\n");
-		sb.append("syscall\n");
-		sb.append("movq %rbp, %rsp\n");
-		sb.append("pop %rbp\n");
-		sb.append("ret\n");
+		// sb.append(".globl print\n");
+		// sb.append(".type print, @function\n");
+		// sb.append("print:\n");
+		// sb.append("pushq %rbp\n");
+		// sb.append("movq %rsp, %rbp\n");
+		// sb.append("movq $1, %rax\n");
+		// sb.append("pushq %r9\n");
+		// sb.append("call length\n");
+		// sb.append("movq %r9, %rsi\n");
+		// sb.append("movq %rcx, %rdx\n");
+		// sb.append("syscall\n");
+		// sb.append("movq %rbp, %rsp\n");
+		// sb.append("pop %rbp\n");
+		// sb.append("ret\n");
 
 		write(sb.toString());
 
