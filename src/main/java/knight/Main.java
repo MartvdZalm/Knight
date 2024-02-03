@@ -56,8 +56,8 @@ public class Main
 					CodeGenerator cg = new CodeGenerator(path, filename);
 					cg.visit((Program) tree);
 
-					if (!containsFlag(args, "-s")) {
-						compileAssemblyFile(path, filename);
+					if (!containsFlag(args, "-asm")) {
+						compileAssemblyFile(args, path, filename);
 	                }
 				}
 			}
@@ -84,12 +84,17 @@ public class Main
 	    return false;
 	}
 
-	private void compileAssemblyFile(String path, String fileName)
+	private void compileAssemblyFile(String[] args, String path, String fileName)
 	{
 		String filename = removeFileExtension(fileName);
 
 	    try {
-	        ProcessBuilder assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename + ".o", path + filename + ".s");
+	    	ProcessBuilder assemblerProcessBuilder = null;
+	    	if (containsFlag(args, "-debug")) {
+	    		assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename + ".o", "-gstabs", path + filename + ".s");
+	    	} else {
+	    		assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename + ".o", path + filename + ".s");
+	    	}
 	        Process assemblerProcess = assemblerProcessBuilder.start();
 	        int assemblerExitCode = assemblerProcess.waitFor();
 
@@ -99,8 +104,10 @@ public class Main
 	            int linkerExitCode = linkerProcess.waitFor();
 	        }
 
-        	ProcessBuilder removeAssemblyFileBuilder = new ProcessBuilder("rm", path + filename + ".s");
-            removeAssemblyFileBuilder.start();
+	        if (!containsFlag(args, "-debug")) {
+	        	ProcessBuilder removeAssemblyFileBuilder = new ProcessBuilder("rm", path + filename + ".s");
+	            removeAssemblyFileBuilder.start();
+        	}
 
             ProcessBuilder removeObjectFileBuilder = new ProcessBuilder("rm", path + filename + ".o");
             removeObjectFileBuilder.start();
