@@ -17,16 +17,17 @@ public class CodeGenerator implements Visitor<String>
 {
 	private SymbolClass currentClass;
 	private SymbolFunction currentFunction;
+
 	private final String PATH;
 	private final String FILENAME;
 	
 	private int bytes;
-	private int slot;
+
+	private int localArg;
+	private int localVar;
 
 	private int stack;
 	private int localStack;
-
-	private int counter = 0; // This will get removed later on.
 
 	StringBuilder data = new StringBuilder();
 	StringBuilder bss = new StringBuilder();
@@ -103,7 +104,8 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(IntLiteral intLiteral)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(intLiteral.getValue());
+
+		sb.append("$" + intLiteral.getValue());
 
 		return sb.toString();
 	}
@@ -256,13 +258,11 @@ public class CodeGenerator implements Visitor<String>
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = callFunctionExpr.getArgExprListSize() - 1; i >= 6; i--) {
-			String arg = "$" + callFunctionExpr.getArgExprAt(i).accept(this);
-			text.append("pushq " + arg + "\n");
+			text.append("pushq " + callFunctionExpr.getArgExprAt(i).accept(this) + "\n");
 		}
 
 		for (int i = Math.min(callFunctionExpr.getArgExprListSize(), 6) - 1; i >= 0; i--) {
-			String arg = "$" + callFunctionExpr.getArgExprAt(i).accept(this);
-			text.append("movq " + arg + ", %" + getArgumentRegister(i) + "\n");
+			text.append("movq " + callFunctionExpr.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
 		}
 
 		text.append("call " + callFunctionExpr.getMethodId() + "\n");
@@ -281,13 +281,11 @@ public class CodeGenerator implements Visitor<String>
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = callFunctionStat.getArgExprListSize() - 1; i >= 6; i--) {
-			String arg = "$" + callFunctionStat.getArgExprAt(i).accept(this);
-			text.append("pushq " + arg + "\n");
+			text.append("pushq " + callFunctionStat.getArgExprAt(i).accept(this) + "\n");
 		}
 
 		for (int i = Math.min(callFunctionStat.getArgExprListSize(), 6) - 1; i >= 0; i--) {
-			String arg = "$" + callFunctionStat.getArgExprAt(i).accept(this);
-			text.append("movq " + arg + ", %" + getArgumentRegister(i) + "\n");
+			text.append("movq " + callFunctionStat.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
 		}
 
 		text.append("call " + callFunctionStat.getMethodId() + "\n");
@@ -373,15 +371,15 @@ public class CodeGenerator implements Visitor<String>
 	public String visit(Argument argDecl)
 	{
 		Binding b = argDecl.getId().getB();
-		setLocalVarIndex(b);
+		setLocalArgIndex(b);
 
 		return null;
 	}
 
 	@Override
-	public String visit(Identifier id)
+	public String visit(Identifier identifier)
 	{
-		return null;
+		return "\"" + identifier.getVarID() + "\"";
 	}
 
 	@Override
@@ -434,7 +432,10 @@ public class CodeGenerator implements Visitor<String>
 			// Need to be changed
 			if (varDeclInit.getExpr() instanceof CallFunctionExpr) {
 				varDeclInit.getExpr().accept(this);
-				text.append("movq %rax" + ", -" + (lvIndex * 8) + "(%rbp)\n");
+				text.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
+			} else if (varDeclInit.getExpr() instanceof IdentifierExpr) {
+				text.append("movq " + varDeclInit.getExpr().accept(this) + ", %rax\n");
+				text.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
 			} else {
 				text.append("movq $" + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
 			}
@@ -449,50 +450,11 @@ public class CodeGenerator implements Visitor<String>
 		return null;
 	}
 
-	// @Override
-	// public String visit(FunctionReturn functionReturn)
-	// {	
-	// 	slot = 0;
-
-	// 	currentFunction = (SymbolFunction) functionReturn.getId().getB();
-	// 	text.append(".globl " + functionReturn.getId() + "\n");
-	// 	text.append(".type " + functionReturn.getId() + ", @function\n");
-	// 	text.append(functionReturn.getId() + ":\n");
-	// 	text.append("pushq %rbp\n");
-	// 	text.append("movq %rsp, %rbp\n");
-
-	// 	for (int i = 0; i < functionReturn.getArgumentListSize(); i++) {
-	// 		functionReturn.getArgumentDeclAt(i).accept(this);
-	// 	}
-
-	// 	for (int i = 0; i < functionReturn.getVariableListSize(); i++) {
-	// 		functionReturn.getVariableDeclAt(i).accept(this);
-	// 	}
-
-	// 	for (int i = 0; i < functionReturn.getStatementListSize(); i++) {
-	// 		functionReturn.getStatementDeclAt(i).accept(this);
-	// 	}
-
-	// 	if (functionReturn.getId().getVarID().equals("main")) {
-	// 		text.append("movq $60, %rax\n");
-	// 		text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
-	// 		text.append("syscall\n");
-	// 	} else {
-	// 		functionReturn.getReturnExpr().accept(this);
-
-	// 		text.append("movq %rbp, %rsp\n");
-	// 		text.append("pop %rbp\n");
-	// 		text.append("ret\n");
-	// 		currentFunction = null;
-	// 	}
-
-	// 	return null;
-	// }
-
 	@Override
 	public String visit(FunctionReturn functionReturn)
 	{
-	    slot = 0;
+		localArg = 0;
+	    localVar = 0;
 
 	    currentFunction = (SymbolFunction) functionReturn.getId().getB();
 	    text.append(".globl " + functionReturn.getId() + "\n");
@@ -521,7 +483,7 @@ public class CodeGenerator implements Visitor<String>
 
 	    if (functionReturn.getId().getVarID().equals("main")) {
 	        text.append("movq $60, %rax\n");
-	        text.append("movq $" + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
+	        text.append("movq " + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
 	        text.append("syscall\n");
 	    } else {
 	    	if (functionReturn.getReturnExpr() instanceof IdentifierExpr) {
@@ -554,7 +516,11 @@ public class CodeGenerator implements Visitor<String>
 	@Override
 	public String visit(Include include)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(".include \"" + include.getId() + ".s\"" + "\n");
+
+		return sb.toString();
 	}
 
 	@Override
@@ -563,6 +529,11 @@ public class CodeGenerator implements Visitor<String>
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(".file \"" + FILENAME + ".knight\"\n");
+
+		for (int i = 0; i < program.getIncludeListSize(); i++) {
+			sb.append(program.getIncludeDeclAt(i).accept(this));
+		}
+
 		data.append(".section .data\n");
 		bss.append(".section .bss\n");
 		text.append(".section .text\n");
@@ -631,6 +602,24 @@ public class CodeGenerator implements Visitor<String>
 
 		return null;
 	}
+
+	private int getLocalArgIndex(Binding b)
+	{
+		if (b != null && b instanceof SymbolVariable) {
+			return ((SymbolVariable) b).getLvIndex(); 
+		}
+		return -1;
+	}
+
+	private int setLocalArgIndex(Binding b)
+	{
+		if (b != null && b instanceof SymbolVariable) {
+			((SymbolVariable) b).setLvIndex(++localArg);
+			return localArg;
+		}
+		return -1;
+	}
+
 	
 	private int getLocalVarIndex(Binding b)
 	{
@@ -643,8 +632,8 @@ public class CodeGenerator implements Visitor<String>
 	private int setLocalVarIndex(Binding b)
 	{
 		if (b != null && b instanceof SymbolVariable) {
-			((SymbolVariable) b).setLvIndex(++slot);
-			return slot;
+			((SymbolVariable) b).setLvIndex(++localVar);
+			return localVar;
 		}
 		return -1;
 	}
