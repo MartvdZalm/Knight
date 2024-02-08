@@ -2,6 +2,7 @@ package knight;
 
 import java.io.*;
 
+import knight.preprocessor.PreProcessor;
 import knight.ast.Program;
 import knight.ast.Tree;
 import knight.parser.Parser;
@@ -35,7 +36,11 @@ public class Main
 				return;
 			}
 
-			BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
+			// BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
+
+			PreProcessor preProcessor = new PreProcessor(filename);
+			BufferedReader bufferedReader = preProcessor.process();
+
 			Parser p = new Parser(bufferedReader);
 			Tree tree = p.parse();
 
