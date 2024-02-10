@@ -1,40 +1,9 @@
-fn divide(int a, int b): int
-{
-    ret a / b;
-}
-
-fn plus(int a, int b): int
-{
-    ret a + b;
-}
-
-fn minus(int a, int b): int
-{
-    ret a - b;
-}
-
-fn times(int a, int b): int
-{
-    ret a * b;
-}
-
-fn test(): int
-{
-    int value = times(10, 10);
-
-    int num = value;
-
-    ret num;
-}
+include calculator
 
 fn main(): int
-{
-    test();
-
-    divide(10, 5);
-    plus(10, 10);
-    times(5, 5);
-    minus(10, 4);
+{   
+    times(10, 10);
+    plus(5, 5);
 
     ret 0;
 }
