@@ -36,8 +36,6 @@ public class Main
 				return;
 			}
 
-			// BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
-
 			PreProcessor preProcessor = new PreProcessor(filename);
 			BufferedReader bufferedReader = preProcessor.process();
 
