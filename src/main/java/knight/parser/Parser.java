@@ -129,7 +129,7 @@ public class Parser
 		return new Class(id.getToken(), id, functions, variables);
 	}
 
-	private Function parseFunction() throws ParseException
+	public Function parseFunction() throws ParseException
 	{
 		List<Variable> variables = new ArrayList<>();
 		List<Statement> statements = new ArrayList<>();
