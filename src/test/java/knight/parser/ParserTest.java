@@ -10,7 +10,7 @@ import knight.ast.*;
 import knight.ast.Class;
 import knight.lexer.*;
 
-import knight.helper.*;
+import knight.builder.code.CodeBuilder;
 
 public class ParserTest
 {
@@ -73,7 +73,7 @@ public class ParserTest
  	@Test
     public void testParseClassWithFunctionsAndVariables() throws ParseException
     {
-    	Builder builder = new Builder();
+    	CodeBuilder builder = new CodeBuilder();
 
         List<String> functions = Arrays.asList(
             builder.buildFunction("calculation", "int a, int b", "int", "a * b"),
@@ -110,6 +110,34 @@ public class ParserTest
       	assertEquals("myString", classDecl.getVariableDeclAt(1).getId().toString());
       	assertTrue(classDecl.getVariableDeclAt(1).getType() instanceof StringType);
     }
+
+    @Test
+    public void parseFunctionInvalid() throws ParseException
+    {
+    	Parser parser = getParser("fn");
+		Lexer lexer = parser.lexer;
+
+		parser.token = lexer.nextToken();
+
+		Exception exception = assertThrows(ParseException.class, () -> 
+			parser.parseFunction());
+		assertEquals("0:0 Token is null, cannot perform operation.", exception.getMessage());
+    }
+
+    @Test
+    public void parseFunctionWithVariablesAndStatements() throws ParseException
+    {
+    	CodeBuilder codeBuilder = new CodeBuilder();
+
+    	List<String> variables = Arrays.asList(
+    		codeBuilder.buildVariable("int", "myVar")
+    	);
+
+    	List<String> statements = Arrays.asList(
+    		codeBuilder.buildStatement("myVar", "10")
+    	);
+    }
+
 
     private Parser getParser(String input)
 	{
