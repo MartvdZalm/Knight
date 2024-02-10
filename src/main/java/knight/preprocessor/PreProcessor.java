@@ -4,8 +4,6 @@ import java.io.*;
 
 public class PreProcessor
 {
- 	private boolean exception;
-    private char character;
     private BufferedReader content;
     private BufferedReader source;
 
@@ -23,7 +21,7 @@ public class PreProcessor
     {
         String word = nextWord();
 
-        while (word != null && !exception) {
+        while (word != null) {
 
             if (word.equals("include")) {
 
