@@ -3,16 +3,16 @@ package knight;
 import java.io.*;
 
 import knight.preprocessor.PreProcessor;
-import knight.ast.Program;
-import knight.ast.Tree;
-import knight.parser.Parser;
-import knight.semantics.NameError;
-import knight.semantics.SemanticErrors;
-import knight.symbol.SymbolProgram;
-import knight.visitor.BuildSymbolProgramVisitor;
-import knight.visitor.CodeGenerator;
-import knight.visitor.NameAnalyserTreeVisitor;
-import knight.visitor.TypeAnalyser;
+import knight.compiler.ast.Program;
+import knight.compiler.ast.Tree;
+import knight.compiler.parser.Parser;
+import knight.compiler.semantics.NameError;
+import knight.compiler.semantics.SemanticErrors;
+import knight.compiler.symbol.SymbolProgram;
+import knight.compiler.visitor.BuildSymbolProgramVisitor;
+import knight.compiler.visitor.CodeGenerator;
+import knight.compiler.visitor.NameAnalyserTreeVisitor;
+import knight.compiler.visitor.TypeAnalyser;
 
 public class Main
 {
