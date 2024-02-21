@@ -2,6 +2,7 @@ package knight.builder.code;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import com.github.javafaker.Faker;
 
@@ -9,9 +10,11 @@ public class CodeBuilderFunction extends CodeBuilder
 {
 	private Faker faker;
 	private String functionName;
+	private CodeBuilderType returnType;
 	private List<CodeBuilderArgument> arguments;
 	private List<CodeBuilderVariable> variables;
 	private List<CodeBuilderStatement> statements;
+	private CodeBuilderReturnStatement returnStatement;
 
 	public CodeBuilderFunction()
 	{
@@ -30,6 +33,16 @@ public class CodeBuilderFunction extends CodeBuilder
 		this.arguments = new ArrayList<>();
 		this.variables = new ArrayList<>();
 		this.statements = new ArrayList<>();
+	}
+
+	public void setReturnType(CodeBuilderType returnType)
+	{
+		this.returnType = returnType;
+	}
+
+	public void setReturnStatement(CodeBuilderReturnStatement returnStatement)
+	{
+		this.returnStatement = returnStatement;
 	}
 
 	public void mockArgument(int count)
@@ -53,6 +66,11 @@ public class CodeBuilderFunction extends CodeBuilder
 		}
 	}
 
+	public void mockReturnStatement()
+	{
+		this.returnStatement = new CodeBuilderReturnStatement().mock();
+	}
+
 	public void addArgument(CodeBuilderArgument argument)
 	{
 		this.arguments.add(argument);
@@ -74,10 +92,6 @@ public class CodeBuilderFunction extends CodeBuilder
 			this.functionName = this.faker.lorem().word();
 		}
 
-		this.mockArgument(1);
-		this.mockVariable(1);
-		this.mockStatement(1);
-
 		return this;
 	}
 
@@ -96,12 +110,11 @@ public class CodeBuilderFunction extends CodeBuilder
         }
 
         if (data.containsKey("statement")) {
-            this.mockFunction(data.get("statement"));
+            this.mockStatement(data.get("statement"));
         }
 
 		return this;
 	}
-
 
 	@Override
 	public String toString()
@@ -124,6 +137,14 @@ public class CodeBuilderFunction extends CodeBuilder
 			functionBody.append(statement).append(" ");
 		}
 
-		return String.format("fn %s(%s) { %s }", this.functionName, argumentBody.toString(), functionBody.toString());
+		if (this.returnType == null) {
+			return String.format("fn %s(%s): void { %s }", this.functionName, argumentBody.toString(), functionBody.toString());
+		} else {
+			if (this.returnStatement == null) {
+				this.mockReturnStatement();
+			}
+
+			return String.format("fn %s(%s): %s { %s %s }", this.functionName, argumentBody.toString(), this.returnType, functionBody.toString(), this.returnStatement);
+		}
 	}
 }

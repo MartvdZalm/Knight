@@ -6,12 +6,10 @@ public class CodeBuilder extends Builder
 {
     public Boolean empty(String str)
     {
-    	if (this.str == null || this.str.isEmpty()) {
+    	if (str == null || str.isEmpty()) {
     		return true;
 		} else {
 			return false;
 		}
     }
-
-    
 }

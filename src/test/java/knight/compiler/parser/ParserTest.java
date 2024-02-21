@@ -72,60 +72,50 @@ public class ParserTest
  	@Test
     public void testParseClassWithFunctionsAndVariables() throws ParseException
     {
-    	CodeBuilderClass codeBuilderClass = new CodeBuilderClass();
+    	CodeBuilderClass codeBuilderClass = new CodeBuilderClass("MyClass");
 
     	Map<String, Integer> data = new HashMap<>();
-		data.put("functionCount", 2);
-
+		data.put("function", 2);
+		data.put("variable", 3);
     	codeBuilderClass.mock(data);
-    	System.out.println(codeBuilderClass);
 
-    	// CodeBuilder codeBuilder = new CodeBuilder();
+    	Parser parser = getParser(codeBuilderClass.toString());
+    	Lexer lexer = parser.lexer;
+    	parser.token = lexer.nextToken();
+    	Class classDecl = parser.parseClass();
 
-    	// List<String> arguments = Arrays.asList(
-    	// 	codeBuilder.buildArgument(CodeBuilderTypes.INT, "a"),
-    	// 	codeBuilder.buildArgument(CodeBuilderTypes.INT, "b")
-    	// );
-
-    	// List<String> variables = Arrays.asList(
-    	// 	codeBuilder.buildVariable(CodeBuilderTypes.INT, "age"),
-    	// 	codeBuilder.buildVariable(CodeBuilderTypes.STRING, "name")
-    	// );
-
-    	// List<String> statements = Arrays.asList(
-    	// 	codeBuilder.buildStatement("age", "21"),
-    	// 	codeBuilder.buildStatement("name", "john doe")
-    	// );
-
-    	// String returnExpr = codeBuilder.buildReturnExpression("0");
-
-    	// System.out.println(codeBuilder.buildFunction("calculate", CodeBuilderTypes.INT, arguments, variables, statements, returnExpr));
-
-        // String input = builder.buildClass("HelloWorld", functions, variables);
-        
-        // Parser parser = getParser(input);
-        // Lexer lexer = parser.lexer;
-
-        // parser.token = lexer.nextToken();
-
-        // Class classDecl = parser.parseClass();
-
-        // assertEquals(2, classDecl.getFunctionListSize());
-
-      	// assertEquals("calculation", classDecl.getFunctionDeclAt(0).getId().toString());
-      	// assertTrue(classDecl.getFunctionDeclAt(0).getReturnType() instanceof IntType);
-
-      	// assertEquals("sum", classDecl.getFunctionDeclAt(1).getId().toString());
-      	// assertTrue(classDecl.getFunctionDeclAt(1).getReturnType() instanceof IntType);
-
-        // assertEquals(2, classDecl.getVariableListSize());
-
-      	// assertEquals("myVar", classDecl.getVariableDeclAt(0).getId().toString());
-      	// assertTrue(classDecl.getVariableDeclAt(0).getType() instanceof IntType);
-
-      	// assertEquals("myString", classDecl.getVariableDeclAt(1).getId().toString());
-      	// assertTrue(classDecl.getVariableDeclAt(1).getType() instanceof StringType);
+    	assertNotNull(classDecl);
+    	assertEquals("MyClass", classDecl.getId().toString());
+    	assertEquals(2, classDecl.getFunctionListSize());
+    	assertEquals(3, classDecl.getVariableListSize());
     }
+
+    @Test
+    public void testParseFunctionReturnValid() throws ParseException
+    {
+    	CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction("MyFunction");
+    	codeBuilderFunction.setReturnType(CodeBuilderType.INT);
+    	codeBuilderFunction.mock();
+
+    	Parser parser = getParser(codeBuilderFunction.toString());
+    	Lexer lexer = parser.lexer;
+    	parser.token = lexer.nextToken();
+    	Function functionDecl = parser.parseFunction();
+
+    	assertNotNull(functionDecl);
+    	assertTrue("FunctionDecl is not instanceof FunctionReturn", functionDecl instanceof FunctionReturn);
+    	assertEquals("MyFunction", functionDecl.getId().toString());
+    	assertTrue("ReturnType is not instanceof IntType", functionDecl.getReturnType() instanceof IntType);
+    	assertEquals(0, functionDecl.getVariableListSize());
+    	assertEquals(0, functionDecl.getStatementListSize());
+    	
+    }
+
+    // @Test
+    // public void testParseFunctionValid() throws ParseException
+    // {
+
+    // }
 
     // @Test
     // public void parseFunctionInvalid() throws ParseException
