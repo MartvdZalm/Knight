@@ -142,7 +142,7 @@ public class Parser
 		eat(Tokens.LEFTBRACE);
 
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
-			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING) {
+			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.BOOLEAN) {
 				variables.add(parseVariable());
 			} else {
 				statements.add(parseStatement());
@@ -159,7 +159,7 @@ public class Parser
 		return new Function(token, returnType, id, argumentList, variables, statements);
 	}
 
-	private Variable parseVariable() throws ParseException
+	public Variable parseVariable() throws ParseException
 	{
 		Type type = parseType();
 		Identifier id = parseIdentifier();
@@ -175,7 +175,7 @@ public class Parser
 		return variable;
 	}
 
-	private Expression parseReturnExpr() throws ParseException
+	public Expression parseReturnExpr() throws ParseException
 	{
 		if (token.getToken() == Tokens.RETURN) {
 			eat(Tokens.RETURN);
@@ -184,7 +184,7 @@ public class Parser
 		return null;
 	}
 
-	private Expression parseExpression() throws ParseException
+	public Expression parseExpression() throws ParseException
     {
         try {
             parseExpr();
