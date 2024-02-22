@@ -18,9 +18,7 @@ public class ParserTest
 	{
         Parser parser = getParser("include example");
         Lexer lexer = parser.lexer;
-
-        parser.token = lexer.nextToken();
-        
+        parser.token = lexer.nextToken();        
         Include include = parser.parseInclude();
         
         assertNotNull(include);
@@ -32,7 +30,6 @@ public class ParserTest
 	{
 		Parser parser = getParser("include");
 		Lexer lexer = parser.lexer;
-
 		parser.token = lexer.nextToken();
 
 		Exception exception = assertThrows(ParseException.class, () ->
@@ -45,9 +42,7 @@ public class ParserTest
 	{
 		Parser parser = getParser("class HelloWorld {}");
 		Lexer lexer = parser.lexer;
-
 		parser.token = lexer.nextToken();
-
 		Class classDecl = parser.parseClass();
 
 		assertNotNull(classDecl);
@@ -61,7 +56,6 @@ public class ParserTest
 	{
 		Parser parser = getParser("class");
 		Lexer lexer = parser.lexer;
-
 		parser.token = lexer.nextToken();
 
 		Exception exception = assertThrows(ParseException.class, () -> 
@@ -108,42 +102,82 @@ public class ParserTest
     	assertTrue("ReturnType is not instanceof IntType", functionDecl.getReturnType() instanceof IntType);
     	assertEquals(0, functionDecl.getVariableListSize());
     	assertEquals(0, functionDecl.getStatementListSize());
-    	
+
+    	FunctionReturn functionReturnDecl = (FunctionReturn) functionDecl;
+    	assertNotNull(functionReturnDecl.getReturnExpr());
     }
 
-    // @Test
-    // public void testParseFunctionValid() throws ParseException
-    // {
+    @Test
+    public void testParseFunctionValid() throws ParseException
+    {
+    	CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction("MyFunction");
 
-    // }
+		Map<String, Integer> data = new HashMap<>();
+		data.put("statement", 2);
+    	data.put("variable", 3);
+    	codeBuilderFunction.mock(data);
 
-    // @Test
-    // public void parseFunctionInvalid() throws ParseException
-    // {
-    // 	Parser parser = getParser("fn");
-	// 	Lexer lexer = parser.lexer;
+    	Parser parser = this.getParser(codeBuilderFunction.toString());
+    	Lexer lexer = parser.lexer;
+    	parser.token = lexer.nextToken();
+    	Function functionDecl = parser.parseFunction();
 
-	// 	parser.token = lexer.nextToken();
+    	assertNotNull(functionDecl);
+    	assertTrue("FunctionDecl is not instanceof Function", functionDecl instanceof Function);
+    	assertEquals("MyFunction", functionDecl.getId().toString());
+    	assertEquals(2, functionDecl.getStatementListSize());
+    	assertEquals(3, functionDecl.getVariableListSize());
+    }
 
-	// 	Exception exception = assertThrows(ParseException.class, () -> 
-	// 		parser.parseFunction());
-	// 	assertEquals("0:0 Token is null, cannot perform operation.", exception.getMessage());
-    // }
+    @Test
+    public void testParseVariableValid() throws ParseException
+    {
+    	CodeBuilderVariable codeBuilderVariable = new CodeBuilderVariable("myVariable");
+    	codeBuilderVariable.mock();
 
-    // @Test
-    // public void parseFunctionWithVariablesAndStatements() throws ParseException
-    // {
-    // 	CodeBuilder codeBuilder = new CodeBuilder();
+    	Parser parser = this.getParser(codeBuilderVariable.toString());
+    	Lexer lexer = parser.lexer;
+    	parser.token = lexer.nextToken();
+    	Variable variableDecl = parser.parseVariable();
 
-    // 	List<String> variables = Arrays.asList(
-    // 		codeBuilder.buildVariable("int", "myVar")
-    // 	);
+    	assertNotNull(variableDecl);
+    	assertTrue("Variable is not instanceof Variable", variableDecl instanceof Variable);
+    	assertEquals("myVariable", variableDecl.getId().toString());
+    }
 
-    // 	List<String> statements = Arrays.asList(
-    // 		codeBuilder.buildStatement("myVar", "10")
-    // 	);
-    // }
+    @Test
+    public void testParseVariableInitValid() throws ParseException
+    {
+    	CodeBuilderVariableInit codeBuilderVariableInit = new CodeBuilderVariableInit("myVariable");
+    	codeBuilderVariableInit.mock();
 
+    	Parser parser = this.getParser(codeBuilderVariableInit.toString());
+    	Lexer lexer = parser.lexer;
+    	parser.token = lexer.nextToken();
+    	Variable variableDecl = parser.parseVariable();
+
+    	assertNotNull(variableDecl);
+    	assertTrue("VariableDecl is not instanceof VariableInit", variableDecl instanceof VariableInit);
+    	assertEquals("myVariable", variableDecl.getId().toString());
+
+    	VariableInit variableInitDecl = (VariableInit) variableDecl;
+    	assertNotNull(variableInitDecl.getExpr());
+    }
+
+    @Test
+    public void testParseReturnExprValid() throws ParseException
+    {
+    	CodeBuilderReturnStatement codeBuilderReturnStatement = new CodeBuilderReturnStatement();
+    	codeBuilderReturnStatement.setExpr("10 * 10");
+    	codeBuilderReturnStatement.mock();
+
+    	Parser parser = this.getParser(codeBuilderReturnStatement.toString());
+    	Lexer lexer = parser.lexer;
+    	parser.token = lexer.nextToken();
+    	Expression expression = parser.parseReturnExpr();
+
+    	assertNotNull(expression);
+    }
 
     private Parser getParser(String input)
 	{
