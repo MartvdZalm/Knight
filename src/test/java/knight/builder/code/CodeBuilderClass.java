@@ -8,7 +8,6 @@ import com.github.javafaker.Faker;
 
 public class CodeBuilderClass extends CodeBuilder
 {
-	private Faker faker;
 	private String className;
 	private List<CodeBuilderFunction> functions;
 	private List<CodeBuilderVariable> variables;
@@ -24,9 +23,10 @@ public class CodeBuilderClass extends CodeBuilder
 		this.initialize();
 	}
 
-	private void initialize()
+	@Override
+	protected void initialize()
 	{
-		this.faker = new Faker();
+		super.initialize();
 		this.functions = new ArrayList<>();
 		this.variables = new ArrayList<>();
 	}
@@ -58,19 +58,15 @@ public class CodeBuilderClass extends CodeBuilder
 	public CodeBuilderClass mock()
 	{
 		if (empty(this.className)) {
-			this.className = this.faker.lorem().word();
+			this.className = super.faker.lorem().word();
 		}
-
-		this.mockFunction(1);
-		this.mockVariable(1);
-
 		return this;
 	}
 
 	public CodeBuilderClass mock(Map<String, Integer> data)
 	{
 		if (empty(this.className)) {
-			this.className = this.faker.lorem().word();
+			this.className = super.faker.lorem().word();
 		}
 
         if (data.containsKey("function")) {

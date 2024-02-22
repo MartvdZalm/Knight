@@ -4,19 +4,18 @@ import com.github.javafaker.Faker;
 
 public class CodeBuilderArgument extends CodeBuilder
 {
-	private Faker faker;
 	private CodeBuilderType type;
 	private String identifier;
 
 	public CodeBuilderArgument()
 	{
-		this.faker = new Faker();
+		super.initialize();
 	}
 
 	public CodeBuilderArgument mock()
 	{
 		this.type = CodeBuilderType.random();
-		this.identifier = this.faker.lorem().word();
+		this.identifier = super.faker.lorem().word();
 
 		return this;
 	}

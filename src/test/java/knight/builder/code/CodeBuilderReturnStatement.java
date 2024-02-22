@@ -2,19 +2,27 @@ package knight.builder.code;
 
 import com.github.javafaker.Faker;
 
-public class CodeBuilderStatement extends CodeBuilder
+public class CodeBuilderReturnStatement extends CodeBuilder
 {
-	private Faker faker;
 	private String expression;
 
 	public CodeBuilderReturnStatement()
 	{
-		this.faker = new Faker();
+		super.initialize();
+	}
+
+	public void setExpr(String expression)
+	{
+		this.expression = expression;
 	}
 
 	public CodeBuilderReturnStatement mock()
 	{
-		this.expression = this.faker.name().firstName();
+		if (super.empty(this.expression)) {
+			this.expression = super.faker.name().firstName();
+		}
+
+		return this;
 	}
 
 	@Override

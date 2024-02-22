@@ -4,19 +4,18 @@ import com.github.javafaker.Faker;
 
 public class CodeBuilderStatement extends CodeBuilder
 {
-	private Faker faker;
 	private String identifier;
 	private String expression;
 
 	public CodeBuilderStatement()
 	{
-		this.faker = new Faker();
+		super.initialize();
 	}
 
 	public CodeBuilderStatement mock()
 	{
-		this.identifier = this.faker.lorem().word();
-		this.expression = this.faker.name().firstName();
+		this.identifier = super.faker.lorem().word();
+		this.expression = super.faker.name().firstName();
 
 		return this;
 	}

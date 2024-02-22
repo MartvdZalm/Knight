@@ -4,19 +4,34 @@ import com.github.javafaker.Faker;
 
 public class CodeBuilderVariable extends CodeBuilder
 {
-	private Faker faker;
-	private CodeBuilderType type;
-	private String identifier;
+	protected CodeBuilderType type;
+	protected String identifier;
 
 	public CodeBuilderVariable()
 	{
-		this.faker = new Faker();
+		super.initialize();
+	}
+
+	public CodeBuilderVariable(String identifier)
+	{
+		this.identifier = identifier;
+		super.initialize();
+	}
+
+	public void setType(CodeBuilderType type)
+	{
+		this.type = type;
 	}
 
 	public CodeBuilderVariable mock()
 	{
-		this.type = CodeBuilderType.random();
-		this.identifier = this.faker.lorem().word();
+		if (this.type == null) {
+			this.type = CodeBuilderType.random();
+		}
+
+		if (super.empty(this.identifier)) {
+			this.identifier = super.faker.lorem().word();
+		}
 
 		return this;
 	}
