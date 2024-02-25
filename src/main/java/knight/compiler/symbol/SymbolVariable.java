@@ -1,6 +1,6 @@
 package knight.compiler.symbol;
 
-import knight.compiler.ast.Type;
+import knight.compiler.ast.types.ASTType;
 import knight.compiler.semantics.Binding;
 
 public class SymbolVariable extends Binding
@@ -8,7 +8,7 @@ public class SymbolVariable extends Binding
 	private String id;
 	private int lvIndex = -1;
 
-	public SymbolVariable(String id, Type type)
+	public SymbolVariable(String id, ASTType type)
 	{
 		super(type);
 		this.id = id;

@@ -1,12 +1,12 @@
 package knight.compiler.semantics;
 
-import knight.compiler.ast.Type;
+import knight.compiler.ast.types.ASTType;
 import knight.compiler.symbol.Counter;
 
 public abstract class Binding
 {
 	private Counter counter = Counter.getInstance(); // Counter instance to generate unique counts for each binding
-	protected Type type; // The type associated with the binding
+	protected ASTType type; // The type associated with the binding
 	private int count; // A unique count assigned to each binding
 
 	/**
@@ -15,13 +15,13 @@ public abstract class Binding
      *
      * @param t The Type associated with the binding.
      */
-	public Binding(Type t)
+	public Binding(ASTType t)
 	{
 		count = counter.getCount();
 		type = t;
 	}
 
-	public Type getType()
+	public ASTType getType()
 	{
 		return type;
 	}

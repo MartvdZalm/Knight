@@ -5,12 +5,12 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Hashtable;
 
-import knight.compiler.ast.BooleanType;
-import knight.compiler.ast.IdentifierType;
-import knight.compiler.ast.IntArrayType;
-import knight.compiler.ast.IntType;
-import knight.compiler.ast.StringType;
-import knight.compiler.ast.Type;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
 
 public class SymbolProgram
 {
@@ -37,7 +37,7 @@ public class SymbolProgram
 		return true;
 	}
 
-	public boolean addFunction(String id, Type type)
+	public boolean addFunction(String id, ASTType type)
 	{
 		if (containsFunction(id)) {
 			return false;
@@ -47,7 +47,7 @@ public class SymbolProgram
 		}
 	}
 
-	public boolean addVariable(String id, Type type)
+	public boolean addVariable(String id, ASTType type)
 	{
 		if (containsVariable(id)) {
 			return false;
@@ -105,7 +105,7 @@ public class SymbolProgram
 	}
 
 
-	public Type getFunctionType(String id, String classScope)
+	public ASTType getFunctionType(String id, String classScope)
 	{
 		SymbolFunction m = getFunction(id, classScope);
 		if (m == null) {
@@ -151,7 +151,7 @@ public class SymbolProgram
 		return getVariable(id);
 	}
 
-	public Type getVariableType(String id)
+	public ASTType getVariableType(String id)
 	{
 		SymbolVariable var = getVariable(id);
 		if (var != null) {
@@ -182,32 +182,32 @@ public class SymbolProgram
 		return false;
 	}
 
-	public boolean compareTypes(Type t1, Type t2)
+	public boolean compareTypes(ASTType t1, ASTType t2)
 	{
 		if (t1 == null || t2 == null) {
 			return false;
 		}
 
-		if (t1 instanceof IntType && t2 instanceof IntType) {
+		if (t1 instanceof ASTIntType && t2 instanceof ASTIntType) {
 			return true;
 		}
-		if (t1 instanceof BooleanType && t2 instanceof BooleanType) {
+		if (t1 instanceof ASTBooleanType && t2 instanceof ASTBooleanType) {
 			return true;
 		}
-		if (t1 instanceof IntArrayType && t2 instanceof IntArrayType) {
+		if (t1 instanceof ASTIntArrayType && t2 instanceof ASTIntArrayType) {
 			return true;
 		}
-		if (t1 instanceof StringType && t2 instanceof StringType) {
+		if (t1 instanceof ASTStringType && t2 instanceof ASTStringType) {
 			return true;
 		}
-		if (t1 instanceof IdentifierType && t2 instanceof IdentifierType) {
-			IdentifierType i1 = (IdentifierType) t1;
-			IdentifierType i2 = (IdentifierType) t2;
+		if (t1 instanceof ASTIdentifierType && t2 instanceof ASTIdentifierType) {
+			ASTIdentifierType i1 = (ASTIdentifierType) t1;
+			ASTIdentifierType i2 = (ASTIdentifierType) t2;
 
-			SymbolClass c = getClass(i2.getVarID());
+			SymbolClass c = getClass(i2.getId());
 			while (c != null && !rstack.contains(c.getId())) {
 				rstack.push(c.getId());
-				if (i1.getVarID().equals(c.getId())) {
+				if (i1.getId().equals(c.getId())) {
 					rstack.clear();
 					return true;
 				} else {
@@ -223,22 +223,22 @@ public class SymbolProgram
 		return false;
 	}
 
-	public boolean absCompTypes(Type t1, Type t2)
+	public boolean absCompTypes(ASTType t1, ASTType t2)
 	{
 		if (t1 == null || t2 == null) {
 			return false;
 		}
 
-		if (t1 instanceof IntType && t2 instanceof IntType) {
+		if (t1 instanceof ASTIntType && t2 instanceof ASTIntType) {
 			return true;
 		}
-		if (t1 instanceof IntArrayType && t2 instanceof IntArrayType) {
+		if (t1 instanceof ASTIntArrayType && t2 instanceof ASTIntArrayType) {
 			return true;
 		}
-		if (t1 instanceof IdentifierType && t2 instanceof IdentifierType) {
-			IdentifierType i1 = (IdentifierType) t1;
-			IdentifierType i2 = (IdentifierType) t2;
-			if (i1.getVarID().equals(i2.getVarID())) {
+		if (t1 instanceof ASTIdentifierType && t2 instanceof ASTIdentifierType) {
+			ASTIdentifierType i1 = (ASTIdentifierType) t1;
+			ASTIdentifierType i2 = (ASTIdentifierType) t2;
+			if (i1.getId().equals(i2.getId())) {
 				return true;
 			}
 		}

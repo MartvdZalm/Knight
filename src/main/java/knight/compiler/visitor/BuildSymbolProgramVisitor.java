@@ -1,7 +1,13 @@
 package knight.compiler.visitor;
 
+import knight.compiler.ast.declarations.*;
+import knight.compiler.ast.expressions.*;
+import knight.compiler.ast.expressions.operations.*;
+import knight.compiler.ast.statements.*;
+import knight.compiler.ast.statements.conditionals.*;
+import knight.compiler.ast.types.*;
 import knight.compiler.ast.*;
-import knight.compiler.ast.Class;
+
 import knight.compiler.lexer.*;
 import knight.compiler.semantics.SemanticErrors;
 
@@ -9,7 +15,7 @@ import knight.compiler.symbol.SymbolClass;
 import knight.compiler.symbol.SymbolFunction;
 import knight.compiler.symbol.SymbolProgram;
 
-public class BuildSymbolProgramVisitor implements Visitor<Type>
+public class BuildSymbolProgramVisitor implements ASTVisitor<ASTType>
 {
 	private SymbolProgram symbolProgram;
 	private SymbolClass symbolClass;
@@ -27,7 +33,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Program program)
+	public ASTType visit(ASTProgram program)
 	{
 		for (int i = 0; i < program.getIncludeListSize(); i++) {
 			program.getIncludeDeclAt(i).accept(this);
@@ -58,9 +64,9 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 
 
 	@Override
-	public Type visit(Class classDecl)
+	public ASTType visit(ASTClass classDecl)
 	{
-		String identifier = classDecl.getId().getVarID();
+		String identifier = classDecl.getId().getId();
 
 		if (!symbolProgram.addClass(identifier, null)) {
 			Token sym = classDecl.getToken();
@@ -82,10 +88,10 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 		return null;
 	}
 
-	public void checkFunction(Function funcDecl)
+	public void checkFunction(ASTFunction funcDecl)
 	{
-		Type type = funcDecl.getReturnType().accept(this);
-		String id = funcDecl.getId().getVarID();
+		ASTType type = funcDecl.getReturnType().accept(this);
+		String id = funcDecl.getId().getId();
 
 		if (symbolClass == null) {
 			if (!symbolProgram.addFunction(id, type)) {
@@ -117,7 +123,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Function functionDecl)
+	public ASTType visit(ASTFunction functionDecl)
 	{
 		checkFunction(functionDecl);
 		symbolFunction = null;
@@ -125,7 +131,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionReturn functionReturn)
+	public ASTType visit(ASTFunctionReturn functionReturn)
 	{
 		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
@@ -134,79 +140,79 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Include include)
+	public ASTType visit(ASTInclude include)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Skip skip)
+	public ASTType visit(ASTSkip skip)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Assign assign)
+	public ASTType visit(ASTAssign assign)
 	{
 		return null;
 	}
 	
 	@Override
-	public Type visit(Block block)
+	public ASTType visit(ASTBlock block)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IfThenElse ifThenElse)
+	public ASTType visit(ASTIfThenElse ifThenElse)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(While while1)
+	public ASTType visit(ASTWhile while1)
 	{
 		return null;
 	}
 	
 	@Override
-	public Type visit(IntLiteral intLiteral)
+	public ASTType visit(ASTIntLiteral intLiteral)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Plus plus)
+	public ASTType visit(ASTPlus plus)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Minus minus)
+	public ASTType visit(ASTMinus minus)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Times times)
+	public ASTType visit(ASTTimes times)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Increment increment)
+	public ASTType visit(ASTIncrement increment)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Modulus modulus)
+	public ASTType visit(ASTModulus modulus)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Division division)
+	public ASTType visit(ASTDivision division)
 	{
 		division.getLhs().accept(this);
 		division.getRhs().accept(this);
@@ -214,7 +220,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Equals equals)
+	public ASTType visit(ASTEquals equals)
 	{
 		equals.getLhs().accept(this);
 		equals.getRhs().accept(this);
@@ -222,7 +228,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(LessThan lessThan)
+	public ASTType visit(ASTLessThan lessThan)
 	{
 		lessThan.getLhs().accept(this);
 		lessThan.getRhs().accept(this);
@@ -230,7 +236,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(LessThanOrEqual lessThanOrEqual)
+	public ASTType visit(ASTLessThanOrEqual lessThanOrEqual)
 	{
 		lessThanOrEqual.getLhs().accept(this);
 		lessThanOrEqual.getRhs().accept(this);
@@ -238,7 +244,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(GreaterThan greaterThan)
+	public ASTType visit(ASTGreaterThan greaterThan)
 	{
 		greaterThan.getLhs().accept(this);
 		greaterThan.getRhs().accept(this);
@@ -246,7 +252,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(GreaterThanOrEqual greaterThanOrEqual)
+	public ASTType visit(ASTGreaterThanOrEqual greaterThanOrEqual)
 	{
 		greaterThanOrEqual.getLhs().accept(this);
 		greaterThanOrEqual.getRhs().accept(this);
@@ -254,7 +260,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(And and)
+	public ASTType visit(ASTAnd and)
 	{
 		and.getLhs().accept(this);
 		and.getRhs().accept(this);
@@ -262,7 +268,7 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Or or)
+	public ASTType visit(ASTOr or)
 	{
 		or.getLhs().accept(this);
 		or.getRhs().accept(this);
@@ -270,93 +276,93 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(True true1)
+	public ASTType visit(ASTTrue true1)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(False false1)
+	public ASTType visit(ASTFalse false1)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IdentifierExpr identifierExpr)
+	public ASTType visit(ASTIdentifierExpr identifierExpr)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(NewArray newArray)
+	public ASTType visit(ASTNewArray newArray)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(NewInstance newInstance)
+	public ASTType visit(ASTNewInstance newInstance)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(CallFunctionExpr callFunctionExpr)
+	public ASTType visit(ASTCallFunctionExpr callFunctionExpr)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(CallFunctionStat callFunctionStat)
+	public ASTType visit(ASTCallFunctionStat callFunctionStat)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(ReturnStatement returnStatement)
+	public ASTType visit(ASTReturnStatement returnStatement)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(FunctionType functionType)
+	public ASTType visit(ASTFunctionType functionType)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IntType intType)
+	public ASTType visit(ASTIntType intType)
 	{
 		return intType;
 	}
 
 	@Override
-	public Type visit(StringType stringType)
+	public ASTType visit(ASTStringType stringType)
 	{
 		return stringType;
 	}
 
 	@Override
-	public Type visit(VoidType voidType)
+	public ASTType visit(ASTVoidType voidType)
 	{
 		return voidType;		
 	}
 
 	@Override
-	public Type visit(BooleanType booleanType)
+	public ASTType visit(ASTBooleanType booleanType)
 	{
 		return booleanType;
 	}
 
 	@Override
-	public Type visit(IntArrayType intArrayType)
+	public ASTType visit(ASTIntArrayType intArrayType)
 	{
 		return intArrayType;
 	}
 
 	@Override
-	public Type visit(IdentifierType identifierType)
+	public ASTType visit(ASTIdentifierType identifierType)
 	{
-		String id = identifierType.getVarID();
+		String id = identifierType.getId();
 
 		if (id != null && id.equals(mKlassId)) {
 			Token tok = identifierType.getToken();
@@ -366,10 +372,10 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 		return identifierType;
 	}
 
-	public void checkIfVariableExist(Variable varDecl)
+	public void checkIfVariableExist(ASTVariable varDecl)
 	{
-		Type t = varDecl.getType().accept(this);
-		String id = varDecl.getId().getVarID();
+		ASTType t = varDecl.getType().accept(this);
+		String id = varDecl.getId().getId();
 
 		if (symbolFunction != null) {
 			if (!symbolFunction.addVariable(id, t)) {
@@ -390,24 +396,24 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Variable varDecl)
+	public ASTType visit(ASTVariable varDecl)
 	{
 		checkIfVariableExist(varDecl);
 		return null;
 	}
 
 	@Override
-	public Type visit(VariableInit varDeclInit)
+	public ASTType visit(ASTVariableInit varDeclInit)
 	{
 		checkIfVariableExist(varDeclInit);
 		return null;
 	}
 
 	@Override
-	public Type visit(Argument argDecl)
+	public ASTType visit(ASTArgument argDecl)
 	{
-		Type t = argDecl.getType().accept(this);
-		String id = argDecl.getId().getVarID();
+		ASTType t = argDecl.getType().accept(this);
+		String id = argDecl.getId().getId();
 
 		if (!symbolFunction.addParam(id, t)) {
 			Token sym = argDecl.getId().getToken();
@@ -417,25 +423,25 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Identifier identifier)
+	public ASTType visit(ASTIdentifier identifier)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(ArrayIndexExpr indexArray)
+	public ASTType visit(ASTArrayIndexExpr indexArray)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(ArrayAssign arrayAssign)
+	public ASTType visit(ASTArrayAssign arrayAssign)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(StringLiteral stringLiteral)
+	public ASTType visit(ASTStringLiteral stringLiteral)
 	{
 		return null;
 	}
@@ -446,19 +452,19 @@ public class BuildSymbolProgramVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Enumeration enumDecl)
+	public ASTType visit(ASTEnumeration enumDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Interface interDecl)
+	public ASTType visit(ASTInterface interDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(ForLoop forLoop)
+	public ASTType visit(ASTForLoop forLoop)
 	{
 		return null;
 	}

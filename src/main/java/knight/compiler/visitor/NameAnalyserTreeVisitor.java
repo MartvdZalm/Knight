@@ -7,8 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import knight.compiler.ast.declarations.*;
+import knight.compiler.ast.expressions.*;
+import knight.compiler.ast.expressions.operations.*;
+import knight.compiler.ast.statements.*;
+import knight.compiler.ast.statements.conditionals.*;
+import knight.compiler.ast.types.*;
 import knight.compiler.ast.*;
-import knight.compiler.ast.Class;
+
 import knight.compiler.lexer.*;
 import knight.compiler.semantics.*;
 import knight.compiler.symbol.SymbolClass;
@@ -16,7 +22,7 @@ import knight.compiler.symbol.SymbolFunction;
 import knight.compiler.symbol.SymbolProgram;
 import knight.compiler.symbol.SymbolVariable;
 
-public class NameAnalyserTreeVisitor implements Visitor<Type>
+public class NameAnalyserTreeVisitor implements ASTVisitor<ASTType>
 {
 	private SymbolProgram symbolProgram;
 	private SymbolClass symbolClass;
@@ -31,13 +37,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Include include)
+	public ASTType visit(ASTInclude include)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Assign assign)
+	public ASTType visit(ASTAssign assign)
 	{
 		assign.getId().accept(this);
 		assign.getExpr().accept(this);
@@ -45,17 +51,17 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 	
 	@Override
-	public Type visit(Block block)
+	public ASTType visit(ASTBlock block)
 	{
 		for (int i = 0; i < block.getStatListSize(); i++) {
-			Statement st = block.getStatAt(i);
+			ASTStatement st = block.getStatAt(i);
 			st.accept(this);
 		}
 		return null;
 	}
 
 	@Override
-	public Type visit(IfThenElse ifThenElse)
+	public ASTType visit(ASTIfThenElse ifThenElse)
 	{
 		ifThenElse.getExpr().accept(this);
 		ifThenElse.getThen().accept(this);
@@ -64,13 +70,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Skip skip)
+	public ASTType visit(ASTSkip skip)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(While while1)
+	public ASTType visit(ASTWhile while1)
 	{
 		while1.getExpr().accept(this);
 		while1.getBody().accept(this);
@@ -78,13 +84,13 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IntLiteral intLiteral)
+	public ASTType visit(ASTIntLiteral intLiteral)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Plus plus)
+	public ASTType visit(ASTPlus plus)
 	{
 		plus.getLhs().accept(this);
 		plus.getRhs().accept(this);
@@ -92,7 +98,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Minus minus)
+	public ASTType visit(ASTMinus minus)
 	{
 		minus.getLhs().accept(this);
 		minus.getRhs().accept(this);
@@ -100,7 +106,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Times times)
+	public ASTType visit(ASTTimes times)
 	{
 		times.getLhs().accept(this);
 		times.getRhs().accept(this);
@@ -108,14 +114,14 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Increment increment)
+	public ASTType visit(ASTIncrement increment)
 	{
 		increment.getExpr().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(Modulus modulus)
+	public ASTType visit(ASTModulus modulus)
 	{
 		modulus.getLhs().accept(this);
 		modulus.getRhs().accept(this);
@@ -123,7 +129,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Division division)
+	public ASTType visit(ASTDivision division)
 	{
 		division.getLhs().accept(this);
 		division.getRhs().accept(this);
@@ -131,7 +137,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Equals equals)
+	public ASTType visit(ASTEquals equals)
 	{
 		equals.getLhs().accept(this);
 		equals.getRhs().accept(this);
@@ -139,7 +145,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(LessThan lessThan)
+	public ASTType visit(ASTLessThan lessThan)
 	{
 		lessThan.getLhs().accept(this);
 		lessThan.getRhs().accept(this);
@@ -147,7 +153,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(LessThanOrEqual lessThanOrEqual)
+	public ASTType visit(ASTLessThanOrEqual lessThanOrEqual)
 	{
 		lessThanOrEqual.getLhs().accept(this);
 		lessThanOrEqual.getRhs().accept(this);
@@ -155,7 +161,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(GreaterThan greaterThan)
+	public ASTType visit(ASTGreaterThan greaterThan)
 	{
 		greaterThan.getLhs().accept(this);
 		greaterThan.getRhs().accept(this);
@@ -163,7 +169,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(GreaterThanOrEqual greaterThanOrEqual)
+	public ASTType visit(ASTGreaterThanOrEqual greaterThanOrEqual)
 	{
 		greaterThanOrEqual.getLhs().accept(this);
 		greaterThanOrEqual.getRhs().accept(this);
@@ -171,7 +177,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(And and)
+	public ASTType visit(ASTAnd and)
 	{
 		and.getLhs().accept(this);
 		and.getRhs().accept(this);
@@ -179,7 +185,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Or or)
+	public ASTType visit(ASTOr or)
 	{
 		or.getLhs().accept(this);
 		or.getRhs().accept(this);
@@ -187,28 +193,28 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(True true1)
+	public ASTType visit(ASTTrue true1)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(False false1)
+	public ASTType visit(ASTFalse false1)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(NewArray newArray)
+	public ASTType visit(ASTNewArray newArray)
 	{
 		newArray.getArrayLength().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(NewInstance ni)
+	public ASTType visit(ASTNewInstance ni)
 	{
-		String id = ni.getClassName().getVarID();
+		String id = ni.getClassName().getId();
 		SymbolClass klass = symbolProgram.getClass(id);
 		if (klass == null) {
 			Token sym = ni.getClassName().getToken();
@@ -220,7 +226,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunctionExpr cm)
+	public ASTType visit(ASTCallFunctionExpr cm)
 	{
 		/*
 		 * The call function expression can be written like this 'object.functionName()'. Here is object the instancename,
@@ -231,7 +237,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		}
 
 		for (int i = 0; i < cm.getArgExprListSize(); i++) {
-			Expression e = cm.getArgExprAt(i);
+			ASTExpression e = cm.getArgExprAt(i);
 			e.accept(this);
 		}
 
@@ -239,55 +245,55 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(CallFunctionStat cm)
+	public ASTType visit(ASTCallFunctionStat cm)
 	{
 		for (int i = 0; i < cm.getArgExprListSize(); i++) {
-			Expression e = cm.getArgExprAt(i);
+			ASTExpression e = cm.getArgExprAt(i);
 			e.accept(this);
 		}
 		return null;
 	}
 
 	@Override
-	public Type visit(FunctionType functionType)
+	public ASTType visit(ASTFunctionType functionType)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IntType intType)
+	public ASTType visit(ASTIntType intType)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(StringType stringType)
+	public ASTType visit(ASTStringType stringType)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(VoidType voidType)
+	public ASTType visit(ASTVoidType voidType)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(BooleanType booleanType)
+	public ASTType visit(ASTBooleanType booleanType)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(IntArrayType intArrayType)
+	public ASTType visit(ASTIntArrayType intArrayType)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Identifier identifier)
+	public ASTType visit(ASTIdentifier identifier)
 	{
-		String id = identifier.getVarID();
+		String id = identifier.getId();
 		SymbolVariable var = symbolProgram.getVariable(id, symbolClass, symbolFunction);
 
 		if (var == null) {
@@ -300,9 +306,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IdentifierType identifierType)
+	public ASTType visit(ASTIdentifierType identifierType)
 	{
-		String id = identifierType.getVarID();
+		String id = identifierType.getId();
 		SymbolClass klass = symbolProgram.getClass(id);
 		if (klass == null) {
 			Token sym = identifierType.getToken();
@@ -314,9 +320,9 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(IdentifierExpr identifierExpr)
+	public ASTType visit(ASTIdentifierExpr identifierExpr)
 	{
-		String id = identifierExpr.getVarID();
+		String id = identifierExpr.getId();
 		SymbolVariable var = symbolProgram.getVariable(id, symbolClass, symbolFunction);
 		if (var == null) {
 			Token sym = identifierExpr.getToken();
@@ -327,23 +333,23 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 		return null;
 	}
 
-	public void checkVariable(Variable varDecl)
+	public void checkVariable(ASTVariable varDecl)
 	{
-		String id = varDecl.getId().getVarID();
+		String id = varDecl.getId().getId();
 		
 		varDecl.getType().accept(this);
 		varDecl.getId().accept(this);
 	}
 
 	@Override
-	public Type visit(Variable varDeclNoInit)
+	public ASTType visit(ASTVariable varDeclNoInit)
 	{	
 		checkVariable(varDeclNoInit);
 		return null;
 	}
 	
 	@Override
-	public Type visit(VariableInit varDeclInit)
+	public ASTType visit(ASTVariableInit varDeclInit)
 	{
 		checkVariable(varDeclInit);
 		varDeclInit.getExpr().accept(this);
@@ -351,15 +357,15 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Argument ad)
+	public ASTType visit(ASTArgument ad)
 	{
 		ad.getId().accept(this);
 		return null;
 	}
 
-	public void checkFunction(Function functionDecl)
+	public void checkFunction(ASTFunction functionDecl)
 	{
-		String functionName = functionDecl.getId().getVarID();
+		String functionName = functionDecl.getId().getId();
 
 		if (hsymbolFunction.contains(functionName)) {
 			return;
@@ -391,7 +397,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Function functionDecl)
+	public ASTType visit(ASTFunction functionDecl)
 	{
 		checkFunction(functionDecl);
 		symbolFunction = null;
@@ -399,7 +405,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(FunctionReturn functionReturn)
+	public ASTType visit(ASTFunctionReturn functionReturn)
 	{
 		checkFunction(functionReturn);
 		functionReturn.getReturnExpr().accept(this);
@@ -408,7 +414,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(Program program)
+	public ASTType visit(ASTProgram program)
 	{
 		for (int i = 0; i < program.getIncludeListSize(); i++) {
 			program.getIncludeDeclAt(i).accept(this);
@@ -438,14 +444,14 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ReturnStatement returnStatement)
+	public ASTType visit(ASTReturnStatement returnStatement)
 	{
 		returnStatement.getReturnExpr().accept(this);
 		return null;
 	}
 
 	@Override
-	public Type visit(ArrayIndexExpr ia)
+	public ASTType visit(ASTArrayIndexExpr ia)
 	{
 		ia.getArray().accept(this);
 		ia.getIndex().accept(this);
@@ -453,7 +459,7 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(ArrayAssign aa)
+	public ASTType visit(ASTArrayAssign aa)
 	{
 		aa.getIdentifier().accept(this);
 		aa.getE1().accept(this);
@@ -462,15 +468,15 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 
 	@Override
-	public Type visit(StringLiteral stringLiteral)
+	public ASTType visit(ASTStringLiteral stringLiteral)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Class cd)
+	public ASTType visit(ASTClass cd)
 	{
-		String id = cd.getId().getVarID();
+		String id = cd.getId().getId();
 		if (hsymbolClass.contains(id)) { 
 			return null;
 		} else {
@@ -500,19 +506,19 @@ public class NameAnalyserTreeVisitor implements Visitor<Type>
 	}
 	
 	@Override
-	public Type visit(Enumeration enumDecl)
+	public ASTType visit(ASTEnumeration enumDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(Interface interDecl)
+	public ASTType visit(ASTInterface interDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public Type visit(ForLoop forLoop)
+	public ASTType visit(ASTForLoop forLoop)
 	{
 		return null;
 	}

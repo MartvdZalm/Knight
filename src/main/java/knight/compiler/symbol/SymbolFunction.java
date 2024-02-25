@@ -4,7 +4,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import knight.compiler.ast.Type;
+import knight.compiler.ast.types.ASTType;
 import knight.compiler.semantics.Binding;
 
 public class SymbolFunction extends Binding
@@ -13,7 +13,7 @@ public class SymbolFunction extends Binding
 	private Vector<SymbolVariable> params;
 	private Hashtable<String, SymbolVariable> variables;
 
-	public SymbolFunction(String id, Type type)
+	public SymbolFunction(String id, ASTType type)
 	{
 		super(type);
 		this.id = id;
@@ -26,7 +26,7 @@ public class SymbolFunction extends Binding
 		return id;
 	}
 
-	public boolean addParam(String id, Type type)
+	public boolean addParam(String id, ASTType type)
 	{
 		if (containsParam(id)) {
 			return false;
@@ -50,7 +50,7 @@ public class SymbolFunction extends Binding
 		}
 	}
 
-	public boolean addVariable(String id, Type type)
+	public boolean addVariable(String id, ASTType type)
 	{
 		if (containsVariable(id)) {
 			return false;

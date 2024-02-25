@@ -4,8 +4,14 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.*;
 
+import knight.compiler.ast.declarations.*;
+import knight.compiler.ast.expressions.*;
+import knight.compiler.ast.expressions.operations.*;
+import knight.compiler.ast.statements.*;
+import knight.compiler.ast.statements.conditionals.*;
+import knight.compiler.ast.types.*;
 import knight.compiler.ast.*;
-import knight.compiler.ast.Class;
+
 import knight.compiler.semantics.*;
 import knight.compiler.symbol.SymbolClass;
 import knight.compiler.symbol.SymbolFunction;
@@ -13,7 +19,7 @@ import knight.compiler.symbol.SymbolProgram;
 import knight.compiler.symbol.SymbolVariable;
 
 
-public class CodeGenerator implements Visitor<String>
+public class CodeGenerator implements ASTVisitor<String>
 {
 	private SymbolClass currentClass;
 	private SymbolFunction currentFunction;
@@ -43,7 +49,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Assign assign)
+	public String visit(ASTAssign assign)
 	{
 		assign.getExpr().accept(this);
 
@@ -62,7 +68,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Block block)
+	public String visit(ASTBlock block)
 	{
 		for (int i = 0; i < block.getStatListSize(); i++) {
 			block.getStatAt(i).accept(this);
@@ -72,7 +78,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(IfThenElse ifThenElse)
+	public String visit(ASTIfThenElse ifThenElse)
 	{
 		ifThenElse.getExpr().accept(this);
 		ifThenElse.getThen().accept(this);
@@ -85,13 +91,13 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Skip skip)
+	public String visit(ASTSkip skip)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(While w)
+	public String visit(ASTWhile w)
 	{
 		text.append("while: \n");
 		w.getBody().accept(this);
@@ -101,7 +107,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(IntLiteral intLiteral)
+	public String visit(ASTIntLiteral intLiteral)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -111,7 +117,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Plus plus)
+	public String visit(ASTPlus plus)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -122,7 +128,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Minus minus)
+	public String visit(ASTMinus minus)
 	{	
 		StringBuilder sb = new StringBuilder();
 
@@ -133,7 +139,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Times times)
+	public String visit(ASTTimes times)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -144,7 +150,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Division division)
+	public String visit(ASTDivision division)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -155,7 +161,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Equals equals)
+	public String visit(ASTEquals equals)
 	{
 		text.append("movl " + equals.getLhs() + ", %eax\n");
 		text.append("cmpl $" + equals.getRhs().accept(this) + ", %eax\n");
@@ -165,12 +171,12 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(LessThan lessThan)
+	public String visit(ASTLessThan lessThan)
 	{
-		Expression lhsExpr = lessThan.getLhs();
+		ASTExpression lhsExpr = lessThan.getLhs();
 
-		if (lhsExpr instanceof IdentifierExpr) {
-			IdentifierExpr lhs = (IdentifierExpr) lhsExpr;
+		if (lhsExpr instanceof ASTIdentifierExpr) {
+			ASTIdentifierExpr lhs = (ASTIdentifierExpr) lhsExpr;
 			Binding b = lhs.getB();
 			int lvIndex = getLocalVarIndex(b);
 
@@ -186,49 +192,49 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(LessThanOrEqual lessThanOrEqual)
+	public String visit(ASTLessThanOrEqual lessThanOrEqual)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(GreaterThan greaterThan)
+	public String visit(ASTGreaterThan greaterThan)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(GreaterThanOrEqual greaterThanOrEqual)
+	public String visit(ASTGreaterThanOrEqual greaterThanOrEqual)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(And n)
+	public String visit(ASTAnd n)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(Or n)
+	public String visit(ASTOr n)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(True true1)
+	public String visit(ASTTrue true1)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(False false1)
+	public String visit(ASTFalse false1)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(IdentifierExpr id)
+	public String visit(ASTIdentifierExpr id)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -241,19 +247,19 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(NewArray na)
+	public String visit(ASTNewArray na)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(NewInstance ni)
+	public String visit(ASTNewInstance ni)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(CallFunctionExpr callFunctionExpr)
+	public String visit(ASTCallFunctionExpr callFunctionExpr)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -276,7 +282,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(CallFunctionStat callFunctionStat)
+	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -332,43 +338,43 @@ public class CodeGenerator implements Visitor<String>
 
 
 	@Override
-	public String visit(IntType intType)
+	public String visit(ASTIntType intType)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(StringType stringType)
+	public String visit(ASTStringType stringType)
 	{	
 		return null;
 	}
 
 	@Override
-	public String visit(VoidType voidType)
+	public String visit(ASTVoidType voidType)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(BooleanType booleanType)
+	public String visit(ASTBooleanType booleanType)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(IntArrayType intArrayType)
+	public String visit(ASTIntArrayType intArrayType)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(IdentifierType refT)
+	public String visit(ASTIdentifierType refT)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(Argument argDecl)
+	public String visit(ASTArgument argDecl)
 	{
 		Binding b = argDecl.getId().getB();
 		setLocalArgIndex(b);
@@ -377,31 +383,31 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Identifier identifier)
+	public String visit(ASTIdentifier identifier)
 	{
-		return "\"" + identifier.getVarID() + "\"";
+		return "\"" + identifier.getId() + "\"";
 	}
 
 	@Override
-	public String visit(ArrayIndexExpr ia)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ArrayAssign aa)
+	public String visit(ASTArrayIndexExpr ia)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(StringLiteral stringLiteral)
+	public String visit(ASTArrayAssign aa)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(ASTStringLiteral stringLiteral)
 	{
 		return "\"" + stringLiteral.getValue() + "\"";
 	}
 
 	@Override
-	public String visit(Variable variable)
+	public String visit(ASTVariable variable)
 	{
 		bss.append(".lcomm " + variable.getId() + " 4\n");
 
@@ -409,18 +415,18 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(VariableInit varDeclInit)
+	public String visit(ASTVariableInit varDeclInit)
 	{
 		StringBuilder sb = new StringBuilder();
 
 		if (currentFunction == null) {
 			data.append(varDeclInit.getId() + ":\n");
 
-			Expression expr = varDeclInit.getExpr();
+			ASTExpression expr = varDeclInit.getExpr();
 
-			data.append(expr.type() + " " + varDeclInit.getExpr().accept(this) + "\n");
+			data.append(expr.getType() + " " + varDeclInit.getExpr().accept(this) + "\n");
 			
-			if (expr instanceof Plus) {
+			if (expr instanceof ASTPlus) {
 				text.append("movq %rax, " + varDeclInit.getId() + "\n");
 			}
 		} else {
@@ -430,10 +436,10 @@ public class CodeGenerator implements Visitor<String>
 			int lvIndex = getLocalVarIndex(b);
 
 			// Need to be changed
-			if (varDeclInit.getExpr() instanceof CallFunctionExpr) {
+			if (varDeclInit.getExpr() instanceof ASTCallFunctionExpr) {
 				varDeclInit.getExpr().accept(this);
 				text.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
-			} else if (varDeclInit.getExpr() instanceof IdentifierExpr) {
+			} else if (varDeclInit.getExpr() instanceof ASTIdentifierExpr) {
 				text.append("movq " + varDeclInit.getExpr().accept(this) + ", %rax\n");
 				text.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
 			} else {
@@ -445,13 +451,13 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Function functionVoid)
+	public String visit(ASTFunction functionVoid)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(FunctionReturn functionReturn)
+	public String visit(ASTFunctionReturn functionReturn)
 	{
 		localArg = 0;
 	    localVar = 0;
@@ -481,12 +487,12 @@ public class CodeGenerator implements Visitor<String>
 	        functionReturn.getStatementDeclAt(i).accept(this);
 	    }
 
-	    if (functionReturn.getId().getVarID().equals("main")) {
+	    if (functionReturn.getId().getId().equals("main")) {
 	        text.append("movq $60, %rax\n");
 	        text.append("movq " + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
 	        text.append("syscall\n");
 	    } else {
-	    	if (functionReturn.getReturnExpr() instanceof IdentifierExpr) {
+	    	if (functionReturn.getReturnExpr() instanceof ASTIdentifierExpr) {
 	    		text.append("movq " + functionReturn.getReturnExpr().accept(this) + ", %rax" + "\n");
 	    	} else {
 	    		functionReturn.getReturnExpr().accept(this);
@@ -508,13 +514,13 @@ public class CodeGenerator implements Visitor<String>
 
 
 	@Override
-	public String visit(Class classDecl)
+	public String visit(ASTClass classDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(Include include)
+	public String visit(ASTInclude include)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -524,7 +530,7 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(Program program)
+	public String visit(ASTProgram program)
 	{
 		StringBuilder sb = new StringBuilder();
 
@@ -639,43 +645,43 @@ public class CodeGenerator implements Visitor<String>
 	}
 
 	@Override
-	public String visit(ReturnStatement returnStatement)
+	public String visit(ASTReturnStatement returnStatement)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(Increment increment)
+	public String visit(ASTIncrement increment)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(Modulus modulus)
+	public String visit(ASTModulus modulus)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(FunctionType functionType)
+	public String visit(ASTFunctionType functionType)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(Enumeration enumDecl)
+	public String visit(ASTEnumeration enumDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(Interface interDecl)
+	public String visit(ASTInterface interDecl)
 	{
 		return null;
 	}
 
 	@Override
-	public String visit(ForLoop forLoop)
+	public String visit(ASTForLoop forLoop)
 	{
 		return null;
 	}

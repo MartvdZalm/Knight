@@ -3,8 +3,8 @@ package knight;
 import java.io.*;
 
 import knight.preprocessor.PreProcessor;
-import knight.compiler.ast.Program;
-import knight.compiler.ast.Tree;
+import knight.compiler.ast.declarations.ASTProgram;
+import knight.compiler.ast.AST;
 import knight.compiler.parser.Parser;
 import knight.compiler.semantics.NameError;
 import knight.compiler.semantics.SemanticErrors;
@@ -40,24 +40,24 @@ public class Main
 			BufferedReader bufferedReader = preProcessor.process();
 
 			Parser p = new Parser(bufferedReader);
-			Tree tree = p.parse();
+			AST tree = p.parse();
 
 			if (tree != null) {
 				BuildSymbolProgramVisitor bspv = new BuildSymbolProgramVisitor();
-				bspv.visit((Program) tree);
+				bspv.visit((ASTProgram) tree);
 
 				SymbolProgram symbolProgram = bspv.getSymbolProgram();
 				
 				NameAnalyserTreeVisitor natv = new NameAnalyserTreeVisitor(symbolProgram);
-				natv.visit((Program) tree);  
+				natv.visit((ASTProgram) tree);  
 
 				TypeAnalyser ta = new TypeAnalyser(symbolProgram);
-				ta.visit((Program) tree);
+				ta.visit((ASTProgram) tree);
 
 				if (SemanticErrors.errorList.size() == 0) {
 					String path = getFileDirPath(filename);
 					CodeGenerator cg = new CodeGenerator(path, filename);
-					cg.visit((Program) tree);
+					cg.visit((ASTProgram) tree);
 
 					if (!containsFlag(args, "-asm")) {
 						compileAssemblyFile(args, path, filename);

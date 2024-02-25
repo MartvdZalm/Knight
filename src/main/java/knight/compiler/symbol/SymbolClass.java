@@ -3,8 +3,8 @@ package knight.compiler.symbol;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import knight.compiler.ast.IdentifierType;
-import knight.compiler.ast.Type;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTType;
 import knight.compiler.semantics.Binding;
 
 public class SymbolClass extends Binding
@@ -16,7 +16,7 @@ public class SymbolClass extends Binding
 
 	public SymbolClass(String id, String p)
 	{
-		super(new IdentifierType(null, id));
+		super(new ASTIdentifierType(null, id));
 		this.id = id;
 		parent = p;
 
@@ -29,12 +29,12 @@ public class SymbolClass extends Binding
 		return id;
 	}
 
-	public Type type()
+	public ASTType type()
 	{
 		return type;
 	}
 
-	public boolean addFunction(String id, Type type)
+	public boolean addFunction(String id, ASTType type)
 	{
 		if (containsFunction(id)) {
 			return false;
@@ -58,7 +58,7 @@ public class SymbolClass extends Binding
 		}
 	}
 
-	public boolean addVariable(String id, Type type)
+	public boolean addVariable(String id, ASTType type)
 	{
 		if (containsVariable(id)) {
 			return false;

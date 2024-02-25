@@ -4,10 +4,17 @@ import java.io.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import java.util.*;
+import java.lang.reflect.Method;
+
+import knight.compiler.ast.declarations.*;
+import knight.compiler.ast.expressions.*;
+import knight.compiler.ast.expressions.operations.*;
+import knight.compiler.ast.statements.*;
+import knight.compiler.ast.statements.conditionals.*;
+import knight.compiler.ast.types.*;
+import knight.compiler.ast.*;
 
 import knight.compiler.parser.*;
-import knight.compiler.ast.*;
-import knight.compiler.ast.Class;
 import knight.compiler.lexer.*;
 import knight.builder.code.*;
 
@@ -19,7 +26,7 @@ public class ParserTest
         Parser parser = getParser("include example");
         Lexer lexer = parser.lexer;
         parser.token = lexer.nextToken();        
-        Include include = parser.parseInclude();
+        ASTInclude include = parser.parseInclude();
         
         assertNotNull(include);
         assertEquals("example", include.getId().toString());
@@ -43,7 +50,7 @@ public class ParserTest
 		Parser parser = getParser("class HelloWorld {}");
 		Lexer lexer = parser.lexer;
 		parser.token = lexer.nextToken();
-		Class classDecl = parser.parseClass();
+		ASTClass classDecl = parser.parseClass();
 
 		assertNotNull(classDecl);
 		assertEquals("HelloWorld", classDecl.getId().toString());
@@ -76,7 +83,7 @@ public class ParserTest
     	Parser parser = getParser(codeBuilderClass.toString());
     	Lexer lexer = parser.lexer;
     	parser.token = lexer.nextToken();
-    	Class classDecl = parser.parseClass();
+    	ASTClass classDecl = parser.parseClass();
 
     	assertNotNull(classDecl);
     	assertEquals("MyClass", classDecl.getId().toString());
@@ -94,16 +101,16 @@ public class ParserTest
     	Parser parser = getParser(codeBuilderFunction.toString());
     	Lexer lexer = parser.lexer;
     	parser.token = lexer.nextToken();
-    	Function functionDecl = parser.parseFunction();
+    	ASTFunction functionDecl = parser.parseFunction();
 
     	assertNotNull(functionDecl);
-    	assertTrue("FunctionDecl is not instanceof FunctionReturn", functionDecl instanceof FunctionReturn);
+    	assertTrue("FunctionDecl is not instanceof FunctionReturn", functionDecl instanceof ASTFunctionReturn);
     	assertEquals("MyFunction", functionDecl.getId().toString());
-    	assertTrue("ReturnType is not instanceof IntType", functionDecl.getReturnType() instanceof IntType);
+    	assertTrue("ReturnType is not instanceof IntType", functionDecl.getReturnType() instanceof ASTIntType);
     	assertEquals(0, functionDecl.getVariableListSize());
     	assertEquals(0, functionDecl.getStatementListSize());
 
-    	FunctionReturn functionReturnDecl = (FunctionReturn) functionDecl;
+    	ASTFunctionReturn functionReturnDecl = (ASTFunctionReturn) functionDecl;
     	assertNotNull(functionReturnDecl.getReturnExpr());
     }
 
@@ -120,10 +127,10 @@ public class ParserTest
     	Parser parser = this.getParser(codeBuilderFunction.toString());
     	Lexer lexer = parser.lexer;
     	parser.token = lexer.nextToken();
-    	Function functionDecl = parser.parseFunction();
+    	ASTFunction functionDecl = parser.parseFunction();
 
     	assertNotNull(functionDecl);
-    	assertTrue("FunctionDecl is not instanceof Function", functionDecl instanceof Function);
+    	assertTrue("FunctionDecl is not instanceof Function", functionDecl instanceof ASTFunction);
     	assertEquals("MyFunction", functionDecl.getId().toString());
     	assertEquals(2, functionDecl.getStatementListSize());
     	assertEquals(3, functionDecl.getVariableListSize());
@@ -138,10 +145,10 @@ public class ParserTest
     	Parser parser = this.getParser(codeBuilderVariable.toString());
     	Lexer lexer = parser.lexer;
     	parser.token = lexer.nextToken();
-    	Variable variableDecl = parser.parseVariable();
+    	ASTVariable variableDecl = parser.parseVariable();
 
     	assertNotNull(variableDecl);
-    	assertTrue("Variable is not instanceof Variable", variableDecl instanceof Variable);
+    	assertTrue("Variable is not instanceof Variable", variableDecl instanceof ASTVariable);
     	assertEquals("myVariable", variableDecl.getId().toString());
     }
 
@@ -154,13 +161,13 @@ public class ParserTest
     	Parser parser = this.getParser(codeBuilderVariableInit.toString());
     	Lexer lexer = parser.lexer;
     	parser.token = lexer.nextToken();
-    	Variable variableDecl = parser.parseVariable();
+    	ASTVariable variableDecl = parser.parseVariable();
 
     	assertNotNull(variableDecl);
-    	assertTrue("VariableDecl is not instanceof VariableInit", variableDecl instanceof VariableInit);
+    	assertTrue("VariableDecl is not instanceof VariableInit", variableDecl instanceof ASTVariableInit);
     	assertEquals("myVariable", variableDecl.getId().toString());
 
-    	VariableInit variableInitDecl = (VariableInit) variableDecl;
+    	ASTVariableInit variableInitDecl = (ASTVariableInit) variableDecl;
     	assertNotNull(variableInitDecl.getExpr());
     }
 
@@ -174,10 +181,44 @@ public class ParserTest
     	Parser parser = this.getParser(codeBuilderReturnStatement.toString());
     	Lexer lexer = parser.lexer;
     	parser.token = lexer.nextToken();
-    	Expression expression = parser.parseReturnExpr();
+    	ASTExpression expression = parser.parseReturnExpr();
 
     	assertNotNull(expression);
+    	assertTrue("Expression is not instanceof Times", expression instanceof ASTTimes);
     }
+
+    @Test
+	public void testParseExpression() throws ParseException
+	{
+	    assertParseExpression("5 * 6;", ASTTimes.class, 5, 6);
+	    assertParseExpression("34 + 23;", ASTPlus.class, 34, 23);
+	    assertParseExpression("10 / 2;", ASTDivision.class, 10, 2);
+	    assertParseExpression("100 - 23;", ASTMinus.class, 100, 23);
+	}
+
+	private void assertParseExpression(String input, Class<? extends ASTExpression> expectedClass, int lhsValue, int rhsValue) throws ParseException
+    {
+	    Parser parser = this.getParser(input);
+	    Lexer lexer = parser.lexer;
+	    parser.token = lexer.nextToken();
+	    ASTExpression expression = parser.parseExpression();
+
+	    assertNotNull(expression);
+	    assertTrue("Expression is not an instance of " + expectedClass.getSimpleName(), expectedClass.isInstance(expression));
+
+	    try {
+	        Method getLhsMethod = expectedClass.getMethod("getLhs");
+	        Method getRhsMethod = expectedClass.getMethod("getRhs");
+
+	        ASTIntLiteral lhs = (ASTIntLiteral) getLhsMethod.invoke(expression);
+	        ASTIntLiteral rhs = (ASTIntLiteral) getRhsMethod.invoke(expression);
+
+	        assertEquals(lhsValue, lhs.getValue());
+	        assertEquals(rhsValue, rhs.getValue());
+	    } catch (Exception e) {
+	        e.getStackTrace();
+	    }
+	}
 
     private Parser getParser(String input)
 	{

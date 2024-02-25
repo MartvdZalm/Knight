@@ -5,11 +5,18 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import knight.compiler.parser.*;
+
+import knight.compiler.ast.declarations.*;
+import knight.compiler.ast.expressions.*;
+import knight.compiler.ast.expressions.operations.*;
+import knight.compiler.ast.statements.*;
+import knight.compiler.ast.statements.conditionals.*;
+import knight.compiler.ast.types.*;
 import knight.compiler.ast.*;
 
 public class ASTTest
 {
-    Program program;
+    ASTProgram program;
 
 	public ASTTest()
 	{
@@ -19,8 +26,8 @@ public class ASTTest
 			BufferedReader br = new BufferedReader(reader);
 
 			Parser parser = new Parser(br);
-			Tree tree = parser.parse();
-            this.program = (Program) tree;
+			AST tree = parser.parse();
+            this.program = (ASTProgram) tree;
 		} catch(ParseException e) {
 			e.printStackTrace();
 		}
@@ -49,10 +56,10 @@ public class ASTTest
         assertEquals(2, program.getFunctionListSize());
 
         assertEquals("calculate", program.getFunctionDeclAt(0).getId().toString());
-        assertTrue(program.getFunctionDeclAt(0).getReturnType() instanceof IntType);
+        assertTrue(program.getFunctionDeclAt(0).getReturnType() instanceof ASTIntType);
 
         assertEquals("main", program.getFunctionDeclAt(1).getId().toString());
-        assertTrue(program.getFunctionDeclAt(1).getReturnType() instanceof IntType);
+        assertTrue(program.getFunctionDeclAt(1).getReturnType() instanceof ASTIntType);
     }
 
     @Test
@@ -61,18 +68,18 @@ public class ASTTest
         assertEquals(2, program.getVariableListSize());
 
         assertEquals("num1", program.getVariableDeclAt(0).getId().toString());
-        assertTrue(program.getVariableDeclAt(0) instanceof VariableInit);
+        assertTrue(program.getVariableDeclAt(0) instanceof ASTVariableInit);
 
         assertEquals("result", program.getVariableDeclAt(1).getId().toString());
-        assertTrue(program.getVariableDeclAt(1) instanceof Variable);
+        assertTrue(program.getVariableDeclAt(1) instanceof ASTVariable);
     }
 
     @Test
     public void ifStatementTest()
     {
-        Function mainFunction = program.getFunctionDeclAt(1);
+        ASTFunction mainFunction = program.getFunctionDeclAt(1);
 
         assertEquals(1, mainFunction.getStatementListSize());
-        assertTrue(mainFunction.getStatementDeclAt(0) instanceof IfThenElse);
+        assertTrue(mainFunction.getStatementDeclAt(0) instanceof ASTIfThenElse);
     }
 }
