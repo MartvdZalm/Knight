@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ * 
+ * Copyright (c) 2023, Mart van der Zalm
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package knight.compiler.visitor;
 
 import java.io.File;
@@ -18,7 +42,12 @@ import knight.compiler.symbol.SymbolFunction;
 import knight.compiler.symbol.SymbolProgram;
 import knight.compiler.symbol.SymbolVariable;
 
-
+/*
+ * File: CodeGenerator.java
+ * @author: Mart van der Zalm
+ * Date: 2024-01-06
+ * Description:
+ */
 public class CodeGenerator implements ASTVisitor<String>
 {
 	private SymbolClass currentClass;
@@ -34,6 +63,8 @@ public class CodeGenerator implements ASTVisitor<String>
 
 	private int stack;
 	private int localStack;
+
+	private int counter;
 
 	StringBuilder data = new StringBuilder();
 	StringBuilder bss = new StringBuilder();
@@ -291,7 +322,14 @@ public class CodeGenerator implements ASTVisitor<String>
 		}
 
 		for (int i = Math.min(callFunctionStat.getArgExprListSize(), 6) - 1; i >= 0; i--) {
-			text.append("movq " + callFunctionStat.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
+			if (callFunctionStat.getArgExprAt(i) instanceof ASTStringLiteral) {
+				data.append(".LC" + counter + ":\n");
+				data.append(".string " + callFunctionStat.getArgExprAt(i).accept(this) + "\n");
+				text.append("movq .LC" + counter + ", %" + getArgumentRegister(i) + "\n");
+				counter++;
+			} else {
+				text.append("movq " + callFunctionStat.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
+			}
 		}
 
 		text.append("call " + callFunctionStat.getMethodId() + "\n");
@@ -302,25 +340,6 @@ public class CodeGenerator implements ASTVisitor<String>
 		}
 
 		return sb.toString();
-
-		// for (int i = callFunctionStat.getArgExprListSize() - 1; i >= 0; i--) {
-
-		// 	Expression expr = callFunctionStat.getArgExprAt(i);
-
-		// 	if (expr instanceof StringLiteral) {
-		// 		data.append(".LC" + counter + ":\n");
-		// 		data.append(".string " + expr.accept(this) + "\n");
-		// 		// text.append("push .LC" + counter + "(%rip)\n");
-		// 		text.append("leaq .LC" + counter + ", %r9\n");
-		// 		counter++;
-		// 	} else if (expr instanceof IdentifierExpr) {
-		// 		text.append("leaq " + expr.accept(this) + ", %r9\n");
-		// 	}
-		// }
-		// text.append("call " + callFunctionStat.getMethodId() + "\n");
-		// text.append("movq $0, %r9\n");
-
-		// return sb.toString();
 	}
 
 	private String getArgumentRegister(int index)
@@ -554,40 +573,40 @@ public class CodeGenerator implements ASTVisitor<String>
 
 		sb.append(data).append(bss).append(text);
 
-		// sb.append(".globl length\n");
-		// sb.append(".type length, @function\n");
-		// sb.append("length:\n");
-		// sb.append("pushq %rbp\n");
-		// sb.append("pushq %rax\n");
-		// sb.append("movq %rsp, %rbp\n");
-		// sb.append("xor %rcx, %rcx\n");
-		// sb.append("movq 16(%rbp), %rax\n");
-		// sb.append("loop:\n");
-		// sb.append("movb (%rax), %dl\n");
-		// sb.append("test %dl, %dl\n");
-		// sb.append("jz end_loop\n");
-		// sb.append("inc %rcx\n");
-		// sb.append("inc %rax\n");
-		// sb.append("jmp loop\n");
-		// sb.append("end_loop:\n");
-		// sb.append("popq %rax\n");
-		// sb.append("popq %rbp\n");
-		// sb.append("ret\n");
+		sb.append(".globl length\n");
+		sb.append(".type length, @function\n");
+		sb.append("length:\n");
+		sb.append("pushq %rbp\n");
+		sb.append("pushq %rax\n");
+		sb.append("movq %rsp, %rbp\n");
+		sb.append("xor %rcx, %rcx\n");
+		sb.append("movq 16(%rbp), %rax\n");
+		sb.append("loop:\n");
+		sb.append("movb (%rax), %dl\n");
+		sb.append("test %dl, %dl\n");
+		sb.append("jz end_loop\n");
+		sb.append("inc %rcx\n");
+		sb.append("inc %rax\n");
+		sb.append("jmp loop\n");
+		sb.append("end_loop:\n");
+		sb.append("popq %rax\n");
+		sb.append("popq %rbp\n");
+		sb.append("ret\n");
 
-		// sb.append(".globl print\n");
-		// sb.append(".type print, @function\n");
-		// sb.append("print:\n");
-		// sb.append("pushq %rbp\n");
-		// sb.append("movq %rsp, %rbp\n");
-		// sb.append("movq $1, %rax\n");
-		// sb.append("pushq %r9\n");
-		// sb.append("call length\n");
-		// sb.append("movq %r9, %rsi\n");
-		// sb.append("movq %rcx, %rdx\n");
-		// sb.append("syscall\n");
-		// sb.append("movq %rbp, %rsp\n");
-		// sb.append("pop %rbp\n");
-		// sb.append("ret\n");
+		sb.append(".globl print\n");
+		sb.append(".type print, @function\n");
+		sb.append("print:\n");
+		sb.append("pushq %rbp\n");
+		sb.append("movq %rsp, %rbp\n");
+		sb.append("movq $1, %rax\n");
+		sb.append("pushq %r9\n");
+		sb.append("call length\n");
+		sb.append("movq %r9, %rsi\n");
+		sb.append("movq %rcx, %rdx\n");
+		sb.append("syscall\n");
+		sb.append("movq %rbp, %rsp\n");
+		sb.append("pop %rbp\n");
+		sb.append("ret\n");
 
 		write(sb.toString());
 
