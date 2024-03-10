@@ -42,9 +42,9 @@ public class ASTFunctionReturn extends ASTFunction
 {
     private ASTExpression returnExpr;
 
-    public ASTFunctionReturn(Token token, ASTType returnType, ASTIdentifier id, List<ASTArgument> argumentList, List<ASTVariable> variableList, List<ASTStatement> statementList, ASTExpression returnExpr)
+    public ASTFunctionReturn(Token token, ASTType returnType, ASTIdentifier id, List<ASTArgument> argumentList, List<ASTVariable> variableList, List<ASTStatement> statementList, List<ASTInlineASM> inlineASMList, ASTExpression returnExpr)
     {
-		super(token, returnType, id, argumentList, variableList, statementList);
+		super(token, returnType, id, argumentList, variableList, statementList, inlineASMList);
         this.returnExpr = returnExpr;
     }
 

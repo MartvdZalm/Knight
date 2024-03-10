@@ -25,6 +25,7 @@
 package knight.preprocessor;
 
 import java.io.*;
+import java.nio.file.*;
 
 /*
  * File: PreProcessor.java
@@ -52,15 +53,24 @@ public class PreProcessor
         String word = nextWord();
 
         while (word != null) {
-
             if (word.equals("include")) {
+                String token = nextWord();
 
-                String filename = nextWord();
-                String includedContent = processInclude(filename);
+                String includedContent = "";
+                if (token.contains("<")) {
+                    String path = token.replace("<", "/").replace(".", "/");
+                    int lastIndex = path.lastIndexOf(">");
+                    if (lastIndex != -1) {
+                        path = path.substring(0, lastIndex) + ".knight";
+                    }
 
-                source = replaceInclude(source, filename, includedContent);
+                    includedContent = processIncludeLibrary(path);
+                } else {
+                    includedContent = processInclude(token);
+                }                
+
+                source = replaceInclude(source, token, includedContent);
             }
-
             word = nextWord();
         }
 
@@ -88,12 +98,30 @@ public class PreProcessor
         return word;
     }
 
+    private String processIncludeLibrary(String path)
+    {
+        StringBuilder includedContent = new StringBuilder();
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("src/main/java/knight/share" + path));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                includedContent.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return includedContent.toString();
+    }
+
     private String processInclude(String filename)
     {
         StringBuilder includedContent = new StringBuilder();
 
         try {
-        	BufferedReader reader = new BufferedReader(new FileReader(filename + ".knight"));
+        	BufferedReader reader = new BufferedReader(new FileReader(filename));
 
             String line;
             while ((line = reader.readLine()) != null) {

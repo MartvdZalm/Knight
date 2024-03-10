@@ -1,11 +1,8 @@
-include calculator
+include <knight.io.Print>
 
 fn main(): int
 {   
-    times(10, 10);
-    plus(5, 5);
-
-    print("Hello World");
+    print("Hello World!!\n");
 
     ret 0;
 }

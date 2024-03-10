@@ -325,7 +325,7 @@ public class CodeGenerator implements ASTVisitor<String>
 			if (callFunctionStat.getArgExprAt(i) instanceof ASTStringLiteral) {
 				data.append(".LC" + counter + ":\n");
 				data.append(".string " + callFunctionStat.getArgExprAt(i).accept(this) + "\n");
-				text.append("movq .LC" + counter + ", %" + getArgumentRegister(i) + "\n");
+				text.append("movq $.LC" + counter + ", %" + getArgumentRegister(i) + "\n");
 				counter++;
 			} else {
 				text.append("movq " + callFunctionStat.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
@@ -472,6 +472,43 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTFunction functionVoid)
 	{
+		localArg = 0;
+	    localVar = 0;
+
+	    currentFunction = (SymbolFunction) functionVoid.getId().getB();
+	    text.append(".globl " + functionVoid.getId() + "\n");
+	    text.append(".type " + functionVoid.getId() + ", @function\n");
+	    text.append(functionVoid.getId() + ":\n");
+	    text.append("pushq %rbp\n");
+	    text.append("movq %rsp, %rbp\n");
+
+	    for (int i = 0; i < Math.min(functionVoid.getArgumentListSize(), 6); i++) {
+	    	functionVoid.getArgumentDeclAt(i).accept(this);
+	        text.append("movq %" + getArgumentRegister(i) + ", -" + getLocalVariableReference(i) + "\n");
+	    }
+
+	    for (int i = 6; i < functionVoid.getArgumentListSize(); i++) {
+	    	functionVoid.getArgumentDeclAt(i).accept(this);
+	        text.append("movq " + (i - 6) * 8 + "(%rbp), -" + getLocalVariableReference(i) + "\n");
+	    }
+
+	    for (int i = 0; i < functionVoid.getInlineASMListSize(); i++) {
+	    	functionVoid.getInlineASMAt(i).accept(this);
+	    }
+
+	    for (int i = 0; i < functionVoid.getVariableListSize(); i++) {
+	        functionVoid.getVariableDeclAt(i).accept(this);
+	    }
+
+	    for (int i = 0; i < functionVoid.getStatementListSize(); i++) {
+	        functionVoid.getStatementDeclAt(i).accept(this);
+	    }
+	    	
+        text.append("movq %rbp, %rsp\n");
+        text.append("pop %rbp\n");
+        text.append("ret\n");
+        currentFunction = null;
+
 		return null;
 	}
 
@@ -549,6 +586,15 @@ public class CodeGenerator implements ASTVisitor<String>
 	}
 
 	@Override
+	public String visit(ASTInlineASM inlineASM)
+	{
+		for (int i = 0; i < inlineASM.getLinesSize(); i++) {
+			text.append(inlineASM.getLineAt(i) + "\n");
+		}
+		return null;
+	}
+
+	@Override
 	public String visit(ASTProgram program)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -567,46 +613,15 @@ public class CodeGenerator implements ASTVisitor<String>
 			program.getVariableDeclAt(i).accept(this);
 		}
 
+		for (int i = 0; i < program.getInlineASMListSize(); i++) {
+			program.getInlineASMDeclAt(i).accept(this);
+		}
+
 		for (int i = 0; i < program.getFunctionListSize(); i++) {
 			program.getFunctionDeclAt(i).accept(this);
 		}
 
 		sb.append(data).append(bss).append(text);
-
-		sb.append(".globl length\n");
-		sb.append(".type length, @function\n");
-		sb.append("length:\n");
-		sb.append("pushq %rbp\n");
-		sb.append("pushq %rax\n");
-		sb.append("movq %rsp, %rbp\n");
-		sb.append("xor %rcx, %rcx\n");
-		sb.append("movq 16(%rbp), %rax\n");
-		sb.append("loop:\n");
-		sb.append("movb (%rax), %dl\n");
-		sb.append("test %dl, %dl\n");
-		sb.append("jz end_loop\n");
-		sb.append("inc %rcx\n");
-		sb.append("inc %rax\n");
-		sb.append("jmp loop\n");
-		sb.append("end_loop:\n");
-		sb.append("popq %rax\n");
-		sb.append("popq %rbp\n");
-		sb.append("ret\n");
-
-		sb.append(".globl print\n");
-		sb.append(".type print, @function\n");
-		sb.append("print:\n");
-		sb.append("pushq %rbp\n");
-		sb.append("movq %rsp, %rbp\n");
-		sb.append("movq $1, %rax\n");
-		sb.append("pushq %r9\n");
-		sb.append("call length\n");
-		sb.append("movq %r9, %rsi\n");
-		sb.append("movq %rcx, %rdx\n");
-		sb.append("syscall\n");
-		sb.append("movq %rbp, %rsp\n");
-		sb.append("pop %rbp\n");
-		sb.append("ret\n");
 
 		write(sb.toString());
 

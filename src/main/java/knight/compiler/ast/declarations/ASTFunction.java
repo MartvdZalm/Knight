@@ -45,8 +45,9 @@ public class ASTFunction extends AST
     private List<ASTArgument> argumentList;
     private List<ASTVariable> variableList;
 	private List<ASTStatement> statementList;
+	private List<ASTInlineASM> inlineASMList;
 
-    public ASTFunction(Token token, ASTType returnType, ASTIdentifier id, List<ASTArgument> argumentList, List<ASTVariable> variableList, List<ASTStatement> statementList)
+    public ASTFunction(Token token, ASTType returnType, ASTIdentifier id, List<ASTArgument> argumentList, List<ASTVariable> variableList, List<ASTStatement> statementList, List<ASTInlineASM> inlineASMList)
     {
         super(token);
         this.returnType = returnType;
@@ -54,6 +55,7 @@ public class ASTFunction extends AST
         this.argumentList = argumentList;
         this.variableList = variableList;
         this.statementList = statementList;
+        this.inlineASMList = inlineASMList;
     }
 
     public ASTType getReturnType()
@@ -81,6 +83,11 @@ public class ASTFunction extends AST
     	return statementList;
     }
 
+    public List<ASTInlineASM> getInlineASMList()
+    {
+    	return inlineASMList;
+    }
+
 	public int getArgumentListSize()
 	{
 		return argumentList.size();
@@ -94,6 +101,11 @@ public class ASTFunction extends AST
 	public int getStatementListSize()
 	{
 		return statementList.size();
+	}
+
+	public int getInlineASMListSize()
+	{
+		return inlineASMList.size();
 	}
 
 	public ASTArgument getArgumentDeclAt(int index)
@@ -116,6 +128,14 @@ public class ASTFunction extends AST
 	{
 		if (index < getStatementListSize()) {
 			return statementList.get(index);
+		}
+		return null;
+	}
+
+	public ASTInlineASM getInlineASMAt(int index)
+	{
+		if (index < getInlineASMListSize()) {
+			return inlineASMList.get(index);
 		}
 		return null;
 	}

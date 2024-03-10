@@ -552,4 +552,10 @@ public class NameAnalyserTreeVisitor implements ASTVisitor<ASTType>
 	{
 		return null;
 	}
+
+	@Override
+	public ASTType visit(ASTInlineASM assembly)
+	{
+		return null;
+	}
 }

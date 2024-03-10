@@ -44,8 +44,9 @@ public class ASTProgram extends AST
 	private List<ASTClass> classList;
 	private List<ASTFunction> functionList;
 	private List<ASTVariable> variableList;
+	private List<ASTInlineASM> inlineASMList;
 
-	public ASTProgram(Token token, List<ASTInclude> includeList, List<ASTEnumeration> enumList, List<ASTInterface> interList, List<ASTClass> classList, List<ASTFunction> functionList, List<ASTVariable> variableList)
+	public ASTProgram(Token token, List<ASTInclude> includeList, List<ASTEnumeration> enumList, List<ASTInterface> interList, List<ASTClass> classList, List<ASTFunction> functionList, List<ASTVariable> variableList, List<ASTInlineASM> inlineASMList)
 	{
 		super(token);
 		this.includeList = includeList;
@@ -54,6 +55,7 @@ public class ASTProgram extends AST
 		this.classList = classList;
 		this.functionList = functionList;
 		this.variableList = variableList;
+		this.inlineASMList = inlineASMList;
 	}
 
 	public List<ASTInclude> getIncludeList()
@@ -86,6 +88,11 @@ public class ASTProgram extends AST
 		return variableList;
 	}
 
+	public List<ASTInlineASM> getInlineASMList()
+	{
+		return inlineASMList;
+	}
+
 	public int getIncludeListSize()
 	{
 		return includeList.size();
@@ -114,6 +121,11 @@ public class ASTProgram extends AST
 	public int getVariableListSize()
 	{
 		return variableList.size();
+	}
+
+	public int getInlineASMListSize()
+	{
+		return inlineASMList.size();
 	}
 
 	public ASTInclude getIncludeDeclAt(int index)
@@ -160,6 +172,14 @@ public class ASTProgram extends AST
 	{
 		if (index < getVariableListSize()) {
 			return variableList.get(index);
+		}
+		return null;
+	}
+
+	public ASTInlineASM getInlineASMDeclAt(int index)
+	{
+		if (index < getInlineASMListSize()) {
+			return inlineASMList.get(index);
 		}
 		return null;
 	}

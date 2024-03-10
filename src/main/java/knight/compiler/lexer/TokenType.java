@@ -69,6 +69,7 @@ public class TokenType
         Symbol.symbol("enum", Tokens.ENUMERATION);
         Symbol.symbol("ext", Tokens.EXTENDS);
         Symbol.symbol("use", Tokens.IMPLEMENTS);
+        Symbol.symbol("asm", Tokens.ASM);
 
         Symbol.symbol("if", Tokens.IF);
         Symbol.symbol("else", Tokens.ELSE);

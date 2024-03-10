@@ -22,75 +22,50 @@
  * SOFTWARE.
  */
 
-package knight.compiler.lexer;
+package knight.compiler.ast.declarations;
+
+import java.util.List;
+
+import knight.compiler.lexer.Token;
+import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTVisitor;
 
 /*
- * File: Tokens.java
+ * File: ASTInlineASM.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
+ * Date: 2024-03-10
  * Description:
  */
-public enum Tokens 
+public class ASTInlineASM extends AST
 {
-    INVALID,
-    SENTINEL,
+	private List<String> lines;
 
-    LEFTPAREN, 
-    RIGHTPAREN,
-    LEFTBRACE, 
-    RIGHTBRACE, 
-    LEFTBRACKET,
-    RIGHTBRACKET,
+	public ASTInlineASM(Token token, List<String> lines)
+	{
+		super(token);
+		this.lines = lines;
+	}
+	
+	public List<String> getLines()
+	{
+		return lines;
+	}
 
-    SEMICOLON,
-    COLON,
-    DOT,
-    COMMA, 
+	public int getLinesSize()
+	{
+		return lines.size();
+	}
 
-    IDENTIFIER,
-    INTEGER,
-    STRING,
-    BOOLEAN,
-    TRUE,
-    FALSE,
+	public String getLineAt(int index)
+	{
+		if (index < getLinesSize()) {
+			return lines.get(index);
+		}
+		return null;
+	}
 
-    PUBLIC,
-    PROTECTED,
-    PRIVATE,
-
-    INCLUDE,
-    CLASS,
-    ENUMERATION,
-    INTERFACE,
-    COMMENT,
-    NEW,
-    FUNCTION,
-    EXTENDS,
-    IMPLEMENTS,
-    ASM,
-
-    IF,
-    ELSE,
-    WHILE,
-    FOR,
-
-    ASSIGN,
-    EQUALS,  
-    OR,
-    AND, 
-
-    LESSTHAN,
-    LESSTHANOREQUAL,
-    GREATERTHAN,
-    GREATERTHANOREQUAL,
-
-    PLUS,
-    INCREMENT,
-    MINUS,
-    TIMES,
-    DIV,
-    MODULUS,
-    
-    RETURN, 
-    VOID,
-}
+	public <R> R accept(ASTVisitor<R> v)
+	{
+		return v.visit(this);
+	}
+}	

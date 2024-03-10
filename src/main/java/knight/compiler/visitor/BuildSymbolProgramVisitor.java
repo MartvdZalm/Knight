@@ -498,4 +498,10 @@ public class BuildSymbolProgramVisitor implements ASTVisitor<ASTType>
 	{
 		return null;
 	}
+
+	@Override
+	public ASTType visit(ASTInlineASM assembly)
+	{
+		return null;
+	}
 }

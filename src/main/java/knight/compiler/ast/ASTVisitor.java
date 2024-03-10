@@ -136,4 +136,6 @@ public interface ASTVisitor<R>
     public R visit(ASTEnumeration enumDecl);
 
     public R visit(ASTInterface interDecl);
+
+    public R visit(ASTInlineASM assemblyDecl);
 }

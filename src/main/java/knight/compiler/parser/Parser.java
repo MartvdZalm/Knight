@@ -74,6 +74,7 @@ public class Parser
 			List<ASTClass> classList = new ArrayList<>();
 			List<ASTFunction> functionList = new ArrayList<>();
 			List<ASTVariable> variableList = new ArrayList<>();
+			List<ASTInlineASM> inlineASMList = new ArrayList<>();
 
 			token = lexer.nextToken();
 
@@ -99,6 +100,10 @@ public class Parser
 						functionList.add(parseFunction());
 					} break;
 
+					case ASM: {
+						inlineASMList.add(parseInlineASM());
+					} break;
+
 					case INTEGER:
 					case STRING: {
 						variableList.add(parseVariable());
@@ -111,12 +116,26 @@ public class Parser
                 
             } while (token != null);
 			
-            program = new ASTProgram(token, includeList, enumerationList, interfaceList, classList, functionList, variableList);
+            program = new ASTProgram(token, includeList, enumerationList, interfaceList, classList, functionList, variableList, inlineASMList);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
         return program;
+    }
+
+    public ASTInlineASM parseInlineASM() throws ParseException
+    {
+    	List<String> lines = new ArrayList<>();
+    	eat(Tokens.ASM);
+    	eat(Tokens.LEFTBRACE);
+    	while (token.getToken() == Tokens.STRING) {
+    		lines.add(token.getSymbol());
+    		eat(Tokens.STRING);
+    	}
+    	eat(Tokens.RIGHTBRACE);
+
+    	return new ASTInlineASM(token, lines);
     }
 
 	public ASTInclude parseInclude() throws ParseException
@@ -169,6 +188,7 @@ public class Parser
 	{
 		List<ASTVariable> variables = new ArrayList<>();
 		List<ASTStatement> statements = new ArrayList<>();
+		List<ASTInlineASM> inlineASM = new ArrayList<>();
 
 		eat(Tokens.FUNCTION);
 		ASTIdentifier id = parseIdentifier();
@@ -180,6 +200,8 @@ public class Parser
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
 			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.BOOLEAN) {
 				variables.add(parseVariable());
+			} else if (token.getToken() == Tokens.ASM) {
+				inlineASM.add(parseInlineASM());
 			} else {
 				statements.add(parseStatement());
 			}
@@ -189,10 +211,10 @@ public class Parser
 		eat(Tokens.RIGHTBRACE);
 
 		if (returnExpr != null) {
-			return new ASTFunctionReturn(token, returnType, id, argumentList, variables, statements, returnExpr);
+			return new ASTFunctionReturn(token, returnType, id, argumentList, variables, statements, inlineASM, returnExpr);
 		}
 
-		return new ASTFunction(token, returnType, id, argumentList, variables, statements);
+		return new ASTFunction(token, returnType, id, argumentList, variables, statements, inlineASM);
 	}
 
 	public ASTVariable parseVariable() throws ParseException
