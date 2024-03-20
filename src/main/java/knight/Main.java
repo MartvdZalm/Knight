@@ -29,6 +29,7 @@ import java.io.*;
 import knight.preprocessor.PreProcessor;
 import knight.compiler.ast.declarations.ASTProgram;
 import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTPrinter;
 import knight.compiler.parser.Parser;
 import knight.compiler.semantics.NameError;
 import knight.compiler.semantics.SemanticErrors;
@@ -37,6 +38,7 @@ import knight.compiler.visitor.BuildSymbolProgramVisitor;
 import knight.compiler.visitor.CodeGenerator;
 import knight.compiler.visitor.NameAnalyserTreeVisitor;
 import knight.compiler.visitor.TypeAnalyser;
+import knight.compiler.visitor.ConstantFolding;
 
 /*
  * File: Main.java
@@ -72,6 +74,12 @@ public class Main
 			Parser p = new Parser(bufferedReader);
 			AST tree = p.parse();
 
+			if (containsFlag(args, "-ast")) {
+				ASTPrinter printer = new ASTPrinter();
+				System.out.println(printer.visit((ASTProgram) tree));
+				System.exit(0);
+	        }
+
 			if (tree != null) {
 				BuildSymbolProgramVisitor bspv = new BuildSymbolProgramVisitor();
 				bspv.visit((ASTProgram) tree);
@@ -86,6 +94,8 @@ public class Main
 
 				if (SemanticErrors.errorList.size() == 0) {
 					String path = getFileDirPath(filename);
+
+					ConstantFolding.optimize(tree);
 					CodeGenerator cg = new CodeGenerator(path, filename);
 					cg.visit((ASTProgram) tree);
 
