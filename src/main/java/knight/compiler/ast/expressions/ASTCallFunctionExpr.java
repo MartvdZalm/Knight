@@ -69,6 +69,11 @@ public class ASTCallFunctionExpr extends ASTExpression
 		this.methodId = methodId;
 	}
 
+	public List<ASTExpression> getArgExprList()
+	{
+		return argExprList;
+	}
+
 	public int getArgExprListSize()
 	{
 		return argExprList.size();

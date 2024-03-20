@@ -45,6 +45,11 @@ public class ASTBlock extends ASTStatement
 		this.body = body;
 	}
 
+	public List<ASTStatement> getStatList()
+	{
+		return body;
+	}
+
 	public int getStatListSize()
 	{
 		return body.size();

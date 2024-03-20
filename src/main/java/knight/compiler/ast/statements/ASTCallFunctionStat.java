@@ -71,6 +71,16 @@ public class ASTCallFunctionStat extends ASTStatement
 		this.methodId = methodId;
 	}
 
+	public void setArgExprList(List<ASTExpression> argExprList)
+	{
+		this.argExprList = argExprList;
+	}
+
+	public List<ASTExpression> getArgExprList()
+	{
+		return argExprList;
+	}
+
 	public int getArgExprListSize()
 	{
 		return argExprList.size();
