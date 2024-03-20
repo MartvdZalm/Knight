@@ -461,8 +461,14 @@ public class CodeGenerator implements ASTVisitor<String>
 			} else if (varDeclInit.getExpr() instanceof ASTIdentifierExpr) {
 				text.append("movq " + varDeclInit.getExpr().accept(this) + ", %rax\n");
 				text.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
+			} else if (
+				varDeclInit.getExpr() instanceof ASTPlus ||
+				varDeclInit.getExpr() instanceof ASTTimes
+			) {
+				text.append(varDeclInit.getExpr().accept(this));
+				text.append("movq %rax, -" + (lvIndex * 8) + "(%rbp)\n");
 			} else {
-				text.append("movq $" + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
+				text.append("movq " + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
 			}
 		}
 
@@ -533,6 +539,10 @@ public class CodeGenerator implements ASTVisitor<String>
 	    for (int i = 6; i < functionReturn.getArgumentListSize(); i++) {
 	    	functionReturn.getArgumentDeclAt(i).accept(this);
 	        text.append("movq " + (i - 6) * 8 + "(%rbp), -" + getLocalVariableReference(i) + "\n");
+	    }
+
+	   	for (int i = 0; i < functionReturn.getInlineASMListSize(); i++) {
+	    	functionReturn.getInlineASMAt(i).accept(this);
 	    }
 
 	    for (int i = 0; i < functionReturn.getVariableListSize(); i++) {
