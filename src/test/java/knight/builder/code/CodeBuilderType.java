@@ -6,7 +6,10 @@ public enum CodeBuilderType
 {
     INT("int"),
     STRING("string"),
-    BOOLEAN("bool");
+    BOOLEAN("bool"),
+    PERSON("Person"),
+    CAR("Car"),
+    ACCOUNT("Account");
 
     private final String type;
     private static final Random random = new Random();

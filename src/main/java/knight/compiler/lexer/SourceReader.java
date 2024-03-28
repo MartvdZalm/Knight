@@ -35,49 +35,59 @@ import java.io.*;
 public class SourceReader
 {
     private BufferedReader source;
-    private int lineNumber = 0;
-    private int positionLastChar;
-    private boolean isPriorEndLine = true;
-    private String nextLine;
+    private SourceReaderProperties props;
+    private SourceReaderProperties savedProps;
 
     public SourceReader(BufferedReader bufferedReader) 
     {
         source = bufferedReader;
+        props = new SourceReaderProperties();
+    }
+
+    public void mark(int index) throws IOException
+    {
+        source.mark(index);
+        this.savedProps = new SourceReaderProperties(props);
+    }
+
+    public void reset() throws IOException
+    {
+        source.reset();
+        this.props = new SourceReaderProperties(this.savedProps);
     }
 
     public char read() throws IOException
     {
-        if (isPriorEndLine) {
-            lineNumber++;
-            positionLastChar = -1;
-            nextLine = source.readLine();
-            isPriorEndLine = false;
+        if (props.isPriorEndLine) {
+            props.lineNumber++;
+            props.positionLastChar = -1;
+            props.nextLine = source.readLine();
+            props.isPriorEndLine = false;
         }
 
-        if (nextLine == null) {  
+        if (props.nextLine == null) {  
             throw new IOException();
-        } 
-        else if (nextLine.length() == 0) {
-            isPriorEndLine = true;
+        } else if (props.nextLine.length() == 0) {
+            props.isPriorEndLine = true;
             return ' ';
         }
 
-        positionLastChar++;
-        if (positionLastChar >= nextLine.length()) {
-            isPriorEndLine = true;
+        props.positionLastChar++;
+        if (props.positionLastChar >= props.nextLine.length()) {
+            props.isPriorEndLine = true;
             return ' ';
         }
-        return nextLine.charAt(positionLastChar);
+        return props.nextLine.charAt(props.positionLastChar);
     }
 
     public int getCol() 
     {
-        return positionLastChar;
+        return props.positionLastChar;
     }
 
     public int getRow() 
     {
-        return lineNumber;
+        return props.lineNumber;
     }
 
     public void close() {
@@ -86,5 +96,23 @@ public class SourceReader
         } catch (Exception e) {
             e.getStackTrace();
         }
+    }
+}
+
+class SourceReaderProperties
+{
+    public int lineNumber = 0;
+    public int positionLastChar;
+    public boolean isPriorEndLine = true;
+    public String nextLine;
+
+    public SourceReaderProperties() {}
+
+    public SourceReaderProperties(SourceReaderProperties props)
+    {
+        this.lineNumber = props.lineNumber;
+        this.positionLastChar = props.positionLastChar;
+        this.isPriorEndLine = props.isPriorEndLine;
+        this.nextLine = props.nextLine;
     }
 }

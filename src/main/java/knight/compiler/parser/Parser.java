@@ -84,13 +84,13 @@ public class Parser
 						includeList.add(parseInclude());
 					} break;
 
-					case ENUMERATION: {
-						enumerationList.add(parseEnumeration());
-					} break;
+					// case ENUMERATION: {
+					// 	enumerationList.add(parseEnumeration());
+					// } break;
 
-					case INTERFACE: {
-						interfaceList.add(parseInterface());
-					} break;
+					// case INTERFACE: {
+					// 	interfaceList.add(parseInterface());
+					// } break;
 
 					case CLASS: {
 						classList.add(parseClass());
@@ -144,25 +144,25 @@ public class Parser
 		return new ASTInclude(token, parseIdentifier());
 	}
 
-	private ASTEnumeration parseEnumeration() throws ParseException
-	{
-		eat(Tokens.ENUMERATION);
-		ASTIdentifier id = parseIdentifier();
-		eat(Tokens.LEFTBRACE);
-		eat(Tokens.RIGHTBRACE);
+	// private ASTEnumeration parseEnumeration() throws ParseException
+	// {
+	// 	eat(Tokens.ENUMERATION);
+	// 	ASTIdentifier id = parseIdentifier();
+	// 	eat(Tokens.LEFTBRACE);
+	// 	eat(Tokens.RIGHTBRACE);
 
-		return new ASTEnumeration(token, id);
-	}
+	// 	return new ASTEnumeration(token, id);
+	// }
 
-	private ASTInterface parseInterface() throws ParseException
-	{
-		eat(Tokens.INTERFACE);
-		ASTIdentifier id = parseIdentifier();
-		eat(Tokens.LEFTBRACE);
-		eat(Tokens.RIGHTBRACE);
+	// private ASTInterface parseInterface() throws ParseException
+	// {
+	// 	eat(Tokens.INTERFACE);
+	// 	ASTIdentifier id = parseIdentifier();
+	// 	eat(Tokens.LEFTBRACE);
+	// 	eat(Tokens.RIGHTBRACE);
 
-		return new ASTInterface(token, id);
-	}
+	// 	return new ASTInterface(token, id);
+	// }
 
 	public ASTClass parseClass() throws ParseException
 	{
@@ -185,7 +185,7 @@ public class Parser
 	}
 
 	public ASTFunction parseFunction() throws ParseException
-	{
+	{		
 		List<ASTVariable> variables = new ArrayList<>();
 		List<ASTStatement> statements = new ArrayList<>();
 		List<ASTInlineASM> inlineASM = new ArrayList<>();
@@ -198,12 +198,28 @@ public class Parser
 		eat(Tokens.LEFTBRACE);
 
 		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
-			if (token.getToken() == Tokens.INTEGER || token.getToken() == Tokens.STRING || token.getToken() == Tokens.BOOLEAN) {
-				variables.add(parseVariable());
-			} else if (token.getToken() == Tokens.ASM) {
-				inlineASM.add(parseInlineASM());
-			} else {
-				statements.add(parseStatement());
+
+			switch (token.getToken()) {
+			    case WHILE:
+			    case FOR:
+			    case IF:
+			        statements.add(parseStatement());
+			        break;
+			    case INTEGER:
+			    case STRING:
+			    case BOOLEAN:
+			    	variables.add(parseVariable());
+			        break;
+			    case ASM:
+			        inlineASM.add(parseInlineASM());
+			        break;
+			    default:
+			    	if (peek().getToken() != Tokens.ASSIGN) { // Then it is a variable
+			    		variables.add(parseVariable());
+			    	} else {
+			    		statements.add(parseStatement());
+			    	}
+			        break;
 			}
 		}
 
@@ -223,7 +239,7 @@ public class Parser
 		ASTIdentifier id = parseIdentifier();
 
 		ASTVariable variable = null;
-		if (token.getToken() == Tokens.SEMICOLON) {
+		if (checkNotNull(token).getToken() == Tokens.SEMICOLON) {
 			variable = new ASTVariable(token, type, id);
 			eat(Tokens.SEMICOLON);
 		} else {
@@ -266,7 +282,7 @@ public class Parser
         }
     }
 
-	private ASTExpression parseCallFunction(ASTIdentifierExpr methodId) throws ParseException
+	public ASTExpression parseCallFunction(ASTIdentifierExpr methodId) throws ParseException
 	{
 		Token tok = token;
 		List<ASTExpression> exprList = new ArrayList<ASTExpression>();
@@ -285,7 +301,7 @@ public class Parser
 		return new ASTCallFunctionExpr(tok, null, methodId, exprList);
 	}
 
-	private List<ASTArgument> parseArguments() throws ParseException
+	public List<ASTArgument> parseArguments() throws ParseException
 	{
 		List<ASTArgument> argumentList = new ArrayList<>();
 		eat(Tokens.LEFTPAREN);
@@ -301,7 +317,7 @@ public class Parser
 		return argumentList;
 	}
 
-	private ASTArgument parseArgument() throws ParseException
+	public ASTArgument parseArgument() throws ParseException
 	{
 		ASTIdentifier argumentId = null;
 		ASTType argumentType = parseType();
@@ -313,7 +329,7 @@ public class Parser
 		return new ASTArgument(argumentId.getToken(), argumentType, argumentId);
 	}
 
-	private ASTStatement parseStatement() throws ParseException
+	public ASTStatement parseStatement() throws ParseException
     {
 		switch (token.getToken()) {
 
@@ -388,7 +404,7 @@ public class Parser
 		}
     }
 
-	private ASTStatement parseState(ASTIdentifier id) throws ParseException
+	public ASTStatement parseState(ASTIdentifier id) throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -436,16 +452,14 @@ public class Parser
 		}
 	}
 
-	private ASTIdentifier parseIdentifier() throws ParseException
+	public ASTIdentifier parseIdentifier() throws ParseException
 	{
-		checkNotNull(token);
-
-		ASTIdentifier id = new ASTIdentifier(token, token.getSymbol());
+		ASTIdentifier id = new ASTIdentifier(token, checkNotNull(token).getSymbol());
 		eat(Tokens.IDENTIFIER);
 		return id;
 	}
 
-	private ASTType parseType() throws ParseException
+	public ASTType parseType() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -493,7 +507,7 @@ public class Parser
 		}
 	}
 
-	private ASTType parseType1() throws ParseException
+	public ASTType parseType1() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -518,7 +532,7 @@ public class Parser
 		}
 	}
 
-	private void parseExpr() throws ParseException
+	public void parseExpr() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -580,7 +594,7 @@ public class Parser
 		}
 	}
 
-	private void pushOperator(Token current)
+	public void pushOperator(Token current)
 	{
 		Token top = stOperator.peek();
 		while (getPriority(top.getToken()) >= getPriority(current.getToken())) {
@@ -590,7 +604,7 @@ public class Parser
 		stOperator.push(current);
 	}
 
-	private void popOperator()
+	public void popOperator()
 	{
 		Token top = stOperator.pop();
 		if (isBinary(top.getToken())) {
@@ -600,7 +614,7 @@ public class Parser
 		}
 	}
 
-	private void parseUnary(Token tok)
+	public void parseUnary(Token tok)
 	{
 		switch (tok.getToken()) {
 		case NEW: {
@@ -618,7 +632,7 @@ public class Parser
 		}
 	}
 
-	private void parseBinary(Token tok)
+	public void parseBinary(Token tok)
 	{
 		switch (tok.getToken()) {
 
@@ -747,7 +761,7 @@ public class Parser
 		}
 	}
 
-	private boolean isBinary(Tokens operator)
+	public boolean isBinary(Tokens operator)
 	{
 		switch (operator) {
 
@@ -776,7 +790,7 @@ public class Parser
 		}
 	}
 
-	private int getPriority(Tokens operator)
+	public int getPriority(Tokens operator)
 	{
 		switch (operator) {
 
@@ -837,7 +851,7 @@ public class Parser
 		}
 	}
 
-	private void parseTerm1() throws ParseException
+	public void parseTerm1() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -969,7 +983,7 @@ public class Parser
 		}
 	}
 
-	private void parseTerm2() throws ParseException
+	public void parseTerm2() throws ParseException
 	{
 		switch (token.getToken()) {
 
@@ -1000,14 +1014,27 @@ public class Parser
 		}
 	}
 
-	private void checkNotNull(Token token) throws ParseException
+	public Token checkNotNull(Token token) throws ParseException
 	{
 	    if (token == null) {
 	        throw new ParseException(0, 0, "Token is null, cannot perform operation.");
 	    }
+
+	    return token;
 	}
 
-	private void advance()
+	public Token peek() throws ParseException
+	{
+		Token tok = null;
+
+		if (checkNotNull(token) != null) {
+			tok = checkNotNull(lexer.peekToken());
+		}
+
+		return tok;
+	}
+
+	public void advance()
     {
         try {
             token = lexer.nextToken();
@@ -1016,12 +1043,12 @@ public class Parser
         }
     }
 
-    private void eat(Tokens tok) throws ParseException
+    public void eat(Tokens tok) throws ParseException
     {
-        if (tok == token.getToken()) {
+        if (tok == checkNotNull(token).getToken()) {
             advance();
         } else {
-            error(token.getToken(), tok);
+            error(checkNotNull(token).getToken(), tok);
         }
     }
 

@@ -1,8 +1,14 @@
 include <knight.io.Print>
 
+class Person
+{
+    Person person;
+
+}
+
+
 fn main(): int
 {   
-    print("Hello World!!\n");
 
     ret 0;
 }

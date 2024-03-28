@@ -1,149 +1,139 @@
+/*
+ * MIT License
+ * 
+ * Copyright (c) 2023, Mart van der Zalm
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package knight.builder.code;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.github.javafaker.Faker;
-
+/*
+ * File: CodeBuilderFunction.java
+ * @author: Mart van der Zalm
+ * Date: 2024-02-10
+ * Description:
+ */
 public class CodeBuilderFunction extends CodeBuilder
 {
-	private String functionName;
-	private CodeBuilderType returnType;
-	private List<CodeBuilderArgument> arguments;
-	private List<CodeBuilderVariable> variables;
-	private List<CodeBuilderStatement> statements;
-	private CodeBuilderReturnStatement returnStatement;
+	protected String id;
+	protected List<CodeBuilderArgument> argumentsList;
+	protected List<CodeBuilderVariable> variablesList;
+	protected List<CodeBuilderStatement> statementsList;
 
 	public CodeBuilderFunction()
 	{
-		this.initialize();
+		this.argumentsList = new ArrayList<>();
+		this.variablesList = new ArrayList<>();
+		this.statementsList = new ArrayList<>();
+
+		this.mock();
 	}
 
-	public CodeBuilderFunction(String functionName)
+	public CodeBuilderFunction setId(String id)
 	{
-		this.functionName = functionName;
-		this.initialize();
+		this.id = id;
+
+		return this;
 	}
 
-	@Override
-	protected void initialize()
-	{
-		super.initialize();
-		this.arguments = new ArrayList<>();
-		this.variables = new ArrayList<>();
-		this.statements = new ArrayList<>();
-	}
-
-	public void setReturnType(CodeBuilderType returnType)
-	{
-		this.returnType = returnType;
-	}
-
-	public void setReturnStatement(CodeBuilderReturnStatement returnStatement)
-	{
-		this.returnStatement = returnStatement;
-	}
-
-	public void mockArgument(int count)
+	public CodeBuilderFunction mockArgument(int count)
 	{
 		for (int i = 0; i < count; i++) {
-			this.arguments.add(new CodeBuilderArgument().mock());
+			this.argumentsList.add(new CodeBuilderArgument());
 		}
+
+		return this;
 	} 
 
-	public void mockVariable(int count)
+	public CodeBuilderFunction mockVariable(int count)
 	{
 		for (int i = 0; i < count; i++) {
-			this.variables.add(new CodeBuilderVariable().mock());
+			this.variablesList.add(new CodeBuilderVariable());
 		}
-	}
-
-	public void mockStatement(int count)
-	{
-		for (int i = 0; i < count; i++) {
-			this.statements.add(new CodeBuilderStatement().mock());
-		}
-	}
-
-	public void mockReturnStatement()
-	{
-		this.returnStatement = new CodeBuilderReturnStatement().mock();
-	}
-
-	public void addArgument(CodeBuilderArgument argument)
-	{
-		this.arguments.add(argument);
-	}
-
-	public void addVariable(CodeBuilderVariable variable)
-	{
-		this.variables.add(variable);	
-	}
-
-	public void addStatement(CodeBuilderStatement statement)
-	{
-		this.statements.add(statement);
-	}
-
-	public CodeBuilderFunction mock()
-	{
-		if (super.empty(this.functionName)) {
-			this.functionName = super.faker.lorem().word();
-		}
-		return this;
-	}
-
-	public CodeBuilderFunction mock(Map<String, Integer> data)
-	{
-		if (super.empty(this.functionName)) {
-			this.functionName = super.faker.lorem().word();
-		}
-
-        if (data.containsKey("argument")) {
-        	this.mockArgument(data.get("argument"));
-        }
-
-        if (data.containsKey("variable")) {
-            this.mockVariable(data.get("variable"));
-        }
-
-        if (data.containsKey("statement")) {
-            this.mockStatement(data.get("statement"));
-        }
 
 		return this;
 	}
 
-	@Override
+	public CodeBuilderFunction mockStatement(int count)
+	{
+		for (int i = 0; i < count; i++) {
+			this.statementsList.add(super.random.statement());
+		}
+
+		return this;
+	}
+
+	public CodeBuilderFunction addArgument(CodeBuilderArgument argument)
+	{
+		this.argumentsList.add(argument);
+
+		return this;
+	}
+
+	public CodeBuilderFunction addVariable(CodeBuilderVariable variable)
+	{
+		this.variablesList.add(variable);
+
+		return this;
+	}
+
+	public CodeBuilderFunction addStatements(CodeBuilderStatement... statements)
+	{
+		for (CodeBuilderStatement statement : statements) {
+			this.statementsList.add(statement);
+		}
+
+		return this;
+	}
+
+	protected CodeBuilderFunction mock()
+	{
+		this.id = super.random.identifier();
+		
+		return this;
+	}
+
 	public String toString()
 	{
 		StringBuilder functionBody = new StringBuilder();
 		StringBuilder argumentBody = new StringBuilder();
 
-		for (int i = 0; i < arguments.size(); i++) {
-		    argumentBody.append(arguments.get(i));
-		    if (i < arguments.size() - 1) {
+		for (int i = 0; i < argumentsList.size(); i++) {
+		    argumentBody.append(argumentsList.get(i));
+		    if (i < argumentsList.size() - 1) {
 		        argumentBody.append(", ");
 		    }
 		}
 
-		for (CodeBuilderVariable variable : variables) {
+		for (CodeBuilderVariable variable : variablesList) {
 			functionBody.append(variable).append(" ");
 		}
 
-		for (CodeBuilderStatement statement : statements) {
+		for (CodeBuilderStatement statement : statementsList) {
 			functionBody.append(statement).append(" ");
 		}
 
-		if (this.returnType == null) {
-			return String.format("fn %s(%s): void { %s }", this.functionName, argumentBody.toString(), functionBody.toString());
-		} else {
-			if (this.returnStatement == null) {
-				this.mockReturnStatement();
-			}
-
-			return String.format("fn %s(%s): %s { %s %s }", this.functionName, argumentBody.toString(), this.returnType, functionBody.toString(), this.returnStatement);
-		}
+		return String.format("fn %s(%s): void { %s }", this.id, argumentBody.toString(), functionBody.toString());
 	}
 }

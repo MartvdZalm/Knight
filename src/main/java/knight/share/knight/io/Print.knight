@@ -1,4 +1,4 @@
-fn length(): void
+fn length(string input): void
 {
 	asm {
 		"movq %rdi, %rsi"

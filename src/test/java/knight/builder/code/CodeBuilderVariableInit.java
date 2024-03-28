@@ -1,35 +1,23 @@
 package knight.builder.code;
 
-import com.github.javafaker.Faker;
-
 public class CodeBuilderVariableInit extends CodeBuilderVariable
 {
-	private String expression;
+	private CodeBuilderExpression expression;
 
 	public CodeBuilderVariableInit()
 	{
-		super.initialize();
+		this.mock();	
 	}
 
-	public CodeBuilderVariableInit(String identifier)
+	protected CodeBuilderVariableInit mock()
 	{
-		super(identifier);
-	}
-
-	public CodeBuilderVariableInit mock()
-	{
-		super.mock();
-
-		if (super.empty(this.expression)) {
-			this.expression = super.faker.lorem().word();
-		}
-
+		this.expression = super.random.expression();
+		
 		return this;
 	}
 
-	@Override
 	public String toString()
 	{
-		return String.format("%s %s = %s;", super.type, super.identifier, this.expression);
+		return String.format("%s %s = %s;", super.type, super.id, this.expression);
 	}
 }

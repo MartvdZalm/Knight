@@ -50,6 +50,22 @@ public class Lexer
         }
     }
 
+    public Token peekToken()
+    {
+        Token token = null;
+        try {
+            char tempChar = charachter;
+            source.mark(100); // needs to be changes!!!
+            token = nextToken();
+            source.reset();
+            charachter = tempChar;
+        } catch (Exception e) {
+            exception = true;
+        }
+
+        return token;
+    }
+
     public Token nextToken()
     { 
         if (exception) {

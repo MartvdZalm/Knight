@@ -94,6 +94,6 @@ public class TokenType
         Symbol.symbol("%", Tokens.MODULUS);
         
         Symbol.symbol("ret", Tokens.RETURN);
-        Symbol.symbol("void", Tokens.VOID);       
+        Symbol.symbol("void", Tokens.VOID);   
     }
 }
