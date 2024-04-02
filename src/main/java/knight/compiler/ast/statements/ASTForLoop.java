@@ -39,15 +39,15 @@ public class ASTForLoop extends ASTStatement
 {
 	private ASTVariable initialization;
 	private ASTExpression condition;
-	private ASTStatement increment;
+	private ASTExpression update;
 	private ASTStatement body;
 
-	public ASTForLoop(Token token, ASTVariable initialization, ASTExpression condition, ASTStatement increment, ASTStatement body)
+	public ASTForLoop(Token token, ASTVariable initialization, ASTExpression condition, ASTExpression update, ASTStatement body)
 	{
 		super(token);
 		this.initialization = initialization;
 		this.condition = condition;
-		this.increment = increment;
+		this.update = update;
 		this.body = body;
 	}
 

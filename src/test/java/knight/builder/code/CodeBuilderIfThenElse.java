@@ -64,13 +64,18 @@ public class CodeBuilderIfThenElse extends CodeBuilderStatement
 
 	protected CodeBuilderIfThenElse mock()
 	{
+		this.expr = new CodeBuilderLessThan()
+							.setLhs(new CodeBuilderIdentifierExpr().setId("a"))
+							.setRhs(new CodeBuilderIntLiteral().setValue(10));
+
+		this.then = super.random.statement();
+		this.elze = super.random.statement();
 
 		return this;
 	}
 
 	public String toString()
 	{
-
-		return "";
+		return String.format("if (%s) {\n %s \n} else {\n %s \n}\n", this.expr, this.then, this.elze);
 	} 
 }

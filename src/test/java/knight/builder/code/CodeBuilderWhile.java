@@ -64,6 +64,6 @@ public class CodeBuilderWhile extends CodeBuilderStatement
 
 	public String toString()
 	{
-		return String.format("while (%s) { %s }", this.expr, this.body);
+		return String.format("while (%s) {\n %s \n}\n", this.expr, this.body);
 	}
 }

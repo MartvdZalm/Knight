@@ -40,7 +40,11 @@ public class CodeBuilderRandom
 {
     private final List<Class<? extends CodeBuilderStatement>> statements = new ArrayList<>();
     private final List<Class<? extends CodeBuilderExpression>> expressions = new ArrayList<>();
-    
+    private final List<Class<? extends CodeBuilderExpression>> conditions = new ArrayList<>();
+    private final List<Class<? extends CodeBuilderType>> types = new ArrayList<>();
+
+    private final List<Class<? extends CodeBuilderStatement>> body = new ArrayList<>();
+
     private final Random random;
     private final Faker faker;
 
@@ -51,10 +55,38 @@ public class CodeBuilderRandom
 
         // Statements
         statements.add(CodeBuilderAssign.class);
+        // statements.add(CodeBuilderWhile.class);
+        // statements.add(CodeBuilderForLoop.class);
+        // statements.add(CodeBuilderIfThenElse.class);
 
         // Expressions
         expressions.add(CodeBuilderIntLiteral.class);
         expressions.add(CodeBuilderStringLiteral.class);
+        expressions.add(CodeBuilderBooleanLiteral.class);
+        expressions.add(CodeBuilderIdentifierExpr.class);
+
+        // Conditions
+        conditions.add(CodeBuilderLessThan.class);
+        conditions.add(CodeBuilderLessThanOrEqual.class);
+        conditions.add(CodeBuilderGreaterThan.class);
+        conditions.add(CodeBuilderGreaterThanOrEqual.class);
+        conditions.add(CodeBuilderEquals.class);
+
+        // Types
+        types.add(CodeBuilderIntType.class);
+        types.add(CodeBuilderStringType.class);
+        types.add(CodeBuilderBooleanType.class);
+        types.add(CodeBuilderIdentifierType.class);
+
+        // Body
+        body.add(CodeBuilderAssign.class);
+    }
+
+    public String className()
+    {
+        String input = this.identifier();
+
+        return String.join("", (input.substring(0, 1).toUpperCase() + input.substring(1)).split("\\s+"));
     }
 
     public String identifier()
@@ -64,7 +96,20 @@ public class CodeBuilderRandom
 
     public int integer()
     {
-        return this.random.nextInt(0, 100000);
+        int min = 1;
+        int max = 10000;
+        
+        return this.random.nextInt(max - min + 1) + min;
+    }
+
+    public String string()
+    {
+        return faker.lorem().sentence();
+    }
+
+    public boolean bool()
+    {
+        return faker.bool().bool();
     }
 
     public CodeBuilderStatement statement()
@@ -87,5 +132,27 @@ public class CodeBuilderRandom
     		e.printStackTrace();
     		return null;
     	}
+    }
+
+    public CodeBuilderExpression condition()
+    {
+        try {
+            Constructor<? extends CodeBuilderExpression> constructor = conditions.get(random.nextInt(conditions.size())).getDeclaredConstructor();
+            return constructor.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public CodeBuilderType type()
+    {
+        try {
+            Constructor<? extends CodeBuilderType> constructor = types.get(random.nextInt(types.size())).getDeclaredConstructor();
+            return constructor.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

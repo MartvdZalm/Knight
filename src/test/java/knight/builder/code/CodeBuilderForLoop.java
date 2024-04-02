@@ -25,45 +25,63 @@
 package knight.builder.code;
 
 /*
- * File: CodeBuilderVariable.java
+ * File: CodeBuilderForLoop.java
  * @author: Mart van der Zalm
- * Date: 2024-02-22
+ * Date: 2024-03-28
  * Description:
  */
-public class CodeBuilderVariable extends CodeBuilder
+public class CodeBuilderForLoop extends CodeBuilderStatement
 {
-	protected CodeBuilderType type;
-	protected String id;
+	private CodeBuilderVariableInit initialization;
+	private CodeBuilderExpression condition;
+	private CodeBuilderStatement update;
+	private CodeBuilderStatement body;
 
-	public CodeBuilderVariable()
+	public CodeBuilderForLoop()
 	{
 		this.mock();
 	}
 
-	public CodeBuilderVariable setId(String id)
+	public CodeBuilderForLoop setInitialization(CodeBuilderVariableInit initialization)
 	{
-		this.id = id;
+		this.initialization = initialization;
+	
+		return this;
+	}
+
+	public CodeBuilderForLoop setCondition(CodeBuilderExpression condition)
+	{
+		this.condition = condition;
 
 		return this;
 	}
 
-	public CodeBuilderVariable setType(CodeBuilderType type)
+	public CodeBuilderForLoop setUpdate(CodeBuilderStatement update)
 	{
-		this.type = type;
+		this.update = update;
 
 		return this;
 	}
 
-	protected CodeBuilderVariable mock()
+	public CodeBuilderStatement setBody(CodeBuilderStatement body)
 	{
-		this.type = super.random.type();
-		this.id = super.random.identifier();
+		this.body = body;
+
+		return this;
+	}
+
+	protected CodeBuilderForLoop mock()
+	{
+		this.initialization = new CodeBuilderVariableInit().setType(new CodeBuilderIntType()).setId("i").setExpr(new CodeBuilderIntLiteral().setValue(0));
+		this.condition = new CodeBuilderLessThan().setLhs(new CodeBuilderIdentifierExpr().setId("i")).setRhs(new CodeBuilderIntLiteral().setValue(10));
+		this.update = new CodeBuilderIncrement().setExpr(new CodeBuilderIdentifierExpr().setId("i"));
+		this.body = super.random.statement();
 
 		return this;
 	}
 
 	public String toString()
-	{		
-		return String.format("%s %s;", this.type, this.id);
+	{
+		return String.format("for (%s %s; %s) {\n %s \n}\n", this.initialization, this.condition, this.update, this.body);
 	}
 }

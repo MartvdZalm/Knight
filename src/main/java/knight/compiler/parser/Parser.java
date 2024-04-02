@@ -80,9 +80,9 @@ public class Parser
 
 			do {
 				switch (token.getToken()) {
-					case INCLUDE: {
-						includeList.add(parseInclude());
-					} break;
+					// case INCLUDE: {
+					// 	includeList.add(parseInclude());
+					// } break;
 
 					// case ENUMERATION: {
 					// 	enumerationList.add(parseEnumeration());
@@ -105,7 +105,8 @@ public class Parser
 					} break;
 
 					case INTEGER:
-					case STRING: {
+					case STRING:
+					case BOOLEAN: {
 						variableList.add(parseVariable());
 					} break;
 					
@@ -138,11 +139,11 @@ public class Parser
     	return new ASTInlineASM(token, lines);
     }
 
-	public ASTInclude parseInclude() throws ParseException
-	{
-		eat(Tokens.INCLUDE);
-		return new ASTInclude(token, parseIdentifier());
-	}
+	// public ASTInclude parseInclude() throws ParseException
+	// {
+	// 	eat(Tokens.INCLUDE);
+	// 	return new ASTInclude(token, parseIdentifier());
+	// }
 
 	// private ASTEnumeration parseEnumeration() throws ParseException
 	// {
@@ -214,7 +215,7 @@ public class Parser
 			        inlineASM.add(parseInlineASM());
 			        break;
 			    default:
-			    	if (peek().getToken() != Tokens.ASSIGN) { // Then it is a variable
+			    	if (peek().getToken() != Tokens.ASSIGN && peek().getToken() != Tokens.LEFTPAREN) { // Then it is a variable
 			    		variables.add(parseVariable());
 			    	} else {
 			    		statements.add(parseStatement());
@@ -379,10 +380,10 @@ public class Parser
 				eat(Tokens.LEFTPAREN);
 				ASTVariable initialization = parseVariable();
 				ASTExpression condition = parseExpression();
-				ASTStatement increment = parseStatement();
+				ASTExpression update = parseExpression();
 				eat(Tokens.RIGHTPAREN);
 				ASTStatement body = parseStatement();
-				ASTForLoop forLoop = new ASTForLoop(tok, initialization, condition, increment, body);
+				ASTForLoop forLoop = new ASTForLoop(tok, initialization, condition, update, body);
 				return forLoop;
 			}
 

@@ -1,14 +1,9 @@
 include <knight.io.Print>
 
-class Person
-{
-    Person person;
-
-}
-
-
 fn main(): int
 {   
+
+    print("" + 10 * 10 * 2);
 
     ret 0;
 }

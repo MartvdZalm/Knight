@@ -56,7 +56,7 @@ public class CodeBuilderArgument extends CodeBuilder
 
 	protected CodeBuilderArgument mock()
 	{
-		this.type = CodeBuilderType.random();
+		this.type = super.random.type();
 		this.id = super.random.identifier();
 
 		return this;

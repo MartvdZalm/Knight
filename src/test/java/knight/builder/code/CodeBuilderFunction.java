@@ -26,7 +26,6 @@ package knight.builder.code;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 
 /*
  * File: CodeBuilderFunction.java
@@ -40,12 +39,14 @@ public class CodeBuilderFunction extends CodeBuilder
 	protected List<CodeBuilderArgument> argumentsList;
 	protected List<CodeBuilderVariable> variablesList;
 	protected List<CodeBuilderStatement> statementsList;
+	protected List<CodeBuilderInlineASM> inlineASMList;
 
 	public CodeBuilderFunction()
 	{
 		this.argumentsList = new ArrayList<>();
 		this.variablesList = new ArrayList<>();
 		this.statementsList = new ArrayList<>();
+		this.inlineASMList = new ArrayList<>();
 
 		this.mock();
 	}
@@ -57,43 +58,20 @@ public class CodeBuilderFunction extends CodeBuilder
 		return this;
 	}
 
-	public CodeBuilderFunction mockArgument(int count)
+	public CodeBuilderFunction addArguments(CodeBuilderArgument... arguments)
 	{
-		for (int i = 0; i < count; i++) {
-			this.argumentsList.add(new CodeBuilderArgument());
-		}
-
-		return this;
-	} 
-
-	public CodeBuilderFunction mockVariable(int count)
-	{
-		for (int i = 0; i < count; i++) {
-			this.variablesList.add(new CodeBuilderVariable());
+		for (CodeBuilderArgument argument : arguments) {
+			this.argumentsList.add(argument);
 		}
 
 		return this;
 	}
 
-	public CodeBuilderFunction mockStatement(int count)
+	public CodeBuilderFunction addVariables(CodeBuilderVariable... variables)
 	{
-		for (int i = 0; i < count; i++) {
-			this.statementsList.add(super.random.statement());
+		for (CodeBuilderVariable variable : variables) {
+			this.variablesList.add(variable);
 		}
-
-		return this;
-	}
-
-	public CodeBuilderFunction addArgument(CodeBuilderArgument argument)
-	{
-		this.argumentsList.add(argument);
-
-		return this;
-	}
-
-	public CodeBuilderFunction addVariable(CodeBuilderVariable variable)
-	{
-		this.variablesList.add(variable);
 
 		return this;
 	}
@@ -102,6 +80,15 @@ public class CodeBuilderFunction extends CodeBuilder
 	{
 		for (CodeBuilderStatement statement : statements) {
 			this.statementsList.add(statement);
+		}
+
+		return this;
+	}
+
+	public CodeBuilderFunction addInlineASM(CodeBuilderInlineASM... inlineASMs)
+	{
+		for (CodeBuilderInlineASM inlineASM : inlineASMs) {
+			this.inlineASMList.add(inlineASM);
 		}
 
 		return this;
@@ -134,6 +121,10 @@ public class CodeBuilderFunction extends CodeBuilder
 			functionBody.append(statement).append(" ");
 		}
 
-		return String.format("fn %s(%s): void { %s }", this.id, argumentBody.toString(), functionBody.toString());
+		for (CodeBuilderInlineASM inlineASM : inlineASMList) {
+			functionBody.append(inlineASM).append(" ");
+		}
+
+		return String.format("fn %s(%s): void {\n %s \n}\n", this.id, argumentBody.toString(), functionBody.toString());
 	}
 }

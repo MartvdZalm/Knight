@@ -25,45 +25,36 @@
 package knight.builder.code;
 
 /*
- * File: CodeBuilderVariable.java
+ * File: CodeBuilderBooleanLiteral.java
  * @author: Mart van der Zalm
- * Date: 2024-02-22
+ * Date: 2024-03-29
  * Description:
  */
-public class CodeBuilderVariable extends CodeBuilder
+public class CodeBuilderBooleanLiteral extends CodeBuilderExpression
 {
-	protected CodeBuilderType type;
-	protected String id;
+	private boolean bool;
 
-	public CodeBuilderVariable()
+	public CodeBuilderBooleanLiteral()
 	{
 		this.mock();
 	}
 
-	public CodeBuilderVariable setId(String id)
+	public CodeBuilderBooleanLiteral setBool(boolean bool)
 	{
-		this.id = id;
+		this.bool = bool;
 
 		return this;
 	}
 
-	public CodeBuilderVariable setType(CodeBuilderType type)
+	protected CodeBuilderBooleanLiteral mock()
 	{
-		this.type = type;
-
-		return this;
-	}
-
-	protected CodeBuilderVariable mock()
-	{
-		this.type = super.random.type();
-		this.id = super.random.identifier();
+		this.bool = super.random.bool();
 
 		return this;
 	}
 
 	public String toString()
-	{		
-		return String.format("%s %s;", this.type, this.id);
+	{
+		return String.valueOf(bool);
 	}
 }

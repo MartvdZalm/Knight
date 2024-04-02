@@ -24,46 +24,53 @@
 
 package knight.builder.code;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /*
- * File: CodeBuilderVariable.java
+ * File: CodeBuilderInlineASM.java
  * @author: Mart van der Zalm
- * Date: 2024-02-22
+ * Date: 2024-01-04
  * Description:
  */
-public class CodeBuilderVariable extends CodeBuilder
+public class CodeBuilderInlineASM extends CodeBuilder
 {
-	protected CodeBuilderType type;
-	protected String id;
+	private List<String> lines;
 
-	public CodeBuilderVariable()
+	public CodeBuilderInlineASM()
 	{
+		this.lines = new ArrayList<>();
+
 		this.mock();
 	}
 
-	public CodeBuilderVariable setId(String id)
+	public CodeBuilderInlineASM setLines(List<String> lines)
 	{
-		this.id = id;
+		this.lines = lines;
 
 		return this;
 	}
 
-	public CodeBuilderVariable setType(CodeBuilderType type)
+	protected CodeBuilderInlineASM mock()
 	{
-		this.type = type;
-
-		return this;
-	}
-
-	protected CodeBuilderVariable mock()
-	{
-		this.type = super.random.type();
-		this.id = super.random.identifier();
+		this.lines.add("call length");
+		this.lines.add("movq $1, %rax");
+		this.lines.add("movq %rdi, %rsi");
+		this.lines.add("xor %rdi, %rdi");
+		this.lines.add("movq %rcx, %rdx");
+		this.lines.add("syscall");
 
 		return this;
 	}
 
 	public String toString()
-	{		
-		return String.format("%s %s;", this.type, this.id);
+	{
+		StringBuilder body = new StringBuilder();
+
+		for (String line : lines) {
+			body.append("\"" + line + "\"\n");
+		}
+
+		return String.format("asm {\n %s \n}", body);
 	}
 }

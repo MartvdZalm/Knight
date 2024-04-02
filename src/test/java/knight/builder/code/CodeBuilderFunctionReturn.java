@@ -37,7 +37,7 @@ import java.util.Map;
 public class CodeBuilderFunctionReturn extends CodeBuilderFunction
 {
 	private CodeBuilderType returnType;
-	private CodeBuilderReturnStatement returnStatement;
+	private CodeBuilderExpression returnStatement;
 
 	public CodeBuilderFunctionReturn()
 	{
@@ -55,28 +55,24 @@ public class CodeBuilderFunctionReturn extends CodeBuilderFunction
 	public CodeBuilderFunctionReturn setReturnType(CodeBuilderType returnType)
 	{
 		this.returnType = returnType;
+		this.returnStatement = this.returnType.getExpr();
 
 		return this;
 	}
 
-	public CodeBuilderFunctionReturn setReturnStatement(CodeBuilderReturnStatement returnStatement)
+	public CodeBuilderFunctionReturn setReturnStatement(CodeBuilderExpression returnStatement)
 	{
 		this.returnStatement = returnStatement;
 
 		return this;
 	}
 
-	public CodeBuilderFunctionReturn mockReturnStatement()
-	{
-		this.returnStatement = new CodeBuilderReturnStatement();
-
-		return this;
-	}
-
 	public CodeBuilderFunctionReturn mock()
 	{
-		this.returnType = CodeBuilderType.random();
-		this.returnStatement = new CodeBuilderReturnStatement();
+		super.mock();
+
+		this.returnType = super.random.type();
+		this.returnStatement = this.returnType.getExpr();
 
 		return this;
 	}
@@ -101,6 +97,10 @@ public class CodeBuilderFunctionReturn extends CodeBuilderFunction
 			functionBody.append(statement).append(" ");
 		}
 
-		return String.format("fn %s(%s): %s { %s %s }", super.id, argumentBody.toString(), this.returnType, functionBody.toString(), this.returnStatement);
+		for (CodeBuilderInlineASM inlineASM : inlineASMList) {
+			functionBody.append(inlineASM).append(" ");
+		}
+
+		return String.format("fn %s(%s): %s { %s ret %s; }", super.id, argumentBody.toString(), this.returnType, functionBody.toString(), this.returnStatement);
 	}
 }

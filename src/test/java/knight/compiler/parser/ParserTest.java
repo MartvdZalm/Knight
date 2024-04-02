@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ * 
+ * Copyright (c) 2023, Mart van der Zalm
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package knight.compiler.parser;
 
 import java.io.*;
@@ -5,6 +29,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import java.util.*;
 import java.lang.reflect.Method;
+import java.util.function.Supplier;
 
 import knight.compiler.ast.declarations.*;
 import knight.compiler.ast.expressions.*;
@@ -18,88 +43,102 @@ import knight.compiler.parser.*;
 import knight.compiler.lexer.*;
 import knight.builder.code.*;
 
-public class ParserTest
+import knight.helper.TestUtils;
+
+/*
+ * File: ParserTest.java
+ * @author: Mart van der Zalm
+ * Date: 2024-01-07
+ * Description:
+ */
+public class ParserTest extends TestUtils
 {
 	@Test
-	public void testParseIncludeValid() throws ParseException
+	public void testParseWithAll() throws ParseException
 	{
-        Parser parser = getParser("include example");
-        Lexer lexer = parser.lexer;
-        parser.token = lexer.nextToken();        
-        ASTInclude include = parser.parseInclude();
-        
-        assertNotNull(include);
-        assertEquals("example", include.getId().toString());
-	}
+		CodeBuilderProgram codeBuilderProgram = new CodeBuilderProgram()
+			.addClasses(
+				new CodeBuilderClass()
+			)
+			.addFunctions(
+				new CodeBuilderFunction(),
+				new CodeBuilderFunctionReturn()
+			)
+			.addVariables(
+				new CodeBuilderVariable(),
+				new CodeBuilderVariableInit()
+			)
+			.addInlineASM(
+				new CodeBuilderInlineASM()
+			);
 
-	@Test
-	public void testParseIncludeInvalid() throws ParseException
-	{
-		Parser parser = getParser("include");
-		Lexer lexer = parser.lexer;
-		parser.token = lexer.nextToken();
+		System.out.println(codeBuilderProgram.toString());
 
-		Exception exception = assertThrows(ParseException.class, () ->
-			parser.parseInclude());
-        assertEquals("0:0 Token is null, cannot perform operation.", exception.getMessage());
+		AST ast = parse(codeBuilderProgram.toString()).parse();
+		ASTProgram program  = castExpectClass(ASTProgram.class, ast);
+
+		assertEquals(1, program.getClassListSize());
+		expectsClass(ASTClass.class, program.getClassDeclAt(0).getClass());
+
+		assertEquals(2, program.getFunctionListSize());
+		expectsClass(ASTFunction.class, program.getFunctionDeclAt(0).getClass());
+		expectsClass(ASTFunctionReturn.class, program.getFunctionDeclAt(1).getClass());
+
+		assertEquals(2, program.getVariableListSize());
+		expectsClass(ASTVariable.class, program.getVariableDeclAt(0).getClass());
+		expectsClass(ASTVariableInit.class, program.getVariableDeclAt(1).getClass());
+
+		assertEquals(1, program.getInlineASMListSize());
+		expectsClass(ASTInlineASM.class, program.getInlineASMDeclAt(0).getClass());
 	}
 
 	@Test
 	public void testParseClassValid() throws ParseException
 	{
-		Parser parser = getParser("class HelloWorld {}");
-		parser.token = parser.lexer.nextToken();
-		ASTClass classDecl = parser.parseClass();
+		CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
+			.setId("MyClass");
 
-		assertNotNull(classDecl);
-		assertEquals("HelloWorld", classDecl.getId().toString());
+		ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
+
+		assertEquals("MyClass", classDecl.getId().toString());
 		assertEquals(0, classDecl.getFunctionListSize());
 		assertEquals(0, classDecl.getVariableListSize());
-	}
-
-	@Test
-	public void testParseClassInvalid() throws ParseException
-	{
-		Parser parser = getParser("class");
-		Lexer lexer = parser.lexer;
-		parser.token = lexer.nextToken();
-
-		Exception exception = assertThrows(ParseException.class, () -> parser.parseClass());
-		assertEquals("0:0 Token is null, cannot perform operation.", exception.getMessage());
 	}
 
     @Test
 	public void testParseClassWithFunctions() throws ParseException
 	{
 		CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
-			.addFunction(new CodeBuilderFunction().setId("MyFunction"));
+			.addFunctions(
+				new CodeBuilderFunction().setId("MyFunction"),
+				new CodeBuilderFunctionReturn().setReturnType(new CodeBuilderIntType())
+			);
 
-		Parser parser = getParser(codeBuilderClass.toString());
-		parser.token = parser.lexer.nextToken();
-		ASTClass classDecl = parser.parseClass();
+		ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
 
-		assertNotNull(classDecl);
-		assertEquals(1, classDecl.getFunctionListSize());
-		
-		ASTFunction function = classDecl.getFunctionDeclAt(0);
+		assertEquals(2, classDecl.getFunctionListSize());
+		ASTFunction function = castExpectClass(ASTFunction.class, classDecl.getFunctionDeclAt(0));
 		assertEquals("MyFunction", function.getId().toString());
+		ASTFunctionReturn functionReturn = castExpectClass(ASTFunctionReturn.class, classDecl.getFunctionDeclAt(1));
+		expectsClass(ASTIntType.class, functionReturn.getReturnType().getClass());
 	}
 
 	@Test
 	public void testParseClassWithVariables() throws ParseException
 	{
 		CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
-			.addVariable(new CodeBuilderVariable().setId("MyVariable"));
+			.addVariables(
+				new CodeBuilderVariable().setId("MyVariable"),
+				new CodeBuilderVariableInit().setType(new CodeBuilderIntType())
+			);
 
-		Parser parser = getParser(codeBuilderClass.toString());
-		parser.token = parser.lexer.nextToken();
-		ASTClass classDecl = parser.parseClass();
+		ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
 
-		assertNotNull(classDecl);
-		assertEquals(1, classDecl.getVariableListSize());
-
-		ASTVariable variable = classDecl.getVariableDeclAt(0);
+		assertEquals(2, classDecl.getVariableListSize());
+		ASTVariable variable = castExpectClass(ASTVariable.class, classDecl.getVariableDeclAt(0));
 		assertEquals("MyVariable", variable.getId().toString());
+		ASTVariableInit variableInit = castExpectClass(ASTVariableInit.class, classDecl.getVariableDeclAt(1));
+		expectsClass(ASTIntType.class, variableInit.getType().getClass());
 	}
 
 	@Test
@@ -107,17 +146,26 @@ public class ParserTest
     {
     	CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
     		.setId("MyClass")
-    		.mockFunction(2)
-    		.mockVariable(3);
+    		.addFunctions(
+    			new CodeBuilderFunction(),
+    			new CodeBuilderFunctionReturn()
+    		)
+    		.addVariables(
+    			new CodeBuilderVariable(),
+    			new CodeBuilderVariableInit()
+    		);
 
-    	Parser parser = getParser(codeBuilderClass.toString());
-    	parser.token = parser.lexer.nextToken();
-    	ASTClass classDecl = parser.parseClass();
+    	ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
 
-    	assertNotNull(classDecl);
     	assertEquals("MyClass", classDecl.getId().toString());
+
     	assertEquals(2, classDecl.getFunctionListSize());
-    	assertEquals(3, classDecl.getVariableListSize());
+    	expectsClass(ASTFunction.class, classDecl.getFunctionDeclAt(0).getClass());
+    	expectsClass(ASTFunctionReturn.class, classDecl.getFunctionDeclAt(1).getClass());
+
+    	assertEquals(2, classDecl.getVariableListSize());
+    	expectsClass(ASTVariable.class, classDecl.getVariableDeclAt(0).getClass());
+    	expectsClass(ASTVariableInit.class, classDecl.getVariableDeclAt(1).getClass());
     }
 
 	@Test
@@ -126,11 +174,8 @@ public class ParserTest
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
 			.setId("MyFunction");
 
-		Parser parser = getParser(codeBuilderFunction.toString());
-		parser.token = parser.lexer.nextToken();
-		ASTFunction function = parser.parseFunction();
+		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
-		assertNotNull(function);
 		assertEquals("MyFunction", function.getId().toString());
 		assertEquals(0, function.getArgumentListSize());
 		assertEquals(0, function.getVariableListSize());
@@ -142,19 +187,14 @@ public class ParserTest
 	public void testParseFunctionReturnValid() throws ParseException
 	{
 		CodeBuilderFunctionReturn codeBuilderFunctionReturn = new CodeBuilderFunctionReturn()
-			.setReturnType(CodeBuilderType.INT)
+			.setReturnType(new CodeBuilderIntType())
 			.setId("MyFunction");
 
-		Parser parser = getParser(codeBuilderFunctionReturn.toString());
-		parser.token = parser.lexer.nextToken();
-		ASTFunction function = parser.parseFunction();
+		ASTFunction function = parse(codeBuilderFunctionReturn.toString()).parseFunction();
 
-		assertNotNull(function);
 		assertEquals("MyFunction", function.getId().toString());
-    	assertTrue("Function is not instanceof FunctionReturn", function instanceof ASTFunctionReturn);
-    	assertTrue("ReturnType is not instanceof IntType", function.getReturnType() instanceof ASTIntType);
-
-    	ASTFunctionReturn functionReturn = (ASTFunctionReturn) function;
+		expectsClass(ASTIntType.class, function.getReturnType().getClass());
+		ASTFunctionReturn functionReturn = castExpectClass(ASTFunctionReturn.class, function);
     	assertNotNull(functionReturn.getReturnExpr());
 	}
 
@@ -162,16 +202,14 @@ public class ParserTest
 	public void testParseFunctionWithArguments() throws ParseException
 	{
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.addArgument(new CodeBuilderArgument().setId("MyArgument"));
+			.addArguments(
+				new CodeBuilderArgument().setId("MyArgument")
+			);
 
-		Parser parser = getParser(codeBuilderFunction.toString());
-		parser.token = parser.lexer.nextToken();
-		ASTFunction function = parser.parseFunction();
+		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
-		assertNotNull(function);
 		assertEquals(1, function.getArgumentListSize());
-
-		ASTArgument argument = function.getArgumentDeclAt(0);
+		ASTArgument argument = castExpectClass(ASTArgument.class, function.getArgumentDeclAt(0));
 		assertEquals("MyArgument", argument.getId().toString());
 	}
 
@@ -179,16 +217,14 @@ public class ParserTest
 	public void testParseFunctionWithVariables() throws ParseException
 	{
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.addVariable(new CodeBuilderVariable().setId("MyVariable"));
+			.addVariables(
+				new CodeBuilderVariable().setId("MyVariable")
+			);
 
-		Parser parser = getParser(codeBuilderFunction.toString());
-		parser.token = parser.lexer.nextToken();
-		ASTFunction function = parser.parseFunction();
+		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
-		assertNotNull(function);
 		assertEquals(1, function.getVariableListSize());
-
-		ASTVariable variable = function.getVariableDeclAt(0);
+		ASTVariable variable = castExpectClass(ASTVariable.class, function.getVariableDeclAt(0));
 		assertEquals("MyVariable", variable.getId().toString());
 	}
 
@@ -196,82 +232,92 @@ public class ParserTest
 	public void testParseFunctionWithStatements() throws ParseException
 	{
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.setId("MyFunction")
 			.addStatements(
-				new CodeBuilderAssign()
-					.setId("MyAssign")
-					.setExpr(new CodeBuilderIntLiteral()),
-				new CodeBuilderWhile()
-					.setExpr(new CodeBuilderIntLiteral().setValue(1))
+				new CodeBuilderAssign().setId("MyStatement")
 			);
 
-		Parser parser = getParser(codeBuilderFunction.toString());
-		parser.token = parser.lexer.nextToken();
-		ASTFunction function = parser.parseFunction();
+		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
-		assertNotNull(function);
-		assertEquals(2, function.getStatementListSize());
-
-		ASTStatement assignStatement = function.getStatementDeclAt(0);
-		assertTrue("Statement is not instanceof ASTStatement", assignStatement instanceof ASTStatement);
-		ASTAssign assign = (ASTAssign) assignStatement;
-		assertEquals("MyAssign", assign.getId().toString());
-
-		ASTStatement whileStatement = function.getStatementDeclAt(1);
-		assertTrue("Statement is not instanceof ASTStatement", whileStatement instanceof ASTStatement);
-		ASTWhile whileStat = (ASTWhile) whileStatement;
-		assertTrue("Expression in while is not instanceof ASTIntLiteral", whileStat.getExpr() instanceof ASTIntLiteral);
+		assertEquals(1, function.getStatementListSize());
+		ASTAssign statement = castExpectClass(ASTAssign.class, function.getStatementDeclAt(0));
+		assertEquals("MyStatement", statement.getId().toString());
 	}
 
-	// @Test
-	// public void testParseFunctionWithAll() throws ParseException
-	// {
-	// 	CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction("MyFunction");
-	// 	codeBuilderFunction.mockArgument(2);
-	// 	codeBuilderFunction.mockVariable(3);
-	// 	codeBuilderFunction.mockStatement(1);
+	@Test
+	public void testParseFunctionWithAll() throws ParseException
+	{
+		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
+			.addArguments(
+				new CodeBuilderArgument().setType(new CodeBuilderIntType()),
+				new CodeBuilderArgument().setType(new CodeBuilderStringType()),
+				new CodeBuilderArgument().setType(new CodeBuilderBooleanType()),
+				new CodeBuilderArgument().setType(new CodeBuilderIdentifierType())
+			)
+			.addVariables(
+				new CodeBuilderVariable().setType(new CodeBuilderIntType()),
+				new CodeBuilderVariable().setType(new CodeBuilderStringType()),
+				new CodeBuilderVariable().setType(new CodeBuilderIdentifierType()),
+				new CodeBuilderVariableInit().setType(new CodeBuilderBooleanType()),
+				new CodeBuilderVariableInit().setType(new CodeBuilderIdentifierType())
+			)
+			.addStatements(
+				new CodeBuilderWhile(),
+				new CodeBuilderForLoop(),
+				new CodeBuilderIfThenElse(),
+				new CodeBuilderAssign()
+			)
+			.addInlineASM(
+				new CodeBuilderInlineASM()
+			);
 
-	// 	Parser parser = getParser(codeBuilderFunction.toString());
-	// 	parser.token = parser.lexer.nextToken();
-	// 	ASTFunction function = parser.parseFunction();
+		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
-	// 	assertNotNull(function);
-	// 	assertEquals("MyFunction", function.getId().toString());
-	// 	assertEquals(2, function.getArgumentListSize());
-	// 	assertEquals(3, function.getVariableListSize());
-	// 	assertEquals(1, function.getStatementListSize());
-	// }
+		assertEquals(5, function.getVariableListSize());
+		expectsClass(ASTIntType.class, function.getVariableDeclAt(0).getType().getClass());
+		expectsClass(ASTStringType.class, function.getVariableDeclAt(1).getType().getClass());
+		expectsClass(ASTIdentifierType.class, function.getVariableDeclAt(2).getType().getClass());
+		expectsClass(ASTBooleanType.class, function.getVariableDeclAt(3).getType().getClass());
+		expectsClass(ASTIdentifierType.class, function.getVariableDeclAt(4).getType().getClass());
 
-    // @Test
-    // public void testParseVariableValid() throws ParseException
-    // {
-    // 	CodeBuilderVariable codeBuilderVariable = new CodeBuilderVariable("MyVariable");
+		assertEquals(4, function.getStatementListSize());
+		expectsClass(ASTWhile.class, function.getStatementDeclAt(0).getClass());
+		expectsClass(ASTForLoop.class, function.getStatementDeclAt(1).getClass());
+		expectsClass(ASTIfThenElse.class, function.getStatementDeclAt(2).getClass());
+		expectsClass(ASTAssign.class, function.getStatementDeclAt(3).getClass());
 
-    // 	Parser parser = this.getParser(codeBuilderVariable.toString());
-    // 	parser.token = parser.lexer.nextToken();
-    // 	ASTVariable variable = parser.parseVariable();
+		assertEquals(1, function.getInlineASMListSize());
+	}
 
-    // 	assertNotNull(variable);
-    // 	assertTrue("Variable is not instanceof ASTVariable", variable instanceof ASTVariable);
-    // 	assertEquals("MyVariable", variable.getId().toString());
-    // }
+    @Test
+    public void testParseVariableValid() throws ParseException
+    {
+    	CodeBuilderVariable codeBuilderVariable = new CodeBuilderVariable()
+    		.setId("MyVariable")
+    		.setType(new CodeBuilderIntType());
 
-    // @Test
-    // public void testParseVariableInitValid() throws ParseException
-    // {
-    // 	CodeBuilderVariableInit codeBuilderVariableInit = new CodeBuilderVariableInit("MyVariable");
+    	ASTVariable variable = parse(codeBuilderVariable.toString()).parseVariable();
 
-    // 	Parser parser = this.getParser(codeBuilderVariableInit.toString());
-    // 	parser.token = parser.lexer.nextToken();
-    // 	ASTVariable variable = parser.parseVariable();
+    	assertEquals("MyVariable", variable.getId().toString());
+    	expectsClass(ASTIntType.class, variable.getType().getClass());
+    }
 
-    // 	assertNotNull(variable);
-    // 	assertTrue("Variable is not instanceof ASTVariableInit", variable instanceof ASTVariableInit);
-    // 	assertEquals("MyVariable", variable.getId().toString());
+    @Test
+    public void testParseVariableInitValid() throws ParseException
+    {
+    	CodeBuilderVariableInit codeBuilderVariableInit = new CodeBuilderVariableInit()
+    		.setId("MyVariable")
+    		.setType(new CodeBuilderStringType())
+    		.setExpr(new CodeBuilderStringLiteral().setId("Hello World"));
 
-    // 	ASTVariableInit variableInitDecl = (ASTVariableInit) variable;
-    // 	assertNotNull(variableInitDecl.getExpr());
-    // }
+    	ASTVariable variable = parse(codeBuilderVariableInit.toString()).parseVariable();
+    	ASTVariableInit variableInit = castExpectClass(ASTVariableInit.class, variable);
+
+    	assertEquals("MyVariable", variableInit.getId().toString());
+    	expectsClass(ASTStringType.class, variableInit.getType().getClass());
+    	expectsClass(ASTStringLiteral.class, variableInit.getExpr().getClass());
+    	ASTStringLiteral stringLiteral = castExpectClass(ASTStringLiteral.class, variableInit.getExpr());
+    	assertEquals("Hello World", stringLiteral.getValue());
+    }
 
     // @Test
 	// public void testParseExpression() throws ParseException
@@ -312,7 +358,7 @@ public class ParserTest
 		
 	// }
 
-    private Parser getParser(String input)
+    private Parser parse(String input)
 	{
 	    if (input == null || input.isEmpty()) {
 	        throw new IllegalArgumentException("Input must not be empty");
@@ -321,6 +367,7 @@ public class ParserTest
 		StringReader stringReader = new StringReader(input);
 		BufferedReader bufferedReader = new BufferedReader(stringReader);
 		Parser parser = new Parser(bufferedReader);
+		parser.token = parser.lexer.nextToken();
 
 		return parser;
 	}

@@ -26,36 +26,40 @@ package knight.builder.code;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 
 /*
- * File: CodeBuilderClass.java
+ * File: CodeBuilderProgram.java
  * @author: Mart van der Zalm
- * Date: 2024-02-10
+ * Date: 2024-04-02
  * Description:
  */
-public class CodeBuilderClass extends CodeBuilder
+public class CodeBuilderProgram extends CodeBuilder
 {
-	private String id;
+	private List<CodeBuilderClass> classList;
 	private List<CodeBuilderFunction> functionsList;
 	private List<CodeBuilderVariable> variablesList;
+	private List<CodeBuilderInlineASM> inlineASMList;
 
-	public CodeBuilderClass()
+	public CodeBuilderProgram()
 	{
+		this.classList = new ArrayList<>();
 		this.functionsList = new ArrayList<>();
 		this.variablesList = new ArrayList<>();
+		this.inlineASMList = new ArrayList<>();
 
 		this.mock();
 	}
 
-	public CodeBuilderClass setId(String id)
+	public CodeBuilderProgram addClasses(CodeBuilderClass... classes)
 	{
-		this.id = id;
+		for (CodeBuilderClass classDecl : classes) {
+			this.classList.add(classDecl);
+		}
 
 		return this;
 	}
 
-	public CodeBuilderClass addFunctions(CodeBuilderFunction... functions)
+	public CodeBuilderProgram addFunctions(CodeBuilderFunction... functions)
 	{
 		for (CodeBuilderFunction function : functions) {
 			this.functionsList.add(function);
@@ -64,7 +68,7 @@ public class CodeBuilderClass extends CodeBuilder
 		return this;
 	}
 
-	public CodeBuilderClass addVariables(CodeBuilderVariable... variables)
+	public CodeBuilderProgram addVariables(CodeBuilderVariable... variables)
 	{
 		for (CodeBuilderVariable variable : variables) {
 			this.variablesList.add(variable);
@@ -73,25 +77,40 @@ public class CodeBuilderClass extends CodeBuilder
 		return this;
 	}
 
-	protected CodeBuilderClass mock()
+	public CodeBuilderProgram addInlineASM(CodeBuilderInlineASM... inlineASMs)
 	{
-		this.id = super.random.className();
-		
+		for (CodeBuilderInlineASM inlineASM : inlineASMs) {
+			this.inlineASMList.add(inlineASM);
+		}
+
+		return this;
+	}
+
+	protected CodeBuilderProgram mock()
+	{
 		return this;
 	}
 
 	public String toString()
-	{		
-		StringBuilder classBody = new StringBuilder();
+	{
+		StringBuilder programBody = new StringBuilder();
 
 		for (CodeBuilderVariable variable : variablesList) {
-			classBody.append(variable).append(" ");
+			programBody.append(variable).append(" ");
 		}
 
 		for (CodeBuilderFunction function : functionsList) {
-			classBody.append(function).append(" ");
+			programBody.append(function).append(" ");
 		}
 
-		return String.format("class %s { %s }", id, classBody.toString());
+		for (CodeBuilderClass classDecl : classList) {
+			programBody.append(classDecl).append(" ");
+		}
+
+		for (CodeBuilderInlineASM inlineASM : inlineASMList) {
+			programBody.append(inlineASM).append(" ");
+		}
+
+		return programBody.toString();
 	}
 }

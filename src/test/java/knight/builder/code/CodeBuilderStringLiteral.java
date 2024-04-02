@@ -39,7 +39,7 @@ public class CodeBuilderStringLiteral extends CodeBuilderExpression
 		this.mock();
 	}
 
-	public CodeBuilderStringLiteral setId()
+	public CodeBuilderStringLiteral setId(String id)
 	{
 		this.id = id;
 

@@ -25,45 +25,42 @@
 package knight.builder.code;
 
 /*
- * File: CodeBuilderVariable.java
+ * File: CodeBuilderPlus.java
  * @author: Mart van der Zalm
- * Date: 2024-02-22
+ * Date: 2024-03-29
  * Description:
  */
-public class CodeBuilderVariable extends CodeBuilder
+public class CodeBuilderPlus extends CodeBuilderExpression
 {
-	protected CodeBuilderType type;
-	protected String id;
+	private CodeBuilderExpression lhs;
+	private CodeBuilderExpression rhs;
 
-	public CodeBuilderVariable()
+	public CodeBuilderPlus()
 	{
 		this.mock();
 	}
 
-	public CodeBuilderVariable setId(String id)
+	public CodeBuilderPlus setLhs(CodeBuilderExpression lhs)
 	{
-		this.id = id;
+		this.lhs = lhs;
 
 		return this;
 	}
 
-	public CodeBuilderVariable setType(CodeBuilderType type)
+	public CodeBuilderPlus setRhs(CodeBuilderExpression rhs)
 	{
-		this.type = type;
+		this.rhs = rhs;
 
 		return this;
 	}
 
-	protected CodeBuilderVariable mock()
+	protected CodeBuilderPlus mock()
 	{
-		this.type = super.random.type();
-		this.id = super.random.identifier();
-
 		return this;
 	}
 
 	public String toString()
-	{		
-		return String.format("%s %s;", this.type, this.id);
+	{
+		return "";
 	}
 }
