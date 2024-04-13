@@ -106,7 +106,8 @@ public class Parser
 
 					case INTEGER:
 					case STRING:
-					case BOOLEAN: {
+					case BOOLEAN:
+					case IDENTIFIER: {
 						variableList.add(parseVariable());
 					} break;
 					
@@ -203,28 +204,39 @@ public class Parser
 			switch (token.getToken()) {
 			    case WHILE:
 			    case FOR:
-			    case IF:
-			        statements.add(parseStatement());
-			        break;
+			    case IF: {
+			    	statements.add(parseStatement());
+			    } break;
+
 			    case INTEGER:
 			    case STRING:
-			    case BOOLEAN:
+			    case BOOLEAN: {
 			    	variables.add(parseVariable());
-			        break;
-			    case ASM:
-			        inlineASM.add(parseInlineASM());
-			        break;
-			    default:
+			    } break;
+
+			    case ASM: {
+					inlineASM.add(parseInlineASM());
+			    } break;
+
+			    case IDENTIFIER: {
 			    	if (peek().getToken() != Tokens.ASSIGN && peek().getToken() != Tokens.LEFTPAREN) { // Then it is a variable
 			    		variables.add(parseVariable());
 			    	} else {
 			    		statements.add(parseStatement());
 			    	}
-			        break;
+			    } break;
+
+			    default: {
+					throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+				}
 			}
 		}
 
-		ASTExpression returnExpr = parseReturnExpr();
+		ASTExpression returnExpr = null;
+		if (token.getToken() == Tokens.RETURN) {
+			eat(Tokens.RETURN);
+			returnExpr = parseExpression();
+		}
 		eat(Tokens.RIGHTBRACE);
 
 		if (returnExpr != null) {
@@ -248,15 +260,6 @@ public class Parser
 			variable = new ASTVariableInit(token, type, id, parseExpression());
 		}
 		return variable;
-	}
-
-	public ASTExpression parseReturnExpr() throws ParseException
-	{
-		if (token.getToken() == Tokens.RETURN) {
-			eat(Tokens.RETURN);
-			return parseExpression();
-		}
-		return null;
 	}
 
 	public ASTExpression parseExpression() throws ParseException
@@ -283,25 +286,6 @@ public class Parser
         }
     }
 
-	public ASTExpression parseCallFunction(ASTIdentifierExpr methodId) throws ParseException
-	{
-		Token tok = token;
-		List<ASTExpression> exprList = new ArrayList<ASTExpression>();
-
-		eat(Tokens.LEFTPAREN);
-		if (token.getToken() != Tokens.RIGHTPAREN) {
-			ASTExpression exprArg = parseExpression();
-			exprList.add(exprArg);
-			while (token.getToken() == Tokens.COMMA) {
-				eat(Tokens.COMMA);
-				exprArg = parseExpression();
-				exprList.add(exprArg);
-			}
-		}
-		eat(Tokens.RIGHTPAREN);
-		return new ASTCallFunctionExpr(tok, null, methodId, exprList);
-	}
-
 	public List<ASTArgument> parseArguments() throws ParseException
 	{
 		List<ASTArgument> argumentList = new ArrayList<>();
@@ -310,7 +294,7 @@ public class Parser
 			argumentList.add(parseArgument());
 
 			while (token.getToken() == Tokens.COMMA) {
-				eat(Tokens.COMMA);;
+				eat(Tokens.COMMA);
 				argumentList.add(parseArgument());
 			}
 		}
@@ -397,7 +381,50 @@ public class Parser
 
 			case IDENTIFIER: {
 				ASTIdentifier id = parseIdentifier();
-				return parseState(id);
+
+				switch (token.getToken()) {
+					case ASSIGN: {
+						Token tok = token;
+						eat(Tokens.ASSIGN);
+						ASTExpression expr = parseExpression();
+						ASTAssign assign = new ASTAssign(tok, id, expr);
+						return assign;
+					}
+
+					case LEFTBRACKET: {
+						eat(Tokens.LEFTBRACKET);
+						ASTExpression expr1 = parseExpression();
+						eat(Tokens.RIGHTBRACKET);
+						eat(Tokens.ASSIGN);
+						ASTExpression expr2 = parseExpression();
+						ASTArrayAssign assign = new ASTArrayAssign(id.getToken(), id, expr1, expr2);
+						return assign;
+					}
+
+					case LEFTPAREN: {
+						ASTIdentifierExpr idExpr = new ASTIdentifierExpr(id.getToken(), id.getId());
+						Token tok = token;
+						List<ASTExpression> exprList = new ArrayList<ASTExpression>();
+
+						eat(Tokens.LEFTPAREN);
+						if (token.getToken() != Tokens.RIGHTPAREN) {
+							ASTExpression exprArg = parseExpression();
+							exprList.add(exprArg);
+							while (token.getToken() == Tokens.COMMA) {
+								eat(Tokens.COMMA);
+								exprArg = parseExpression();
+								exprList.add(exprArg);
+							}
+						}
+						eat(Tokens.RIGHTPAREN);
+						eat(Tokens.SEMICOLON);
+						ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, null, idExpr, exprList);
+						return callFunc;
+					}
+
+					default:
+						throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+				}
 			}
 
 			default:
@@ -405,53 +432,53 @@ public class Parser
 		}
     }
 
-	public ASTStatement parseState(ASTIdentifier id) throws ParseException
-	{
-		switch (token.getToken()) {
+	// public ASTStatement parseState(ASTIdentifier id) throws ParseException
+	// {
+	// 	switch (token.getToken()) {
 
-		case ASSIGN: {
-			Token tok = token;
-			eat(Tokens.ASSIGN);
-			ASTExpression expr = parseExpression();
-			ASTAssign assign = new ASTAssign(tok, id, expr);
-			return assign;
-		}
+	// 		case ASSIGN: {
+	// 			Token tok = token;
+	// 			eat(Tokens.ASSIGN);
+	// 			ASTExpression expr = parseExpression();
+	// 			ASTAssign assign = new ASTAssign(tok, id, expr);
+	// 			return assign;
+	// 		}
 
-		case LEFTBRACKET: {
-			eat(Tokens.LEFTBRACKET);
-			ASTExpression expr1 = parseExpression();
-			eat(Tokens.RIGHTBRACKET);
-			eat(Tokens.ASSIGN);
-			ASTExpression expr2 = parseExpression();
-			ASTArrayAssign assign = new ASTArrayAssign(id.getToken(), id, expr1, expr2);
-			return assign;
-		}
+	// 		case LEFTBRACKET: {
+	// 			eat(Tokens.LEFTBRACKET);
+	// 			ASTExpression expr1 = parseExpression();
+	// 			eat(Tokens.RIGHTBRACKET);
+	// 			eat(Tokens.ASSIGN);
+	// 			ASTExpression expr2 = parseExpression();
+	// 			ASTArrayAssign assign = new ASTArrayAssign(id.getToken(), id, expr1, expr2);
+	// 			return assign;
+	// 		}
 
-		case LEFTPAREN: {
-			ASTIdentifierExpr idExpr = new ASTIdentifierExpr(id.getToken(), id.getId());
-			Token tok = token;
-			List<ASTExpression> exprList = new ArrayList<ASTExpression>();
+	// 		case LEFTPAREN: {
+	// 			ASTIdentifierExpr idExpr = new ASTIdentifierExpr(id.getToken(), id.getId());
+	// 			Token tok = token;
+	// 			List<ASTExpression> exprList = new ArrayList<ASTExpression>();
 
-			eat(Tokens.LEFTPAREN);
-			if (token.getToken() != Tokens.RIGHTPAREN) {
-				ASTExpression exprArg = parseExpression();
-				exprList.add(exprArg);
-				while (token.getToken() == Tokens.COMMA) {
-					eat(Tokens.COMMA);
-					exprArg = parseExpression();
-					exprList.add(exprArg);
-				}
-			}
-			eat(Tokens.RIGHTPAREN);
-			eat(Tokens.SEMICOLON);
-			ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, null, idExpr, exprList);
-			return callFunc;
-		}
+	// 			eat(Tokens.LEFTPAREN);
+	// 			if (token.getToken() != Tokens.RIGHTPAREN) {
+	// 				ASTExpression exprArg = parseExpression();
+	// 				exprList.add(exprArg);
+	// 				while (token.getToken() == Tokens.COMMA) {
+	// 					eat(Tokens.COMMA);
+	// 					exprArg = parseExpression();
+	// 					exprList.add(exprArg);
+	// 				}
+	// 			}
+	// 			eat(Tokens.RIGHTPAREN);
+	// 			eat(Tokens.SEMICOLON);
+	// 			ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, null, idExpr, exprList);
+	// 			return callFunc;
+	// 		}
 
-		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
-		}
-	}
+	// 		default:
+	// 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+	// 	}
+	// }
 
 	public ASTIdentifier parseIdentifier() throws ParseException
 	{
@@ -467,34 +494,27 @@ public class Parser
 		case INTEGER: {
 			Token tok = token;
 			eat(Tokens.INTEGER);
-			ASTType type = parseType1();
-			if (type == null) {
-				return new ASTIntType(tok);
-			}
-			return type;
+
+			if (token.getToken() == Tokens.LEFTBRACKET) {
+				Token tok = token;
+				eat(Tokens.LEFTBRACKET);
+				eat(Tokens.RIGHTBRACKET);
+				return new ASTIntArrayType(tok);
+			} 
+
+			return new ASTIntType(tok);
 		}
 
-		case BOOLEAN: {
-			ASTBooleanType bt = new ASTBooleanType(token);
-			eat(Tokens.BOOLEAN);
-			return bt;
-		}
 		case STRING: {
 			ASTStringType st = new ASTStringType(token);
 			eat(Tokens.STRING);
 			return st;
 		}
 
-		case VOID: {
-			ASTVoidType vt = new ASTVoidType(token);
-			eat(Tokens.VOID);
-			return vt;
-		}
-
-		case FUNCTION: {
-			ASTFunctionType functionType = new ASTFunctionType(token);
-			eat(Tokens.FUNCTION);
-			return functionType;
+		case BOOLEAN: {
+			ASTBooleanType bt = new ASTBooleanType(token);
+			eat(Tokens.BOOLEAN);
+			return bt;
 		}
 
 		case IDENTIFIER: {
@@ -503,35 +523,41 @@ public class Parser
 			return id;
 		}
 
-		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
-		}
-	}
-
-	public ASTType parseType1() throws ParseException
-	{
-		switch (token.getToken()) {
-
-		case LEFTBRACKET: {
-			Token tok = token;
-			eat(Tokens.LEFTBRACKET);
-			eat(Tokens.RIGHTBRACKET);
-			ASTIntArrayType type = new ASTIntArrayType(tok);
-			return type;
-		}
-
-		case IDENTIFIER:
-		case LEFTBRACE:
-		case ASSIGN:
-		case RIGHTPAREN:
-		case COMMA: {
-			return null;
+		case VOID: {
+			ASTVoidType vt = new ASTVoidType(token);
+			eat(Tokens.VOID);
+			return vt;
 		}
 
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 		}
 	}
+
+	// public ASTType parseType1() throws ParseException
+	// {
+	// 	switch (token.getToken()) {
+
+	// 	case LEFTBRACKET: {
+	// 		Token tok = token;
+	// 		eat(Tokens.LEFTBRACKET);
+	// 		eat(Tokens.RIGHTBRACKET);
+	// 		ASTIntArrayType type = new ASTIntArrayType(tok);
+	// 		return type;
+	// 	}
+
+	// 	case IDENTIFIER:
+	// 	case LEFTBRACE:
+	// 	case ASSIGN:
+	// 	case RIGHTPAREN:
+	// 	case COMMA: {
+	// 		return null;
+	// 	}
+
+	// 	default:
+	// 		throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+	// 	}
+	// }
 
 	public void parseExpr() throws ParseException
 	{
@@ -593,6 +619,25 @@ public class Parser
 		default:
 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token : " + token.getToken());
 		}
+	}
+
+	public ASTExpression parseCallFunction(ASTIdentifierExpr methodId) throws ParseException
+	{
+		Token tok = token;
+		List<ASTExpression> exprList = new ArrayList<ASTExpression>();
+
+		eat(Tokens.LEFTPAREN);
+		if (token.getToken() != Tokens.RIGHTPAREN) {
+			ASTExpression exprArg = parseExpression();
+			exprList.add(exprArg);
+			while (token.getToken() == Tokens.COMMA) {
+				eat(Tokens.COMMA);
+				exprArg = parseExpression();
+				exprList.add(exprArg);
+			}
+		}
+		eat(Tokens.RIGHTPAREN);
+		return new ASTCallFunctionExpr(tok, null, methodId, exprList);
 	}
 
 	public void pushOperator(Token current)

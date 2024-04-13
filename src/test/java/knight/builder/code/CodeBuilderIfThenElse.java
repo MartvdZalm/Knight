@@ -65,8 +65,8 @@ public class CodeBuilderIfThenElse extends CodeBuilderStatement
 	protected CodeBuilderIfThenElse mock()
 	{
 		this.expr = new CodeBuilderLessThan()
-							.setLhs(new CodeBuilderIdentifierExpr().setId("a"))
-							.setRhs(new CodeBuilderIntLiteral().setValue(10));
+			.setLhs(new CodeBuilderIdentifierExpr().setId("a"))
+			.setRhs(new CodeBuilderIntLiteral().setValue(10));
 
 		this.then = super.random.statement();
 		this.elze = super.random.statement();

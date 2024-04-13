@@ -72,9 +72,12 @@ public class ParserTest extends TestUtils
 				new CodeBuilderInlineASM()
 			);
 
-		System.out.println(codeBuilderProgram.toString());
 
-		AST ast = parse(codeBuilderProgram.toString()).parse();
+		StringReader stringReader = new StringReader(codeBuilderProgram.toString());
+		BufferedReader bufferedReader = new BufferedReader(stringReader);
+		Parser parser = new Parser(bufferedReader);
+
+		AST ast = parser.parse();
 		ASTProgram program  = castExpectClass(ASTProgram.class, ast);
 
 		assertEquals(1, program.getClassListSize());
@@ -319,6 +322,192 @@ public class ParserTest extends TestUtils
     	assertEquals("Hello World", stringLiteral.getValue());
     }
 
+    @Test
+    public void testParseExpression() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testParseArguments() throws ParseException
+    {
+    	String arguments = "(";
+    	for (int i = 0; i < 10; i++) {
+    		if (i < 9) {
+    			arguments += new CodeBuilderArgument().toString() +  ", ";
+    		} else {
+    			arguments += new CodeBuilderArgument().toString();
+    		}
+    	}
+    	arguments += ")";
+
+    	List<ASTArgument> argumentList = parse(arguments).parseArguments();
+
+    	assertEquals(10, argumentList.size());
+    }
+
+    @Test
+    public void testParseArgument() throws ParseException
+    {
+    	CodeBuilderArgument codeBuilderArgumentInt = new CodeBuilderArgument()
+    		.setId("MyArgument")
+    		.setType(new CodeBuilderIntType());
+
+    	ASTArgument argumentInt = parse(codeBuilderArgumentInt.toString()).parseArgument();
+    	assertEquals("MyArgument", argumentInt.getId().toString());
+    	expectsClass(ASTIntType.class, argumentInt.getType().getClass());
+
+    	CodeBuilderArgument codeBuilderArgumentString = new CodeBuilderArgument()
+    		.setId("MyArgument")
+    		.setType(new CodeBuilderStringType());
+
+    	ASTArgument argumentString = parse(codeBuilderArgumentString.toString()).parseArgument();
+    	assertEquals("MyArgument", argumentString.getId().toString());
+    	expectsClass(ASTStringType.class, argumentString.getType().getClass());
+
+    	CodeBuilderArgument codeBuilderArgumentBoolean = new CodeBuilderArgument()
+    		.setId("MyArgument")
+    		.setType(new CodeBuilderBooleanType());
+
+    	ASTArgument argumentBoolean = parse(codeBuilderArgumentBoolean.toString()).parseArgument();
+    	assertEquals("MyArgument", argumentBoolean.getId().toString());
+    	expectsClass(ASTBooleanType.class, argumentBoolean.getType().getClass());
+    }
+
+   	@Test
+    public void testParseStatement() throws ParseException
+    {
+    	CodeBuilderIfThenElse codeBuilderIfThenElse = new CodeBuilderIfThenElse();
+    	ASTStatement ifThenElse = parse(codeBuilderIfThenElse.toString()).parseStatement();
+    	expectsClass(ASTIfThenElse.class, ifThenElse.getClass());
+
+    	CodeBuilderWhile codeBuilderWhile = new CodeBuilderWhile();
+    	ASTStatement astWhile = parse(codeBuilderWhile.toString()).parseStatement();
+    	expectsClass(ASTWhile.class, astWhile.getClass());
+
+    	CodeBuilderForLoop codeBuilderForLoop = new CodeBuilderForLoop();
+    	ASTStatement forLoop = parse(codeBuilderForLoop.toString()).parseStatement();
+    	expectsClass(ASTForLoop.class, forLoop.getClass());
+    }
+
+   	@Test
+    public void testParseIdentifier() throws ParseException
+    {
+    	CodeBuilderIdentifier codeBuilderIdentifier = new CodeBuilderIdentifier()
+    		.setId("MyIdentifier");
+
+    	ASTIdentifier identifier = parse(codeBuilderIdentifier.toString()).parseIdentifier();
+    	assertEquals("MyIdentifier", identifier.getId().toString());
+    }
+
+    @Test
+    public void testParseType() throws ParseException
+    {
+    	CodeBuilderIntType codeBuilderIntType = new CodeBuilderIntType();
+    	ASTType intType = parse(codeBuilderIntType.toString()).parseType();
+    	expectsClass(ASTIntType.class, intType.getClass());
+
+    	CodeBuilderStringType codeBuilderStringType = new CodeBuilderStringType();
+    	ASTType stringType = parse(codeBuilderStringType.toString()).parseType();
+    	expectsClass(ASTStringType.class, stringType.getClass());
+
+    	CodeBuilderBooleanType codeBuilderBooleanType = new CodeBuilderBooleanType();
+    	ASTType booleanType = parse(codeBuilderBooleanType.toString()).parseType();
+    	expectsClass(ASTBooleanType.class, booleanType.getClass());
+
+    	CodeBuilderIdentifierType codeBuilderIdentifierType = new CodeBuilderIdentifierType();
+    	ASTType identifierType = parse(codeBuilderIdentifierType.toString()).parseType();
+    	expectsClass(ASTIdentifierType.class, identifierType.getClass());
+
+    	CodeBuilderVoidType codeBuilderVoidType = new CodeBuilderVoidType();
+    	ASTType voidType = parse(codeBuilderVoidType.toString()).parseType();
+    	expectsClass(ASTVoidType.class, voidType.getClass());
+    }
+
+    @Test
+    public void testParseType1() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testParseExpr() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testPushOperator() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testPopOperator() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testParseUnary() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testParseBinary() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testIsBinary() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testGetPriority() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testParseTerm1() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testParseTerm2() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testCheckNotNull() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testPeek() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testAdvance() throws ParseException
+    {
+
+    }
+
+    @Test
+    public void testEat() throws ParseException
+    {
+
+    }
+
     // @Test
 	// public void testParseExpression() throws ParseException
 	// {
@@ -350,12 +539,6 @@ public class ParserTest extends TestUtils
 	//     } catch (Exception e) {
 	//         e.getStackTrace();
 	//     }
-	// }
-
-	// @Test
-	// public void testParseCallFunction() throws ParseException
-	// {
-		
 	// }
 
     private Parser parse(String input)

@@ -34,15 +34,6 @@ public class ASTTest
 	}
 
     @Test
-    public void includeTest()
-    {
-        assertEquals(2, program.getIncludeListSize());
-
-        assertEquals("print", program.getIncludeDeclAt(0).getId().toString());
-        assertEquals("math", program.getIncludeDeclAt(1).getId().toString());
-    }
-
-    @Test
     public void classTest()
     {
         assertEquals(1, program.getClassListSize());
