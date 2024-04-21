@@ -66,12 +66,6 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTInclude include)
-	{
-		return null;
-	}
-
-	@Override
 	public ASTType visit(ASTAssign n)
 	{
 		ASTType rhs = n.getExpr().accept(this);
@@ -219,21 +213,6 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		ASTType type = new ASTIntType(times.getToken());
 		times.setType(type);
 		return type;
-	}
-
-	@Override
-	public ASTType visit(ASTIncrement increment)
-	{
-		ASTType expr = increment.getExpr().accept(this);
-
-		if (!(expr instanceof ASTIntType)) {
-			Token sym = increment.getExpr().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator ++ cannot be applied to " + expr);
-		}
-
-		ASTType t = new ASTIntType(increment.getToken());
-		increment.setType(t);
-		return t;
 	}
 
 	@Override
@@ -718,18 +697,6 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram program)
 	{	
-		for (int i = 0; i < program.getIncludeListSize(); i++) {
-			program.getIncludeDeclAt(i).accept(this);
-		}
-
-		for (int i = 0; i < program.getEnumListSize(); i++) {
-			program.getEnumDeclAt(i).accept(this);
-		}
-
-		for (int i = 0; i < program.getInterListSize(); i++) {
-			program.getInterDeclAt(i).accept(this);
-		}
-
 		for (int i = 0; i < program.getClassListSize(); i++) {
 			program.getClassDeclAt(i).accept(this);
 		}
@@ -855,18 +822,6 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
-	}
-
-	@Override
-	public ASTType visit(ASTEnumeration enumDecl)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTInterface interDecl)
-	{
-		return null;
 	}
 
 	@Override

@@ -30,6 +30,12 @@ import java.util.Random;
 import java.lang.reflect.Constructor;
 import com.github.javafaker.Faker;
 
+import knight.builder.code.declarations.*;
+import knight.builder.code.expressions.*;
+import knight.builder.code.expressions.operations.*;
+import knight.builder.code.statements.*;
+import knight.builder.code.types.*;
+
 /*
  * File: CodeBuilderRandom.java
  * @author: Mart van der Zalm

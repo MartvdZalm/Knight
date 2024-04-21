@@ -68,9 +68,6 @@ public class Parser
         ASTProgram program = null;
 
         try {
-			List<ASTInclude> includeList = new ArrayList<>();
-			List<ASTEnumeration> enumerationList = new ArrayList<>();
-			List<ASTInterface> interfaceList = new ArrayList<>();
 			List<ASTClass> classList = new ArrayList<>();
 			List<ASTFunction> functionList = new ArrayList<>();
 			List<ASTVariable> variableList = new ArrayList<>();
@@ -80,17 +77,6 @@ public class Parser
 
 			do {
 				switch (token.getToken()) {
-					// case INCLUDE: {
-					// 	includeList.add(parseInclude());
-					// } break;
-
-					// case ENUMERATION: {
-					// 	enumerationList.add(parseEnumeration());
-					// } break;
-
-					// case INTERFACE: {
-					// 	interfaceList.add(parseInterface());
-					// } break;
 
 					case CLASS: {
 						classList.add(parseClass());
@@ -118,7 +104,7 @@ public class Parser
                 
             } while (token != null);
 			
-            program = new ASTProgram(token, includeList, enumerationList, interfaceList, classList, functionList, variableList, inlineASMList);
+            program = new ASTProgram(token, classList, functionList, variableList, inlineASMList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,32 +125,6 @@ public class Parser
 
     	return new ASTInlineASM(token, lines);
     }
-
-	// public ASTInclude parseInclude() throws ParseException
-	// {
-	// 	eat(Tokens.INCLUDE);
-	// 	return new ASTInclude(token, parseIdentifier());
-	// }
-
-	// private ASTEnumeration parseEnumeration() throws ParseException
-	// {
-	// 	eat(Tokens.ENUMERATION);
-	// 	ASTIdentifier id = parseIdentifier();
-	// 	eat(Tokens.LEFTBRACE);
-	// 	eat(Tokens.RIGHTBRACE);
-
-	// 	return new ASTEnumeration(token, id);
-	// }
-
-	// private ASTInterface parseInterface() throws ParseException
-	// {
-	// 	eat(Tokens.INTERFACE);
-	// 	ASTIdentifier id = parseIdentifier();
-	// 	eat(Tokens.LEFTBRACE);
-	// 	eat(Tokens.RIGHTBRACE);
-
-	// 	return new ASTInterface(token, id);
-	// }
 
 	public ASTClass parseClass() throws ParseException
 	{
@@ -272,7 +232,7 @@ public class Parser
 				tok = stOperator.peek();
 			}
 
-			if (token.getToken() == Tokens.SEMICOLON) {
+			if (checkNotNull(token).getToken() == Tokens.SEMICOLON) {
 				eat(Tokens.SEMICOLON);
 			}
 
@@ -427,58 +387,11 @@ public class Parser
 				}
 			}
 
-			default:
+			default: {
 				throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+			}
 		}
     }
-
-	// public ASTStatement parseState(ASTIdentifier id) throws ParseException
-	// {
-	// 	switch (token.getToken()) {
-
-	// 		case ASSIGN: {
-	// 			Token tok = token;
-	// 			eat(Tokens.ASSIGN);
-	// 			ASTExpression expr = parseExpression();
-	// 			ASTAssign assign = new ASTAssign(tok, id, expr);
-	// 			return assign;
-	// 		}
-
-	// 		case LEFTBRACKET: {
-	// 			eat(Tokens.LEFTBRACKET);
-	// 			ASTExpression expr1 = parseExpression();
-	// 			eat(Tokens.RIGHTBRACKET);
-	// 			eat(Tokens.ASSIGN);
-	// 			ASTExpression expr2 = parseExpression();
-	// 			ASTArrayAssign assign = new ASTArrayAssign(id.getToken(), id, expr1, expr2);
-	// 			return assign;
-	// 		}
-
-	// 		case LEFTPAREN: {
-	// 			ASTIdentifierExpr idExpr = new ASTIdentifierExpr(id.getToken(), id.getId());
-	// 			Token tok = token;
-	// 			List<ASTExpression> exprList = new ArrayList<ASTExpression>();
-
-	// 			eat(Tokens.LEFTPAREN);
-	// 			if (token.getToken() != Tokens.RIGHTPAREN) {
-	// 				ASTExpression exprArg = parseExpression();
-	// 				exprList.add(exprArg);
-	// 				while (token.getToken() == Tokens.COMMA) {
-	// 					eat(Tokens.COMMA);
-	// 					exprArg = parseExpression();
-	// 					exprList.add(exprArg);
-	// 				}
-	// 			}
-	// 			eat(Tokens.RIGHTPAREN);
-	// 			eat(Tokens.SEMICOLON);
-	// 			ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, null, idExpr, exprList);
-	// 			return callFunc;
-	// 		}
-
-	// 		default:
-	// 			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
-	// 	}
-	// }
 
 	public ASTIdentifier parseIdentifier() throws ParseException
 	{
@@ -491,133 +404,130 @@ public class Parser
 	{
 		switch (token.getToken()) {
 
-		case INTEGER: {
-			Token tok = token;
-			eat(Tokens.INTEGER);
-
-			if (token.getToken() == Tokens.LEFTBRACKET) {
+			case INTEGER: {
 				Token tok = token;
-				eat(Tokens.LEFTBRACKET);
-				eat(Tokens.RIGHTBRACKET);
-				return new ASTIntArrayType(tok);
-			} 
+				eat(Tokens.INTEGER);
 
-			return new ASTIntType(tok);
-		}
+				if (checkNotNull(token).getToken() == Tokens.LEFTBRACKET) {
+					tok = token;
+					eat(Tokens.LEFTBRACKET);
+					eat(Tokens.RIGHTBRACKET);
+					return new ASTIntArrayType(tok);
+				} 
 
-		case STRING: {
-			ASTStringType st = new ASTStringType(token);
-			eat(Tokens.STRING);
-			return st;
-		}
+				return new ASTIntType(tok);
+			}
 
-		case BOOLEAN: {
-			ASTBooleanType bt = new ASTBooleanType(token);
-			eat(Tokens.BOOLEAN);
-			return bt;
-		}
+			case STRING: {
+				ASTStringType st = new ASTStringType(token);
+				eat(Tokens.STRING);
+				return st;
+			}
 
-		case IDENTIFIER: {
-			ASTIdentifierType id = new ASTIdentifierType(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-			return id;
-		}
+			case BOOLEAN: {
+				ASTBooleanType bt = new ASTBooleanType(token);
+				eat(Tokens.BOOLEAN);
+				return bt;
+			}
 
-		case VOID: {
-			ASTVoidType vt = new ASTVoidType(token);
-			eat(Tokens.VOID);
-			return vt;
-		}
+			case IDENTIFIER: {
+				ASTIdentifierType id = new ASTIdentifierType(token, token.getSymbol());
+				eat(Tokens.IDENTIFIER);
+				return id;
+			}
 
-		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+			case VOID: {
+				ASTVoidType vt = new ASTVoidType(token);
+				eat(Tokens.VOID);
+				return vt;
+			}
+
+			default: {
+				throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+			}
 		}
 	}
-
-	// public ASTType parseType1() throws ParseException
-	// {
-	// 	switch (token.getToken()) {
-
-	// 	case LEFTBRACKET: {
-	// 		Token tok = token;
-	// 		eat(Tokens.LEFTBRACKET);
-	// 		eat(Tokens.RIGHTBRACKET);
-	// 		ASTIntArrayType type = new ASTIntArrayType(tok);
-	// 		return type;
-	// 	}
-
-	// 	case IDENTIFIER:
-	// 	case LEFTBRACE:
-	// 	case ASSIGN:
-	// 	case RIGHTPAREN:
-	// 	case COMMA: {
-	// 		return null;
-	// 	}
-
-	// 	default:
-	// 		throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
-	// 	}
-	// }
 
 	public void parseExpr() throws ParseException
 	{
 		switch (token.getToken()) {
 
-		case INTEGER: {
-			ASTIntLiteral lit = new ASTIntLiteral(token, Integer.parseInt(token.getSymbol()));
-			eat(Tokens.INTEGER);
-			stOperand.push(lit);
-			parseTerm1();
-		}
-		break;
+			case INTEGER: {
+				ASTIntLiteral lit = new ASTIntLiteral(token, Integer.parseInt(token.getSymbol()));
+				eat(Tokens.INTEGER);
+				stOperand.push(lit);
+				parseTerm1();
+			} break;
 
-		case STRING: {
-			ASTStringLiteral sl = new ASTStringLiteral(token, (String) token.getSymbol());
-			eat(Tokens.STRING);
-			stOperand.push(sl);
-			parseTerm1();
-		}
-		break;
+			case STRING: {
+				ASTStringLiteral sl = new ASTStringLiteral(token, (String) token.getSymbol());
+				eat(Tokens.STRING);
+				stOperand.push(sl);
+				parseTerm1();
+			} break;
 
-		case TRUE: {
-			ASTTrue true1 = new ASTTrue(token);
-			eat(Tokens.TRUE);
-			stOperand.push(true1);
-			parseTerm1();
-		}
-		break;
+			case TRUE: {
+				ASTTrue true1 = new ASTTrue(token);
+				eat(Tokens.TRUE);
+				stOperand.push(true1);
+				parseTerm1();
+			} break;
 
-		case FALSE: {
-			ASTFalse false1 = new ASTFalse(token);
-			eat(Tokens.FALSE);
-			stOperand.push(false1);
-			parseTerm1();
-		}
-		break;
+			case FALSE: {
+				ASTFalse false1 = new ASTFalse(token);
+				eat(Tokens.FALSE);
+				stOperand.push(false1);
+				parseTerm1();
+			} break;
 
-		case IDENTIFIER: {
-			ASTIdentifierExpr id = new ASTIdentifierExpr(token, (String) token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-			if (token.getToken() == Tokens.LEFTPAREN) {
-				ASTExpression expr = parseCallFunction(id);
-				stOperand.push(expr);	
-			} else {
-				stOperand.push(id);
+			case IDENTIFIER: {
+				ASTIdentifierExpr id = new ASTIdentifierExpr(token, (String) token.getSymbol());
+				eat(Tokens.IDENTIFIER);
+				if (token.getToken() == Tokens.LEFTPAREN) {
+					ASTExpression expr = parseCallFunction(id);
+					stOperand.push(expr);	
+				} else {
+					stOperand.push(id);
+				}
+				parseTerm1();
+			} break;
+
+			case NEW: {
+				pushOperator(token);
+				eat(Tokens.NEW);
+
+				switch (token.getToken()) {
+					case INTEGER: {
+						eat(Tokens.INTEGER);
+						eat(Tokens.LEFTBRACKET);
+						stOperator.push(SENTINEL);
+						ASTExpression arrayLength = parseExpression();
+						eat(Tokens.RIGHTBRACKET);
+						stOperator.pop(); 
+						stOperator.pop(); 
+						ASTNewArray array = new ASTNewArray(arrayLength.getToken(), arrayLength);
+						stOperand.push(array);
+					} break;
+
+					case IDENTIFIER: {
+						ASTIdentifierExpr idExpr = new ASTIdentifierExpr(token, token.getSymbol());
+						eat(Tokens.IDENTIFIER);
+						eat(Tokens.LEFTPAREN);
+						eat(Tokens.RIGHTPAREN);
+						stOperand.push(idExpr);
+					} break;
+
+					default: {
+						throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+					}
+				}
+
+				parseTerm1();
+			} break;
+
+			default: {
+				throw new ParseException(token.getRow(), token.getCol(), "Invalid token : " + token.getToken());
 			}
-			parseTerm1();
-		}
-		break;
-
-		case NEW: {
-			pushOperator(token);
-			eat(Tokens.NEW);
-			parseTerm2();
-			parseTerm1();
-		}
-		break;
-
-		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token : " + token.getToken());
 		}
 	}
 
@@ -643,16 +553,19 @@ public class Parser
 	public void pushOperator(Token current)
 	{
 		Token top = stOperator.peek();
+
 		while (getPriority(top.getToken()) >= getPriority(current.getToken())) {
 			popOperator();
 			top = stOperator.peek();
 		}
+
 		stOperator.push(current);
 	}
 
 	public void popOperator()
 	{
 		Token top = stOperator.pop();
+
 		if (isBinary(top.getToken())) {
 			parseBinary(top);
 		} else {
@@ -663,18 +576,17 @@ public class Parser
 	public void parseUnary(Token tok)
 	{
 		switch (tok.getToken()) {
-		case NEW: {
-			ASTExpression expr = stOperand.pop();
-			ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
-			ASTNewInstance instance = new ASTNewInstance(tok, idExpr);
-			stOperand.push(instance);
-		}
-		break;
 
-		default: {
-			System.err.println("parseUnary(): Error in parsing " + token.getToken() + " " + token.getRow());
-		}
-		break;
+			case NEW: {
+				ASTExpression expr = stOperand.pop();
+				ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
+				ASTNewInstance instance = new ASTNewInstance(tok, idExpr);
+				stOperand.push(instance);
+			} break;
+
+			default: {
+				System.err.println("parseUnary(): Error in parsing " + token.getToken() + " " + token.getRow());
+			}
 		}
 	}
 
@@ -682,128 +594,108 @@ public class Parser
 	{
 		switch (tok.getToken()) {
 
-		case OR: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTOr or = new ASTOr(tok, lhs, rhs);
-			stOperand.push(or);
-		}
-		break;
+			case OR: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTOr or = new ASTOr(tok, lhs, rhs);
+				stOperand.push(or);
+			} break;
 
-		case AND: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTAnd and = new ASTAnd(tok, lhs, rhs);
-			stOperand.push(and);
-		}
-		break;
+			case AND: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTAnd and = new ASTAnd(tok, lhs, rhs);
+				stOperand.push(and);
+			} break;
 
-		case EQUALS: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTEquals equals = new ASTEquals(tok, lhs, rhs);
-			stOperand.push(equals);
-		}
-		break;
+			case EQUALS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTEquals equals = new ASTEquals(tok, lhs, rhs);
+				stOperand.push(equals);
+			} break;
 
-		case LESSTHAN: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTLessThan lessThan = new ASTLessThan(tok, lhs, rhs);
-			stOperand.push(lessThan);
-		}
-		break;
+			case LESSTHAN: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTLessThan lessThan = new ASTLessThan(tok, lhs, rhs);
+				stOperand.push(lessThan);
+			} break;
 
-		case LESSTHANOREQUAL: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTLessThanOrEqual lessThanOrEqual = new ASTLessThanOrEqual(tok, lhs, rhs);
-			stOperand.push(lessThanOrEqual);
-		}
-		break;
+			case LESSTHANOREQUAL: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTLessThanOrEqual lessThanOrEqual = new ASTLessThanOrEqual(tok, lhs, rhs);
+				stOperand.push(lessThanOrEqual);
+			} break;
 
-		case GREATERTHAN: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTGreaterThan greaterThan = new ASTGreaterThan(tok, lhs, rhs);
-			stOperand.push(greaterThan);
-		}
-		break;
+			case GREATERTHAN: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTGreaterThan greaterThan = new ASTGreaterThan(tok, lhs, rhs);
+				stOperand.push(greaterThan);
+			} break;
 
-		case GREATERTHANOREQUAL: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTGreaterThanOrEqual greaterThanOrEqual = new ASTGreaterThanOrEqual(tok, lhs, rhs);
-			stOperand.push(greaterThanOrEqual);
-		}
-		break;
-		
-		case PLUS: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTPlus plus = new ASTPlus(tok, lhs, rhs);
-			stOperand.push(plus);
-		}
-		break;
+			case GREATERTHANOREQUAL: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTGreaterThanOrEqual greaterThanOrEqual = new ASTGreaterThanOrEqual(tok, lhs, rhs);
+				stOperand.push(greaterThanOrEqual);
+			} break;
+			
+			case PLUS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTPlus plus = new ASTPlus(tok, lhs, rhs);
+				stOperand.push(plus);
+			} break;
 
-		case INCREMENT: {
-			ASTExpression expr = stOperand.pop();
-			ASTIncrement inc = new ASTIncrement(tok, expr);
-			stOperand.push(inc);
-		}
-		break;
+			case MINUS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTMinus minus = new ASTMinus(tok, lhs, rhs);
+				stOperand.push(minus);
+			} break;
 
-		case MINUS: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTMinus minus = new ASTMinus(tok, lhs, rhs);
-			stOperand.push(minus);
-		}
-		break;
+			case TIMES: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTTimes times = new ASTTimes(tok, lhs, rhs);
+				stOperand.push(times);
+			} break;
 
-		case TIMES: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTTimes times = new ASTTimes(tok, lhs, rhs);
-			stOperand.push(times);
-		}
-		break;
+			case DIV: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTDivision div = new ASTDivision(tok, lhs, rhs);
+				stOperand.push(div);
+			} break;
 
-		case DIV: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTDivision div = new ASTDivision(tok, lhs, rhs);
-			stOperand.push(div);
-		}
-		break;
+			case MODULUS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTModulus modulus = new ASTModulus(tok, lhs, rhs);
+				stOperand.push(modulus);
+			} break;
 
-		case MODULUS: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTModulus modulus = new ASTModulus(tok, lhs, rhs);
-			stOperand.push(modulus);
-		}
-		break;
+			case DOT: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTCallFunctionExpr cm = (ASTCallFunctionExpr) rhs;
+				cm.setInstanceName(lhs);
+				stOperand.push(cm);
+			} break;
 
-		case DOT: {
-			ASTExpression rhs = stOperand.pop();
-			ASTExpression lhs = stOperand.pop();
-			ASTCallFunctionExpr cm = (ASTCallFunctionExpr) rhs;
-			cm.setInstanceName(lhs);
-			stOperand.push(cm);
-		}
-		break;
+			case LEFTBRACKET: {
+				ASTExpression indexExpr = stOperand.pop();
+				ASTExpression arrayExpr = stOperand.pop();
+				ASTArrayIndexExpr indexArray = new ASTArrayIndexExpr(arrayExpr.getToken(), arrayExpr, indexExpr);
+				stOperand.push(indexArray);
+			} break;
 
-		case LEFTBRACKET: {
-			ASTExpression indexExpr = stOperand.pop();
-			ASTExpression arrayExpr = stOperand.pop();
-			ASTArrayIndexExpr indexArray = new ASTArrayIndexExpr(arrayExpr.getToken(), arrayExpr, indexExpr);
-			stOperand.push(indexArray);
-		}
-		break;
-
-		default:
-			System.err.println("parseBinary(): Error in parsing");
+			default: {
+				System.err.println("parseBinary(): Error in parsing");
+			}
 		}
 	}
 
@@ -811,28 +703,30 @@ public class Parser
 	{
 		switch (operator) {
 
-		case OR:
-		case AND:
-		case EQUALS:
-		case LESSTHAN:
-		case LESSTHANOREQUAL:
-		case GREATERTHAN:
-		case GREATERTHANOREQUAL:
-		case PLUS:
-		case INCREMENT:
-		case MINUS:
-		case TIMES:
-		case DIV:
-		case MODULUS:
-		case DOT:
-		case LEFTBRACKET: {
-			return true;
-		}
-		case NEW: {
-			return false;
-		}
-		default:
-			return false;
+			case OR:
+			case AND:
+			case EQUALS:
+			case LESSTHAN:
+			case LESSTHANOREQUAL:
+			case GREATERTHAN:
+			case GREATERTHANOREQUAL:
+			case PLUS:
+			case MINUS:
+			case TIMES:
+			case DIV:
+			case MODULUS:
+			case DOT:
+			case LEFTBRACKET: {
+				return true;
+			}
+
+			case NEW: {
+				return false;
+			}
+
+			default: {
+				return false;
+			}
 		}
 	}
 
@@ -840,60 +734,61 @@ public class Parser
 	{
 		switch (operator) {
 
-		case SENTINEL: {
-			return -1;
-		}
+			case SENTINEL: {
+				return -1;
+			}
 
-		case OR: {
-			return 1;
-		}
+			case OR: {
+				return 1;
+			}
 
-		case AND: {
-			return 2;
-		}
+			case AND: {
+				return 2;
+			}
 
-		case EQUALS: {
-			return 3;
-		}
+			case EQUALS: {
+				return 3;
+			}
 
-		case LESSTHAN: {
-			return 3;
-		}
+			case LESSTHAN: {
+				return 3;
+			}
 
-		case PLUS: {
-			return 4;
-		}
+			case PLUS: {
+				return 4;
+			}
 
-		case MINUS: {
-			return 4;
-		}
+			case MINUS: {
+				return 4;
+			}
 
-		case MODULUS: {
-			return 4;
-		}
+			case MODULUS: {
+				return 4;
+			}
 
-		case TIMES: {
-			return 5;
-		}
+			case TIMES: {
+				return 5;
+			}
 
-		case DIV: {
-			return 5;
-		}
+			case DIV: {
+				return 5;
+			}
 
-		case LEFTBRACKET: {
-			return 7;
-		}
+			case LEFTBRACKET: {
+				return 7;
+			}
 
-		case DOT: {
-			return 8;
-		}
+			case DOT: {
+				return 8;
+			}
 
-		case NEW: {
-			return 9;
-		}
+			case NEW: {
+				return 9;
+			}
 
-		default:
-			return 0;
+			default: {
+				return 0;
+			}
 		}
 	}
 
@@ -901,162 +796,111 @@ public class Parser
 	{
 		switch (token.getToken()) {
 
-		case AND: {
-			pushOperator(token);
-			eat(Tokens.AND);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case AND: {
+				pushOperator(token);
+				eat(Tokens.AND);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case OR: {
-			pushOperator(token);
-			eat(Tokens.OR);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case OR: {
+				pushOperator(token);
+				eat(Tokens.OR);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case EQUALS: {
-			pushOperator(token);
-			eat(Tokens.EQUALS);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case EQUALS: {
+				pushOperator(token);
+				eat(Tokens.EQUALS);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case LESSTHAN: {
-			pushOperator(token);
-			eat(Tokens.LESSTHAN);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case LESSTHAN: {
+				pushOperator(token);
+				eat(Tokens.LESSTHAN);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case LESSTHANOREQUAL: {
-			pushOperator(token);
-			eat(Tokens.LESSTHANOREQUAL);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case LESSTHANOREQUAL: {
+				pushOperator(token);
+				eat(Tokens.LESSTHANOREQUAL);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case GREATERTHAN: {
-			pushOperator(token);
-			eat(Tokens.GREATERTHAN);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case GREATERTHAN: {
+				pushOperator(token);
+				eat(Tokens.GREATERTHAN);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case GREATERTHANOREQUAL: {
-			pushOperator(token);
-			eat(Tokens.GREATERTHANOREQUAL);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case GREATERTHANOREQUAL: {
+				pushOperator(token);
+				eat(Tokens.GREATERTHANOREQUAL);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case PLUS: {
-			pushOperator(token);
-			eat(Tokens.PLUS);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case PLUS: {
+				pushOperator(token);
+				eat(Tokens.PLUS);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case INCREMENT: {
-			pushOperator(token);
-			eat(Tokens.INCREMENT);
-			parseTerm1();
-		}
-		break;
+			case MINUS: {
+				pushOperator(token);
+				eat(Tokens.MINUS);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case MINUS: {
-			pushOperator(token);
-			eat(Tokens.MINUS);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case TIMES: {
+				pushOperator(token);
+				eat(Tokens.TIMES);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case TIMES: {
-			pushOperator(token);
-			eat(Tokens.TIMES);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case DIV: {
+				pushOperator(token);
+				eat(Tokens.DIV);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case DIV: {
-			pushOperator(token);
-			eat(Tokens.DIV);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case MODULUS: {
+				pushOperator(token);
+				eat(Tokens.MODULUS);
+				parseExpr();
+				parseTerm1();
+			} break;
 
-		case MODULUS: {
-			pushOperator(token);
-			eat(Tokens.MODULUS);
-			parseExpr();
-			parseTerm1();
-		}
-		break;
+			case LEFTBRACKET: {
+				pushOperator(token);
+				eat(Tokens.LEFTBRACKET);
+				stOperator.push(SENTINEL);
+				ASTExpression indexExpr = parseExpression();
+				eat(Tokens.RIGHTBRACKET);
+				stOperator.pop(); 
+				stOperand.push(indexExpr);
+				parseTerm1();
+			} break;
 
-		case LEFTBRACKET: {
-			pushOperator(token);
-			eat(Tokens.LEFTBRACKET);
-			stOperator.push(SENTINEL);
-			ASTExpression indexExpr = parseExpression();
-			eat(Tokens.RIGHTBRACKET);
-			stOperator.pop(); 
-			stOperand.push(indexExpr);
-			parseTerm1();
-		}
-		break;
+			case RIGHTPAREN:
+			case SEMICOLON:
+			case COMMA:
+			case RIGHTBRACKET: {
+				// Epsilon expected
+			} break;
 
-		case RIGHTPAREN:
-		case SEMICOLON:
-		case COMMA:
-		case RIGHTBRACKET: {
-			// Epsilon expected
-		}
-		break;
-
-		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
-		}
-	}
-
-	public void parseTerm2() throws ParseException
-	{
-		switch (token.getToken()) {
-
-		case INTEGER: {
-			eat(Tokens.INTEGER);
-			eat(Tokens.LEFTBRACKET);
-			stOperator.push(SENTINEL);
-			ASTExpression arrayLength = parseExpression();
-			eat(Tokens.RIGHTBRACKET);
-			stOperator.pop(); 
-			stOperator.pop(); 
-			ASTNewArray array = new ASTNewArray(arrayLength.getToken(), arrayLength);
-			stOperand.push(array);
-		}
-		break;
-
-		case IDENTIFIER: {
-			ASTIdentifierExpr idExpr = new ASTIdentifierExpr(token, token.getSymbol());
-			eat(Tokens.IDENTIFIER);
-			eat(Tokens.LEFTPAREN);
-			eat(Tokens.RIGHTPAREN);
-			stOperand.push(idExpr);
-		}
-		break;
-
-		default:
-			throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+			default: {
+				throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
+			}
 		}
 	}
 

@@ -18,12 +18,10 @@ public
 protected
 private
 class
-inter
 //
 new
 include
 fn
-enum
 ext
 use
 if

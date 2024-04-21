@@ -401,18 +401,6 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTEnumeration enumDecl)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTInterface interDecl)
-	{
-		return null;
-	}
-
-	@Override
 	public String visit(ASTForLoop forLoop)
 	{
 		return null;
@@ -426,12 +414,6 @@ public class ASTPrinter implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTModulus modulus)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTIncrement increment)
 	{
 		return null;
 	}
@@ -456,12 +438,6 @@ public class ASTPrinter implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTLessThanOrEqual lessThanOrEqual)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTInclude include)
 	{
 		return null;
 	}

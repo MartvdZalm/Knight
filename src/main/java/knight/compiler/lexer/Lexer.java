@@ -86,47 +86,16 @@ public class Lexer
         }
 
         if (Character.isJavaIdentifierStart(charachter)) {
-            String identifier = "";
-            try {
-                do {
-                    identifier += charachter;
-                    charachter = source.read();
-                } while (Character.isJavaIdentifierPart(charachter));
-            } catch (Exception e) {
-                exception = true;
-            }
-            return newIdToken(identifier);
+            return processIdentifier();
         }
 
         if (Character.isDigit(charachter)) {
-            String number = "";
-            try {
-                do {
-                    number += charachter;
-                    charachter = source.read();
-                } while (Character.isDigit(charachter));
-            } catch (Exception e) {
-                exception = true;
-            }
-            return newNumberToken(number);
-        }   
+            return processNumber();
+        }
 
         if (charachter == '\"') {
-            StringBuilder str = new StringBuilder();
-            try {
-                charachter = source.read();
-                while (charachter != '\"') {
-                    str.append(charachter);
-                    charachter = source.read();
-                }
-                charachter = source.read();
-            } catch (Exception e) {
-                exception = true;
-            }
-            String token = str.toString().trim(); // remove leading/trailing whitespace
-
-            return newStringToken(token);
-        } 
+            return processString();
+        }
 
         String charOld = "" + charachter;
         String op = charOld;
@@ -149,6 +118,56 @@ public class Lexer
         return makeToken(op);
     }
 
+    private Token processIdentifier()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            do {
+                sb.append(charachter);
+                charachter = source.read();
+            } while (Character.isJavaIdentifierPart(charachter));
+        } catch (Exception e) {
+            exception = true;
+        }
+
+        return new Token(Symbol.symbol(sb.toString(), Tokens.IDENTIFIER), source.getRow(), source.getCol());
+    }
+
+    private Token processNumber()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            do {
+                sb.append(charachter);
+                charachter = source.read();
+            } while (Character.isDigit(charachter));
+        } catch (Exception e) {
+            exception = true;
+        }
+
+        return new Token(Symbol.symbol(sb.toString(), Tokens.INTEGER), source.getRow(), source.getCol());
+    }
+
+    private Token processString()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            charachter = source.read();
+            while (charachter != '\"') {
+                sb.append(charachter);
+                charachter = source.read();
+            }
+            charachter = source.read();            
+        } catch (Exception e) {
+            exception = true;
+        }
+
+        return new Token(Symbol.symbol(sb.toString().trim(), Tokens.STRING), source.getRow(), source.getCol());
+    }
+
     private Token makeToken(String newSymbol) 
     {
         if (newSymbol.equals("//")) {  
@@ -169,20 +188,5 @@ public class Lexer
             return nextToken();
         }
         return new Token(symbol, source.getRow(), source.getCol());
-    }
-
-    private Token newIdToken(String id) 
-    {
-        return new Token(Symbol.symbol(id, Tokens.IDENTIFIER), source.getRow(), source.getCol());
-    }
-
-    private Token newNumberToken(String number) 
-    {
-        return new Token(Symbol.symbol(number, Tokens.INTEGER), source.getRow(), source.getCol());
-    }
-
-    private Token newStringToken(String str)
-    {
-        return new Token(Symbol.symbol(str, Tokens.STRING), source.getRow(), source.getCol());
     }
 }

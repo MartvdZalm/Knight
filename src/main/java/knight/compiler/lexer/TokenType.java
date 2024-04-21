@@ -61,12 +61,10 @@ public class TokenType
         Symbol.symbol("private", Tokens.PRIVATE);
 
         Symbol.symbol("class", Tokens.CLASS);
-        Symbol.symbol("inter", Tokens.INTERFACE);
         Symbol.symbol("//", Tokens.COMMENT);
         Symbol.symbol("new", Tokens.NEW);
         Symbol.symbol("include", Tokens.INCLUDE);
         Symbol.symbol("fn", Tokens.FUNCTION);
-        Symbol.symbol("enum", Tokens.ENUMERATION);
         Symbol.symbol("ext", Tokens.EXTENDS);
         Symbol.symbol("use", Tokens.IMPLEMENTS);
         Symbol.symbol("asm", Tokens.ASM);
@@ -87,7 +85,6 @@ public class TokenType
         Symbol.symbol(">=", Tokens.GREATERTHANOREQUAL);
 
         Symbol.symbol("+", Tokens.PLUS);
-        Symbol.symbol("++", Tokens.INCREMENT);
         Symbol.symbol("-", Tokens.MINUS);
         Symbol.symbol("*", Tokens.TIMES);
         Symbol.symbol("/", Tokens.DIV);

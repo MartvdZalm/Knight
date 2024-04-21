@@ -41,6 +41,12 @@ import knight.compiler.ast.*;
 
 import knight.compiler.parser.*;
 import knight.compiler.lexer.*;
+
+import knight.builder.code.declarations.*;
+import knight.builder.code.expressions.*;
+import knight.builder.code.expressions.operations.*;
+import knight.builder.code.statements.*;
+import knight.builder.code.types.*;
 import knight.builder.code.*;
 
 import knight.helper.TestUtils;
@@ -71,7 +77,6 @@ public class ParserTest extends TestUtils
 			.addInlineASM(
 				new CodeBuilderInlineASM()
 			);
-
 
 		StringReader stringReader = new StringReader(codeBuilderProgram.toString());
 		BufferedReader bufferedReader = new BufferedReader(stringReader);
@@ -273,6 +278,7 @@ public class ParserTest extends TestUtils
 				new CodeBuilderInlineASM()
 			);
 
+		System.out.println(codeBuilderFunction.toString());
 		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
 		assertEquals(5, function.getVariableListSize());
@@ -323,10 +329,66 @@ public class ParserTest extends TestUtils
     }
 
     @Test
-    public void testParseExpression() throws ParseException
-    {
+	public void testParseExpression() throws ParseException
+	{
+		ASTExpression exprInt = parse("10;").parseExpression();
+		ASTIntLiteral intLiteral = castExpectClass(ASTIntLiteral.class, exprInt);
+		assertEquals(10, intLiteral.getValue());
 
-    }
+		ASTExpression exprTimes = parse("5 * 6;").parseExpression();
+		ASTTimes times = castExpectClass(ASTTimes.class, exprTimes);
+		ASTIntLiteral lhsTimes = (ASTIntLiteral) times.getLhs();
+		ASTIntLiteral rhsTimes = (ASTIntLiteral) times.getRhs();
+		assertEquals(5, lhsTimes.getValue());
+		assertEquals(6, rhsTimes.getValue());
+
+		ASTExpression exprPlus = parse("34 + 23;").parseExpression();
+		ASTPlus plus = castExpectClass(ASTPlus.class, exprPlus);
+		ASTIntLiteral lhsPlus = (ASTIntLiteral) plus.getLhs();
+		ASTIntLiteral rhsPlus = (ASTIntLiteral) plus.getRhs();
+		assertEquals(34, lhsPlus.getValue());
+		assertEquals(23, rhsPlus.getValue());
+
+		ASTExpression exprDivision = parse("10 / 2;").parseExpression();
+		ASTDivision division = castExpectClass(ASTDivision.class, exprDivision);
+		ASTIntLiteral lhsDivision = (ASTIntLiteral) division.getLhs();
+		ASTIntLiteral rhsDivision = (ASTIntLiteral) division.getRhs();
+		assertEquals(10, lhsDivision.getValue());
+		assertEquals(2, rhsDivision.getValue());
+
+		ASTExpression exprMinus = parse("100 - 23;").parseExpression();
+		ASTMinus minus = castExpectClass(ASTMinus.class, exprMinus);
+		ASTIntLiteral lhsMinus = (ASTIntLiteral) minus.getLhs();
+		ASTIntLiteral rhsMinus = (ASTIntLiteral) minus.getRhs();
+		assertEquals(100, lhsMinus.getValue());
+		assertEquals(23, rhsMinus.getValue());
+
+		ASTExpression exprString = parse("\"Hello World\";").parseExpression();
+		ASTStringLiteral stringLiteral = castExpectClass(ASTStringLiteral.class, exprString);
+		assertEquals("Hello World", stringLiteral.getValue());
+
+		ASTExpression exprTrue = parse("true;").parseExpression();
+		ASTTrue astTrue = castExpectClass(ASTTrue.class, exprTrue);
+		ASTExpression exprFalse = parse("false;").parseExpression();
+		ASTFalse astFalse = castExpectClass(ASTFalse.class, exprFalse);
+
+		ASTExpression exprIdentifier = parse("age;").parseExpression();
+		ASTIdentifierExpr identifierExpr = castExpectClass(ASTIdentifierExpr.class, exprIdentifier);
+		assertEquals("age", identifierExpr.getId().toString());
+
+		ASTExpression exprCallFunction = parse("calculate();").parseExpression();
+		ASTCallFunctionExpr callFunctionExpr = castExpectClass(ASTCallFunctionExpr.class, exprCallFunction);
+		assertEquals("calculate", callFunctionExpr.getMethodId().toString());
+
+		ASTExpression exprNewInstance = parse("new Person();").parseExpression();
+		ASTNewInstance newInstance = castExpectClass(ASTNewInstance.class, exprNewInstance);
+		assertEquals("Person", newInstance.getClassName().toString());
+
+		ASTExpression exprNewArray = parse("new int[52];").parseExpression();
+		ASTNewArray newArray = castExpectClass(ASTNewArray.class, exprNewArray);
+		ASTIntLiteral arrayLengthIntLiteral = castExpectClass(ASTIntLiteral.class, newArray.getArrayLength());
+		assertEquals(52, arrayLengthIntLiteral.getValue());
+	}
 
     @Test
     public void testParseArguments() throws ParseException
@@ -403,8 +465,9 @@ public class ParserTest extends TestUtils
     @Test
     public void testParseType() throws ParseException
     {
-    	CodeBuilderIntType codeBuilderIntType = new CodeBuilderIntType();
-    	ASTType intType = parse(codeBuilderIntType.toString()).parseType();
+    	CodeBuilderVariable codeBuilderVariableIntType = new CodeBuilderVariable()
+    		.setType(new CodeBuilderIntType());
+    	ASTType intType = parse(codeBuilderVariableIntType.toString()).parseType();
     	expectsClass(ASTIntType.class, intType.getClass());
 
     	CodeBuilderStringType codeBuilderStringType = new CodeBuilderStringType();
@@ -422,124 +485,11 @@ public class ParserTest extends TestUtils
     	CodeBuilderVoidType codeBuilderVoidType = new CodeBuilderVoidType();
     	ASTType voidType = parse(codeBuilderVoidType.toString()).parseType();
     	expectsClass(ASTVoidType.class, voidType.getClass());
+
+    	CodeBuilderIntArrayType codeBuilderIntArrayType = new CodeBuilderIntArrayType();
+    	ASTType intArrayType = parse(codeBuilderIntArrayType.toString()).parseType();
+    	expectsClass(ASTIntArrayType.class, intArrayType.getClass());
     }
-
-    @Test
-    public void testParseType1() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testParseExpr() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testPushOperator() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testPopOperator() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testParseUnary() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testParseBinary() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testIsBinary() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testGetPriority() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testParseTerm1() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testParseTerm2() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testCheckNotNull() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testPeek() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testAdvance() throws ParseException
-    {
-
-    }
-
-    @Test
-    public void testEat() throws ParseException
-    {
-
-    }
-
-    // @Test
-	// public void testParseExpression() throws ParseException
-	// {
-	//     assertParseExpression("5 * 6;", ASTTimes.class, 5, 6);
-	//     assertParseExpression("34 + 23;", ASTPlus.class, 34, 23);
-	//     assertParseExpression("10 / 2;", ASTDivision.class, 10, 2);
-	//     assertParseExpression("100 - 23;", ASTMinus.class, 100, 23);
-	// }
-
-	// private void assertParseExpression(String input, Class<? extends ASTExpression> expectedClass, int lhsValue, int rhsValue) throws ParseException
-    // {
-	//     Parser parser = this.getParser(input);
-	//     Lexer lexer = parser.lexer;
-	//     parser.token = lexer.nextToken();
-	//     ASTExpression expression = parser.parseExpression();
-
-	//     assertNotNull(expression);
-	//     assertTrue("Expression is not an instance of " + expectedClass.getSimpleName(), expectedClass.isInstance(expression));
-
-	//     try {
-	//         Method getLhsMethod = expectedClass.getMethod("getLhs");
-	//         Method getRhsMethod = expectedClass.getMethod("getRhs");
-
-	//         ASTIntLiteral lhs = (ASTIntLiteral) getLhsMethod.invoke(expression);
-	//         ASTIntLiteral rhs = (ASTIntLiteral) getRhsMethod.invoke(expression);
-
-	//         assertEquals(lhsValue, lhs.getValue());
-	//         assertEquals(rhsValue, rhs.getValue());
-	//     } catch (Exception e) {
-	//         e.getStackTrace();
-	//     }
-	// }
 
     private Parser parse(String input)
 	{

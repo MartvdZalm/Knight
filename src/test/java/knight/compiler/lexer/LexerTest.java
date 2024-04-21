@@ -44,11 +44,9 @@ public class LexerTest
 		assertToken(Tokens.PROTECTED, "protected");
 		assertToken(Tokens.PRIVATE, "private");
 		assertToken(Tokens.CLASS, "class");
-		assertToken(Tokens.INTERFACE, "inter");
 		assertToken(Tokens.NEW, "new");
 		assertToken(Tokens.INCLUDE, "include");
 		assertToken(Tokens.FUNCTION, "fn");
-		assertToken(Tokens.ENUMERATION, "enum");
 		assertToken(Tokens.EXTENDS, "ext");
 		assertToken(Tokens.IMPLEMENTS, "use");
 		assertToken(Tokens.IF, "if");
@@ -64,7 +62,6 @@ public class LexerTest
 		assertToken(Tokens.GREATERTHAN, ">");
 		assertToken(Tokens.GREATERTHANOREQUAL, ">=");
 		assertToken(Tokens.PLUS, "+");
-		assertToken(Tokens.INCREMENT, "++");
 		assertToken(Tokens.MINUS, "-");
 		assertToken(Tokens.TIMES, "*");
 		assertToken(Tokens.DIV, "/");

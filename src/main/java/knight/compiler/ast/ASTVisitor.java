@@ -109,8 +109,6 @@ public interface ASTVisitor<R>
 
     public R visit(ASTVariableInit variableDeclInit);
 
-    public R visit(ASTInclude includeDecl);
-
     public R visit(ASTVoidType voidType);
 
     public R visit(ASTSkip skip);
@@ -127,15 +125,9 @@ public interface ASTVisitor<R>
 
     public R visit(ASTReturnStatement returnStatement);
 
-    public R visit(ASTIncrement increment);
-
     public R visit(ASTModulus modulus);
 
     public R visit(ASTFunctionType functionType);
-
-    public R visit(ASTEnumeration enumDecl);
-
-    public R visit(ASTInterface interDecl);
 
     public R visit(ASTInlineASM assemblyDecl);
 }

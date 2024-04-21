@@ -96,8 +96,6 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTPlus plus)
 	{
-		System.out.println(plus.getLhs().getClass() + " " + plus.getRhs().getClass());
-		// System.exit(0);
 		plus.setLhs(plus.getLhs().accept(this));
 		plus.setRhs(plus.getRhs().accept(this));
 
@@ -557,18 +555,6 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 		return null;
 	}
 
-		@Override
-	public ASTExpression visit(ASTEnumeration enumDecl)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTInterface interDecl)
-	{
-		return null;
-	}
-
 	@Override
 	public ASTExpression visit(ASTForLoop forLoop)
 	{
@@ -583,12 +569,6 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 
 	@Override
 	public ASTExpression visit(ASTModulus modulus)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTIncrement increment)
 	{
 		return null;
 	}
@@ -613,12 +593,6 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 
 	@Override
 	public ASTExpression visit(ASTLessThanOrEqual lessThanOrEqual)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTInclude include)
 	{
 		return null;
 	}

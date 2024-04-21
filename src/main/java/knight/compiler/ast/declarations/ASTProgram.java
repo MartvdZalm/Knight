@@ -38,39 +38,18 @@ import knight.compiler.ast.ASTVisitor;
  */
 public class ASTProgram extends AST
 {
-	private List<ASTInclude> includeList;
-	private List<ASTEnumeration> enumList;
-	private List<ASTInterface> interList;
 	private List<ASTClass> classList;
 	private List<ASTFunction> functionList;
 	private List<ASTVariable> variableList;
 	private List<ASTInlineASM> inlineASMList;
 
-	public ASTProgram(Token token, List<ASTInclude> includeList, List<ASTEnumeration> enumList, List<ASTInterface> interList, List<ASTClass> classList, List<ASTFunction> functionList, List<ASTVariable> variableList, List<ASTInlineASM> inlineASMList)
+	public ASTProgram(Token token, List<ASTClass> classList, List<ASTFunction> functionList, List<ASTVariable> variableList, List<ASTInlineASM> inlineASMList)
 	{
 		super(token);
-		this.includeList = includeList;
-		this.enumList = enumList;
-		this.interList = interList;
 		this.classList = classList;
 		this.functionList = functionList;
 		this.variableList = variableList;
 		this.inlineASMList = inlineASMList;
-	}
-
-	public List<ASTInclude> getIncludeList()
-	{
-		return includeList;
-	}
-
-	public List<ASTEnumeration> getEnumList()
-	{
-		return enumList;
-	}
-
-	public List<ASTInterface> getInterList()
-	{
-		return interList;
 	}
 
 	public List<ASTClass> getClassList()
@@ -93,21 +72,6 @@ public class ASTProgram extends AST
 		return inlineASMList;
 	}
 
-	public int getIncludeListSize()
-	{
-		return includeList.size();
-	}
-
-	public int getEnumListSize()
-	{
-		return enumList.size();
-	}
-
-	public int getInterListSize()
-	{
-		return interList.size();
-	}
-
 	public int getClassListSize()
 	{
 		return classList.size();
@@ -126,30 +90,6 @@ public class ASTProgram extends AST
 	public int getInlineASMListSize()
 	{
 		return inlineASMList.size();
-	}
-
-	public ASTInclude getIncludeDeclAt(int index)
-	{
-		if (index < getIncludeListSize()) {
-			return includeList.get(index);
-		}
-		return null;
-	}
-
-	public ASTEnumeration getEnumDeclAt(int index)
-	{
-		if (index < getEnumListSize()) {
-			return enumList.get(index);
-		}
-		return null;
-	}
-
-	public ASTInterface getInterDeclAt(int index)
-	{
-		if (index < getInterListSize()) {
-			return interList.get(index);
-		}
-		return null;
 	}
 
 	public ASTClass getClassDeclAt(int index)

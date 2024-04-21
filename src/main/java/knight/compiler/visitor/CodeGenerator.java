@@ -586,16 +586,6 @@ public class CodeGenerator implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTInclude include)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(".include \"" + include.getId() + ".s\"" + "\n");
-
-		return sb.toString();
-	}
-
-	@Override
 	public String visit(ASTInlineASM inlineASM)
 	{
 		for (int i = 0; i < inlineASM.getLinesSize(); i++) {
@@ -610,11 +600,6 @@ public class CodeGenerator implements ASTVisitor<String>
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(".file \"" + FILENAME + ".knight\"\n");
-
-		for (int i = 0; i < program.getIncludeListSize(); i++) {
-			sb.append(program.getIncludeDeclAt(i).accept(this));
-		}
-
 		data.append(".section .data\n");
 		bss.append(".section .bss\n");
 		text.append(".section .text\n");
@@ -695,12 +680,6 @@ public class CodeGenerator implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTIncrement increment)
-	{
-		return null;
-	}
-
-	@Override
 	public String visit(ASTModulus modulus)
 	{
 		return null;
@@ -708,18 +687,6 @@ public class CodeGenerator implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTFunctionType functionType)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTEnumeration enumDecl)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTInterface interDecl)
 	{
 		return null;
 	}
