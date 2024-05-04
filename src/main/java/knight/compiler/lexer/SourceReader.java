@@ -35,8 +35,8 @@ import java.io.*;
 public class SourceReader
 {
     private BufferedReader source;
-    private SourceReaderProperties props;
-    private SourceReaderProperties savedProps;
+    public SourceReaderProperties props;
+    public SourceReaderProperties savedProps;
 
     public SourceReader(BufferedReader bufferedReader) 
     {
@@ -46,51 +46,73 @@ public class SourceReader
 
     public void mark(int index) throws IOException
     {
-        source.mark(index);
-        this.savedProps = new SourceReaderProperties(props);
+        if (index < 0) {
+            throw new IllegalArgumentException("Index must not be negative");
+        }
+
+        try {
+            if (!source.markSupported()) {
+                throw new UnsupportedOperationException("Mark operation is not supported");
+            }
+
+            source.mark(index);
+            this.savedProps = new SourceReaderProperties(props);
+        } catch (IOException e) {
+            throw new IOException("Error occurred while marking input stream", e);
+        }
     }
 
     public void reset() throws IOException
     {
-        source.reset();
-        this.props = new SourceReaderProperties(this.savedProps);
+        try {
+            if (!source.markSupported()) {
+                throw new UnsupportedOperationException("Reset operation is not supported");
+            }
+            
+            source.reset();
+            this.props = new SourceReaderProperties(this.savedProps);
+        } catch (IOException e) {
+            throw new IOException("Error occurred while resetting input stream", e);
+        }
     }
 
     public char read() throws IOException
     {
         if (props.isPriorEndLine) {
-            props.lineNumber++;
-            props.positionLastChar = -1;
-            props.nextLine = source.readLine();
+            props.row++;
+            props.col = -1;
+            props.line = source.readLine();
             props.isPriorEndLine = false;
         }
 
-        if (props.nextLine == null) {  
-            throw new IOException();
-        } else if (props.nextLine.length() == 0) {
+        if (props.line == null) {
+            throw new IOException("Error occurred when attempting to read from a source where the next line was null or empty");
+        } else if (props.line.length() == 0) {
             props.isPriorEndLine = true;
             return ' ';
         }
 
-        props.positionLastChar++;
-        if (props.positionLastChar >= props.nextLine.length()) {
+        props.col++;
+        if (props.col >= props.line.length()) {
             props.isPriorEndLine = true;
             return ' ';
         }
-        return props.nextLine.charAt(props.positionLastChar);
+
+        return props.line.charAt(props.col);
     }
 
     public int getCol() 
     {
-        return props.positionLastChar;
+        return props.col;
     }
 
     public int getRow() 
     {
-        return props.lineNumber;
+        return props.row;
     }
 
-    public void close() {
+    public void close()
+    {
         try {
             source.close();
         } catch (Exception e) {
@@ -101,18 +123,18 @@ public class SourceReader
 
 class SourceReaderProperties
 {
-    public int lineNumber = 0;
-    public int positionLastChar;
+    public int row = 0;
+    public int col;
     public boolean isPriorEndLine = true;
-    public String nextLine;
+    public String line;
 
     public SourceReaderProperties() {}
 
     public SourceReaderProperties(SourceReaderProperties props)
     {
-        this.lineNumber = props.lineNumber;
-        this.positionLastChar = props.positionLastChar;
+        this.row = props.row;
+        this.col = props.col;
         this.isPriorEndLine = props.isPriorEndLine;
-        this.nextLine = props.nextLine;
+        this.line = props.line;
     }
 }
