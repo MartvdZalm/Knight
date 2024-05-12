@@ -24,8 +24,7 @@
 
 package knight.helper;
 
-import static org.junit.Assert.*;
-
+import static org.junit.jupiter.api.Assertions.*;
 import knight.compiler.ast.AST;
 
 /*
@@ -38,7 +37,8 @@ public class TestUtils
 {
 	public <A, B> void expectsClass(Class<A> expects, Class<B> actual)
 	{
-		assertTrue("Expects " + expects + " Actual " + actual, expects.equals(actual));
+		assertTrue(expects.equals(actual), "Expects " + expects + " Actual " + actual);
+		// assertTrue("Expects " + expects + " Actual " + actual, expects.equals(actual));
 	}
 
 	public <A, B> void expectsClasses(Class<A>[] expects, Class<B>[] actual)
@@ -48,7 +48,8 @@ public class TestUtils
         }
 
         for (int i = 0; i < expects.length; i++) {
-            assertTrue("Expects " + expects[i] + " Actual " + actual[i], expects[i].equals(actual[i]));
+            // assertTrue("Expects " + expects[i] + " Actual " + actual[i], expects[i].equals(actual[i]));
+            assertTrue(expects[i].equals(actual[i]), "Expects " + expects[i] + " Actual " + actual[i]);
         }
 	}
 
@@ -66,8 +67,8 @@ public class TestUtils
 
 	public <A, B> A castExpectClass(Class<A> expects, Object obj)
 	{
-	    assertTrue("Expects " + expects + " Actual " + obj.getClass(), expects.isInstance(obj));
+		assertTrue(expects.isInstance(obj), "Expects " + expects + " Actual " + obj.getClass());
+	    // assertTrue("Expects " + expects + " Actual " + obj.getClass(), expects.isInstance(obj));
 	    return expects.cast(obj);
 	}
-
 }
