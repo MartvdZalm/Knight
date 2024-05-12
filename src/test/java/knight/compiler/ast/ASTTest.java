@@ -1,8 +1,9 @@
 package knight.compiler.ast;
 
 import java.io.*;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 import knight.compiler.parser.*;
 

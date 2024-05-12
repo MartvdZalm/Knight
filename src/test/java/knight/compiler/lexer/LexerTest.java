@@ -1,28 +1,45 @@
 package knight.compiler.lexer;
 
 import java.io.*;
-import static org.junit.Assert.*;
-import org.junit.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import knight.compiler.lexer.Lexer;
 import knight.compiler.lexer.Token;
 import knight.compiler.lexer.Tokens;
+import knight.compiler.lexer.SourceReader;
 
 public class LexerTest
 {
-	Lexer lexer;
+	@Test
+	public void testPeekToken()
+	{
+		String input = "This is a string for testing my Lexer class!";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+		Token token = lexer.peekToken();
 
-	public LexerTest()
-	{   
-		InputStream ioStream = this.getClass().getClassLoader().getResourceAsStream("LexerTest.txt");
-		Reader reader = new InputStreamReader(ioStream);
-		BufferedReader br = new BufferedReader(reader);
+		assertNotNull(token);
+		assertEquals(Tokens.IDENTIFIER, token.getToken());
+		assertEquals("This", token.getSymbol());
+	}
 
-		this.lexer = new Lexer(br);
+	@Test
+	public void testPeekTokenNextTokenNull()
+	{
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(" "));
+		Lexer lexer = new Lexer(bufferedReader);
+		Token token = lexer.nextToken();
+
+		assertNull(token);
+		assertTrue(lexer.exception);
 	}
 
     @Test
-    public void testTokenization()
+    public void testNextToken()
     {
     	assertToken(Tokens.LEFTPAREN, "(");
 		assertToken(Tokens.RIGHTPAREN, ")");
@@ -49,14 +66,15 @@ public class LexerTest
 		assertToken(Tokens.FUNCTION, "fn");
 		assertToken(Tokens.EXTENDS, "ext");
 		assertToken(Tokens.IMPLEMENTS, "use");
+		assertToken(Tokens.ASM, "asm");
 		assertToken(Tokens.IF, "if");
 		assertToken(Tokens.ELSE, "else");
 		assertToken(Tokens.WHILE, "while");
 		assertToken(Tokens.FOR, "for");
 		assertToken(Tokens.ASSIGN, "=");
 		assertToken(Tokens.EQUALS, "==");
-		assertToken(Tokens.AND, "and");
-		assertToken(Tokens.OR, "or");
+		assertToken(Tokens.OR, "||");
+		assertToken(Tokens.AND, "&&");
 		assertToken(Tokens.LESSTHAN, "<");
 		assertToken(Tokens.LESSTHANOREQUAL, "<=");
 		assertToken(Tokens.GREATERTHAN, ">");
@@ -72,10 +90,22 @@ public class LexerTest
 
     private void assertToken(Tokens expectedToken, String input)
     {
+    	BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+    	Lexer lexer = new Lexer(bufferedReader);
         Token token = lexer.nextToken();
 
         assertNotNull(token);
         assertEquals(expectedToken, token.getToken());
         assertEquals(input, token.getSymbol());
+    }
+
+    @Test
+    public void testProcessIdentifier()
+    {
+    	BufferedReader bufferedReader = new BufferedReader(new StringReader("1010"));
+    	Lexer lexer = new Lexer(bufferedReader);
+    	Token token = lexer.processIdentifier();
+
+    	assertNull(token);
     }
 }
