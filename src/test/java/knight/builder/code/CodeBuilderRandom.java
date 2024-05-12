@@ -25,6 +25,7 @@
 package knight.builder.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.lang.reflect.Constructor;
@@ -48,11 +49,17 @@ public class CodeBuilderRandom
     private final List<Class<? extends CodeBuilderExpression>> expressions = new ArrayList<>();
     private final List<Class<? extends CodeBuilderExpression>> conditions = new ArrayList<>();
     private final List<Class<? extends CodeBuilderType>> types = new ArrayList<>();
-
     private final List<Class<? extends CodeBuilderStatement>> body = new ArrayList<>();
 
     private final Random random;
     private final Faker faker;
+
+    private final String[] tokens = {
+        "int", "string", "bool", "true", "false",
+        "public", "protected", "private", "class",
+        "new", "include", "fn", "ext", "use", "asm",
+        "if", "else", "while", "for", "ret", "void"
+    };
 
     public CodeBuilderRandom()
     {
@@ -80,7 +87,7 @@ public class CodeBuilderRandom
 
         // Types
         types.add(CodeBuilderIntType.class);
-        types.add(CodeBuilderStringType.class);
+        // types.add(CodeBuilderStringType.class);
         types.add(CodeBuilderBooleanType.class);
         types.add(CodeBuilderIdentifierType.class);
 
@@ -97,7 +104,13 @@ public class CodeBuilderRandom
 
     public String identifier()
     {
-        return this.faker.lorem().word();
+        String id;
+        
+        do {
+            id = this.faker.lorem().word();
+        } while (isToken(id));
+
+        return id;
     }
 
     public int integer()
@@ -110,7 +123,13 @@ public class CodeBuilderRandom
 
     public String string()
     {
-        return faker.lorem().sentence();
+        String str;
+
+        do {
+            str = this.faker.lorem().sentence();
+        } while (isToken(str));
+
+        return str;
     }
 
     public boolean bool()
@@ -160,5 +179,15 @@ public class CodeBuilderRandom
             e.printStackTrace();
             return null;
         }
+    }
+
+    private boolean isToken(String word)
+    {
+        for (String token : tokens) {
+            if (token.equals(word)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

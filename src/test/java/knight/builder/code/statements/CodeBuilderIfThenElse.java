@@ -81,6 +81,6 @@ public class CodeBuilderIfThenElse extends CodeBuilderStatement
 
 	public String toString()
 	{
-		return String.format("if (%s) {\n %s \n} else {\n %s \n}\n", this.expr, this.then, this.elze);
+		return String.format("if (%s) { %s } else { %s }", this.expr, this.then, this.elze);
 	} 
 }

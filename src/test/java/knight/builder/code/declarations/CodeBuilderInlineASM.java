@@ -70,9 +70,9 @@ public class CodeBuilderInlineASM extends CodeBuilder
 		StringBuilder body = new StringBuilder();
 
 		for (String line : lines) {
-			body.append("\"" + line + "\"\n");
+			body.append(" \"" + line + "\" ");
 		}
 
-		return String.format("asm {\n %s \n}", body);
+		return String.format("asm { %s }", body);
 	}
 }

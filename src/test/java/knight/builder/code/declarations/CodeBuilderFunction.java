@@ -128,6 +128,6 @@ public class CodeBuilderFunction extends CodeBuilder
 			functionBody.append(inlineASM).append(" ");
 		}
 
-		return String.format("fn %s(%s): void {\n %s \n}\n", this.id, argumentBody.toString(), functionBody.toString());
+		return String.format("fn %s(%s): void { %s }", this.id, argumentBody.toString(), functionBody.toString());
 	}
 }

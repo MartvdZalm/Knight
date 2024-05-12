@@ -81,7 +81,7 @@ public class CodeBuilderForLoop extends CodeBuilderStatement
 	{
 		this.initialization = new CodeBuilderVariableInit().setType(new CodeBuilderIntType()).setId("i").setExpr(new CodeBuilderIntLiteral().setValue(0));
 		this.condition = new CodeBuilderLessThan().setLhs(new CodeBuilderIdentifierExpr().setId("i")).setRhs(new CodeBuilderIntLiteral().setValue(10));
-		this.update = "i++";
+		this.update = "i = i + 1";
 		this.body = super.random.statement();
 
 		return this;
@@ -89,6 +89,6 @@ public class CodeBuilderForLoop extends CodeBuilderStatement
 
 	public String toString()
 	{
-		return String.format("for (%s %s; %s) {\n %s \n}\n", this.initialization, this.condition, this.update, this.body);
+		return String.format("for (%s %s; %s) { %s }", this.initialization, this.condition, this.update, this.body);
 	}
 }

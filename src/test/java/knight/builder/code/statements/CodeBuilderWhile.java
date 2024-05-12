@@ -25,6 +25,7 @@
 package knight.builder.code.statements;
 
 import knight.builder.code.expressions.CodeBuilderExpression;
+import knight.builder.code.expressions.CodeBuilderIdentifierExpr;
 
 /*
  * File: CodeBuilderWhile.java
@@ -58,7 +59,7 @@ public class CodeBuilderWhile extends CodeBuilderStatement
 
 	protected CodeBuilderWhile mock()
 	{
-		this.expr = super.random.expression();
+		this.expr = new CodeBuilderIdentifierExpr();
 		this.body = super.random.statement();
 
 		return this;
@@ -66,6 +67,6 @@ public class CodeBuilderWhile extends CodeBuilderStatement
 
 	public String toString()
 	{
-		return String.format("while (%s) {\n %s \n}\n", this.expr, this.body);
+		return String.format("while (%s) { %s }", this.expr, this.body);
 	}
 }
