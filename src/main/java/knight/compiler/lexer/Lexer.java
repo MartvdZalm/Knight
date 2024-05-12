@@ -35,9 +35,9 @@ import java.io.*;
  */
 public class Lexer 
 {
-    private boolean exception;
+    public boolean exception;
     private char charachter; 
-    private SourceReader source;
+    public SourceReader source;
 
     public Lexer(BufferedReader bufferedReader) 
     {
@@ -118,7 +118,7 @@ public class Lexer
         return makeToken(op);
     }
 
-    private Token processIdentifier()
+    public Token processIdentifier()
     {
         StringBuilder sb = new StringBuilder();
 
@@ -134,7 +134,7 @@ public class Lexer
         return new Token(Symbol.symbol(sb.toString(), Tokens.IDENTIFIER), source.getRow(), source.getCol());
     }
 
-    private Token processNumber()
+    public Token processNumber()
     {
         StringBuilder sb = new StringBuilder();
 
@@ -150,7 +150,7 @@ public class Lexer
         return new Token(Symbol.symbol(sb.toString(), Tokens.INTEGER), source.getRow(), source.getCol());
     }
 
-    private Token processString()
+    public Token processString()
     {
         StringBuilder sb = new StringBuilder();
 

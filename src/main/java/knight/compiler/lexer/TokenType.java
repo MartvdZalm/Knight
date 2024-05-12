@@ -34,6 +34,7 @@ public class TokenType
 {
     public TokenType()
     {
+        // These two can be removed I think. I will do this later when I am done testing.
         Symbol.symbol("INVALID", Tokens.INVALID);
         Symbol.symbol("SENTINEL", Tokens.SENTINEL);
 
@@ -76,8 +77,8 @@ public class TokenType
         
         Symbol.symbol("=", Tokens.ASSIGN);
         Symbol.symbol("==", Tokens.EQUALS);
-        Symbol.symbol("and", Tokens.AND);
-        Symbol.symbol("or", Tokens.OR);
+        Symbol.symbol("&&", Tokens.AND);
+        Symbol.symbol("||", Tokens.OR);
 
         Symbol.symbol("<", Tokens.LESSTHAN);
         Symbol.symbol("<=", Tokens.LESSTHANOREQUAL);
