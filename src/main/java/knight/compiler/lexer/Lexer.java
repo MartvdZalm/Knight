@@ -165,7 +165,7 @@ public class Lexer
             exception = true;
         }
 
-        return new Token(Symbol.symbol(sb.toString().trim(), Tokens.STRING), source.getRow(), source.getCol());
+        return new Token(Symbol.symbol("\"" + sb.toString().trim() + "\"", Tokens.STRING), source.getRow(), source.getCol());
     }
 
     private Token makeToken(String newSymbol) 

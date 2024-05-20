@@ -113,6 +113,8 @@ public class SourceReader
 
     public void close()
     {
+        Symbol.symbols.clear();
+ 
         try {
             source.close();
         } catch (Exception e) {
