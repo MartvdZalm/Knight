@@ -386,7 +386,7 @@ public class BuildSymbolProgramVisitor implements ASTVisitor<ASTType>
 		if (symbolFunction != null) {
 			if (!symbolFunction.addVariable(id, t)) {
 				Token tok = varDecl.getId().getToken();
-				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in method " + symbolFunction.getId() + " in class " + symbolClass.getId());
+				addError(tok.getRow(), tok.getCol(), "Variable " + id + " already defined in function " + symbolFunction.getId());
 			}
 		} else if (symbolClass != null) {
 			if (!symbolClass.addVariable(id, t)) {
