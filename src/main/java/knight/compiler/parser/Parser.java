@@ -163,7 +163,7 @@ public class Parser
 
 			switch (token.getToken()) {
 			    case WHILE:
-			    case FOR:
+			    // case FOR:
 			    case IF: {
 			    	statements.add(parseStatement());
 			    } break;
@@ -318,18 +318,18 @@ public class Parser
 				return result;
 			}
 
-			case FOR: {
-				Token tok = token;
-				eat(Tokens.FOR);
-				eat(Tokens.LEFTPAREN);
-				ASTVariable initialization = parseVariable();
-				ASTExpression condition = parseExpression();
-				ASTExpression update = parseExpression();
-				eat(Tokens.RIGHTPAREN);
-				ASTStatement body = parseStatement();
-				ASTForLoop forLoop = new ASTForLoop(tok, initialization, condition, update, body);
-				return forLoop;
-			}
+			// case FOR: {
+			// 	Token tok = token;
+			// 	eat(Tokens.FOR);
+			// 	eat(Tokens.LEFTPAREN);
+			// 	ASTVariable initialization = parseVariable();
+			// 	ASTExpression condition = parseExpression();
+			// 	ASTExpression update = parseExpression();
+			// 	eat(Tokens.RIGHTPAREN);
+			// 	ASTStatement body = parseStatement();
+			// 	ASTForLoop forLoop = new ASTForLoop(tok, initialization, condition, update, body);
+			// 	return forLoop;
+			// }
 
 			case RETURN: {
 				Token tok = token;
