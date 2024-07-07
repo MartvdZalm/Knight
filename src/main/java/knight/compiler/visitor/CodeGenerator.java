@@ -194,8 +194,19 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTEquals equals)
 	{
-		text.append("movl " + equals.getLhs() + ", %eax\n");
-		text.append("cmpl $" + equals.getRhs().accept(this) + ", %eax\n");
+		ASTExpression lhsExpr = equals.getLhs();
+
+		if (lhsExpr instanceof ASTIdentifierExpr) {
+			ASTIdentifierExpr lhs = (ASTIdentifierExpr) lhsExpr;
+			Binding b = lhs.getB();
+			int lvIndex = getLocalVarIndex(b);
+
+			text.append("movl " + (lvIndex * 8) + "(%rbp), %eax\n");
+		} else {
+			text.append("movl " + equals.getLhs() + ", %eax\n");
+		}
+
+		text.append("cmpl " + equals.getRhs().accept(this) + ", %eax\n");
 		text.append("jne else\n");
 
 		return null;
@@ -211,12 +222,12 @@ public class CodeGenerator implements ASTVisitor<String>
 			Binding b = lhs.getB();
 			int lvIndex = getLocalVarIndex(b);
 
-			text.append("movl -" + (lvIndex * 8) + "(%rbp), %eax\n");
+			text.append("movl " + (lvIndex * 8) + "(%rbp), %eax\n");
 		} else {
 			text.append("movl " + lessThan.getLhs() + ", %eax\n");
 		}
 
-		text.append("cmpl $" + lessThan.getRhs().accept(this) + ", %eax\n");
+		text.append("cmpl " + lessThan.getRhs().accept(this) + ", %eax\n");
 		text.append("jl while\n");
 
 		return null;
@@ -422,7 +433,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTStringLiteral stringLiteral)
 	{
-		return "\"" + stringLiteral.getValue() + "\"";
+		return stringLiteral.getValue();
 	}
 
 	@Override
@@ -578,10 +589,12 @@ public class CodeGenerator implements ASTVisitor<String>
 	    return ((index + 1) * 8) + "(%rbp)";
 	}
 
-
 	@Override
 	public String visit(ASTClass classDecl)
 	{
+
+
+
 		return null;
 	}
 
@@ -589,7 +602,13 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTInlineASM inlineASM)
 	{
 		for (int i = 0; i < inlineASM.getLinesSize(); i++) {
-			text.append(inlineASM.getLineAt(i) + "\n");
+			String line = inlineASM.getLineAt(i);
+
+			if (line.startsWith("\"") && line.endsWith("\"")) {
+                line = line.substring(1, line.length() - 1);
+            }
+
+            text.append(line).append("\n");
 		}
 		return null;
 	}
@@ -654,7 +673,6 @@ public class CodeGenerator implements ASTVisitor<String>
 		}
 		return -1;
 	}
-
 	
 	private int getLocalVarIndex(Binding b)
 	{
@@ -693,6 +711,18 @@ public class CodeGenerator implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTForLoop forLoop)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(ASTPointerAssign pointerAssign)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(ASTThis astThis)
 	{
 		return null;
 	}

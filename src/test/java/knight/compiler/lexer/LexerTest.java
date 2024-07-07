@@ -88,6 +88,7 @@ public class LexerTest extends TestUtils
 		assertToken(Tokens.MODULUS, "%");
 		assertToken(Tokens.RETURN, "ret");
 		assertToken(Tokens.VOID, "void");
+        assertToken(Tokens.ARROW, "->");
     }
 
     private void assertToken(Tokens expectedToken, String input)

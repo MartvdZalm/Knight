@@ -25,57 +25,26 @@
 package knight.compiler.ast.declarations;
 
 import knight.compiler.lexer.Token;
-import knight.compiler.semantics.Binding;
-import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTVisitor;
+import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPointer;
 
 /*
- * File: ASTIdentifier.java
+ * File: ASTThis.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
+ * Date: 2024-07-04
  * Description:
  */
-public class ASTIdentifier extends AST implements ASTPointer
+public class ASTThis extends AST implements ASTPointer
 {
-	private String id;
-	private Binding b;
-
-	public ASTIdentifier(Token token, String id)
+	public ASTThis(Token token)
 	{
 		super(token);
-		this.id = id;
-	}
-
-	public String getId()
-	{
-		return id;
-	}
-
-	public void setId(String id)
-	{
-		this.id = id;
-	}
-
-	public Binding getB()
-	{
-		return b;
-	}
-
-	public void setB(Binding b)
-	{
-		this.b = b;
 	}
 
 	@Override
 	public <R> R accept(ASTVisitor<R> v)
 	{
 		return v.visit(this);
-	}
-
-	@Override
-	public String toString()
-	{
-		return id;
 	}
 }

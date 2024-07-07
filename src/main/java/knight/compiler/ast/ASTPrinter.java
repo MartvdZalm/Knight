@@ -78,9 +78,12 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTBlock block)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		for (ASTStatement stat : block.getStatList()) {
-			strBuilder.append(stat.accept(this) + "\n");
+
+		for (ASTStatement statement : block.getStatList()) {
+			System.out.println(statement);
+			strBuilder.append(statement.accept(this) + "\n");
 		}
+
 		return strBuilder.toString();
 	}
 
@@ -185,7 +188,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIdentifierExpr identifier)
 	{
-		return "(ID " + identifier.getId() + ")";
+		return "(" + identifier.getId() + ")";
 	}
 
 	@Override
@@ -197,7 +200,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTNewInstance newInstance)
 	{
-		return "(NEW-INSTANCE " + newInstance.getClassName().accept(this) + ")";
+		return "(NEW) " + newInstance.getClassName().accept(this);
 	}
 
 	@Override
@@ -230,19 +233,19 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIntType intType)
 	{
-		return "INT";
+		return "(INT)";
 	}
 
 	@Override
 	public String visit(ASTStringType stringType)
 	{
-		return "STRING";
+		return "(STRING)";
 	}
 
 	@Override
 	public String visit(ASTBooleanType booleanType)
 	{
-		return "BOOLEAN";
+		return "(BOOLEAN)";
 	}
 
 	@Override
@@ -254,63 +257,64 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIntArrayType intArrayType)
 	{
-		return "INT-ARRAY";
+		return "(INT-ARRAY)";
 	}
 
 	@Override
 	public String visit(ASTVoidType voitType)
 	{
-		return "VOID";
+		return "(VOID)";
 	}
 
 	@Override
 	public String visit(ASTIdentifierType identifierType)
 	{
-		return "(ID " + identifierType.getId() + ")";
+		return "(IDENTIFIER)";
 	}
 
 	@Override
 	public String visit(ASTVariable varDeclaration)
 	{
-		return printInc() + "(VAR-DECL " + varDeclaration.getType().accept(this) + " " + varDeclaration.getId().accept(this) + ")";
+		return printInc() + "(VARIABLE) " + varDeclaration.getType().accept(this) + " " + varDeclaration.getId().accept(this);
 	}
 
 	@Override
 	public String visit(ASTVariableInit varDeclarationInit)
 	{
-		return printInc() + "(VAR-DECL " + varDeclarationInit.getType().accept(this) + " " + varDeclarationInit.getId().accept(this) + " = " + varDeclarationInit.getExpr().accept(this) + ")";
+		return printInc() + "(VARIABLE) " + varDeclarationInit.getType().accept(this) + " " + varDeclarationInit.getId().accept(this) + " = " + varDeclarationInit.getExpr().accept(this);
 	}
 
 	@Override
 	public String visit(ASTArgument argument)
 	{
-		return "(" + argument.getType().accept(this) + " " + argument.getId().accept(this) + ")";
+		return " " + argument.getType().accept(this) + " " + argument.getId().accept(this);
 	}
 
 	@Override
 	public String visit(ASTFunction function)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(printInc() + "(MTD-DECL " + function.getReturnType().accept(this) + " " + function.getId().accept(this) + " ");
+		sb.append(printInc() + "(FUNCTION) " + function.getId().accept(this) + " ");
 
-		sb.append("(TY-ID-LIST ");
+		sb.append("(PARAMETERS)");
 		for (ASTArgument arg : function.getArgumentList()) {
 			sb.append(arg.accept(this));
 		}
-		sb.append(")\n");
-		sb.append(printInc() + "(BLOCK\n");
+
+		sb.append(" : " + function.getReturnType().accept(this) + "\n");
 
 		incLevel();
+
 		for (ASTVariable variable : function.getVariableList()) {
 			sb.append(variable.accept(this) + "\n");
 		}
-		for (ASTStatement stat : function.getStatementList()) {
-			sb.append(stat.accept(this) + "\n");
+
+		for (ASTStatement statement : function.getStatementList()) {
+			sb.append(statement.accept(this) + "\n");
 		}
+
 		decLevel();
 
-		sb.append(printInc() + ")\n");
-		sb.append(printInc() + ")");
 		return sb.toString();
 	}
 
@@ -355,13 +359,17 @@ public class ASTPrinter implements ASTVisitor<String>
 			sb.append(function.accept(this) + "\n");
 		}
 
+		for (ASTClass astClass : program.getClassList()) {
+			sb.append(astClass.accept(this) + "\n");
+		}
+
 		return sb.toString();
 	}
 
 	@Override
 	public String visit(ASTIdentifier identifier)
 	{
-		return "(ID " + identifier.getId() + ")";
+		return "(" + identifier.getId() + ")";
 	}
 
 	@Override
@@ -386,17 +394,21 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTClass classDecl)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(CLASS-DECL " + classDecl.getId().accept(this));
-		sb.append("\n");
+		sb.append("(CLASS) " + classDecl.getId().accept(this) + "\n");
+
 		incLevel();
+
 		for (ASTVariable variable : classDecl.getVariableList()) {
 			sb.append(variable.accept(this) + "\n");
 		}
+
 		for (ASTFunction function : classDecl.getFunctionList()) {
 			sb.append(function.accept(this) + "\n");
 		}
+		
 		decLevel();
 		sb.append(")");
+		
 		return sb.toString();
 	}
 
@@ -442,6 +454,24 @@ public class ASTPrinter implements ASTVisitor<String>
 		return null;
 	}
 
+	@Override
+	public String visit(ASTPointerAssign pointerAssign)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(printInc() + pointerAssign.getPointer().accept(this) + " -> ");
+		sb.append(pointerAssign.getVariable().accept(this) + " = ");
+		sb.append(pointerAssign.getExpression().accept(this));
+
+		return sb.toString();
+	}
+
+	@Override
+	public String visit(ASTThis astThis)
+	{
+		return "(THIS)";
+	}
+
 	public static String printFileAst(String filename) throws FileNotFoundException, ParseException
 	{
 		ASTPrinter printer = new ASTPrinter();
@@ -449,6 +479,7 @@ public class ASTPrinter implements ASTVisitor<String>
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 		Parser p = new Parser(br);
 		AST tree = p.parse();
+
 		return printer.visit((ASTProgram) tree);
 	}
 }

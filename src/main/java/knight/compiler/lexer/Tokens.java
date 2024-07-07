@@ -93,4 +93,7 @@ public enum Tokens
     
     RETURN, 
     VOID,
+
+    ARROW,
+    THIS,
 }

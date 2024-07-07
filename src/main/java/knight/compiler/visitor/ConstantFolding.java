@@ -597,6 +597,18 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 		return null;
 	}
 
+	@Override
+	public ASTExpression visit(ASTPointerAssign pointerAssign)
+	{
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTThis astThis)
+	{
+		return null;
+	}
+
 	private void incChanges()
 	{
 		changes++;
@@ -615,5 +627,4 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 		}
 		System.out.println("Total optimization changes = " + total);
 	}
-
 }

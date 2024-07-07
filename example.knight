@@ -1,17 +1,34 @@
-include <knight.io.Print>
 
-fn times(int a, int b): int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Point point = new Point();
+
+
+
+
+class Point
 {
-    ret a * b;
-}
+    int x;
+    int y;
 
-fn main(): int
-{ 
-    int result = times(10, 10);
-
-    if (result == 100) {
-        print("Line1\n" + "Line2\n");
+    fn Point(int x, int y): void
+    {
+        this->x = x;
+        this->y = y;
     }
-
-    ret 0;
 }
+

@@ -22,60 +22,67 @@
  * SOFTWARE.
  */
 
-package knight.compiler.ast.declarations;
+package knight.compiler.ast.statements;
 
 import knight.compiler.lexer.Token;
-import knight.compiler.semantics.Binding;
-import knight.compiler.ast.AST;
+import knight.compiler.ast.expressions.ASTExpression;
+import knight.compiler.ast.declarations.ASTIdentifier;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTPointer;
 
 /*
- * File: ASTIdentifier.java
+ * File: ASTPointerAssign.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
- * Description:
+ * Date: 2024-05-26
+ * Description: this->x = x; person->age = 18;
  */
-public class ASTIdentifier extends AST implements ASTPointer
+public class ASTPointerAssign extends ASTStatement
 {
-	private String id;
-	private Binding b;
+	private ASTPointer pointer;
+	private ASTIdentifier variable;
+	private ASTExpression expression;
 
-	public ASTIdentifier(Token token, String id)
+	public ASTPointerAssign(Token token, ASTPointer pointer, ASTIdentifier variable, ASTExpression expression)
 	{
 		super(token);
-		this.id = id;
+		this.pointer = pointer;
+		this.variable = variable;
+		this.expression = expression;
 	}
 
-	public String getId()
+	public ASTPointer getPointer()
 	{
-		return id;
+		return pointer;
 	}
 
-	public void setId(String id)
+	public void setPointer(ASTPointer pointer)
 	{
-		this.id = id;
+		this.pointer = pointer;
 	}
 
-	public Binding getB()
+	public ASTIdentifier getVariable()
 	{
-		return b;
+		return variable;
 	}
 
-	public void setB(Binding b)
+	public void setVariable(ASTIdentifier variable)
 	{
-		this.b = b;
+		this.variable = variable;
+	}
+
+	public ASTExpression getExpression()
+	{
+		return expression;
+	}
+
+	public void setExpression(ASTExpression expression)
+	{
+		this.expression = expression;
 	}
 
 	@Override
 	public <R> R accept(ASTVisitor<R> v)
 	{
 		return v.visit(this);
-	}
-
-	@Override
-	public String toString()
-	{
-		return id;
 	}
 }

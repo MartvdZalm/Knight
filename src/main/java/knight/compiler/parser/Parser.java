@@ -186,6 +186,17 @@ public class Parser
 			    	}
 			    } break;
 
+			   	case THIS: {
+			   		ASTThis pointer = new ASTThis(token);
+			   		eat(Tokens.THIS);
+			   		eat(Tokens.ARROW);
+			   		ASTIdentifier variable = parseIdentifier();
+			   		eat(Tokens.ASSIGN);
+			   		ASTExpression expression = parseExpression();
+
+			   		statements.add(new ASTPointerAssign(token, pointer, variable, expression));
+			   	} break;
+
 			    default: {
 					throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 				}

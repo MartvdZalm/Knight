@@ -22,60 +22,59 @@
  * SOFTWARE.
  */
 
-package knight.compiler.ast.declarations;
+package knight.builder.code.statements;
 
-import knight.compiler.lexer.Token;
-import knight.compiler.semantics.Binding;
-import knight.compiler.ast.AST;
-import knight.compiler.ast.ASTVisitor;
-import knight.compiler.ast.ASTPointer;
+import knight.builder.code.expressions.CodeBuilderExpression;
 
 /*
- * File: ASTIdentifier.java
+ * File: CodeBuilderPointerAssign.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
+ * Date: 2024-05-26
  * Description:
  */
-public class ASTIdentifier extends AST implements ASTPointer
+public class CodeBuilderPointerAssign extends CodeBuilderStatement
 {
-	private String id;
-	private Binding b;
+	private String pointer;
+	private String variable;
+	private CodeBuilderExpression expression;
 
-	public ASTIdentifier(Token token, String id)
+	public CodeBuilderPointerAssign()
 	{
-		super(token);
-		this.id = id;
+		this.mock();
 	}
 
-	public String getId()
+	public CodeBuilderPointerAssign setPointer(String pointer)
 	{
-		return id;
+		this.pointer = pointer;
+
+		return this;
 	}
 
-	public void setId(String id)
+	public CodeBuilderPointerAssign setVariable(String variable)
 	{
-		this.id = id;
+		this.variable = variable;
+
+		return this;
 	}
 
-	public Binding getB()
+	public CodeBuilderPointerAssign setExpression(CodeBuilderExpression expression)
 	{
-		return b;
+		this.expression = expression;
+
+		return this;
 	}
 
-	public void setB(Binding b)
+	protected CodeBuilderPointerAssign mock()
 	{
-		this.b = b;
+		this.pointer = "this"; // For Testing, needs to be changed.
+		this.variable = super.random.identifier();
+		this.expr = super.random.expression();
+
+		return this;
 	}
 
-	@Override
-	public <R> R accept(ASTVisitor<R> v)
-	{
-		return v.visit(this);
-	}
-
-	@Override
 	public String toString()
 	{
-		return id;
+		return String.format("%s->%s = %s;", this.pointer, this.variable, this.expression);
 	}
 }

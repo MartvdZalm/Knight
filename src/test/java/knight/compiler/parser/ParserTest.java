@@ -508,26 +508,4 @@ public class ParserTest extends TestUtils
 
 		return parser;
 	}
-
-	// private Parser parse(String input)
-	// {
-	//     if (input == null || input.isEmpty()) {
-	//         throw new IllegalArgumentException("Input must not be empty");
-	//     }
-
-	//     try (StringReader stringReader = new StringReader(input);
-	//          BufferedReader bufferedReader = new BufferedReader(stringReader)) {
-
-	//         Parser parser = new Parser(bufferedReader);
-	//         parser.token = parser.lexer.nextToken();
-
-	//         System.out.println("==========================================");
-
-	//         return parser;
-	//     } catch (IOException e) {
-	//         // Handle IOException
-	//         e.printStackTrace();
-	//         return null;
-	//     }
-	// }
 }

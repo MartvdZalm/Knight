@@ -521,4 +521,16 @@ public class NameAnalyserTreeVisitor implements ASTVisitor<ASTType>
 	{
 		return null;
 	}
+
+	@Override
+	public ASTType visit(ASTPointerAssign pointerAssign)
+	{
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTThis astThis)
+	{
+		return null;
+	}
 }

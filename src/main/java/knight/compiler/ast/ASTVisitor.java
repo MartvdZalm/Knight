@@ -130,4 +130,8 @@ public interface ASTVisitor<R>
     public R visit(ASTFunctionType functionType);
 
     public R visit(ASTInlineASM assemblyDecl);
+
+    public R visit(ASTPointerAssign pointerAssign);
+
+    public R visit(ASTThis this1);
 }
