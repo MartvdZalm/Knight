@@ -1,29 +1,9 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Point point = new Point();
-
-
-
 
 class Point
 {
-    int x;
-    int y;
+    int x { get; private set; }
+    int y { get; set; }
 
     fn Point(int x, int y): void
     {

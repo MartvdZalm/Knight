@@ -223,9 +223,15 @@ public class Parser
 		ASTIdentifier id = parseIdentifier();
 
 		ASTVariable variable = null;
+
+		// Change this to a switch if it gets to ugly.
 		if (checkNotNull(token).getToken() == Tokens.SEMICOLON) {
 			variable = new ASTVariable(token, type, id);
 			eat(Tokens.SEMICOLON);
+		} else if (checkNotNull(token).getToken() == Tokens.LEFTBRACKET) {
+			eat(Tokens.LEFTBRACKET);
+			variable = new ASTVariableInit(token, type, id, parseExpression());
+			eat(Tokens.RIGHTBRACKET);
 		} else {
 			eat(Tokens.ASSIGN);
 			variable = new ASTVariableInit(token, type, id, parseExpression());
@@ -532,6 +538,21 @@ public class Parser
 						throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 					}
 				}
+
+				parseTerm1();
+			} break;
+
+			case GET: {
+				pushOperator(token);
+				Token tok = token;
+				eat(Tokens.GET);
+				eat(Tokens.LEFTBRACKET);
+				List<ASTStatement> astStatements = new ArrayList<>();
+				while (token.getToken() !== Tokens.RIGHTBRACKET) {
+					astStatements.add(parseStatement());
+				}
+
+				stOperand.push(new ASTExprBlock(tok, astStatements));
 
 				parseTerm1();
 			} break;
