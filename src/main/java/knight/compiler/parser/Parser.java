@@ -129,7 +129,7 @@ public class Parser
 	public ASTClass parseClass() throws ParseException
 	{
 		List<ASTFunction> functions = new ArrayList<>();
-		List<ASTVariable> variables = new ArrayList<>();
+		List<ASTProperty> properties = new ArrayList<>();
 
 		eat(Tokens.CLASS);
 		ASTIdentifier id = parseIdentifier();
@@ -139,11 +139,11 @@ public class Parser
 			if (token.getToken() == Tokens.FUNCTION) {
 				functions.add(parseFunction());
 			} else {
-				variables.add(parseVariable());
+				properties.add(parseProperty());
 			}
 		}
 		eat(Tokens.RIGHTBRACE);
-		return new ASTClass(id.getToken(), id, functions, variables);
+		return new ASTClass(id.getToken(), id, functions, properties);
 	}
 
 	public ASTFunction parseFunction() throws ParseException
@@ -217,6 +217,14 @@ public class Parser
 		return new ASTFunction(token, returnType, id, argumentList, variables, statements, inlineASM);
 	}
 
+	public ASTProperty parseProperty() throws ParseException
+	{
+		ASTType type = parseType();
+		ASTIdentifier identifier = parseIdentifier();
+		eat(Tokens.SEMICOLON);
+		return new ASTProperty(token, type, identifier);
+	}
+
 	public ASTVariable parseVariable() throws ParseException
 	{
 		ASTType type = parseType();
@@ -228,10 +236,10 @@ public class Parser
 		if (checkNotNull(token).getToken() == Tokens.SEMICOLON) {
 			variable = new ASTVariable(token, type, id);
 			eat(Tokens.SEMICOLON);
-		} else if (checkNotNull(token).getToken() == Tokens.LEFTBRACKET) {
-			eat(Tokens.LEFTBRACKET);
+		} else if (checkNotNull(token).getToken() == Tokens.LEFTBRACE) {
+			eat(Tokens.LEFTBRACE);
 			variable = new ASTVariableInit(token, type, id, parseExpression());
-			eat(Tokens.RIGHTBRACKET);
+			eat(Tokens.RIGHTBRACE);
 		} else {
 			eat(Tokens.ASSIGN);
 			variable = new ASTVariableInit(token, type, id, parseExpression());
@@ -538,21 +546,6 @@ public class Parser
 						throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 					}
 				}
-
-				parseTerm1();
-			} break;
-
-			case GET: {
-				pushOperator(token);
-				Token tok = token;
-				eat(Tokens.GET);
-				eat(Tokens.LEFTBRACKET);
-				List<ASTStatement> astStatements = new ArrayList<>();
-				while (token.getToken() !== Tokens.RIGHTBRACKET) {
-					astStatements.add(parseStatement());
-				}
-
-				stOperand.push(new ASTExprBlock(tok, astStatements));
 
 				parseTerm1();
 			} break;

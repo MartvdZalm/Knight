@@ -546,8 +546,8 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTClass classDecl)
 	{
-		for (ASTVariable variable : classDecl.getVariableList()) {
-			variable.accept(this);
+		for (ASTProperty property : classDecl.getPropertyList()) {
+			property.accept(this);
 		}
 		for (ASTFunction function : classDecl.getFunctionList()) { 
 			function.accept(this);
@@ -605,6 +605,12 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 
 	@Override
 	public ASTExpression visit(ASTThis astThis)
+	{
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTProperty property)
 	{
 		return null;
 	}

@@ -134,4 +134,6 @@ public interface ASTVisitor<R>
     public R visit(ASTPointerAssign pointerAssign);
 
     public R visit(ASTThis this1);
+
+    public R visit(ASTProperty property);
 }

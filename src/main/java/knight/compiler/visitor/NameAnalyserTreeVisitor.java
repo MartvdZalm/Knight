@@ -491,8 +491,8 @@ public class NameAnalyserTreeVisitor implements ASTVisitor<ASTType>
 		symbolClass = symbolProgram.getClass(id);
 		cd.getId().setB(symbolClass);
 
-		for (int i = 0; i < cd.getVariableListSize(); i++) {
-			cd.getVariableDeclAt(i).accept(this);;
+		for (int i = 0; i < cd.getPropertyListSize(); i++) {
+			cd.getPropertyDeclAt(i).accept(this);;
 		}
 
 		for (int i = 0; i < cd.getFunctionListSize(); i++) {
@@ -530,6 +530,12 @@ public class NameAnalyserTreeVisitor implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTThis astThis)
+	{
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTProperty property)
 	{
 		return null;
 	}

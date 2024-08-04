@@ -398,8 +398,8 @@ public class ASTPrinter implements ASTVisitor<String>
 
 		incLevel();
 
-		for (ASTVariable variable : classDecl.getVariableList()) {
-			sb.append(variable.accept(this) + "\n");
+		for (ASTProperty property : classDecl.getPropertyList()) {
+			sb.append(property.accept(this) + "\n");
 		}
 
 		for (ASTFunction function : classDecl.getFunctionList()) {
@@ -470,6 +470,12 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTThis astThis)
 	{
 		return "(THIS)";
+	}
+
+	@Override
+	public String visit(ASTProperty property)
+	{
+		return null;
 	}
 
 	public static String printFileAst(String filename) throws FileNotFoundException, ParseException

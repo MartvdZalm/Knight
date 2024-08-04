@@ -96,7 +96,5 @@ public class TokenType
 
         Symbol.symbol("->", Tokens.ARROW);
         Symbol.symbol("this", Tokens.THIS);
-        Symbol.symbol("get", Tokens.GET);
-        Symbol.symbol("set", Tokens.SET);
     }
 }

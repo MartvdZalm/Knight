@@ -94,8 +94,8 @@ public class BuildSymbolProgramVisitor implements ASTVisitor<ASTType>
 			symbolClass = symbolProgram.getClass(identifier);
 		}
 
-		for (int i = 0; i < classDecl.getVariableListSize(); i++) {
-			classDecl.getVariableDeclAt(i).accept(this);
+		for (int i = 0; i < classDecl.getPropertyListSize(); i++) {
+			classDecl.getPropertyDeclAt(i).accept(this);
 		}
 
 		for (int i = 0; i < classDecl.getFunctionListSize(); i++) {
@@ -477,6 +477,12 @@ public class BuildSymbolProgramVisitor implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTThis astThis)
+	{
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTProperty property)
 	{
 		return null;
 	}

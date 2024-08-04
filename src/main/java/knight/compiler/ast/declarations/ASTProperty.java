@@ -22,52 +22,52 @@
  * SOFTWARE.
  */
 
-package knight.compiler.ast.expressions;
+package knight.compiler.ast.declarations;
 
 import java.util.List;
 
 import knight.compiler.lexer.Token;
+import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTVisitor;
+import knight.compiler.ast.statements.ASTStatement;
+import knight.compiler.ast.types.ASTType;
 
 /*
- * File: ASTExprBlock.java
+ * File: ASTProperty.java
  * @author: Mart van der Zalm
  * Date: 2024-08-03
  * Description:
  */
-public class ASTExprBlock extends ASTExpression
+public class ASTProperty extends AST
 {
-	private List<ASTStatement> body;
+	private ASTType type;
+	private ASTIdentifier identifier;
 
-	public ASTExprBlock(Token token, List<ASTStatement> body)
+	public ASTProperty(Token token, ASTType type, ASTIdentifier identifier)
 	{
 		super(token);
-		this.body = body;
+		this.type = type;
+		this.identifier = identifier;
 	}
 
-	public List<ASTStatement> getBody()
+	public ASTType getType()
 	{
-		return body;
+		return type;
 	}
 
-	public int getBodySize()
+	public void setType(ASTType type)
 	{
-		return body.size();
+		this.type = type;
 	}
 
-	public ASTStatement getStatAt(int index)
+	public ASTIdentifier getId()
 	{
-		if (index < body.size()) {
-			return body.get(index);
-		}
-		return null;
+		return identifier;
 	}
 
-	public void setStatAt(int index, ASTStatement stat)
+	public void setId(ASTIdentifier identifier)
 	{
-		if (index < body.size()) {
-			body.set(index, stat);
-		}
+		this.identifier = identifier;
 	}
 
 	@Override

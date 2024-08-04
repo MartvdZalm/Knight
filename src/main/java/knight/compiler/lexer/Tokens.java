@@ -96,6 +96,4 @@ public enum Tokens
 
     ARROW,
     THIS,
-    GET,
-    SET,
 }

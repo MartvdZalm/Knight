@@ -808,8 +808,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 		hsymbolFunction.clear();
 
-		for (int i = 0; i < classDecl.getVariableListSize(); i++) {
-			classDecl.getVariableDeclAt(i).accept(this);
+		for (int i = 0; i < classDecl.getPropertyListSize(); i++) {
+			classDecl.getPropertyDeclAt(i).accept(this);
 		}
 
 		for (int i = 0; i < classDecl.getFunctionListSize(); i++) {
@@ -847,4 +847,10 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	{
 		return null;
 	}
+
+	@Override
+	public ASTType visit(ASTProperty property)
+	{
+		return null;
+	} 
 }

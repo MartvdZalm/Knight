@@ -40,14 +40,14 @@ public class ASTClass extends AST
 {
 	private ASTIdentifier id;
 	private List<ASTFunction> functionList;
-	private List<ASTVariable> variableList;
+	private List<ASTProperty> propertyList;
 
-	public ASTClass(Token token, ASTIdentifier id, List<ASTFunction> functionList, List<ASTVariable> variableList)
+	public ASTClass(Token token, ASTIdentifier id, List<ASTFunction> functionList, List<ASTProperty> propertyList)
 	{
 		super(token);
 		this.id = id;
 		this.functionList = functionList;
-		this.variableList = variableList;
+		this.propertyList = propertyList;
 	}
 
 	public ASTIdentifier getId()
@@ -60,9 +60,9 @@ public class ASTClass extends AST
 		return functionList;
 	}
 
-	public List<ASTVariable> getVariableList()
+	public List<ASTProperty> getPropertyList()
 	{
-		return variableList;
+		return propertyList;
 	}
 
 	public int getFunctionListSize()
@@ -70,9 +70,9 @@ public class ASTClass extends AST
 		return functionList.size();
 	}
 
-	public int getVariableListSize()
+	public int getPropertyListSize()
 	{
-		return variableList.size();
+		return propertyList.size();
 	}
 
 	public ASTFunction getFunctionDeclAt(int index)
@@ -83,10 +83,10 @@ public class ASTClass extends AST
 		return null;
 	}
 
-	public ASTVariable getVariableDeclAt(int index)
+	public ASTProperty getPropertyDeclAt(int index)
 	{
-		if (index < getVariableListSize()) {
-			return variableList.get(index);
+		if (index < getPropertyListSize()) {
+			return propertyList.get(index);
 		}
 		return null;
 	}

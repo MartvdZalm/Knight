@@ -592,9 +592,6 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTClass classDecl)
 	{
-
-
-
 		return null;
 	}
 
@@ -723,6 +720,12 @@ public class CodeGenerator implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTThis astThis)
+	{
+		return null;
+	}
+
+	@Override
+	public String visit(ASTProperty property)
 	{
 		return null;
 	}
