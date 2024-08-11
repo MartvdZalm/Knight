@@ -24,31 +24,16 @@
 
 package knight.compiler.asm.declarations;
 
+import java.util.List;
 import knight.compiler.asm.ASM;
 
 /*
- * File: ASMProperty.java
+ * File: ASMTypes.java
  * @author: Mart van der Zalm
  * Date: 2024-08-11
  * Description:
  */
-public class ASMProperty extends ASM
+public class ASMType extends ASM
 {
-	private ASMType type;
-	private String id;
 
-	public ASMProperty()
-	{
-		
-	}
-
-	public void setType(ASMType type)
-	{
-		this.type = type;
-	}
-
-	public void setId(String id)
-	{
-		this.id = id;
-	}
 }

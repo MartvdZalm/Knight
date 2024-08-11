@@ -35,8 +35,21 @@ import knight.compiler.asm.ASM;
  */
 public class ASMVariable extends ASM
 {
+	private ASMType type;
+	private String id;
+
 	public ASMVariable()
 	{
 		
+	}
+
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
+	public void setType(ASMType type)
+	{
+		this.type = type;
 	}
 }

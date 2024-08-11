@@ -55,263 +55,297 @@ public class Codegen implements ASTVisitor<ASM>
 {
 
 	@Override
-	public ASM visit(ASTAssign assign)
+	public ASMAssign visit(ASTAssign astAssign)
 	{
+		ASMAssign asmAssign = new ASMAssign();
 
-		return null;
+		return asmAssign;
 	}
 
 	@Override
-	public ASM visit(ASTBlock block)
+	public ASMBlock visit(ASTBlock astBlock)
 	{
+		ASMBlock asmBlock = new ASMBlock();
 
-		return null;
+		return asmBlock;
 	}
 
 	@Override
-	public ASM visit(ASTIfThenElse ifThenElse)
+	public ASMIfThenElse visit(ASTIfThenElse astIfThenElse)
 	{
+		ASMIfThenElse asmIfThenElse = new ASMIfThenElse();
 
-		return null;
+		return new ASMIfThenElse();
 	}
 
 	@Override
-	public ASM visit(ASTSkip skip)
+	public ASMSkip visit(ASTSkip astSkip)
 	{
+		ASMSkip asmSkip = new ASMSkip();
 
-		return null;
+		return asmSkip;
 	}
 
 	@Override
-	public ASM visit(ASTWhile w)
+	public ASMWhile visit(ASTWhile astWhile)
 	{
+		ASMWhile asmWhile = new ASMWhile();
 
-		return null;
+		return asmWhile;
 	}
 
 	@Override
-	public ASM visit(ASTIntLiteral intLiteral)
+	public ASMIntLiteral visit(ASTIntLiteral astIntLiteral)
 	{
+		ASMIntLiteral asmIntLiteral = new ASMIntLiteral();
 
-		return null;
+		return asmIntLiteral;
 	}
 
 	@Override
-	public ASM visit(ASTPlus plus)
+	public ASMPlus visit(ASTPlus astPlus)
 	{
+		ASMPlus asmPlus = new ASMPlus();
 
-		return null;
+		return asmPlus;
 	}
 
 	@Override
-	public ASM visit(ASTMinus minus)
+	public ASMMinus visit(ASTMinus astMinus)
 	{
+		ASMMinus asmMinus = new ASMMinus();
 
-		return null;
+		return asmMinus;
 	}
 
 	@Override
-	public ASM visit(ASTTimes times)
+	public ASMTimes visit(ASTTimes astTimes)
 	{
+		ASMTimes asmTimes = new ASMTimes();
 
-		return null;
+		return asmTimes;
 	}
 
 	@Override
-	public ASM visit(ASTDivision division)
+	public ASMDivision visit(ASTDivision astDivision)
 	{
+		ASMDivision asmDivision = new ASMDivision();
 
-		return null;
+		return asmDivision;
 	}
 
 	@Override
-	public ASM visit(ASTEquals equals)
+	public ASMEquals visit(ASTEquals astEquals)
 	{
+		ASMEquals asmEquals = new ASMEquals();
 
-		return null;
+		return asmEquals;
 	}
 
 	@Override
-	public ASM visit(ASTLessThan lessThan)
+	public ASMLessThan visit(ASTLessThan astLessThan)
 	{
+		ASMLessThan asmLessThan = new ASMLessThan();
 
-		return null;
+		return asmLessThan;
 	}
 
 	@Override
-	public ASM visit(ASTLessThanOrEqual lessThanOrEqual)
+	public ASMLessThanOrEqual visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
+		ASMLessThanOrEqual asmLessThanOrEqual = new ASMLessThanOrEqual();
 
-				return null;
+		return asmLessThanOrEqual;
 	}
 
 	@Override
-	public ASM visit(ASTGreaterThan greaterThan)
+	public ASMGreaterThan visit(ASTGreaterThan astGreaterThan)
 	{
+		ASMGreaterThan asmGreaterThan = new ASMGreaterThan();
 
-		return null;
+		return asmGreaterThan;
 	}
 
 	@Override
-	public ASM visit(ASTGreaterThanOrEqual greaterThanOrEqual)
+	public ASMGreaterThanOrEqual visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
+		ASMGreaterThanOrEqual asmGreaterThanOrEqual = new ASMGreaterThanOrEqual();
 
-		return null;
+		return asmGreaterThanOrEqual;
 	}
 
 	@Override
-	public ASM visit(ASTAnd n)
+	public ASMAnd visit(ASTAnd astAnd)
 	{
+		ASMAnd asmAnd = new ASMAnd();
 
-		return null;
+		return asmAnd;
 	}
 
 	@Override
-	public ASM visit(ASTOr n)
+	public ASMOr visit(ASTOr astOr)
 	{
+		ASMOr asmOr = new ASMOr();
 
-		return null;
+		return asmOr;
 	}
 
 	@Override
-	public ASM visit(ASTTrue true1)
+	public ASMTrue visit(ASTTrue astTrue)
 	{
+		ASMTrue asmTrue = new ASMTrue();
 
-		return null;
+		return asmTrue;
 	}
 
 	@Override
-	public ASM visit(ASTFalse false1)
+	public ASMFalse visit(ASTFalse astFalse)
 	{
+		ASMFalse asmFalse = new ASMFalse();
 
-		return null;
+		return asmFalse;
 	}
 
 	@Override
-	public ASM visit(ASTIdentifierExpr id)
+	public ASMIdentifierExpr visit(ASTIdentifierExpr astIdentifierExpr)
 	{
+		ASMIdentifierExpr asmIdentifierExpr = new ASMIdentifierExpr();
 
-		return null;
+		return asmIdentifierExpr;
 	}
 
 	@Override
-	public ASM visit(ASTNewArray na)
+	public ASMNewArray visit(ASTNewArray astNewArray)
 	{
+		ASMNewArray asmNewArray = new ASMNewArray();
 
-		return null;
+		return asmNewArray;
 	}
 
 	@Override
-	public ASM visit(ASTNewInstance ni)
+	public ASMNewInstance visit(ASTNewInstance astNewInstance)
 	{
+		ASMNewInstance asmNewInstance = new ASMNewInstance();
 
-		return null;
+		return asmNewInstance;
 	}
 
 	@Override
-	public ASM visit(ASTCallFunctionExpr callFunctionExpr)
+	public ASMCallFunctionExpr visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
+		ASMCallFunctionExpr asmCallFunctionExpr = new ASMCallFunctionExpr();
 
-		return null;
+		return asmCallFunctionExpr;
 	}
 
 	@Override
-	public ASM visit(ASTCallFunctionStat callFunctionStat)
+	public ASMCallFunctionStat visit(ASTCallFunctionStat astCallFunctionStat)
 	{
+		ASMCallFunctionStat asmCallFunctionStat = new ASMCallFunctionStat();
 
-		return null;
+		return asmCallFunctionStat;
 	}
 
 
 	@Override
-	public ASM visit(ASTIntType intType)
+	public ASMIntType visit(ASTIntType intType)
 	{
 
-		return null;
+		return new ASMIntType();
 	}
 
 	@Override
-	public ASM visit(ASTStringType stringType)
+	public ASMStringType visit(ASTStringType stringType)
 	{
 
-		return null;
+		return new ASMStringType();
 	}
 
 	@Override
-	public ASM visit(ASTVoidType voidType)
+	public ASMVoidType visit(ASTVoidType voidType)
 	{
 
-		return null;
+		return new ASMVoidType();
 	}
 
 	@Override
-	public ASM visit(ASTBooleanType booleanType)
+	public ASMBooleanType visit(ASTBooleanType booleanType)
 	{
 
-		return null;
+		return new ASMBooleanType();
 	}
 
 	@Override
-	public ASM visit(ASTIntArrayType intArrayType)
+	public ASMIntArrayType visit(ASTIntArrayType intArrayType)
 	{
 
-		return null;
+		return new ASMIntArrayType();
 	}
 
 	@Override
-	public ASM visit(ASTIdentifierType refT)
+	public ASMIdentifierType visit(ASTIdentifierType refT)
 	{
 
-		return null;
+		return new ASMIdentifierType();
 	}
 
 	@Override
-	public ASM visit(ASTArgument argDecl)
+	public ASMArgument visit(ASTArgument astArgument)
 	{
+		ASMArgument asmArgument = new ASMArgument();
 
-		return null;
+		return asmArgument;
 	}
 
 	@Override
-	public ASM visit(ASTIdentifier identifier)
+	public ASMIdentifier visit(ASTIdentifier astIdentifier)
 	{
+		ASMIdentifier asmIdentifier = new ASMIdentifier();
 
-		return null;
+		return asmIdentifier;
 	}
 
 	@Override
-	public ASM visit(ASTArrayIndexExpr ia)
+	public ASMArrayIndexExpr visit(ASTArrayIndexExpr astArrayIndexExpr)
 	{
+		ASMArrayIndexExpr asmArrayIndexExpr = new ASMArrayIndexExpr();
 
-		return null;
+		return asmArrayIndexExpr;
 	}
 
 	@Override
-	public ASM visit(ASTArrayAssign aa)
+	public ASMArrayAssign visit(ASTArrayAssign astArrayAssign)
 	{
+		ASMArrayAssign asmArrayAssign = new ASMArrayAssign();
 
-		return null;
+		return asmArrayAssign;
 	}
 
 	@Override
-	public ASM visit(ASTStringLiteral stringLiteral)
+	public ASMStringLiteral visit(ASTStringLiteral astStringLiteral)
 	{
+		ASMStringLiteral asmStringLiteral = new ASMStringLiteral();
 
-		return null;
+		return asmStringLiteral;
 	}
 
 	@Override
 	public ASMVariable visit(ASTVariable variable)
 	{
+		ASMVariable asmVariable = new ASMVariable();
 
-		return null;
+		asmVariable.setId(variable.getId());
+		asmVariable.setType(variable.getType());
+
+		return asmVariable;
 	}
 
 	@Override
-	public ASMVariable visit(ASTVariableInit varDeclInit)
+	public ASMVariableInit visit(ASTVariableInit astVariableInit)
 	{
+		ASMVariableInit asmVariableInit = new ASMVariableInit();
 
-		return null;
+		return asmVariableInit;
 	}
 
 	@Override
@@ -337,24 +371,27 @@ public class Codegen implements ASTVisitor<ASM>
 	}
 
 	@Override
-	public ASM visit(ASTFunctionReturn functionReturn)
+	public ASMFunctionReturn visit(ASTFunctionReturn astFunctionReturn)
 	{
+		ASMFunctionReturn asmFunctionReturn = new ASMFunctionReturn();
 
-		return null;
+		return asmFunctionReturn;
 	}
 
 	@Override
-	public ASM visit(ASTClass classDecl)
+	public ASMClass visit(ASTClass astClass)
 	{
+		ASMClass asmClass = new ASMClass();
 
-		return null;
+		return asmClass;
 	}
 
 	@Override
-	public ASM visit(ASTInlineASM inlineASM)
+	public ASMInlineASM visit(ASTInlineASM astInlineASM)
 	{
+		ASMInlineASM asmInlineASM = new ASMInlineASM();
 
-		return null;
+		return asmInlineASM;
 	}
 
 	@Override
@@ -374,51 +411,53 @@ public class Codegen implements ASTVisitor<ASM>
 	}
 
 	@Override
-	public ASM visit(ASTReturnStatement returnStatement)
+	public ASMReturnStatement visit(ASTReturnStatement astReturnStatement)
 	{
+		ASMReturnStatement asmReturnStatement = new ASMReturnStatement();
 
-		return null;
+		return asmReturnStatement;
 	}
 
 	@Override
-	public ASM visit(ASTModulus modulus)
+	public ASMModulus visit(ASTModulus astModulus)
 	{
+		ASMModulus asmModulus = new ASMModulus();
 
-		return null;
+		return asmModulus;
 	}
 
 	@Override
-	public ASM visit(ASTFunctionType functionType)
+	public ASMForLoop visit(ASTForLoop astForLoop)
 	{
+		ASMForLoop asmForLoop = new ASMForLoop();
 
-		return null;
+		return asmForLoop;
 	}
 
 	@Override
-	public ASM visit(ASTForLoop forLoop)
+	public ASMPointerAssign visit(ASTPointerAssign astPointerAssign)
 	{
+		ASMPointerAssign asmPointerAssign = new ASMPointerAssign();
 
-		return null;
+		return asmPointerAssign;
 	}
 
 	@Override
-	public ASM visit(ASTPointerAssign pointerAssign)
+	public ASMThis visit(ASTThis astThis)
 	{
+		ASMThis asmThis = new ASMThis();
 
-		return null;
+		return asmThis;
 	}
 
 	@Override
-	public ASM visit(ASTThis astThis)
+	public ASM visit(ASTProperty astProperty)
 	{
+		ASMProperty asmProperty = new ASMProperty();
 
-		return null;
-	}
+		asmProperty.setType(astProperty.getType().accept(this));
+		asmProperty.setId(astProperty.getId());
 
-	@Override
-	public ASM visit(ASTProperty property)
-	{
-
-		return null;
+		return asmProperty;
 	}
 }

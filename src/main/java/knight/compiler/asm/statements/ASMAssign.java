@@ -22,33 +22,18 @@
  * SOFTWARE.
  */
 
-package knight.compiler.asm.declarations;
-
-import knight.compiler.asm.ASM;
+package knight.compiler.asm;
 
 /*
- * File: ASMProperty.java
+ * File: ASMAssign.java
  * @author: Mart van der Zalm
  * Date: 2024-08-11
  * Description:
  */
-public class ASMProperty extends ASM
+public class ASMAssign
 {
-	private ASMType type;
-	private String id;
-
-	public ASMProperty()
+	public ASMAssign()
 	{
-		
-	}
 
-	public void setType(ASMType type)
-	{
-		this.type = type;
-	}
-
-	public void setId(String id)
-	{
-		this.id = id;
 	}
 }
