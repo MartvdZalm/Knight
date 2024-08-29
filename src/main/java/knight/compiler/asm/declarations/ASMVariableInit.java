@@ -24,33 +24,20 @@
 
 package knight.compiler.asm.declarations;
 
-
-import knight.compiler.asm.ASM;
-import knight.compiler.asm.types.ASMType;
+import knight.compiler.asm.expressions.ASMExpression;
 
 /*
- * File: ASMVariable.java
+ * File: ASMVariableInit.java
  * @author: Mart van der Zalm
- * Date: 2024-08-06
+ * Date: 2024-08-29
  * Description:
  */
-public class ASMVariable extends ASM
+public class ASMVariableInit extends ASMVariable
 {
-	private ASMType type;
-	private String id;
+	private ASMExpression expr;
 
-	public ASMVariable()
+	public ASMVariableInit()
 	{
-		
-	}
 
-	public void setId(String id)
-	{
-		this.id = id;
-	}
-
-	public void setType(ASMType type)
-	{
-		this.type = type;
 	}
 }

@@ -22,35 +22,18 @@
  * SOFTWARE.
  */
 
-package knight.compiler.asm.declarations;
-
-
-import knight.compiler.asm.ASM;
-import knight.compiler.asm.types.ASMType;
+package knight.compiler.asm.statements;
 
 /*
- * File: ASMVariable.java
+ * File: ASMPointerAssign.java
  * @author: Mart van der Zalm
- * Date: 2024-08-06
+ * Date: 2024-08-29
  * Description:
  */
-public class ASMVariable extends ASM
+public class ASMPointerAssign
 {
-	private ASMType type;
-	private String id;
-
-	public ASMVariable()
+	public ASMPointerAssign()
 	{
-		
-	}
 
-	public void setId(String id)
-	{
-		this.id = id;
-	}
-
-	public void setType(ASMType type)
-	{
-		this.type = type;
 	}
 }

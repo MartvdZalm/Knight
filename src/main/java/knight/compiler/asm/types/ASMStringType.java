@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package knight.compiler.asm.declarations;
+package knight.compiler.asm.types;
 
 import knight.compiler.asm.ASM;
 

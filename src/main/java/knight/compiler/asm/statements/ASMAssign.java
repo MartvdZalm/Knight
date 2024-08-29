@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package knight.compiler.asm;
+package knight.compiler.asm.statements;
 
 /*
  * File: ASMAssign.java

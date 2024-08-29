@@ -26,6 +26,8 @@ package knight.compiler.asm.declarations;
 
 import knight.compiler.asm.ASM;
 
+import java.util.List;
+
 /*
  * File: ASMClass.java
  * @author: Mart van der Zalm
@@ -34,8 +36,27 @@ import knight.compiler.asm.ASM;
  */
 public class ASMClass extends ASM
 {
+	private String id;
+	private List<ASMFunction> functionList;
+	private List<ASMProperty> propertyList;
+
 	public ASMClass()
 	{
 		
+	}
+
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
+	public void addFunction(ASMFunction asmFunction)
+	{
+		this.functionList.add(asmFunction);
+	}
+
+	public void addProperty(ASMProperty asmProperty)
+	{
+		this.propertyList.add(asmProperty);
 	}
 }

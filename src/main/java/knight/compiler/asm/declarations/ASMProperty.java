@@ -25,6 +25,7 @@
 package knight.compiler.asm.declarations;
 
 import knight.compiler.asm.ASM;
+import knight.compiler.asm.types.ASMType;
 
 /*
  * File: ASMProperty.java

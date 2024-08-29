@@ -25,7 +25,11 @@
 package knight.compiler.asm.declarations;
 
 import java.util.List;
+
 import knight.compiler.asm.ASM;
+import knight.compiler.asm.statements.ASMStatement;
+import knight.compiler.asm.declarations.ASMVariable;
+import knight.compiler.asm.declarations.ASMArgument;
 
 /*
  * File: ASMFunction.java

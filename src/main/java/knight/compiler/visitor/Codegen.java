@@ -36,14 +36,19 @@ import knight.compiler.ast.statements.conditionals.*;
 import knight.compiler.ast.types.*;
 import knight.compiler.ast.*;
 
+import knight.compiler.asm.declarations.*;
+import knight.compiler.asm.expressions.*;
+import knight.compiler.asm.expressions.operations.*;
+import knight.compiler.asm.statements.*;
+import knight.compiler.asm.statements.conditionals.*;
+import knight.compiler.asm.types.*;
+import knight.compiler.asm.*;
+
 import knight.compiler.semantics.*;
 import knight.compiler.symbol.SymbolClass;
 import knight.compiler.symbol.SymbolFunction;
 import knight.compiler.symbol.SymbolProgram;
 import knight.compiler.symbol.SymbolVariable;
-
-import knight.compiler.asm.ASM;
-import knight.compiler.asm.declarations.*;
 
 /*
  * File: CodeGen.java
@@ -345,6 +350,8 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMVariableInit asmVariableInit = new ASMVariableInit();
 
+		
+
 		return asmVariableInit;
 	}
 
@@ -382,6 +389,16 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMClass visit(ASTClass astClass)
 	{
 		ASMClass asmClass = new ASMClass();
+
+		asmClass.setId(astClass.getId().accept(this));
+
+		for (int i = 0; i < astClass.getPropertyListSize(); i++) {
+			asmClass.addProperty((ASMProperty)astClass.getPropertyDeclAt(i).accept(this));
+		}
+
+		for (int i = 0; i < astClass.getFunctionListSize(); i++) {
+			asmClass.addFunction((ASMFunction)astClass.getFunctionDeclAt(i).accept(this));
+		}
 
 		return asmClass;
 	}
