@@ -30,10 +30,23 @@ package knight.compiler.asm.expressions;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMIdentifierExpr
+public class ASMIdentifierExpr extends ASMExpression
 {
+	private String id;
+
 	public ASMIdentifierExpr()
 	{
 
+	}
+
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

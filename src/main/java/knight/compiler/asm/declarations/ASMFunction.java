@@ -25,6 +25,7 @@
 package knight.compiler.asm.declarations;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import knight.compiler.asm.ASM;
 import knight.compiler.asm.statements.ASMStatement;
@@ -39,17 +40,19 @@ import knight.compiler.asm.declarations.ASMArgument;
  */
 public class ASMFunction extends ASM
 {
-	private String id;
+	private ASMIdentifier id;
 	private List<ASMArgument> argumentList;
 	private List<ASMVariable> variableList;
 	private List<ASMStatement> statementList;
 
 	public ASMFunction()
 	{
-		
+		this.argumentList = new ArrayList<>();
+		this.variableList = new ArrayList<>();
+		this.statementList = new ArrayList<>();
 	}
 
-	public void setId(String id)
+	public void setId(ASMIdentifier id)
 	{
 		this.id = id;
 	}
@@ -67,5 +70,16 @@ public class ASMFunction extends ASM
 	public void addStatement(ASMStatement asmStatement)
 	{
 		this.statementList.add(asmStatement);
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(".globl " + this.id + ASM.NEWLINE);
+		sb.append(".type " + this.id +  ", @function" + ASM.NEWLINE);
+
+		return sb.toString();
 	}
 }

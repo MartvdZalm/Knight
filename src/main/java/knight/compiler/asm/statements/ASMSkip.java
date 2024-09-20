@@ -30,10 +30,16 @@ package knight.compiler.asm.statements;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMSkip
+public class ASMSkip extends ASMStatement
 {
 	public ASMSkip()
 	{
 
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

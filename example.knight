@@ -1,4 +1,10 @@
+int age;
 Point point = new Point();
+
+fn test(): int
+{
+    ret 1;
+}
 
 class Point
 {

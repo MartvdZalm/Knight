@@ -24,16 +24,44 @@
 
 package knight.compiler.asm.statements;
 
+import knight.compiler.asm.declarations.ASMIdentifier;
+import knight.compiler.asm.expressions.ASMExpression;
+
 /*
  * File: ASMArrayAssign.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMArrayAssign
+public class ASMArrayAssign extends ASMStatement
 {
+	private ASMIdentifier identifier;
+	private ASMExpression expression1;
+	private ASMExpression expression2;
+
 	public ASMArrayAssign()
 	{
 
+	}
+
+	public void setIdentifier(ASMIdentifier identifier)
+	{
+		this.identifier = identifier;
+	}
+
+	public void setExpression1(ASMExpression expression1)
+	{
+		this.expression1 = expression1;
+	}
+
+	public void setExpression2(ASMExpression expression2)
+	{
+		this.expression2 = expression2;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

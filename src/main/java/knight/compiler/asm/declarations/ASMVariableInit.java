@@ -34,10 +34,21 @@ import knight.compiler.asm.expressions.ASMExpression;
  */
 public class ASMVariableInit extends ASMVariable
 {
-	private ASMExpression expr;
+	private ASMExpression expression;
 
 	public ASMVariableInit()
 	{
 
+	}
+
+	public void setExpr(ASMExpression expression)
+	{
+		this.expression = expression;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

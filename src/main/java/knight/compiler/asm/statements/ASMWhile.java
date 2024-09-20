@@ -24,16 +24,37 @@
 
 package knight.compiler.asm.statements;
 
+import knight.compiler.asm.expressions.ASMExpression;
+
 /*
  * File: ASMWhile.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMWhile
+public class ASMWhile extends ASMStatement
 {
+	private ASMExpression expression;
+	private ASMStatement body;
+
 	public ASMWhile()
 	{
 
+	}
+
+	public void setExpression(ASMExpression expression)
+	{
+		this.expression = expression;
+	}
+
+	public void setBody(ASMStatement body)
+	{
+		this.body = body;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

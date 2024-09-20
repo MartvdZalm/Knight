@@ -37,46 +37,46 @@ import knight.compiler.ast.ASTVisitor;
  */
 public class ASTArrayAssign extends ASTStatement
 {
-	private ASTIdentifier identifier;
-	private ASTExpression e1;
-	private ASTExpression e2;
+	private ASTIdentifier id;
+	private ASTExpression expression1;
+	private ASTExpression expression2;
 
-	public ASTArrayAssign(Token token, ASTIdentifier identifier, ASTExpression e1, ASTExpression e2)
+	public ASTArrayAssign(Token token, ASTIdentifier id, ASTExpression expression1, ASTExpression expression2)
 	{
 		super(token);
-		this.identifier = identifier;
-		this.e1 = e1;
-		this.e2 = e2;
+		this.id = id;
+		this.expression1 = expression1;
+		this.expression2 = expression2;
 	}
 
-	public ASTIdentifier getIdentifier()
+	public ASTIdentifier getId()
 	{
-		return identifier;
+		return id;
 	}
 
-	public void setIdentifier(ASTIdentifier identifier)
+	public void setIdentifier(ASTIdentifier id)
 	{
-		this.identifier = identifier;
+		this.id = id;
 	}
 
-	public ASTExpression getE1()
+	public ASTExpression getExpression1()
 	{
-		return e1;
+		return expression1;
 	}
 
-	public void setE1(ASTExpression e1)
+	public void setE1(ASTExpression expression1)
 	{
-		this.e1 = e1;
+		this.expression1 = expression1;
 	}
 
-	public ASTExpression getE2()
+	public ASTExpression getExpression2()
 	{
-		return e2;
+		return expression2;
 	}
 
-	public void setE2(ASTExpression e2)
+	public void setE2(ASTExpression expression2)
 	{
-		this.e2 = e2;
+		this.expression2 = expression2;
 	}
 
 	@Override

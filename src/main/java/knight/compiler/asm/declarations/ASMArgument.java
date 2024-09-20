@@ -25,6 +25,7 @@
 package knight.compiler.asm.declarations;
 
 import knight.compiler.asm.ASM;
+import knight.compiler.asm.types.ASMType;
 
 /*
  * File: ASMArgument.java
@@ -34,8 +35,27 @@ import knight.compiler.asm.ASM;
  */
 public class ASMArgument extends ASM
 {
+	private ASMType type;
+	private ASMIdentifier id;
+
 	public ASMArgument()
 	{
 		
+	}
+
+	public void setType(ASMType type)
+	{
+		this.type = type;
+	}
+
+	public void setId(ASMIdentifier id)
+	{
+		this.id = id;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

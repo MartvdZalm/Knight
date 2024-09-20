@@ -61,12 +61,12 @@ public class ASTCallFunctionStat extends ASTStatement
 		this.instanceName = instanceName;
 	}
 
-	public ASTIdentifierExpr getMethodId()
+	public ASTIdentifierExpr getFunctionId()
 	{
 		return methodId;
 	}
 
-	public void setMethodId(ASTIdentifierExpr methodId)
+	public void setFunctionId(ASTIdentifierExpr methodId)
 	{
 		this.methodId = methodId;
 	}

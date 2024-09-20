@@ -30,10 +30,16 @@ package knight.compiler.asm.expressions;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMTrue
+public class ASMTrue extends ASMExpression
 {
 	public ASMTrue()
 	{
 
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

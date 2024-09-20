@@ -40,4 +40,15 @@ public class ASMFunctionReturn extends ASMFunction
 	{
 
 	}
+
+	public void setReturnExpr(ASMExpression returnExpr)
+	{
+		this.returnExpr = returnExpr;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
+	}
 }

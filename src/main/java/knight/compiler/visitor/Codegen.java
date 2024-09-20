@@ -58,12 +58,31 @@ import knight.compiler.symbol.SymbolVariable;
  */
 public class Codegen implements ASTVisitor<ASM>
 {
+	private final String PATH;
+	private final String FILENAME;
+
+	public Codegen(String progPath, String filename)
+	{
+		File f = new File(filename);
+		String name = f.getName();
+
+		FILENAME = name.substring(0, name.lastIndexOf("."));
+		PATH = progPath;
+	}
+
+	// NEED TO BE REMOVED 
+	@Override
+	public ASM visit(ASTFunctionType functionType)
+	{
+		return null;
+	}
 
 	@Override
 	public ASMAssign visit(ASTAssign astAssign)
 	{
 		ASMAssign asmAssign = new ASMAssign();
-
+		asmAssign.setId((ASMIdentifier)astAssign.getId().accept(this));
+		asmAssign.setExpr((ASMExpression)astAssign.getExpr().accept(this));
 		return asmAssign;
 	}
 
@@ -71,7 +90,9 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMBlock visit(ASTBlock astBlock)
 	{
 		ASMBlock asmBlock = new ASMBlock();
-
+		for (int i = 0; i < astBlock.getStatementListSize(); i++) {
+			asmBlock.addStatement((ASMStatement)astBlock.getStatementAt(i).accept(this));
+		}
 		return asmBlock;
 	}
 
@@ -79,15 +100,16 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMIfThenElse visit(ASTIfThenElse astIfThenElse)
 	{
 		ASMIfThenElse asmIfThenElse = new ASMIfThenElse();
-
-		return new ASMIfThenElse();
+		asmIfThenElse.setExpression((ASMExpression)astIfThenElse.getExpr().accept(this));
+		asmIfThenElse.setThen((ASMStatement)astIfThenElse.getThen().accept(this));
+		asmIfThenElse.setElze((ASMStatement)astIfThenElse.getElze().accept(this));
+		return asmIfThenElse;
 	}
 
 	@Override
 	public ASMSkip visit(ASTSkip astSkip)
 	{
 		ASMSkip asmSkip = new ASMSkip();
-
 		return asmSkip;
 	}
 
@@ -95,7 +117,8 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMWhile visit(ASTWhile astWhile)
 	{
 		ASMWhile asmWhile = new ASMWhile();
-
+		asmWhile.setExpression((ASMExpression)astWhile.getExpr().accept(this));
+		asmWhile.setBody((ASMStatement)astWhile.getBody().accept(this));
 		return asmWhile;
 	}
 
@@ -103,7 +126,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMIntLiteral visit(ASTIntLiteral astIntLiteral)
 	{
 		ASMIntLiteral asmIntLiteral = new ASMIntLiteral();
-
+		asmIntLiteral.setValue(astIntLiteral.getValue());
 		return asmIntLiteral;
 	}
 
@@ -111,7 +134,8 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMPlus visit(ASTPlus astPlus)
 	{
 		ASMPlus asmPlus = new ASMPlus();
-
+		asmPlus.setLhs((ASMExpression)astPlus.getLhs().accept(this));
+		asmPlus.setRhs((ASMExpression)astPlus.getRhs().accept(this));
 		return asmPlus;
 	}
 
@@ -119,7 +143,8 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMMinus visit(ASTMinus astMinus)
 	{
 		ASMMinus asmMinus = new ASMMinus();
-
+		asmMinus.setLhs((ASMExpression)astMinus.getLhs().accept(this));
+		asmMinus.setRhs((ASMExpression)astMinus.getRhs().accept(this));
 		return asmMinus;
 	}
 
@@ -128,6 +153,9 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMTimes asmTimes = new ASMTimes();
 
+		asmTimes.setLhs((ASMExpression)astTimes.getLhs().accept(this));
+		asmTimes.setRhs((ASMExpression)astTimes.getRhs().accept(this));
+		
 		return asmTimes;
 	}
 
@@ -136,13 +164,28 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMDivision asmDivision = new ASMDivision();
 
+		asmDivision.setLhs((ASMExpression)astDivision.getLhs().accept(this));
+		asmDivision.setRhs((ASMExpression)astDivision.getRhs().accept(this));	
+
 		return asmDivision;
+	}
+
+	@Override
+	public ASMModulus visit(ASTModulus astModulus)
+	{
+		ASMModulus asmModulus = new ASMModulus();
+		asmModulus.setLhs((ASMExpression)astModulus.getLhs().accept(this));
+		asmModulus.setRhs((ASMExpression)astModulus.getRhs().accept(this));
+		return asmModulus;
 	}
 
 	@Override
 	public ASMEquals visit(ASTEquals astEquals)
 	{
 		ASMEquals asmEquals = new ASMEquals();
+
+		asmEquals.setLhs((ASMExpression)astEquals.getLhs().accept(this));
+		asmEquals.setRhs((ASMExpression)astEquals.getRhs().accept(this));
 
 		return asmEquals;
 	}
@@ -152,6 +195,9 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMLessThan asmLessThan = new ASMLessThan();
 
+		asmLessThan.setLhs((ASMExpression)astLessThan.getLhs().accept(this));
+		asmLessThan.setRhs((ASMExpression)astLessThan.getRhs().accept(this));
+
 		return asmLessThan;
 	}
 
@@ -159,6 +205,9 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMLessThanOrEqual visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
 		ASMLessThanOrEqual asmLessThanOrEqual = new ASMLessThanOrEqual();
+
+		asmLessThanOrEqual.setLhs((ASMExpression)astLessThanOrEqual.getLhs().accept(this));
+		asmLessThanOrEqual.setRhs((ASMExpression)astLessThanOrEqual.getRhs().accept(this));
 
 		return asmLessThanOrEqual;
 	}
@@ -168,6 +217,9 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMGreaterThan asmGreaterThan = new ASMGreaterThan();
 
+		asmGreaterThan.setLhs((ASMExpression)astGreaterThan.getLhs().accept(this));
+		asmGreaterThan.setRhs((ASMExpression)astGreaterThan.getRhs().accept(this));
+
 		return asmGreaterThan;
 	}
 
@@ -175,6 +227,9 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMGreaterThanOrEqual visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
 		ASMGreaterThanOrEqual asmGreaterThanOrEqual = new ASMGreaterThanOrEqual();
+
+		asmGreaterThanOrEqual.setLhs((ASMExpression)astGreaterThanOrEqual.getLhs().accept(this));
+		asmGreaterThanOrEqual.setRhs((ASMExpression)astGreaterThanOrEqual.getRhs().accept(this));
 
 		return asmGreaterThanOrEqual;
 	}
@@ -184,6 +239,9 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMAnd asmAnd = new ASMAnd();
 
+		asmAnd.setLhs((ASMExpression)astAnd.getLhs().accept(this));
+		asmAnd.setRhs((ASMExpression)astAnd.getRhs().accept(this));
+
 		return asmAnd;
 	}
 
@@ -192,6 +250,9 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMOr asmOr = new ASMOr();
 
+		asmOr.setLhs((ASMExpression)astOr.getLhs().accept(this));
+		asmOr.setRhs((ASMExpression)astOr.getRhs().accept(this));
+
 		return asmOr;
 	}
 
@@ -199,7 +260,6 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMTrue visit(ASTTrue astTrue)
 	{
 		ASMTrue asmTrue = new ASMTrue();
-
 		return asmTrue;
 	}
 
@@ -207,7 +267,6 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMFalse visit(ASTFalse astFalse)
 	{
 		ASMFalse asmFalse = new ASMFalse();
-
 		return asmFalse;
 	}
 
@@ -216,6 +275,8 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMIdentifierExpr asmIdentifierExpr = new ASMIdentifierExpr();
 
+		asmIdentifierExpr.setId(astIdentifierExpr.getId());
+
 		return asmIdentifierExpr;
 	}
 
@@ -223,7 +284,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMNewArray visit(ASTNewArray astNewArray)
 	{
 		ASMNewArray asmNewArray = new ASMNewArray();
-
+		asmNewArray.setArrayLength((ASMExpression)astNewArray.getArrayLength().accept(this));
 		return asmNewArray;
 	}
 
@@ -231,7 +292,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMNewInstance visit(ASTNewInstance astNewInstance)
 	{
 		ASMNewInstance asmNewInstance = new ASMNewInstance();
-
+		asmNewInstance.setClassName((ASMIdentifierExpr)astNewInstance.getClassName().accept(this));
 		return asmNewInstance;
 	}
 
@@ -239,6 +300,13 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMCallFunctionExpr visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
 		ASMCallFunctionExpr asmCallFunctionExpr = new ASMCallFunctionExpr();
+
+		asmCallFunctionExpr.setInstanceName((ASMExpression)astCallFunctionExpr.getInstanceName().accept(this));
+		asmCallFunctionExpr.setFunctionId((ASMIdentifierExpr)astCallFunctionExpr.getFunctionId().accept(this));
+
+		for (int i = 0; i < astCallFunctionExpr.getArgExprListSize(); i++) {
+			asmCallFunctionExpr.addArgExpr((ASMExpression)astCallFunctionExpr.getArgExprAt(i).accept(this));
+		}
 
 		return asmCallFunctionExpr;
 	}
@@ -248,6 +316,13 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMCallFunctionStat asmCallFunctionStat = new ASMCallFunctionStat();
 
+		asmCallFunctionStat.setInstanceName((ASMExpression)astCallFunctionStat.getInstanceName().accept(this));
+		asmCallFunctionStat.setFunctionName((ASMIdentifierExpr)astCallFunctionStat.getFunctionId().accept(this));
+
+		for (int i = 0; i < astCallFunctionStat.getArgExprListSize(); i++) {
+			asmCallFunctionStat.addArgExpr((ASMExpression)astCallFunctionStat.getArgExprAt(i).accept(this));
+		}
+
 		return asmCallFunctionStat;
 	}
 
@@ -255,7 +330,6 @@ public class Codegen implements ASTVisitor<ASM>
 	@Override
 	public ASMIntType visit(ASTIntType intType)
 	{
-
 		return new ASMIntType();
 	}
 
@@ -298,7 +372,8 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMArgument visit(ASTArgument astArgument)
 	{
 		ASMArgument asmArgument = new ASMArgument();
-
+		asmArgument.setType((ASMType)astArgument.getType().accept(this));
+		asmArgument.setId((ASMIdentifier)astArgument.getId().accept(this));
 		return asmArgument;
 	}
 
@@ -306,7 +381,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMIdentifier visit(ASTIdentifier astIdentifier)
 	{
 		ASMIdentifier asmIdentifier = new ASMIdentifier();
-
+		asmIdentifier.setId(astIdentifier.getId().toString());
 		return asmIdentifier;
 	}
 
@@ -314,7 +389,6 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMArrayIndexExpr visit(ASTArrayIndexExpr astArrayIndexExpr)
 	{
 		ASMArrayIndexExpr asmArrayIndexExpr = new ASMArrayIndexExpr();
-
 		return asmArrayIndexExpr;
 	}
 
@@ -322,7 +396,9 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMArrayAssign visit(ASTArrayAssign astArrayAssign)
 	{
 		ASMArrayAssign asmArrayAssign = new ASMArrayAssign();
-
+		asmArrayAssign.setIdentifier((ASMIdentifier)astArrayAssign.getId().accept(this));
+		asmArrayAssign.setExpression1((ASMExpression)astArrayAssign.getExpression1().accept(this));
+		asmArrayAssign.setExpression2((ASMExpression)astArrayAssign.getExpression2().accept(this));
 		return asmArrayAssign;
 	}
 
@@ -335,13 +411,11 @@ public class Codegen implements ASTVisitor<ASM>
 	}
 
 	@Override
-	public ASMVariable visit(ASTVariable variable)
+	public ASMVariable visit(ASTVariable astVariable)
 	{
 		ASMVariable asmVariable = new ASMVariable();
-
-		asmVariable.setId(variable.getId());
-		asmVariable.setType(variable.getType());
-
+		asmVariable.setId((ASMIdentifier)astVariable.getId().accept(this));
+		asmVariable.setType((ASMType)astVariable.getType().accept(this));
 		return asmVariable;
 	}
 
@@ -349,9 +423,9 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMVariableInit visit(ASTVariableInit astVariableInit)
 	{
 		ASMVariableInit asmVariableInit = new ASMVariableInit();
-
-		
-
+		asmVariableInit.setId((ASMIdentifier)astVariableInit.getId().accept(this));
+		asmVariableInit.setType((ASMType)astVariableInit.getType().accept(this));
+		asmVariableInit.setExpr((ASMExpression)astVariableInit.getExpr().accept(this));
 		return asmVariableInit;
 	}
 
@@ -360,7 +434,7 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMFunction asmFunction = new ASMFunction();
 
-		asmFunction.setId(astFunction.getId());
+		asmFunction.setId((ASMIdentifier)astFunction.getId().accept(this));
 
 		for (int i = 0; i < astFunction.getArgumentListSize(); i++) {
 			asmFunction.addArgument((ASMArgument)astFunction.getArgumentDeclAt(i).accept(this));
@@ -381,6 +455,21 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMFunctionReturn visit(ASTFunctionReturn astFunctionReturn)
 	{
 		ASMFunctionReturn asmFunctionReturn = new ASMFunctionReturn();
+		asmFunctionReturn.setId((ASMIdentifier)astFunctionReturn.getId().accept(this));
+
+		for (int i = 0; i < astFunctionReturn.getArgumentListSize(); i++) {
+			asmFunctionReturn.addArgument((ASMArgument)astFunctionReturn.getArgumentDeclAt(i).accept(this));
+		}
+
+		for (int i = 0; i < astFunctionReturn.getVariableListSize(); i++) {
+			asmFunctionReturn.addVariable((ASMVariable)astFunctionReturn.getVariableDeclAt(i).accept(this));
+		}
+
+		for (int i = 0; i < astFunctionReturn.getStatementListSize(); i++) {
+			asmFunctionReturn.addStatement((ASMStatement)astFunctionReturn.getStatementDeclAt(i).accept(this));
+		}
+
+		asmFunctionReturn.setReturnExpr((ASMExpression)astFunctionReturn.getReturnExpr().accept(this));
 
 		return asmFunctionReturn;
 	}
@@ -389,8 +478,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMClass visit(ASTClass astClass)
 	{
 		ASMClass asmClass = new ASMClass();
-
-		asmClass.setId(astClass.getId().accept(this));
+		asmClass.setId((ASMIdentifier)astClass.getId().accept(this));
 
 		for (int i = 0; i < astClass.getPropertyListSize(); i++) {
 			asmClass.addProperty((ASMProperty)astClass.getPropertyDeclAt(i).accept(this));
@@ -436,18 +524,9 @@ public class Codegen implements ASTVisitor<ASM>
 	}
 
 	@Override
-	public ASMModulus visit(ASTModulus astModulus)
-	{
-		ASMModulus asmModulus = new ASMModulus();
-
-		return asmModulus;
-	}
-
-	@Override
 	public ASMForLoop visit(ASTForLoop astForLoop)
 	{
 		ASMForLoop asmForLoop = new ASMForLoop();
-
 		return asmForLoop;
 	}
 
@@ -455,7 +534,9 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMPointerAssign visit(ASTPointerAssign astPointerAssign)
 	{
 		ASMPointerAssign asmPointerAssign = new ASMPointerAssign();
-
+		asmPointerAssign.setPointer((ASMPointer)astPointerAssign.getPointer().accept(this));
+		asmPointerAssign.setVariable((ASMIdentifier)astPointerAssign.getVariable().accept(this));
+		asmPointerAssign.setExpression((ASMExpression)astPointerAssign.getExpression().accept(this));
 		return asmPointerAssign;
 	}
 
@@ -463,7 +544,6 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMThis visit(ASTThis astThis)
 	{
 		ASMThis asmThis = new ASMThis();
-
 		return asmThis;
 	}
 
@@ -471,10 +551,8 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASM visit(ASTProperty astProperty)
 	{
 		ASMProperty asmProperty = new ASMProperty();
-
-		asmProperty.setType(astProperty.getType().accept(this));
-		asmProperty.setId(astProperty.getId());
-
+		asmProperty.setType((ASMType)astProperty.getType().accept(this));
+		asmProperty.setId((ASMIdentifier)astProperty.getId().accept(this));
 		return asmProperty;
 	}
 }

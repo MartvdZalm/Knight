@@ -30,10 +30,16 @@ package knight.compiler.asm.statements;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMForLoop
+public class ASMForLoop extends ASMStatement
 {
 	public ASMForLoop()
 	{
 
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

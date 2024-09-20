@@ -36,7 +36,7 @@ import knight.compiler.asm.types.ASMType;
 public class ASMProperty extends ASM
 {
 	private ASMType type;
-	private String id;
+	private ASMIdentifier id;
 
 	public ASMProperty()
 	{
@@ -48,8 +48,14 @@ public class ASMProperty extends ASM
 		this.type = type;
 	}
 
-	public void setId(String id)
+	public void setId(ASMIdentifier id)
 	{
 		this.id = id;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

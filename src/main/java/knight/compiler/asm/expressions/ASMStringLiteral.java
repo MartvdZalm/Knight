@@ -30,10 +30,16 @@ package knight.compiler.asm.expressions;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMStringLiteral
+public class ASMStringLiteral extends ASMExpression
 {
 	public ASMStringLiteral()
 	{
 
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

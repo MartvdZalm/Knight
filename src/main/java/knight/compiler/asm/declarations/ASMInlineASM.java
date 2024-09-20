@@ -24,6 +24,9 @@
 
 package knight.compiler.asm.declarations;
 
+import java.util.List;
+import java.util.ArrayList;
+
 import knight.compiler.asm.ASM;
 
 /*
@@ -34,8 +37,21 @@ import knight.compiler.asm.ASM;
  */
 public class ASMInlineASM extends ASM
 {
+	private List<String> lines;
+
 	public ASMInlineASM()
 	{
-		
+		this.lines = new ArrayList<>();
+	}
+
+	public void addLine(String line)
+	{
+		this.lines.add(line);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

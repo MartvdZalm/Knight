@@ -30,10 +30,23 @@ package knight.compiler.asm.expressions;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMNewInstance
+public class ASMNewInstance extends ASMExpression
 {
+	private ASMIdentifierExpr className;
+
 	public ASMNewInstance()
 	{
 
+	}
+
+	public void setClassName(ASMIdentifierExpr className)
+	{
+		this.className = className;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

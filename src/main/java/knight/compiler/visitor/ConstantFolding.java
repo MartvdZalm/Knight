@@ -63,8 +63,8 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTBlock block)
 	{
-		for (int i = 0; i < block.getStatListSize(); i++) {
-			ASTStatement st = block.getStatAt(i);
+		for (int i = 0; i < block.getStatementListSize(); i++) {
+			ASTStatement st = block.getStatementAt(i);
 			st.accept(this);
 		}
 		return null;
@@ -532,8 +532,8 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTArrayAssign arrayAssign)
 	{
-		arrayAssign.setE1(arrayAssign.getE1().accept(this));
-		arrayAssign.setE2(arrayAssign.getE2().accept(this));
+		arrayAssign.setE1(arrayAssign.getExpression1().accept(this));
+		arrayAssign.setE2(arrayAssign.getExpression2().accept(this));
 		return null;
 	}
 

@@ -24,16 +24,37 @@
 
 package knight.compiler.asm.expressions.operations;
 
+import knight.compiler.asm.expressions.ASMExpression;
+
 /*
  * File: ASMLessThanOrEqual.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMLessThanOrEqual
+public class ASMLessThanOrEqual extends ASMExpression
 {
+	private ASMExpression lhs;
+	private ASMExpression rhs;
+
 	public ASMLessThanOrEqual()
 	{
 
+	}
+
+	public void setLhs(ASMExpression lhs)
+	{
+		this.lhs = lhs;
+	}
+
+	public void setRhs(ASMExpression rhs)
+	{
+		this.rhs = rhs;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

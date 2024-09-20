@@ -30,10 +30,29 @@ package knight.compiler.asm.expressions;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMArrayIndexExpr
+public class ASMArrayIndexExpr extends ASMExpression
 {
+	private ASMExpression array;
+	private ASMExpression index;
+
 	public ASMArrayIndexExpr()
 	{
 
+	}
+
+	public void setArray(ASMExpression array)
+	{
+		this.array = array;
+	}
+
+	public void setIndex(ASMExpression index)
+	{
+		this.index = index;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

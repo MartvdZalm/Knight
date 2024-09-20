@@ -101,8 +101,8 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTBlock block)
 	{
-		for (int i = 0; i < block.getStatListSize(); i++) {
-			block.getStatAt(i).accept(this);
+		for (int i = 0; i < block.getStatementListSize(); i++) {
+			block.getStatementAt(i).accept(this);
 		}
 
 		return null;
@@ -313,7 +313,7 @@ public class CodeGenerator implements ASTVisitor<String>
 			text.append("movq " + callFunctionExpr.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
 		}
 
-		text.append("call " + callFunctionExpr.getMethodId() + "\n");
+		text.append("call " + callFunctionExpr.getFunctionId() + "\n");
 
 		if (callFunctionExpr.getArgExprListSize() > 6) {
 			int stackCleanup = (callFunctionExpr.getArgExprListSize() - 6) * 8;
@@ -343,7 +343,7 @@ public class CodeGenerator implements ASTVisitor<String>
 			}
 		}
 
-		text.append("call " + callFunctionStat.getMethodId() + "\n");
+		text.append("call " + callFunctionStat.getFunctionId() + "\n");
 
 		if (callFunctionStat.getArgExprListSize() > 6) {
 			int stackCleanup = (callFunctionStat.getArgExprListSize() - 6) * 8;

@@ -89,8 +89,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTBlock n)
 	{
-		for (int i = 0; i < n.getStatListSize(); i++) {
-			ASTStatement st = n.getStatAt(i);
+		for (int i = 0; i < n.getStatementListSize(); i++) {
+			ASTStatement st = n.getStatementAt(i);
 			st.accept(this);
 		}
 		return null;
@@ -447,7 +447,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTCallFunctionExpr cm)
 	{
 		if (cm.getInstanceName() == null) {
-			ASTIdentifierExpr callFunc = cm.getMethodId();
+			ASTIdentifierExpr callFunc = cm.getFunctionId();
 
 			SymbolFunction func = null;
 			if (symbolClass == null) {
@@ -588,9 +588,9 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			if (callFunc.getInstanceName() == null) {
 				SymbolFunction func = null;
 				if (symbolClass != null) {
-					func = symbolProgram.getFunction(callFunc.getMethodId().toString(), symbolClass.getId());
+					func = symbolProgram.getFunction(callFunc.getFunctionId().toString(), symbolClass.getId());
 				} else {
-					func = symbolProgram.getFunction(callFunc.getMethodId().toString());
+					func = symbolProgram.getFunction(callFunc.getFunctionId().toString());
 				}
 				
 				if (func != null) {
@@ -759,28 +759,28 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTArrayAssign arrayAssign)
 	{
 		// Check identifier type
-		ASTType tid = arrayAssign.getIdentifier().accept(this);
+		ASTType tid = arrayAssign.getId().accept(this);
 		if (tid == null || !(tid instanceof ASTIntArrayType)) {
-			Token sym = arrayAssign.getIdentifier().getToken();
+			Token sym = arrayAssign.getId().getToken();
 			addError(sym.getRow(), sym.getCol(), "Identifier must be of Type int[]");
 		}
 
 		// Check expression type
-		ASTType texp1 = arrayAssign.getE1().accept(this);
+		ASTType texp1 = arrayAssign.getExpression1().accept(this);
 		if (texp1 == null || !(texp1 instanceof ASTIntType)) {
-			Token sym = arrayAssign.getE1().getToken();
+			Token sym = arrayAssign.getExpression1().getToken();
 			addError(sym.getRow(), sym.getCol(), "Expression must be of Type int");
 		} else {
-			arrayAssign.getE1().setType(texp1);
+			arrayAssign.getExpression1().setType(texp1);
 		}
 
 		// Check assigned expression type
-		ASTType texp2 = arrayAssign.getE2().accept(this);
+		ASTType texp2 = arrayAssign.getExpression2().accept(this);
 		if (texp2 == null || !(texp2 instanceof ASTIntType)) {
-			Token sym = arrayAssign.getE2().getToken();
+			Token sym = arrayAssign.getExpression2().getToken();
 			addError(sym.getRow(), sym.getCol(), "Expression must be of Type int");
 		} else {
-			arrayAssign.getE2().setType(texp2);
+			arrayAssign.getExpression2().setType(texp2);
 		}
 
 		return null;

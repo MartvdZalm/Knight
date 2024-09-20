@@ -24,16 +24,15 @@
 
 package knight.compiler.asm.statements;
 
+import knight.compiler.asm.ASM;
+
 /*
  * File: ASMStatement.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMStatement
+public abstract class ASMStatement extends ASM
 {
-	public ASMStatement()
-	{
 
-	}
 }

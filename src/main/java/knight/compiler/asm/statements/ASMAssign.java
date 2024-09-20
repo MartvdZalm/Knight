@@ -24,16 +24,38 @@
 
 package knight.compiler.asm.statements;
 
+import knight.compiler.asm.declarations.ASMIdentifier;
+import knight.compiler.asm.expressions.ASMExpression;
+
 /*
  * File: ASMAssign.java
  * @author: Mart van der Zalm
  * Date: 2024-08-11
  * Description:
  */
-public class ASMAssign
+public class ASMAssign extends ASMStatement
 {
+	private ASMIdentifier id;
+	private ASMExpression expr;
+
 	public ASMAssign()
 	{
 
+	}
+
+	public void setId(ASMIdentifier id)
+	{
+		this.id = id;
+	}
+
+	public void setExpr(ASMExpression expr)
+	{
+		this.expr = expr;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

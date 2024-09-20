@@ -38,4 +38,10 @@ public class ASMThis extends ASM
 	{
 		
 	}
+
+	@Override
+	public String toString()
+	{
+		return "";
+	}
 }

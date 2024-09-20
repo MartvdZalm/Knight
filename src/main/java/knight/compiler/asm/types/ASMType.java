@@ -33,7 +33,7 @@ import knight.compiler.asm.ASM;
  * Date: 2024-08-11
  * Description:
  */
-public class ASMType extends ASM
+public abstract class ASMType extends ASM
 {
 
 }

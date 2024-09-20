@@ -22,17 +22,15 @@
  * SOFTWARE.
  */
 
-package knight.compiler.asm.expressions;
-
-import knight.compiler.asm.ASM;
+package knight.compiler.asm;
 
 /*
- * File: ASMExpression.java
+ * File: ASMPointer.java
  * @author: Mart van der Zalm
- * Date: 2024-08-29
+ * Date: 2024-09-09
  * Description:
  */
-public abstract class ASMExpression extends ASM
+public interface ASMPointer
 {
 
 }

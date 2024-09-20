@@ -40,11 +40,11 @@ public class ASTAssign extends ASTStatement
 	private ASTIdentifier id;
 	private ASTExpression expr;
 
-	public ASTAssign(Token token, ASTIdentifier id, ASTExpression src)
+	public ASTAssign(Token token, ASTIdentifier id, ASTExpression expr)
 	{
 		super(token);
 		this.id = id;
-		this.expr = src;
+		this.expr = expr;
 	}
 
 	public ASTIdentifier getId()

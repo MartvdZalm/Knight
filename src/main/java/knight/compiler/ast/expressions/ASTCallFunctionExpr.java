@@ -59,7 +59,7 @@ public class ASTCallFunctionExpr extends ASTExpression
 		this.instanceName = instanceName;
 	}
 
-	public ASTIdentifierExpr getMethodId()
+	public ASTIdentifierExpr getFunctionId()
 	{
 		return methodId;
 	}

@@ -24,16 +24,44 @@
 
 package knight.compiler.asm.expressions;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /*
  * File: ASMCallFunctionExpr.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMCallFunctionExpr
+public class ASMCallFunctionExpr extends ASMExpression
 {
+	private ASMExpression instanceName;
+	private ASMIdentifierExpr functionId;
+	private List<ASMExpression> argExprList;
+
 	public ASMCallFunctionExpr()
 	{
+		this.argExprList = new ArrayList<>();
+	}
 
+	public void setInstanceName(ASMExpression instanceName)
+	{
+		this.instanceName = instanceName;
+	}
+
+	public void setFunctionId(ASMIdentifierExpr functionId)
+	{
+		this.functionId = functionId;
+	}
+
+	public void addArgExpr(ASMExpression argExpr)
+	{
+		this.argExprList.add(argExpr);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

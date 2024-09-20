@@ -77,8 +77,8 @@ public class NameAnalyserTreeVisitor implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTBlock block)
 	{
-		for (int i = 0; i < block.getStatListSize(); i++) {
-			ASTStatement st = block.getStatAt(i);
+		for (int i = 0; i < block.getStatementListSize(); i++) {
+			ASTStatement st = block.getStatementAt(i);
 			st.accept(this);
 		}
 		return null;
@@ -466,9 +466,9 @@ public class NameAnalyserTreeVisitor implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTArrayAssign aa)
 	{
-		aa.getIdentifier().accept(this);
-		aa.getE1().accept(this);
-		aa.getE2().accept(this);
+		aa.getId().accept(this);
+		aa.getExpression1().accept(this);
+		aa.getExpression2().accept(this);
 		return null;
 	}
 

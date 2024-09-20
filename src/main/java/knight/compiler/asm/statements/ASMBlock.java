@@ -24,16 +24,32 @@
 
 package knight.compiler.asm.statements;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /*
  * File: ASMBlock.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMBlock
+public class ASMBlock extends ASMStatement
 {
+	private List<ASMStatement> body;
+
 	public ASMBlock()
 	{
+		this.body = new ArrayList<>();
+	}
 
+	public void addStatement(ASMStatement statement)
+	{
+		this.body.add(statement);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

@@ -24,16 +24,31 @@
 
 package knight.compiler.asm.statements;
 
+import knight.compiler.asm.expressions.ASMExpression;
+
 /*
  * File: ASMReturnStatement.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMReturnStatement
+public class ASMReturnStatement extends ASMStatement
 {
+	private ASMExpression expression;
+
 	public ASMReturnStatement()
 	{
 
+	}
+
+	public void setReturnExpr(ASMExpression expression)
+	{
+		this.expression = expression;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

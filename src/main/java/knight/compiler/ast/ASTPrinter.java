@@ -79,7 +79,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		StringBuilder strBuilder = new StringBuilder();
 
-		for (ASTStatement statement : block.getStatList()) {
+		for (ASTStatement statement : block.getStatementList()) {
 			System.out.println(statement);
 			strBuilder.append(statement.accept(this) + "\n");
 		}
@@ -207,7 +207,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionExpr callFunctionExpr)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(DOT " + callFunctionExpr.getInstanceName().accept(this) + " (FUN-CALL " + callFunctionExpr.getMethodId().accept(this));
+		sb.append("(DOT " + callFunctionExpr.getInstanceName().accept(this) + " (FUN-CALL " + callFunctionExpr.getFunctionId().accept(this));
 		for (ASTExpression expr : callFunctionExpr.getArgExprList()) {
 			sb.append(expr.accept(this));
 		}
@@ -220,8 +220,8 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
 		StringBuilder sb = new StringBuilder();
-		// sb.append("(DOT " + callFunctionStat.getInstanceName().accept(this) + " (FUN-CALL " + callFunctionStat.getMethodId().accept(this));
-		sb.append("(DOT (FUN-CALL " + callFunctionStat.getMethodId().accept(this));
+		// sb.append("(DOT " + callFunctionStat.getInstanceName().accept(this) + " (FUN-CALL " + callFunctionStat.getFunctionId().accept(this));
+		sb.append("(DOT (FUN-CALL " + callFunctionStat.getFunctionId().accept(this));
 		for (ASTExpression expr : callFunctionStat.getArgExprList()) {
 			sb.append(expr.accept(this));
 		}
@@ -381,7 +381,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTArrayAssign arrayAssign)
 	{
-		return printInc() + "(EQSIGN " + "(ARRAY-ASSIGN " + arrayAssign.getIdentifier().accept(this) + arrayAssign.getE1().accept(this) + ") " + arrayAssign.getE2().accept(this) + ")";
+		return printInc() + "(EQSIGN " + "(ARRAY-ASSIGN " + arrayAssign.getId().accept(this) + arrayAssign.getExpression1().accept(this) + ") " + arrayAssign.getExpression2().accept(this) + ")";
 	}
 
 	@Override

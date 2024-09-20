@@ -45,17 +45,17 @@ public class ASTBlock extends ASTStatement
 		this.body = body;
 	}
 
-	public List<ASTStatement> getStatList()
+	public List<ASTStatement> getStatementList()
 	{
 		return body;
 	}
 
-	public int getStatListSize()
+	public int getStatementListSize()
 	{
 		return body.size();
 	}
 
-	public ASTStatement getStatAt(int index)
+	public ASTStatement getStatementAt(int index)
 	{
 		if (index < body.size()) {
 			return body.get(index);
@@ -63,7 +63,7 @@ public class ASTBlock extends ASTStatement
 		return null;
 	}
 
-	public void setStatAt(int index, ASTStatement stat)
+	public void setStatementAt(int index, ASTStatement stat)
 	{
 		if (index < body.size()) {
 			body.set(index, stat);

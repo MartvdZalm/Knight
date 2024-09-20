@@ -34,8 +34,21 @@ import knight.compiler.asm.ASM;
  */
 public class ASMIdentifier extends ASM
 {
+	private String id;
+
 	public ASMIdentifier()
 	{
 		
+	}
+
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
+	@Override
+	public String toString()
+	{
+		return id;
 	}
 }

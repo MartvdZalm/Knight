@@ -30,10 +30,23 @@ package knight.compiler.asm.expressions;
  * Date: 2024-08-29
  * Description:
  */
-public class ASMNewArray
+public class ASMNewArray extends ASMExpression
 {
+	private ASMExpression arrayLength;
+
 	public ASMNewArray()
 	{
 
+	}
+
+	public void setArrayLength(ASMExpression arrayLength)
+	{
+		this.arrayLength = arrayLength;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

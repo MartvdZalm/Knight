@@ -24,16 +24,44 @@
 
 package knight.compiler.asm.statements.conditionals;
 
+import knight.compiler.asm.expressions.ASMExpression;
+import knight.compiler.asm.statements.ASMStatement;
+
 /*
  * File: ASMIfThenElse.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMIfThenElse
+public class ASMIfThenElse extends ASMStatement
 {
+	private ASMExpression expression;
+	private ASMStatement then;
+	private ASMStatement elze;
+
 	public ASMIfThenElse()
 	{
 
+	}
+
+	public void setExpression(ASMExpression expression)
+	{
+		this.expression = expression;
+	}
+
+	public void setThen(ASMStatement then)
+	{
+		this.then = then;
+	}
+
+	public void setElze(ASMStatement elze)
+	{
+		this.elze = elze;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

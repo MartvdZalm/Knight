@@ -30,10 +30,15 @@ package knight.compiler.asm;
  * Date: 2024-08-04
  * Description:
  */
-public class ASM
+public abstract class ASM
 {
+	protected static String NEWLINE = "\n";
+
 	public ASM()
 	{
 
 	}
+
+	@Override
+	public abstract String toString();
 }

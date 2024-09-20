@@ -34,5 +34,9 @@ import knight.compiler.asm.ASM;
  */
 public class ASMIdentifierType extends ASMType
 {
-
+	@Override
+	public String toString()
+	{
+		return "";
+	}
 }

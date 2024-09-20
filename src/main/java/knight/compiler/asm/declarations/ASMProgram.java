@@ -24,7 +24,8 @@
 
 package knight.compiler.asm.declarations;
 
-import java.util.List;;
+import java.util.List;
+import java.util.ArrayList;
 import knight.compiler.asm.ASM;
 
 /*
@@ -40,7 +41,8 @@ public class ASMProgram extends ASM
 
 	public ASMProgram()
 	{
-		
+		this.variableList = new ArrayList<>();
+		this.functionList = new ArrayList<>();
 	}
 
 	public void addVariable(ASMVariable asmVariable)
@@ -51,5 +53,31 @@ public class ASMProgram extends ASM
 	public void addFunction(ASMFunction asmFunction)
 	{
 		this.functionList.add(asmFunction);
+	}
+
+	public List<ASMVariable> getVariables()
+	{
+		return this.variableList;
+	}
+
+	public List<ASMFunction> getFunctions()
+	{
+		return this.functionList;
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		for (ASMVariable variable : this.variableList) {
+			sb.append(variable);
+		}
+
+		for (ASMFunction function : this.functionList) {
+			sb.append(function);
+		}
+
+		return sb.toString();
 	}
 }

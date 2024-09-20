@@ -24,16 +24,45 @@
 
 package knight.compiler.asm.statements;
 
+import knight.compiler.asm.ASMPointer;
+import knight.compiler.asm.declarations.ASMIdentifier;
+import knight.compiler.asm.expressions.ASMExpression;
+
 /*
  * File: ASMPointerAssign.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMPointerAssign
+public class ASMPointerAssign extends ASMStatement
 {
+	private ASMPointer pointer;
+	private ASMIdentifier variable;
+	private ASMExpression expression;
+
 	public ASMPointerAssign()
 	{
 
+	}
+
+	public void setPointer(ASMPointer pointer)
+	{
+		this.pointer = pointer;
+	}
+
+	public void setVariable(ASMIdentifier variable)
+	{
+		this.variable = variable;
+	}
+
+	public void setExpression(ASMExpression expression)
+	{
+		this.expression = expression;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

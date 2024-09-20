@@ -24,16 +24,37 @@
 
 package knight.compiler.asm.expressions.operations;
 
+import knight.compiler.asm.expressions.ASMExpression;
+
 /*
  * File: ASMTimes.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMTimes
+public class ASMTimes extends ASMExpression
 {
+	private ASMExpression lhs;
+	private ASMExpression rhs;
+
 	public ASMTimes()
 	{
 
+	}
+
+	public void setLhs(ASMExpression lhs)
+	{
+		this.lhs = lhs;
+	}
+
+	public void setRhs(ASMExpression rhs)
+	{
+		this.rhs = rhs;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }

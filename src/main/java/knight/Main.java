@@ -30,12 +30,14 @@ import knight.preprocessor.PreProcessor;
 import knight.compiler.ast.declarations.ASTProgram;
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPrinter;
+import knight.compiler.asm.ASM;
 import knight.compiler.parser.Parser;
 import knight.compiler.semantics.NameError;
 import knight.compiler.semantics.SemanticErrors;
 import knight.compiler.symbol.SymbolProgram;
 import knight.compiler.visitor.BuildSymbolProgramVisitor;
 import knight.compiler.visitor.CodeGenerator;
+import knight.compiler.visitor.Codegen;
 import knight.compiler.visitor.NameAnalyserTreeVisitor;
 import knight.compiler.visitor.TypeAnalyser;
 import knight.compiler.visitor.ConstantFolding;
@@ -61,6 +63,7 @@ public class Main
 
 	public void codeGen(String[] args)
 	{
+		String platform = System.getProperty("os.name").toLowerCase();
 		String filename = args[0];
 
 		try {
@@ -96,8 +99,12 @@ public class Main
 					String path = getFileDirPath(filename);
 
 					ConstantFolding.optimize(tree);
-					CodeGenerator cg = new CodeGenerator(path, filename);
-					cg.visit((ASTProgram) tree);
+					Codegen cg = new Codegen(path, filename);
+					// CodeGenerator cg = new CodeGenerator(path, filename);
+
+					ASM asmProgram = cg.visit((ASTProgram) tree);
+					
+					System.out.println(asmProgram);
 
 					if (!containsFlag(args, "-asm")) {
 						compileAssemblyFile(args, path, filename);

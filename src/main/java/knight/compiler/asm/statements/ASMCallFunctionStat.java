@@ -24,16 +24,47 @@
 
 package knight.compiler.asm.statements;
 
+import java.util.List;
+import java.util.ArrayList;
+
+import knight.compiler.asm.expressions.ASMExpression;
+import knight.compiler.asm.expressions.ASMIdentifierExpr;
+
 /*
  * File: ASMCallFunctionStat.java
  * @author: Mart van der Zalm
  * Date: 2024-08-29
  * Description:
  */
-public class ASMCallFunctionStat
+public class ASMCallFunctionStat extends ASMStatement
 {
+	private ASMExpression instanceName;
+	private ASMIdentifierExpr functionName;
+	private List<ASMExpression> argExprList;
+
 	public ASMCallFunctionStat()
 	{
+		this.argExprList = new ArrayList<>();
+	}
 
+	public void setInstanceName(ASMExpression instanceName)
+	{
+		this.instanceName = instanceName;
+	}
+
+	public void setFunctionName(ASMIdentifierExpr functionName)
+	{
+		this.functionName = functionName;
+	}
+
+	public void addArgExpr(ASMExpression argExpr)
+	{
+		this.argExprList.add(argExpr);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "";
 	}
 }
