@@ -44,9 +44,14 @@ public class ASMIntLiteral extends ASMExpression
 		this.value = value;
 	}
 
+	public int getValue()
+	{
+		return this.value;
+	}
+
 	@Override
 	public String toString()
 	{
-		return "";
+		return "$" + this.value;
 	}
 }

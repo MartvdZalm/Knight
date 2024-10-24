@@ -1,0 +1,7 @@
+fn main(): int
+{
+	int result = 1 + 2;
+
+
+	ret 0;
+}

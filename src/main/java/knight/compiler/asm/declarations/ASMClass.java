@@ -52,6 +52,11 @@ public class ASMClass extends ASM
 		this.id = id;
 	}
 
+	public ASMIdentifier getId()
+	{
+		return this.id;
+	}
+
 	public void addFunction(ASMFunction asmFunction)
 	{
 		this.functionList.add(asmFunction);

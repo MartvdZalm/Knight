@@ -25,6 +25,11 @@
 package knight.compiler.asm.declarations;
 
 import knight.compiler.asm.expressions.ASMExpression;
+import knight.compiler.semantics.Binding;
+import knight.compiler.asm.expressions.ASMCallFunctionExpr;
+import knight.compiler.asm.expressions.ASMIdentifierExpr;
+import knight.compiler.asm.expressions.operations.ASMPlus;
+import knight.compiler.asm.expressions.operations.ASMTimes;
 
 /*
  * File: ASMVariableInit.java
@@ -49,6 +54,32 @@ public class ASMVariableInit extends ASMVariable
 	@Override
 	public String toString()
 	{
-		return "";
+		StringBuilder sb = new StringBuilder();
+
+		if (statistics.currentFunction !=  null) {
+			Binding b = this.id.getB();
+			statistics.setLocalVarIndex(b);
+
+			int lvIndex = statistics.getLocalVarIndex(b);
+
+			// Need to be changed
+			if (this.expression instanceof ASMCallFunctionExpr) {
+				sb.append(this.expression);
+				sb.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
+			} else if (this.expression instanceof ASMIdentifierExpr) {
+				sb.append("movq " + this.expression + ", %rax\n");
+				sb.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
+			} else if (
+				this.expression instanceof ASMPlus ||
+				this.expression instanceof ASMTimes
+			) {
+				sb.append(this.expression);
+				sb.append("movq %rax, -" + (lvIndex * 8) + "(%rbp)\n");
+			} else {
+				sb.append("movq " + this.expression + ", -" + (lvIndex * 8) + "(%rbp)\n");
+			}
+		}
+
+		return sb.toString();
 	}
 }

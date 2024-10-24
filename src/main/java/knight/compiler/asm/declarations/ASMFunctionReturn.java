@@ -25,6 +25,8 @@
 package knight.compiler.asm.declarations;
 
 import knight.compiler.asm.expressions.ASMExpression;
+import knight.compiler.asm.ASM;
+import knight.compiler.asm.statements.ASMStatement;
 
 /*
  * File: ASMFunctionReturn.java
@@ -49,6 +51,31 @@ public class ASMFunctionReturn extends ASMFunction
 	@Override
 	public String toString()
 	{
-		return "";
+		StringBuilder sb = new StringBuilder();
+
+		statistics.setFunction(this);
+
+		sb.append(".globl " + this.id + ASM.NEWLINE);
+		sb.append(".type " + this.id + ", @function" + ASM.NEWLINE);
+		sb.append(this.id + ":" + ASM.NEWLINE);
+		sb.append("pushq %rbp" + ASM.NEWLINE);
+		sb.append("movq %rsp, %rbp" + ASM.NEWLINE);
+
+		// for (ASMArgument asmArgument : this.argumentList) {
+		// 	sb.append(asmArgument).append(ASM.NEWLINE);
+		// }
+
+		for (ASMVariable asmVariable : this.variableList) {
+			sb.append(asmVariable).append(ASM.NEWLINE);
+		}
+
+		// for (ASMStatement asmStatement : this.statementList) {
+		// 	sb.append(asmStatement).append(ASM.NEWLINE);
+		// }
+
+		sb.append("popq %rbp" + ASM.NEWLINE);
+		sb.append("ret" + ASM.NEWLINE);
+
+		return sb.toString();
 	}
 }

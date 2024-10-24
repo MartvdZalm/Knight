@@ -31,6 +31,7 @@ import knight.compiler.ast.declarations.ASTProgram;
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPrinter;
 import knight.compiler.asm.ASM;
+import knight.compiler.asm.ASMPlatform;
 import knight.compiler.parser.Parser;
 import knight.compiler.semantics.NameError;
 import knight.compiler.semantics.SemanticErrors;
@@ -63,7 +64,7 @@ public class Main
 
 	public void codeGen(String[] args)
 	{
-		String platform = System.getProperty("os.name").toLowerCase();
+		String platformString = System.getProperty("os.name").toLowerCase();
 		String filename = args[0];
 
 		try {
@@ -97,15 +98,18 @@ public class Main
 
 				if (SemanticErrors.errorList.size() == 0) {
 					String path = getFileDirPath(filename);
-
 					ConstantFolding.optimize(tree);
 					Codegen cg = new Codegen(path, filename);
-					// CodeGenerator cg = new CodeGenerator(path, filename);
+
+					File f = new File(filename);
+					String name = f.getName();
+					String updated_filename = name.substring(0, name.lastIndexOf("."));
 
 					ASM asmProgram = cg.visit((ASTProgram) tree);
+					ASMPlatform platform = ASMPlatform.findOS(platformString);
+					asmProgram.setPlatform(platform);
+					write(asmProgram.toString(), path, updated_filename);
 					
-					System.out.println(asmProgram);
-
 					if (!containsFlag(args, "-asm")) {
 						compileAssemblyFile(args, path, filename);
 	                }
@@ -123,6 +127,22 @@ public class Main
 			}
 		}
 	}
+
+	private File write(String code, String path, String filename)
+	{
+		try {
+			File f = new File(path + filename + ".s");
+			PrintWriter writer = new PrintWriter(f, "UTF-8");
+			writer.println(code);
+			writer.close();
+			return f;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+
+		return null;
+	}
+
 
 	private boolean containsFlag(String[] args, String flag)
 	{

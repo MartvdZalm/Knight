@@ -30,7 +30,31 @@ package knight.compiler.asm;
  * Date: 2024-09-13
  * Description:
  */
-public class ASMPlatform
+public enum ASMPlatform
 {
+	LINUX("linux"),
+	WINDOWS("windows"),
+	MACOS("macos");
 
+	private String value;
+
+	ASMPlatform(String value)
+	{
+		this.value = value;
+	}
+
+	public String getOS()
+	{
+		return this.value;
+	}
+
+	public static ASMPlatform findOS(String os)
+	{
+		for (ASMPlatform platform : ASMPlatform.values()) {
+			if (platform.value.equalsIgnoreCase(os)) {
+				return platform;
+			}
+		}
+		throw new IllegalArgumentException("Unknown OS: " + os);
+	}	
 }

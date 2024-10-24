@@ -60,6 +60,7 @@ public class Codegen implements ASTVisitor<ASM>
 {
 	private final String PATH;
 	private final String FILENAME;
+	private ASMStatistics statistics;
 
 	public Codegen(String progPath, String filename)
 	{
@@ -68,6 +69,8 @@ public class Codegen implements ASTVisitor<ASM>
 
 		FILENAME = name.substring(0, name.lastIndexOf("."));
 		PATH = progPath;
+
+		this.statistics = new ASMStatistics();
 	}
 
 	// NEED TO BE REMOVED 
@@ -326,7 +329,6 @@ public class Codegen implements ASTVisitor<ASM>
 		return asmCallFunctionStat;
 	}
 
-
 	@Override
 	public ASMIntType visit(ASTIntType intType)
 	{
@@ -382,6 +384,7 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMIdentifier asmIdentifier = new ASMIdentifier();
 		asmIdentifier.setId(astIdentifier.getId().toString());
+		asmIdentifier.setB(astIdentifier.getB());
 		return asmIdentifier;
 	}
 
@@ -414,6 +417,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMVariable visit(ASTVariable astVariable)
 	{
 		ASMVariable asmVariable = new ASMVariable();
+		asmVariable.setStatistics(this.statistics);
 		asmVariable.setId((ASMIdentifier)astVariable.getId().accept(this));
 		asmVariable.setType((ASMType)astVariable.getType().accept(this));
 		return asmVariable;
@@ -423,6 +427,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMVariableInit visit(ASTVariableInit astVariableInit)
 	{
 		ASMVariableInit asmVariableInit = new ASMVariableInit();
+		asmVariableInit.setStatistics(this.statistics);
 		asmVariableInit.setId((ASMIdentifier)astVariableInit.getId().accept(this));
 		asmVariableInit.setType((ASMType)astVariableInit.getType().accept(this));
 		asmVariableInit.setExpr((ASMExpression)astVariableInit.getExpr().accept(this));
@@ -433,7 +438,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMFunction visit(ASTFunction astFunction)
 	{
 		ASMFunction asmFunction = new ASMFunction();
-
+		asmFunction.setStatistics(this.statistics);
 		asmFunction.setId((ASMIdentifier)astFunction.getId().accept(this));
 
 		for (int i = 0; i < astFunction.getArgumentListSize(); i++) {
@@ -455,6 +460,7 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMFunctionReturn visit(ASTFunctionReturn astFunctionReturn)
 	{
 		ASMFunctionReturn asmFunctionReturn = new ASMFunctionReturn();
+		asmFunctionReturn.setStatistics(this.statistics);
 		asmFunctionReturn.setId((ASMIdentifier)astFunctionReturn.getId().accept(this));
 
 		for (int i = 0; i < astFunctionReturn.getArgumentListSize(); i++) {
@@ -503,6 +509,10 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASM visit(ASTProgram astProgram)
 	{
 		ASMProgram asmProgram = new ASMProgram();
+
+		asmProgram.setFileName(FILENAME);
+		asmProgram.setStatistics(this.statistics);
+
 
 		for (int i = 0; i < astProgram.getVariableListSize(); i++) {
 			asmProgram.addVariable((ASMVariable)astProgram.getVariableDeclAt(i).accept(this));

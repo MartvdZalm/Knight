@@ -6,6 +6,11 @@ fn test(): int
     ret 1;
 }
 
+fn testVoid(): void
+{
+    
+}
+
 class Point
 {
     int x;   

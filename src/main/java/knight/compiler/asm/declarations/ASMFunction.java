@@ -38,12 +38,12 @@ import knight.compiler.asm.declarations.ASMArgument;
  * Date: 2024-08-04
  * Description:
  */
-public class ASMFunction extends ASM
+public class ASMFunction extends ASMProgram
 {
-	private ASMIdentifier id;
-	private List<ASMArgument> argumentList;
-	private List<ASMVariable> variableList;
-	private List<ASMStatement> statementList;
+	protected ASMIdentifier id;
+	protected List<ASMArgument> argumentList;
+	protected List<ASMVariable> variableList;
+	protected List<ASMStatement> statementList;
 
 	public ASMFunction()
 	{
@@ -55,6 +55,11 @@ public class ASMFunction extends ASM
 	public void setId(ASMIdentifier id)
 	{
 		this.id = id;
+	}
+
+	public ASMIdentifier getId()
+	{
+		return this.id;
 	}
 
 	public void addArgument(ASMArgument asmArgument)
@@ -79,6 +84,25 @@ public class ASMFunction extends ASM
 
 		sb.append(".globl " + this.id + ASM.NEWLINE);
 		sb.append(".type " + this.id +  ", @function" + ASM.NEWLINE);
+		sb.append(this.id + ":" + ASM.NEWLINE);
+		sb.append("pushq %rbp" + ASM.NEWLINE);
+		sb.append("movq %rsp, %rbp" + ASM.NEWLINE);
+
+		for (ASMArgument asmArgument : this.argumentList) {
+			sb.append(asmArgument).append(ASM.NEWLINE);
+		}
+
+		for (ASMVariable asmVariable : this.variableList) {
+			sb.append(asmVariable).append(ASM.NEWLINE);
+		}
+
+		for (ASMStatement asmStatement : this.statementList) {
+			sb.append(asmStatement).append(ASM.NEWLINE);
+		}
+
+		sb.append("movq %rbp, %rsp" + ASM.NEWLINE);
+		sb.append("pop %rbp" + ASM.NEWLINE);
+		sb.append("ret" + ASM.NEWLINE);
 
 		return sb.toString();
 	}

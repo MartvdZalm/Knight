@@ -38,6 +38,7 @@ public class ASMProgram extends ASM
 {
 	private List<ASMVariable> variableList;
 	private List<ASMFunction> functionList;
+	private String fileName;
 
 	public ASMProgram()
 	{
@@ -55,6 +56,11 @@ public class ASMProgram extends ASM
 		this.functionList.add(asmFunction);
 	}
 
+	public void setFileName(String fileName)
+	{
+		this.fileName = fileName;
+	}
+
 	public List<ASMVariable> getVariables()
 	{
 		return this.variableList;
@@ -70,12 +76,14 @@ public class ASMProgram extends ASM
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (ASMVariable variable : this.variableList) {
-			sb.append(variable);
-		}
+		sb.append(".file \"" + this.fileName + ".knight\"" + ASM.NEWLINE);
+
+		// for (ASMVariable variable : this.variableList) {
+		// 	sb.append(variable);
+		// }
 
 		for (ASMFunction function : this.functionList) {
-			sb.append(function);
+			sb.append(function).append(ASM.NEWLINE);
 		}
 
 		return sb.toString();

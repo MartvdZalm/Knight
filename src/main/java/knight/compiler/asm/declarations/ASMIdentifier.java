@@ -25,6 +25,7 @@
 package knight.compiler.asm.declarations;
 
 import knight.compiler.asm.ASM;
+import knight.compiler.semantics.Binding;
 
 /*
  * File: ASMIdentifier.java
@@ -35,6 +36,7 @@ import knight.compiler.asm.ASM;
 public class ASMIdentifier extends ASM
 {
 	private String id;
+	private Binding b;
 
 	public ASMIdentifier()
 	{
@@ -44,6 +46,16 @@ public class ASMIdentifier extends ASM
 	public void setId(String id)
 	{
 		this.id = id;
+	}
+
+	public Binding getB()
+	{
+		return b;
+	}
+
+	public void setB(Binding b)
+	{
+		this.b = b;
 	}
 
 	@Override

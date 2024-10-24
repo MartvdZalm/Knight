@@ -47,6 +47,6 @@ public class ASMIdentifierExpr extends ASMExpression
 	@Override
 	public String toString()
 	{
-		return "";
+		return this.id;
 	}
 }

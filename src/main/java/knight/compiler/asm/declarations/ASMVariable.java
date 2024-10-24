@@ -36,8 +36,8 @@ import knight.compiler.asm.types.ASMType;
  */
 public class ASMVariable extends ASM
 {
-	private ASMType type;
-	private ASMIdentifier id;
+	protected ASMType type;
+	protected ASMIdentifier id;
 
 	public ASMVariable()
 	{
@@ -61,7 +61,7 @@ public class ASMVariable extends ASM
 
 	@Override
 	public String toString()
-	{		
-		return String.format("%s %s", this.type, this.id);
+	{	
+		return ".lcomm " + this.id + " 4" + ASM.NEWLINE;
 	}
 }

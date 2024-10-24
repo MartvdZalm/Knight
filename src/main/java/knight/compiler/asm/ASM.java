@@ -33,10 +33,22 @@ package knight.compiler.asm;
 public abstract class ASM
 {
 	protected static String NEWLINE = "\n";
+	protected ASMPlatform platform;
+	protected ASMStatistics statistics;
 
 	public ASM()
 	{
 
+	}
+
+	public void setPlatform(ASMPlatform platform)
+	{
+		this.platform = platform;
+	}
+
+	public void setStatistics(ASMStatistics statistics)
+	{
+		this.statistics = statistics;
 	}
 
 	@Override
