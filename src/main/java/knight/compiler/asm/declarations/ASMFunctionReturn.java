@@ -61,9 +61,9 @@ public class ASMFunctionReturn extends ASMFunction
 		sb.append("pushq %rbp" + ASM.NEWLINE);
 		sb.append("movq %rsp, %rbp" + ASM.NEWLINE);
 
-		// for (ASMArgument asmArgument : this.argumentList) {
-		// 	sb.append(asmArgument).append(ASM.NEWLINE);
-		// }
+		for (ASMArgument asmArgument : this.argumentList) {
+			sb.append(asmArgument).append(ASM.NEWLINE);
+		}
 
 		for (ASMVariable asmVariable : this.variableList) {
 			sb.append(asmVariable).append(ASM.NEWLINE);

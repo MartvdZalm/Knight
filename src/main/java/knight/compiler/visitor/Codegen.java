@@ -319,7 +319,9 @@ public class Codegen implements ASTVisitor<ASM>
 	{
 		ASMCallFunctionStat asmCallFunctionStat = new ASMCallFunctionStat();
 
-		asmCallFunctionStat.setInstanceName((ASMExpression)astCallFunctionStat.getInstanceName().accept(this));
+		if (astCallFunctionStat.getInstanceName() != null) {
+			asmCallFunctionStat.setInstanceName((ASMExpression)astCallFunctionStat.getInstanceName().accept(this));
+		}
 		asmCallFunctionStat.setFunctionName((ASMIdentifierExpr)astCallFunctionStat.getFunctionId().accept(this));
 
 		for (int i = 0; i < astCallFunctionStat.getArgExprListSize(); i++) {
