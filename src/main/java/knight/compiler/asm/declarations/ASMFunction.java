@@ -78,24 +78,6 @@ public class ASMFunction extends ASMProgram
 		this.statementList.add(asmStatement);
 	}
 
-	private String getArgumentRegister(int index)
-	{
-	    switch (index) {
-	        case 0: return "rdi";
-	        case 1: return "rsi";
-	        case 2: return "rdx";
-	        case 3: return "rcx";
-	        case 4: return "r8";
-	        case 5: return "r9";
-	        default: throw new IllegalArgumentException("Unsupported argument index: " + index);
-	    }
-	}
-
-	private String getLocalVariableReference(int index)
-	{
-	    return ((index + 1) * 8) + "(%rbp)";
-	}
-
 	@Override
 	public String toString()
 	{
@@ -108,13 +90,11 @@ public class ASMFunction extends ASMProgram
 		sb.append("movq %rsp, %rbp" + ASM.NEWLINE);
 
 		for (int i = 0; i < Math.min(this.argumentList.size(), 6); i++) {
-	    	this.argumentList.get(i);
-	        sb.append("movq %" + getArgumentRegister(i) + ", -" + getLocalVariableReference(i) + "\n");
+	        sb.append("movq %" + this.helper.getArgumentRegister(i) + ", -" + this.helper.getLocalVariableReference(i) + "\n");
 	    }
 
 	    for (int i = 6; i < this.argumentList.size(); i++) {
-	    	this.argumentList.get(i);
-	        sb.append("movq " + (i - 6) * 8 + "(%rbp), -" + getLocalVariableReference(i) + "\n");
+	        sb.append("movq " + (i - 6) * 8 + "(%rbp), -" + this.helper.getLocalVariableReference(i) + "\n");
 	    }
 
 

@@ -1,4 +1,4 @@
-/*
+	/*
  * MIT License
  * 
  * Copyright (c) 2023, Mart van der Zalm
@@ -22,45 +22,38 @@
  * SOFTWARE.
  */
 
-package knight.compiler.asm.expressions.operations;
+package knight.compiler.asm;
 
-import knight.compiler.asm.ASM;
-import knight.compiler.asm.expressions.ASMExpression;
+import knight.compiler.symbol.SymbolClass;
+import knight.compiler.symbol.SymbolFunction;
+import knight.compiler.symbol.SymbolVariable;
+import knight.compiler.semantics.Binding;
+import knight.compiler.asm.declarations.ASMClass;
+import knight.compiler.asm.declarations.ASMFunction;
 
 /*
- * File: ASMPlus.java
+ * File: ASMHelper.java
  * @author: Mart van der Zalm
- * Date: 2024-08-29
+ * Date: 2024-12-20
  * Description:
  */
-public class ASMPlus extends ASMExpression
+public class ASMHelper
 {
-	private ASMExpression lhs;
-	private ASMExpression rhs;
-
-	public ASMPlus()
+	public String getArgumentRegister(int index)
 	{
-
+		switch (index) {
+			case 0: return "rdi";
+			case 1: return "rsi";
+			case 2: return "rdx";
+			case 3: return "rcx";
+			case 4: return "r8";
+			case 5: return "r9";
+			default: throw new IllegalArgumentException("Unsupported argument index: " + index);
+		}
 	}
 
-	public void setLhs(ASMExpression lhs)
+	public String getLocalVariableReference(int index)
 	{
-		this.lhs = lhs;
-	}
-
-	public void setRhs(ASMExpression rhs)
-	{
-		this.rhs = rhs;		
-	}
-
-	@Override
-	public String toString()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("movq " + this.lhs + ", %rax" + ASM.NEWLINE);
-		sb.append("addq " + this.rhs + ", %rax" + ASM.NEWLINE);
-
-		return sb.toString();
+	    return ((index + 1) * 8) + "(%rbp)";
 	}
 }

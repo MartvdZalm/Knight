@@ -61,18 +61,30 @@ public class ASMFunctionReturn extends ASMFunction
 		sb.append("pushq %rbp" + ASM.NEWLINE);
 		sb.append("movq %rsp, %rbp" + ASM.NEWLINE);
 
-		for (ASMArgument asmArgument : this.argumentList) {
-			sb.append(asmArgument).append(ASM.NEWLINE);
+		for (int i = 0; i < Math.min(this.argumentList.size(), 6); i++) {
+			sb.append("movq %" + this.helper.getArgumentRegister(i) + ", -" + this.helper.getLocalVariableReference(i) + ASM.NEWLINE);
 		}
+
+		for (int i = 6; i < this.argumentList.size(); i++) {
+			sb.append("movq " + (i - 6) * 8 + "(%rbp), -" + this.helper.getLocalVariableReference(i) + ASM.NEWLINE);
+		}
+
+
+		// for (ASMArgument asmArgument : this.argumentList) {
+		// 	sb.append(asmArgument).append(ASM.NEWLINE);
+		// }
 
 		for (ASMVariable asmVariable : this.variableList) {
 			sb.append(asmVariable).append(ASM.NEWLINE);
 		}
 
-		// for (ASMStatement asmStatement : this.statementList) {
-		// 	sb.append(asmStatement).append(ASM.NEWLINE);
-		// }
+		for (ASMStatement asmStatement : this.statementList) {
+			sb.append(asmStatement).append(ASM.NEWLINE);
+		}
 
+		sb.append(this.returnExpr + ASM.NEWLINE);
+
+		sb.append("movq %rbp, %rsp" + ASM.NEWLINE);
 		sb.append("popq %rbp" + ASM.NEWLINE);
 		sb.append("ret" + ASM.NEWLINE);
 

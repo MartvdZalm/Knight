@@ -24,6 +24,7 @@
 
 package knight.compiler.asm.expressions.operations;
 
+import knight.compiler.asm.ASM;
 import knight.compiler.asm.expressions.ASMExpression;
 
 /*
@@ -55,6 +56,11 @@ public class ASMTimes extends ASMExpression
 	@Override
 	public String toString()
 	{
-		return "";
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("movq " + this.lhs + ", %rax" + ASM.NEWLINE);
+		sb.append("imulq " + this.rhs + ", %rax" + ASM.NEWLINE);
+
+		return sb.toString();
 	}
 }

@@ -23,6 +23,7 @@
  */
 
 package knight.compiler.asm.expressions;
+import knight.compiler.semantics.Binding;
 
 /*
  * File: ASMIdentifierExpr.java
@@ -33,6 +34,7 @@ package knight.compiler.asm.expressions;
 public class ASMIdentifierExpr extends ASMExpression
 {
 	private String id;
+	private Binding b;
 
 	public ASMIdentifierExpr()
 	{
@@ -44,9 +46,25 @@ public class ASMIdentifierExpr extends ASMExpression
 		this.id = id;
 	}
 
+	public Binding getB()
+	{
+		return b;
+	}
+
+	public void setB(Binding b)
+	{
+		this.b = b;
+	}
+
 	@Override
 	public String toString()
 	{
-		return this.id;
+		StringBuilder sb = new StringBuilder();
+
+		int lvIndex = statistics.getLocalVarIndex(this.b);
+
+		sb.append(lvIndex * 8 + "(%rbp)");
+
+		return sb.toString();
 	}
 }

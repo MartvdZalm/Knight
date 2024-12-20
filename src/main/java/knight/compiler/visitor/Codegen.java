@@ -277,9 +277,9 @@ public class Codegen implements ASTVisitor<ASM>
 	public ASMIdentifierExpr visit(ASTIdentifierExpr astIdentifierExpr)
 	{
 		ASMIdentifierExpr asmIdentifierExpr = new ASMIdentifierExpr();
-
-		asmIdentifierExpr.setId(astIdentifierExpr.getId());
-
+		asmIdentifierExpr.setStatistics(this.statistics);
+		asmIdentifierExpr.setId(astIdentifierExpr.getId().toString());
+		asmIdentifierExpr.setB(astIdentifierExpr.getB());
 		return asmIdentifierExpr;
 	}
 

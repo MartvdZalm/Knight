@@ -29,6 +29,7 @@ import java.util.ArrayList;
 
 import knight.compiler.asm.expressions.ASMExpression;
 import knight.compiler.asm.expressions.ASMIdentifierExpr;
+import knight.compiler.asm.expressions.ASMStringLiteral;
 
 /*
  * File: ASMCallFunctionStat.java
@@ -65,6 +66,20 @@ public class ASMCallFunctionStat extends ASMStatement
 	@Override
 	public String toString()
 	{
-		return "";
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = this.argExprList.size() - 1; i >= 6; i--) {
+			sb.append("pushq " + this.argExprList.get(i) + "\n");
+		}
+
+		for (int i = Math.min(this.argExprList.size(), 6) - 1; i >= 0; i--) {
+			if (this.argExprList.get(i) instanceof ASMStringLiteral) {
+
+			} else {
+				sb.append("movq " + this.argExprList.get(i) + ", %" + this.helper.getArgumentRegister(i) + "\n");
+			}
+		}
+
+		return sb.toString();
 	}
 }

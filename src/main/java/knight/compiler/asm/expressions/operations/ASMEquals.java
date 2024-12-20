@@ -24,6 +24,8 @@
 
 package knight.compiler.asm.expressions.operations;
 
+import knight.compiler.asm.ASM;
+import knight.compiler.asm.expressions.ASMIdentifierExpr;
 import knight.compiler.asm.expressions.ASMExpression;
 
 /*
@@ -55,6 +57,21 @@ public class ASMEquals extends ASMExpression
 	@Override
 	public String toString()
 	{
-		return "";
+		StringBuilder sb = new StringBuilder();
+
+		if (this.lhs instanceof ASMIdentifierExpr) {
+			// ASMIdentifierExpr lhsExpr = (ASMIdentifierExpr) lhs;
+			// Binding b = lhsExpr.getB();
+			// int lvIndex = this.helper.getLocalVarIndex(b);
+
+			// sb.append("movl " + (lvIndex * 8) + "(%rbp), %eax" + ASM.NEWLINE);
+		} else {
+			sb.append("movl " + this.lhs + ", %eax" + ASM.NEWLINE);
+		}
+
+		sb.append("cmpl " + this.rhs + ", %eax" + ASM.NEWLINE);
+		sb.append("jne else" + ASM.NEWLINE);
+
+		return sb.toString();
 	}
 }

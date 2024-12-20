@@ -35,10 +35,11 @@ public abstract class ASM
 	protected static String NEWLINE = "\n";
 	protected ASMPlatform platform;
 	protected ASMStatistics statistics;
+	protected ASMHelper helper;
 
 	public ASM()
 	{
-
+		this.helper = new ASMHelper();
 	}
 
 	public void setPlatform(ASMPlatform platform)

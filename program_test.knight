@@ -1,7 +1,7 @@
 
-fn calculate(int a, int b): void
+fn calculate(int a, int b): int
 {
-	
+	ret a * b;
 }
 
 fn main(): int
