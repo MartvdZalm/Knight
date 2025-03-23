@@ -353,7 +353,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	        code.append(functionReturn.getStatementDeclAt(i).accept(this) + "\n");
 	    }
 
-	    code.append("\treturn " + functionReturn.getReturnExpr().accept(this) + "\n");
+	    code.append("\treturn " + functionReturn.getReturnExpr().accept(this) + ";\n");
 
 	   	code.append("} \n");
 
@@ -368,6 +368,18 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTClass classDecl)
 	{
+		code.append("class " + classDecl.getId().accept(this) + " {\n");
+
+		for (int i = 0; i < classDecl.getPropertyListSize(); i++) {
+			code.append(classDecl.getPropertyDeclAt(i).accept(this) + "\n");
+		}
+
+		for (int i = 0; i < classDecl.getFunctionListSize(); i++) {
+			code.append(classDecl.getFunctionDeclAt(i).accept(this) + "\n");
+		}
+
+		code.append("};\n");
+
 		return null;
 	}
 
@@ -389,20 +401,18 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTProgram program)
 	{
+		StringBuilder sb = new StringBuilder();
+		sb.append("#include <string>\n");
 
-		// for (int i = 0; i < program.getVariableListSize(); i++) {
-		// 	program.getVariableDeclAt(i).accept(this);
-		// }
-
-		// for (int i = 0; i < program.getInlineASMListSize(); i++) {
-		// 	program.getInlineASMDeclAt(i).accept(this);
-		// }
+		for (int i = 0; i < program.getClassListSize(); i++) {
+			program.getClassDeclAt(i).accept(this);
+		}
 
 		for (int i = 0; i < program.getFunctionListSize(); i++) {
 			program.getFunctionDeclAt(i).accept(this);
 		}
 
-		write(code.toString());
+		write(sb.append(code).toString());
 
 		return null;
 	}
@@ -495,6 +505,8 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTProperty property)
 	{
-		return null;
+		String type = property.getType().accept(this);
+		String id = property.getId().accept(this);
+		return type + " " + id + ";";
 	}
 }
