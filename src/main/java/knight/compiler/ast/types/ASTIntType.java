@@ -49,6 +49,6 @@ public class ASTIntType extends ASTType
 	@Override
 	public String toString()
 	{
-		return ".int";
+		return "int";
 	}
 }

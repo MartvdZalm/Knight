@@ -99,20 +99,22 @@ public class Main
 				if (SemanticErrors.errorList.size() == 0) {
 					String path = getFileDirPath(filename);
 					ConstantFolding.optimize(tree);
-					Codegen cg = new Codegen(path, filename);
+					// Codegen cg = new Codegen(path, filename);
+					CodeGenerator cg = new CodeGenerator(path, filename);
+					cg.visit((ASTProgram) tree);
 
-					File f = new File(filename);
-					String name = f.getName();
-					String updated_filename = name.substring(0, name.lastIndexOf("."));
+					// File f = new File(filename);
+					// String name = f.getName();
+					// String updated_filename = name.substring(0, name.lastIndexOf("."));
 
-					ASM asmProgram = cg.visit((ASTProgram) tree);
-					ASMPlatform platform = ASMPlatform.findOS(platformString);
-					asmProgram.setPlatform(platform);
-					write(asmProgram.toString(), path, updated_filename);
+					// ASM asmProgram = cg.visit((ASTProgram) tree);
+					// ASMPlatform platform = ASMPlatform.findOS(platformString);
+					// asmProgram.setPlatform(platform);
+					// write(asmProgram.toString(), path, updated_filename);
 					
-					if (!containsFlag(args, "-asm")) {
-						compileAssemblyFile(args, path, filename);
-	                }
+					// if (!containsFlag(args, "-asm")) {
+					// 	compileAssemblyFile(args, path, filename);
+	                // }
 				}
 			}
 		} catch (Exception e) {

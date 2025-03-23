@@ -56,19 +56,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	private final String PATH;
 	private final String FILENAME;
 	
-	private int bytes;
-
-	private int localArg;
-	private int localVar;
-
-	private int stack;
-	private int localStack;
-
-	private int counter;
-
-	StringBuilder data = new StringBuilder();
-	StringBuilder bss = new StringBuilder();
-	StringBuilder text = new StringBuilder();
+	StringBuilder code = new StringBuilder();
 
 	public CodeGenerator(String progPath, String filename)
 	{
@@ -82,18 +70,18 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTAssign assign)
 	{
-		assign.getExpr().accept(this);
+		// assign.getExpr().accept(this);
 
-		Binding b = assign.getId().getB();
-		int lvIndex = getLocalVarIndex(b);
+		// Binding b = assign.getId().getB();
+		// int lvIndex = getLocalVarIndex(b);
 
-		if (lvIndex == -1) {
-			text.append("movq %rax, " + assign.getId() + "\n");
-		} else {
-			text.append("movq %rax, -" + (lvIndex * 8) + "(%rbp)\n");
-		}
+		// if (lvIndex == -1) {
+		// 	text.append("movq %rax, " + assign.getId() + "\n");
+		// } else {
+		// 	text.append("movq %rax, -" + (lvIndex * 8) + "(%rbp)\n");
+		// }
 
-		text.append("movq $0, %rax\n");
+		// text.append("movq $0, %rax\n");
 
 		return null;
 	}
@@ -101,9 +89,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTBlock block)
 	{
-		for (int i = 0; i < block.getStatementListSize(); i++) {
-			block.getStatementAt(i).accept(this);
-		}
+		// for (int i = 0; i < block.getStatementListSize(); i++) {
+		// 	block.getStatementAt(i).accept(this);
+		// }
 
 		return null;
 	}
@@ -111,12 +99,12 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIfThenElse ifThenElse)
 	{
-		ifThenElse.getExpr().accept(this);
-		ifThenElse.getThen().accept(this);
-		text.append("jmp end\n");
-		text.append("else:\n");
-		ifThenElse.getElze().accept(this);
-		text.append("end:\n");
+		// ifThenElse.getExpr().accept(this);
+		// ifThenElse.getThen().accept(this);
+		// text.append("jmp end\n");
+		// text.append("else:\n");
+		// ifThenElse.getElze().accept(this);
+		// text.append("end:\n");
 
 		return null;
 	}
@@ -130,9 +118,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTWhile w)
 	{
-		text.append("while: \n");
-		w.getBody().accept(this);
-		w.getExpr().accept(this);
+		// text.append("while: \n");
+		// w.getBody().accept(this);
+		// w.getExpr().accept(this);
 
 		return null;
 	}
@@ -140,158 +128,97 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIntLiteral intLiteral)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("$" + intLiteral.getValue());
-
-		return sb.toString();
+		return String.valueOf(intLiteral.getValue());
 	}
 
 	@Override
 	public String visit(ASTPlus plus)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		text.append("movq " + plus.getLhs().accept(this) + ", %rax" + "\n");
-		text.append("addq " + plus.getRhs().accept(this) + ", %rax" + "\n");
-
-		return sb.toString();
+		return plus.getLhs().accept(this) + " + " + plus.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTMinus minus)
 	{	
-		StringBuilder sb = new StringBuilder();
-
-		text.append("movq " + minus.getLhs().accept(this) + ", %rax" + "\n");
-		text.append("subq " + minus.getRhs().accept(this) + ", %rax" + "\n");
-
-		return sb.toString();
+		return minus.getLhs().accept(this) + " - " + minus.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTTimes times)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		text.append("movq " + times.getLhs().accept(this) + ", %rax" + "\n");
-		text.append("imulq " + times.getRhs().accept(this) + ", %rax" + "\n");
-
-		return sb.toString();
+		return times.getLhs().accept(this) + " * " + times.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTDivision division)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		text.append("movq " + division.getLhs().accept(this) + ", %rax\n");
-		text.append("idivq " + division.getRhs().accept(this) + "\n");
-
-		return sb.toString();
+		return division.getLhs().accept(this) + " / " + division.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTEquals equals)
 	{
-		ASTExpression lhsExpr = equals.getLhs();
-
-		if (lhsExpr instanceof ASTIdentifierExpr) {
-			ASTIdentifierExpr lhs = (ASTIdentifierExpr) lhsExpr;
-			Binding b = lhs.getB();
-			int lvIndex = getLocalVarIndex(b);
-
-			text.append("movl " + (lvIndex * 8) + "(%rbp), %eax\n");
-		} else {
-			text.append("movl " + equals.getLhs() + ", %eax\n");
-		}
-
-		text.append("cmpl " + equals.getRhs().accept(this) + ", %eax\n");
-		text.append("jne else\n");
-
-		return null;
+		return equals.getLhs().accept(this) + " == " + equals.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTLessThan lessThan)
 	{
-		ASTExpression lhsExpr = lessThan.getLhs();
-
-		if (lhsExpr instanceof ASTIdentifierExpr) {
-			ASTIdentifierExpr lhs = (ASTIdentifierExpr) lhsExpr;
-			Binding b = lhs.getB();
-			int lvIndex = getLocalVarIndex(b);
-
-			text.append("movl " + (lvIndex * 8) + "(%rbp), %eax\n");
-		} else {
-			text.append("movl " + lessThan.getLhs() + ", %eax\n");
-		}
-
-		text.append("cmpl " + lessThan.getRhs().accept(this) + ", %eax\n");
-		text.append("jl while\n");
-
-		return null;
+		return lessThan.getLhs().accept(this) + " < " + lessThan.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTLessThanOrEqual lessThanOrEqual)
 	{
-		return null;
+		return lessThanOrEqual.getLhs().accept(this) + " <= " + lessThanOrEqual.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTGreaterThan greaterThan)
 	{
-		return null;
+		return greaterThan.getLhs().accept(this) + " > " + greaterThan.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTGreaterThanOrEqual greaterThanOrEqual)
 	{
-		return null;
+		return greaterThanOrEqual.getLhs().accept(this) + " >= " + greaterThanOrEqual.getRhs().accept(this);
 	}
 
 	@Override
-	public String visit(ASTAnd n)
+	public String visit(ASTAnd and)
 	{
-		return null;
+		return and.getLhs().accept(this) + " && " + and.getRhs().accept(this);
 	}
 
 	@Override
-	public String visit(ASTOr n)
+	public String visit(ASTOr or)
 	{
-		return null;
+		return or.getLhs().accept(this) + " || " + or.getRhs().accept(this);
 	}
 
 	@Override
 	public String visit(ASTTrue true1)
 	{
-		return null;
+		return "true";
 	}
 
 	@Override
 	public String visit(ASTFalse false1)
 	{
-		return null;
+		return "false";
 	}
 
 	@Override
 	public String visit(ASTIdentifierExpr id)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		Binding b = id.getB();
-		int lvIndex = getLocalVarIndex(b);
-
-		sb.append("-" + lvIndex * 8 + "(%rbp)");
-
-		return sb.toString();
+		return id.getId();
 	}
 
 	@Override
 	public String visit(ASTNewArray na)
 	{
-		return null;
+		return "";
 	}
 
 	@Override
@@ -303,119 +230,64 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTCallFunctionExpr callFunctionExpr)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = callFunctionExpr.getArgExprListSize() - 1; i >= 6; i--) {
-			text.append("pushq " + callFunctionExpr.getArgExprAt(i).accept(this) + "\n");
-		}
-
-		for (int i = Math.min(callFunctionExpr.getArgExprListSize(), 6) - 1; i >= 0; i--) {
-			text.append("movq " + callFunctionExpr.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
-		}
-
-		text.append("call " + callFunctionExpr.getFunctionId() + "\n");
-
-		if (callFunctionExpr.getArgExprListSize() > 6) {
-			int stackCleanup = (callFunctionExpr.getArgExprListSize() - 6) * 8;
-			text.append("addq $" + stackCleanup + ", %rsp\n");
-		}
-
-		return sb.toString();
+		return null;
 	}
 
 	@Override
 	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = callFunctionStat.getArgExprListSize() - 1; i >= 6; i--) {
-			text.append("pushq " + callFunctionStat.getArgExprAt(i).accept(this) + "\n");
-		}
-
-		for (int i = Math.min(callFunctionStat.getArgExprListSize(), 6) - 1; i >= 0; i--) {
-			if (callFunctionStat.getArgExprAt(i) instanceof ASTStringLiteral) {
-				data.append(".LC" + counter + ":\n");
-				data.append(".string " + callFunctionStat.getArgExprAt(i).accept(this) + "\n");
-				text.append("movq $.LC" + counter + ", %" + getArgumentRegister(i) + "\n");
-				counter++;
-			} else {
-				text.append("movq " + callFunctionStat.getArgExprAt(i).accept(this) + ", %" + getArgumentRegister(i) + "\n");
-			}
-		}
-
-		text.append("call " + callFunctionStat.getFunctionId() + "\n");
-
-		if (callFunctionStat.getArgExprListSize() > 6) {
-			int stackCleanup = (callFunctionStat.getArgExprListSize() - 6) * 8;
-			text.append("addq $" + stackCleanup + ", %rsp\n");
-		}
-
-		return sb.toString();
+		return null;
 	}
-
-	private String getArgumentRegister(int index)
-	{
-	    switch (index) {
-	        case 0: return "rdi";
-	        case 1: return "rsi";
-	        case 2: return "rdx";
-	        case 3: return "rcx";
-	        case 4: return "r8";
-	        case 5: return "r9";
-	        default: throw new IllegalArgumentException("Unsupported argument index: " + index);
-	    }
-	}
-
 
 	@Override
 	public String visit(ASTIntType intType)
 	{
-		return null;
+		return "int";
 	}
 
 	@Override
 	public String visit(ASTStringType stringType)
 	{	
-		return null;
+		return "std::string";
 	}
 
 	@Override
 	public String visit(ASTVoidType voidType)
 	{
-		return null;
+		return "void";
 	}
 
 	@Override
 	public String visit(ASTBooleanType booleanType)
 	{
-		return null;
+		return "bool";
 	}
 
 	@Override
 	public String visit(ASTIntArrayType intArrayType)
 	{
-		return null;
+		return "int[]";
 	}
 
 	@Override
-	public String visit(ASTIdentifierType refT)
+	public String visit(ASTIdentifierType id)
 	{
-		return null;
+		return id.getId();
 	}
 
 	@Override
 	public String visit(ASTArgument argDecl)
 	{
-		Binding b = argDecl.getId().getB();
-		setLocalArgIndex(b);
+		String type = argDecl.getType().accept(this);
+		String id = argDecl.getId().accept(this);
 
-		return null;
+		return type + " " + id;
 	}
 
 	@Override
 	public String visit(ASTIdentifier identifier)
 	{
-		return "\"" + identifier.getId() + "\"";
+		return identifier.getId();
 	}
 
 	@Override
@@ -439,147 +311,51 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTVariable variable)
 	{
-		bss.append(".lcomm " + variable.getId() + " 4\n");
-
-		return null;
+		String type = variable.getType().accept(this);
+		String id = variable.getId().accept(this);
+		return type + " " + id + ";";
 	}
 
 	@Override
-	public String visit(ASTVariableInit varDeclInit)
+	public String visit(ASTVariableInit variableInit)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		if (currentFunction == null) {
-			data.append(varDeclInit.getId() + ":\n");
-
-			ASTExpression expr = varDeclInit.getExpr();
-
-			data.append(expr.getType() + " " + varDeclInit.getExpr().accept(this) + "\n");
-			
-			if (expr instanceof ASTPlus) {
-				text.append("movq %rax, " + varDeclInit.getId() + "\n");
-			}
-		} else {
-			Binding b = varDeclInit.getId().getB();
-			setLocalVarIndex(b);
-
-			int lvIndex = getLocalVarIndex(b);
-
-			// Need to be changed
-			if (varDeclInit.getExpr() instanceof ASTCallFunctionExpr) {
-				varDeclInit.getExpr().accept(this);
-				text.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
-			} else if (varDeclInit.getExpr() instanceof ASTIdentifierExpr) {
-				text.append("movq " + varDeclInit.getExpr().accept(this) + ", %rax\n");
-				text.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
-			} else if (
-				varDeclInit.getExpr() instanceof ASTPlus ||
-				varDeclInit.getExpr() instanceof ASTTimes
-			) {
-				text.append(varDeclInit.getExpr().accept(this));
-				text.append("movq %rax, -" + (lvIndex * 8) + "(%rbp)\n");
-			} else {
-				text.append("movq " + varDeclInit.getExpr().accept(this) + ", -" + (lvIndex * 8) + "(%rbp)\n");
-			}
-		}
-
-		return sb.toString();
+		String type = variableInit.getType().accept(this);
+		String id = variableInit.getId().accept(this);
+		return type + " " + id + " = " + variableInit.getExpr().accept(this) + ";";
 	}
 
 	@Override
 	public String visit(ASTFunction functionVoid)
 	{
-		localArg = 0;
-	    localVar = 0;
-
-	    currentFunction = (SymbolFunction) functionVoid.getId().getB();
-	    text.append(".globl " + functionVoid.getId() + "\n");
-	    text.append(".type " + functionVoid.getId() + ", @function\n");
-	    text.append(functionVoid.getId() + ":\n");
-	    text.append("pushq %rbp\n");
-	    text.append("movq %rsp, %rbp\n");
-
-	    for (int i = 0; i < Math.min(functionVoid.getArgumentListSize(), 6); i++) {
-	    	functionVoid.getArgumentDeclAt(i).accept(this);
-	        text.append("movq %" + getArgumentRegister(i) + ", -" + getLocalVariableReference(i) + "\n");
-	    }
-
-	    for (int i = 6; i < functionVoid.getArgumentListSize(); i++) {
-	    	functionVoid.getArgumentDeclAt(i).accept(this);
-	        text.append("movq " + (i - 6) * 8 + "(%rbp), -" + getLocalVariableReference(i) + "\n");
-	    }
-
-	    for (int i = 0; i < functionVoid.getInlineASMListSize(); i++) {
-	    	functionVoid.getInlineASMAt(i).accept(this);
-	    }
-
-	    for (int i = 0; i < functionVoid.getVariableListSize(); i++) {
-	        functionVoid.getVariableDeclAt(i).accept(this);
-	    }
-
-	    for (int i = 0; i < functionVoid.getStatementListSize(); i++) {
-	        functionVoid.getStatementDeclAt(i).accept(this);
-	    }
-	    	
-        text.append("movq %rbp, %rsp\n");
-        text.append("pop %rbp\n");
-        text.append("ret\n");
-        currentFunction = null;
-
 		return null;
 	}
 
 	@Override
 	public String visit(ASTFunctionReturn functionReturn)
 	{
-		localArg = 0;
-	    localVar = 0;
+	    code.append(functionReturn.getReturnType() + " " + functionReturn.getId() + "(");
+	    
+	    for (int i = 0; i < functionReturn.getArgumentListSize(); i++) {
+	    	code.append(functionReturn.getArgumentDeclAt(i).accept(this));
 
-	    currentFunction = (SymbolFunction) functionReturn.getId().getB();
-	    text.append(".globl " + functionReturn.getId() + "\n");
-	    text.append(".type " + functionReturn.getId() + ", @function\n");
-	    text.append(functionReturn.getId() + ":\n");
-	    text.append("pushq %rbp\n");
-	    text.append("movq %rsp, %rbp\n");
-
-	    for (int i = 0; i < Math.min(functionReturn.getArgumentListSize(), 6); i++) {
-	    	functionReturn.getArgumentDeclAt(i).accept(this);
-	        text.append("movq %" + getArgumentRegister(i) + ", -" + getLocalVariableReference(i) + "\n");
+	    	if (i != functionReturn.getArgumentListSize() - 1) {
+	    		code.append(", ");
+	    	}
 	    }
-
-	    for (int i = 6; i < functionReturn.getArgumentListSize(); i++) {
-	    	functionReturn.getArgumentDeclAt(i).accept(this);
-	        text.append("movq " + (i - 6) * 8 + "(%rbp), -" + getLocalVariableReference(i) + "\n");
-	    }
-
-	   	for (int i = 0; i < functionReturn.getInlineASMListSize(); i++) {
-	    	functionReturn.getInlineASMAt(i).accept(this);
-	    }
+	    
+	    code.append(") { \n");
 
 	    for (int i = 0; i < functionReturn.getVariableListSize(); i++) {
-	        functionReturn.getVariableDeclAt(i).accept(this);
+	        code.append("\t" + functionReturn.getVariableDeclAt(i).accept(this) + "\n");
 	    }
 
 	    for (int i = 0; i < functionReturn.getStatementListSize(); i++) {
-	        functionReturn.getStatementDeclAt(i).accept(this);
+	        code.append(functionReturn.getStatementDeclAt(i).accept(this) + "\n");
 	    }
 
-	    if (functionReturn.getId().getId().equals("main")) {
-	        text.append("movq $60, %rax\n");
-	        text.append("movq " + functionReturn.getReturnExpr().accept(this) + ", %rdi\n");
-	        text.append("syscall\n");
-	    } else {
-	    	if (functionReturn.getReturnExpr() instanceof ASTIdentifierExpr) {
-	    		text.append("movq " + functionReturn.getReturnExpr().accept(this) + ", %rax" + "\n");
-	    	} else {
-	    		functionReturn.getReturnExpr().accept(this);
-	    	}
-	    	
-	        text.append("movq %rbp, %rsp\n");
-	        text.append("pop %rbp\n");
-	        text.append("ret\n");
-	        currentFunction = null;
-	    }
+	    code.append("\treturn " + functionReturn.getReturnExpr().accept(this) + "\n");
+
+	   	code.append("} \n");
 
 	    return null;
 	}
@@ -598,43 +374,35 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTInlineASM inlineASM)
 	{
-		for (int i = 0; i < inlineASM.getLinesSize(); i++) {
-			String line = inlineASM.getLineAt(i);
+		// for (int i = 0; i < inlineASM.getLinesSize(); i++) {
+		// 	String line = inlineASM.getLineAt(i);
 
-			if (line.startsWith("\"") && line.endsWith("\"")) {
-                line = line.substring(1, line.length() - 1);
-            }
+		// 	if (line.startsWith("\"") && line.endsWith("\"")) {
+        //         line = line.substring(1, line.length() - 1);
+        //     }
 
-            text.append(line).append("\n");
-		}
+        //     text.append(line).append("\n");
+		// }
 		return null;
 	}
 
 	@Override
 	public String visit(ASTProgram program)
 	{
-		StringBuilder sb = new StringBuilder();
 
-		sb.append(".file \"" + FILENAME + ".knight\"\n");
-		data.append(".section .data\n");
-		bss.append(".section .bss\n");
-		text.append(".section .text\n");
+		// for (int i = 0; i < program.getVariableListSize(); i++) {
+		// 	program.getVariableDeclAt(i).accept(this);
+		// }
 
-		for (int i = 0; i < program.getVariableListSize(); i++) {
-			program.getVariableDeclAt(i).accept(this);
-		}
-
-		for (int i = 0; i < program.getInlineASMListSize(); i++) {
-			program.getInlineASMDeclAt(i).accept(this);
-		}
+		// for (int i = 0; i < program.getInlineASMListSize(); i++) {
+		// 	program.getInlineASMDeclAt(i).accept(this);
+		// }
 
 		for (int i = 0; i < program.getFunctionListSize(); i++) {
 			program.getFunctionDeclAt(i).accept(this);
 		}
 
-		sb.append(data).append(bss).append(text);
-
-		write(sb.toString());
+		write(code.toString());
 
 		return null;
 	}
@@ -642,7 +410,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	private File write(String code)
 	{
 		try {
-			File f = new File(PATH + FILENAME + ".s");
+			File f = new File(PATH + FILENAME + ".cpp");
 			PrintWriter writer = new PrintWriter(f, "UTF-8");
 			writer.println(code);
 			writer.close();
@@ -656,35 +424,35 @@ public class CodeGenerator implements ASTVisitor<String>
 
 	private int getLocalArgIndex(Binding b)
 	{
-		if (b != null && b instanceof SymbolVariable) {
-			return ((SymbolVariable) b).getLvIndex(); 
-		}
+		// if (b != null && b instanceof SymbolVariable) {
+		// 	return ((SymbolVariable) b).getLvIndex(); 
+		// }
 		return -1;
 	}
 
 	private int setLocalArgIndex(Binding b)
 	{
-		if (b != null && b instanceof SymbolVariable) {
-			((SymbolVariable) b).setLvIndex(++localArg);
-			return localArg;
-		}
+		// if (b != null && b instanceof SymbolVariable) {
+		// 	((SymbolVariable) b).setLvIndex(++localArg);
+		// 	return localArg;
+		// }
 		return -1;
 	}
 	
 	private int getLocalVarIndex(Binding b)
 	{
-		if (b != null && b instanceof SymbolVariable) {
-			return ((SymbolVariable) b).getLvIndex();
-		}
+		// if (b != null && b instanceof SymbolVariable) {
+		// 	return ((SymbolVariable) b).getLvIndex();
+		// }
 		return -1;
 	}
 
 	private int setLocalVarIndex(Binding b)
 	{
-		if (b != null && b instanceof SymbolVariable) {
-			((SymbolVariable) b).setLvIndex(++localVar);
-			return localVar;
-		}
+		// if (b != null && b instanceof SymbolVariable) {
+		// 	((SymbolVariable) b).setLvIndex(++localVar);
+		// 	return localVar;
+		// }
 		return -1;
 	}
 

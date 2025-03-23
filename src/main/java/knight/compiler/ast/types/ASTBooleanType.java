@@ -49,6 +49,6 @@ public class ASTBooleanType extends ASTType
 	@Override
 	public String toString()
 	{
-		return "boolean";
+		return "bool";
 	}
 }

@@ -6,8 +6,9 @@ fn calculate(int a, int b): int
 
 fn main(): int
 {
-	calculate(10, 5);
-
+	int age = 18;
+	int a = 20;
+	int result = a + age;
 
 	ret 0;
 }
