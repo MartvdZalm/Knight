@@ -1,50 +1,25 @@
-/*
- * MIT License
- * 
- * Copyright (c) 2023, Mart van der Zalm
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package knight.compiler.symbol;
 
-import java.util.Enumeration;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
-import knight.compiler.ast.types.ASTBooleanType;
-import knight.compiler.ast.types.ASTIdentifierType;
-import knight.compiler.ast.types.ASTIntArrayType;
-import knight.compiler.ast.types.ASTIntType;
-import knight.compiler.ast.types.ASTStringType;
-import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.ASTBooleanType;
+import knight.compiler.ast.ASTIdentifierType;
+import knight.compiler.ast.ASTIntArrayType;
+import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTStringType;
+import knight.compiler.ast.ASTType;
 
 /*
  * File: SymbolProgram.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
- * Description:
+ * Date: 2025-04-10
  */
 public class SymbolProgram
 {
-	private Hashtable<String, SymbolClass> classes; 
+	private Hashtable<String, SymbolClass> classes;
 	private Hashtable<String, SymbolFunction> functions;
 	private Hashtable<String, SymbolVariable> variables;
 
@@ -61,9 +36,9 @@ public class SymbolProgram
 	{
 		if (containsClass(id)) {
 			return false;
-		} else {
-			classes.put(id, new SymbolClass(id, parent));
 		}
+
+		classes.put(id, new SymbolClass(id, parent));
 		return true;
 	}
 
@@ -71,38 +46,36 @@ public class SymbolProgram
 	{
 		if (containsFunction(id)) {
 			return false;
-		} else {
-			functions.put(id, new SymbolFunction(id, type));
-			return true;
 		}
+
+		functions.put(id, new SymbolFunction(id, type));
+		return true;
 	}
 
 	public boolean addVariable(String id, ASTType type)
 	{
 		if (containsVariable(id)) {
 			return false;
-		} else {
-			variables.put(id, new SymbolVariable(id, type));
-			return true;
 		}
+
+		variables.put(id, new SymbolVariable(id, type));
+		return true;
 	}
 
 	public SymbolClass getClass(String id)
 	{
 		if (containsClass(id)) {
 			return classes.get(id);
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	public SymbolFunction getFunction(String id)
 	{
 		if (containsFunction(id)) {
 			return functions.get(id);
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	public SymbolFunction getFunction(String id, String classScope)
@@ -134,15 +107,13 @@ public class SymbolProgram
 		return functions.keys();
 	}
 
-
 	public ASTType getFunctionType(String id, String classScope)
 	{
 		SymbolFunction m = getFunction(id, classScope);
 		if (m == null) {
 			return null;
-		} else {
-			return m.getType();
 		}
+		return m.getType();
 	}
 
 	public SymbolVariable getVariable(String id)
@@ -272,7 +243,7 @@ public class SymbolProgram
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 }

@@ -36,7 +36,7 @@ public class ASMThis extends ASM
 {
 	public ASMThis()
 	{
-		
+
 	}
 
 	@Override

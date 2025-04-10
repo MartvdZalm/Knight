@@ -32,9 +32,7 @@ package knight.compiler.asm;
  */
 public enum ASMPlatform
 {
-	LINUX("linux"),
-	WINDOWS("windows"),
-	MACOS("macos");
+	LINUX("linux"), WINDOWS("windows"), MACOS("macos");
 
 	private String value;
 
@@ -56,5 +54,5 @@ public enum ASMPlatform
 			}
 		}
 		throw new IllegalArgumentException("Unknown OS: " + os);
-	}	
+	}
 }

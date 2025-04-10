@@ -40,7 +40,7 @@ public class ASMArgument extends ASM
 
 	public ASMArgument()
 	{
-		
+
 	}
 
 	public void setType(ASMType type)

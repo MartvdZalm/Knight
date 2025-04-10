@@ -56,7 +56,7 @@ public class ASMVariableInit extends ASMVariable
 	{
 		StringBuilder sb = new StringBuilder();
 
-		if (statistics.currentFunction !=  null) {
+		if (statistics.currentFunction != null) {
 			Binding b = this.id.getB();
 			statistics.setLocalVarIndex(b);
 
@@ -69,10 +69,7 @@ public class ASMVariableInit extends ASMVariable
 			} else if (this.expression instanceof ASMIdentifierExpr) {
 				sb.append("movq " + this.expression + ", %rax\n");
 				sb.append("movq %rax, " + (lvIndex * 8) + "(%rbp)\n");
-			} else if (
-				this.expression instanceof ASMPlus ||
-				this.expression instanceof ASMTimes
-			) {
+			} else if (this.expression instanceof ASMPlus || this.expression instanceof ASMTimes) {
 				sb.append(this.expression);
 				sb.append("movq %rax, -" + (lvIndex * 8) + "(%rbp)\n");
 			} else {

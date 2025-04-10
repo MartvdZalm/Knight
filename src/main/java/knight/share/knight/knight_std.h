@@ -6,6 +6,9 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <chrono>
+#include <ctime>
+#include <cstdlib>
 
 namespace knight
 {
@@ -87,6 +90,34 @@ namespace knight
     {
         std::transform(str.begin(), str.end(), str.begin(), ::tolower);
         return str;
+    }
+
+    std::string now()
+    {
+        auto now = std::chrono::system_clock::now();
+        std::time_t time_now = std::chrono::system_clock::to_time_t(now);
+        return std::ctime(&time_now); // Has newline at end
+    }
+
+    int random(int min, int max)
+    {
+        static bool seeded = false;
+        if (!seeded)
+        {
+            std::srand(std::time(nullptr));
+            seeded = true;
+        }
+        return min + std::rand() % (max - min + 1);
+    }
+
+    int to_int(const std::string& s)
+    {
+        return std::stoi(s);
+    }
+
+    std::string to_string(int n)
+    {
+        return std::to_string(n);
     }
 }
 

@@ -62,16 +62,16 @@ public class ASMFunctionReturn extends ASMFunction
 		sb.append("movq %rsp, %rbp" + ASM.NEWLINE);
 
 		for (int i = 0; i < Math.min(this.argumentList.size(), 6); i++) {
-			sb.append("movq %" + this.helper.getArgumentRegister(i) + ", -" + this.helper.getLocalVariableReference(i) + ASM.NEWLINE);
+			sb.append("movq %" + this.helper.getArgumentRegister(i) + ", -" + this.helper.getLocalVariableReference(i)
+					+ ASM.NEWLINE);
 		}
 
 		for (int i = 6; i < this.argumentList.size(); i++) {
 			sb.append("movq " + (i - 6) * 8 + "(%rbp), -" + this.helper.getLocalVariableReference(i) + ASM.NEWLINE);
 		}
 
-
 		// for (ASMArgument asmArgument : this.argumentList) {
-		// 	sb.append(asmArgument).append(ASM.NEWLINE);
+		// sb.append(asmArgument).append(ASM.NEWLINE);
 		// }
 
 		for (ASMVariable asmVariable : this.variableList) {

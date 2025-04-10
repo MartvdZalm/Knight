@@ -23,6 +23,7 @@
  */
 
 package knight.compiler.asm.expressions;
+
 import knight.compiler.semantics.Binding;
 
 /*

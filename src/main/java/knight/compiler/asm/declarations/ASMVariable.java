@@ -24,7 +24,6 @@
 
 package knight.compiler.asm.declarations;
 
-
 import knight.compiler.asm.ASM;
 import knight.compiler.asm.types.ASMType;
 
@@ -41,7 +40,7 @@ public class ASMVariable extends ASM
 
 	public ASMVariable()
 	{
-		
+
 	}
 
 	public void setId(ASMIdentifier id)
@@ -61,7 +60,7 @@ public class ASMVariable extends ASM
 
 	@Override
 	public String toString()
-	{	
+	{
 		return ".lcomm " + this.id + " 4" + ASM.NEWLINE;
 	}
 }

@@ -1,45 +1,16 @@
-/*
- * MIT License
- * 
- * Copyright (c) 2023, Mart van der Zalm
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package knight.compiler.ast;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 
-import knight.compiler.lexer.Lexer;
-import knight.compiler.ast.declarations.*;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.expressions.operations.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.statements.conditionals.*;
-import knight.compiler.ast.types.*;
-import knight.compiler.parser.*;
+import knight.compiler.parser.ParseException;
+import knight.compiler.parser.Parser;
 
 /*
  * File: ASTPrinter.java
  * @author: Mart van der Zalm
- * Date: 2024-03-17
- * Description:
+ * Date: 2025-04-10
  */
 public class ASTPrinter implements ASTVisitor<String>
 {
@@ -75,35 +46,38 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTBlock block)
+	public String visit(ASTBody body)
 	{
-		StringBuilder strBuilder = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 
-		for (ASTStatement statement : block.getStatementList()) {
-			System.out.println(statement);
-			strBuilder.append(statement.accept(this) + "\n");
+		for (ASTVariable variable : body.getVariableList()) {
+			sb.append(variable.accept(this));
 		}
 
-		return strBuilder.toString();
-	}
-
-	@Override
-	public String visit(ASTIfThenElse ifThenElse)
-	{
-		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append(printInc() + "(IF " + ifThenElse.getExpr().accept(this) + "\n");
-
-		incLevel();
-		strBuilder.append(ifThenElse.getThen().accept(this) + "\n");
-		String elze = ifThenElse.getElze().accept(this);
-		if (elze != null && elze.trim().length() > 0) {
-			strBuilder.append(elze + "\n");
+		for (ASTStatement statement : body.getStatementList()) {
+			sb.append(statement.accept(this));
 		}
-		decLevel();
 
-		strBuilder.append(printInc() + ")\n");
-		return strBuilder.toString();
+		return sb.toString();
 	}
+
+//	@Override
+//	public String visit(ASTIfThenElse ifThenElse)
+//	{
+//		StringBuilder strBuilder = new StringBuilder();
+//		strBuilder.append(printInc() + "(IF " + ifThenElse.getExpr().accept(this) + "\n");
+//
+//		incLevel();
+//		strBuilder.append(ifThenElse.getThen().accept(this) + "\n");
+//		String elze = ifThenElse.getElze().accept(this);
+//		if (elze != null && elze.trim().length() > 0) {
+//			strBuilder.append(elze + "\n");
+//		}
+//		decLevel();
+//
+//		strBuilder.append(printInc() + ")\n");
+//		return strBuilder.toString();
+//	}
 
 	@Override
 	public String visit(ASTWhile w)
@@ -123,54 +97,6 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTIntLiteral intLiteral)
 	{
 		return "(INTLIT " + intLiteral.getValue() + ")";
-	}
-
-	@Override
-	public String visit(ASTPlus plus)
-	{
-		return "(PLUS " + plus.getLhs().accept(this) + " " + plus.getRhs().accept(this) + ")";
-	}
-
-	@Override
-	public String visit(ASTMinus minus)
-	{
-		return "(MINUS " + minus.getLhs().accept(this) + " " + minus.getRhs().accept(this) + ")";
-	}
-
-	@Override
-	public String visit(ASTTimes times)
-	{
-		return "(TIMES " + times.getLhs().accept(this) + " " + times.getRhs().accept(this) + ")";
-	}
-
-	@Override
-	public String visit(ASTDivision division)
-	{
-		return "(DIV " + division.getLhs().accept(this) + " " + division.getRhs().accept(this) + ")";
-	}
-
-	@Override
-	public String visit(ASTEquals equals)
-	{
-		return "(EQUALS " + equals.getLhs().accept(this) + " " + equals.getRhs().accept(this) + ")";
-	}
-
-	@Override
-	public String visit(ASTLessThan lessThan)
-	{
-		return "(< " + lessThan.getLhs().accept(this) + " " + lessThan.getRhs().accept(this) + ")";
-	}
-
-	@Override
-	public String visit(ASTAnd and)
-	{
-		return "(&& " + and.getLhs().accept(this) + " " + and.getRhs().accept(this) + ")";
-	}
-
-	@Override
-	public String visit(ASTOr or)
-	{
-		return "(|| " + or.getLhs().accept(this) + " " + or.getRhs().accept(this) + ")";
 	}
 
 	@Override
@@ -207,8 +133,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionExpr callFunctionExpr)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(DOT " + callFunctionExpr.getInstanceName().accept(this) + " (FUN-CALL " + callFunctionExpr.getFunctionId().accept(this));
-		for (ASTExpression expr : callFunctionExpr.getArgExprList()) {
+		for (ASTExpression expr : callFunctionExpr.getArgumentList()) {
 			sb.append(expr.accept(this));
 		}
 		sb.append("))");
@@ -220,7 +145,6 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
 		StringBuilder sb = new StringBuilder();
-		// sb.append("(DOT " + callFunctionStat.getInstanceName().accept(this) + " (FUN-CALL " + callFunctionStat.getFunctionId().accept(this));
 		sb.append("(DOT (FUN-CALL " + callFunctionStat.getFunctionId().accept(this));
 		for (ASTExpression expr : callFunctionStat.getArgExprList()) {
 			sb.append(expr.accept(this));
@@ -275,45 +199,43 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTVariable varDeclaration)
 	{
-		return printInc() + "(VARIABLE) " + varDeclaration.getType().accept(this) + " " + varDeclaration.getId().accept(this);
+		return printInc() + "(VARIABLE) " + varDeclaration.getType().accept(this) + " "
+				+ varDeclaration.getId().accept(this);
 	}
 
 	@Override
 	public String visit(ASTVariableInit varDeclarationInit)
 	{
-		return printInc() + "(VARIABLE) " + varDeclarationInit.getType().accept(this) + " " + varDeclarationInit.getId().accept(this) + " = " + varDeclarationInit.getExpr().accept(this);
-	}
-
-	@Override
-	public String visit(ASTArgument argument)
-	{
-		return " " + argument.getType().accept(this) + " " + argument.getId().accept(this);
+		return printInc() + "(VARIABLE) " + varDeclarationInit.getType().accept(this) + " "
+				+ varDeclarationInit.getId().accept(this) + " = " + varDeclarationInit.getExpr().accept(this);
 	}
 
 	@Override
 	public String visit(ASTFunction function)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(printInc() + "(FUNCTION) " + function.getId().accept(this) + " ");
+//		sb.append(printInc() + "(FUNCTION) " + function.getId().accept(this) + " ");
 
 		sb.append("(PARAMETERS)");
-		for (ASTArgument arg : function.getArgumentList()) {
-			sb.append(arg.accept(this));
-		}
+//		for (ASTArgument arg : function.getArgumentList()) {
+//			sb.append(arg.accept(this));
+//		}
 
 		sb.append(" : " + function.getReturnType().accept(this) + "\n");
 
-		incLevel();
+		sb.append(function.getBody().accept(this));
 
-		for (ASTVariable variable : function.getVariableList()) {
-			sb.append(variable.accept(this) + "\n");
-		}
+		// incLevel();
 
-		for (ASTStatement statement : function.getStatementList()) {
-			sb.append(statement.accept(this) + "\n");
-		}
+		// for (ASTVariable variable : function.getVariableList()) {
+		// sb.append(variable.accept(this) + "\n");
+		// }
 
-		decLevel();
+		// for (ASTStatement statement : function.getStatementList()) {
+		// sb.append(statement.accept(this) + "\n");
+		// }
+
+		// decLevel();
 
 		return sb.toString();
 	}
@@ -322,24 +244,27 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTFunctionReturn functionReturn)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(printInc() + "(MTD-DECL " + functionReturn.getReturnType().accept(this) + " " + functionReturn.getId().accept(this) + " ");
+		sb.append("(FUNC " + functionReturn.getReturnType().accept(this) + " "
+				+ functionReturn.getFunctionName().accept(this));
 
-		sb.append("(TY-ID-LIST ");
-		for (ASTArgument arg : functionReturn.getArgumentList()) {
-			sb.append(arg.accept(this));
+		sb.append("(ARG-LIST ");
+		for (ASTArgument argument : functionReturn.getArgumentList()) {
+			sb.append(argument.accept(this));
 		}
 		sb.append(")\n");
-		sb.append(printInc() + "(BLOCK\n");
+		sb.append(printInc() + "(BODY\n");
 
-		incLevel();
-		for (ASTVariable variable : functionReturn.getVariableList()) {
-			sb.append(variable.accept(this) + "\n");
-		}
-		for (ASTStatement stat : functionReturn.getStatementList()) {
-			sb.append(stat.accept(this) + "\n");
-		}
+		sb.append(functionReturn.getBody().accept(this));
+
+		// incLevel();
+		// for (ASTVariable variable : functionReturn.getVariableList()) {
+		// sb.append(variable.accept(this) + "\n");
+		// }
+		// for (ASTStatement stat : functionReturn.getStatementList()) {
+		// sb.append(stat.accept(this) + "\n");
+		// }
 		sb.append(printInc() + "(RETURN " + functionReturn.getReturnExpr().accept(this) + ")\n");
-		decLevel();
+		// decLevel();
 
 		sb.append(printInc() + ")\n");
 		sb.append(printInc() + ")");
@@ -381,7 +306,8 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTArrayAssign arrayAssign)
 	{
-		return printInc() + "(EQSIGN " + "(ARRAY-ASSIGN " + arrayAssign.getId().accept(this) + arrayAssign.getExpression1().accept(this) + ") " + arrayAssign.getExpression2().accept(this) + ")";
+		return printInc() + "(EQSIGN " + "(ARRAY-ASSIGN " + arrayAssign.getId().accept(this)
+				+ arrayAssign.getExpression1().accept(this) + ") " + arrayAssign.getExpression2().accept(this) + ")";
 	}
 
 	@Override
@@ -394,7 +320,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTClass classDecl)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(CLASS) " + classDecl.getId().accept(this) + "\n");
+//		sb.append("(CLASS) " + classDecl.getId().accept(this) + "\n");
 
 		incLevel();
 
@@ -405,51 +331,15 @@ public class ASTPrinter implements ASTVisitor<String>
 		for (ASTFunction function : classDecl.getFunctionList()) {
 			sb.append(function.accept(this) + "\n");
 		}
-		
+
 		decLevel();
 		sb.append(")");
-		
+
 		return sb.toString();
 	}
 
 	@Override
-	public String visit(ASTForLoop forLoop)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTInlineASM assembly)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTModulus modulus)
-	{
-		return null;
-	}
-
-	@Override
 	public String visit(ASTReturnStatement returnStatement)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTGreaterThanOrEqual greaterThanOrEqual)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTGreaterThan greaterThan)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTLessThanOrEqual lessThanOrEqual)
 	{
 		return null;
 	}
@@ -487,5 +377,33 @@ public class ASTPrinter implements ASTVisitor<String>
 		AST tree = p.parse();
 
 		return printer.visit((ASTProgram) tree);
+	}
+
+	@Override
+	public String visit(ASTIfChain ifChain)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTBinaryOperation astBinaryOperation)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTConditionalBranch astConditionalBranch)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTArgument astArgument)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

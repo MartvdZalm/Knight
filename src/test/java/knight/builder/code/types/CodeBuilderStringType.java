@@ -37,7 +37,8 @@ public class CodeBuilderStringType extends CodeBuilderType
 {
 	public CodeBuilderStringType()
 	{
-		this.mock();	}
+		this.mock();
+	}
 
 	public CodeBuilderExpression getExpr()
 	{

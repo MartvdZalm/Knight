@@ -38,37 +38,41 @@ public class TestUtils
 	public <A, B> void expectsClass(Class<A> expects, Class<B> actual)
 	{
 		assertTrue(expects.equals(actual), "Expects " + expects + " Actual " + actual);
-		// assertTrue("Expects " + expects + " Actual " + actual, expects.equals(actual));
+		// assertTrue("Expects " + expects + " Actual " + actual,
+		// expects.equals(actual));
 	}
 
 	public <A, B> void expectsClasses(Class<A>[] expects, Class<B>[] actual)
 	{
 		if (expects.length != actual.length) {
-            throw new IllegalArgumentException("Length of expects and actual arrays must be equal");
-        }
+			throw new IllegalArgumentException("Length of expects and actual arrays must be equal");
+		}
 
-        for (int i = 0; i < expects.length; i++) {
-            // assertTrue("Expects " + expects[i] + " Actual " + actual[i], expects[i].equals(actual[i]));
-            assertTrue(expects[i].equals(actual[i]), "Expects " + expects[i] + " Actual " + actual[i]);
-        }
+		for (int i = 0; i < expects.length; i++) {
+			// assertTrue("Expects " + expects[i] + " Actual " + actual[i],
+			// expects[i].equals(actual[i]));
+			assertTrue(expects[i].equals(actual[i]), "Expects " + expects[i] + " Actual " + actual[i]);
+		}
 	}
 
 	// public <A, B> A castExpectClass(Class<A> expects, Class<B> actual)
 	// {
-	//     assertTrue("Expects " + expects + " Actual " + actual, expects.equals(actual));
-	    
-	//        try {
-    //     return expects.cast(actual.newInstance());
-    // } catch (Exception e) {
-    //     e.printStackTrace(); // Handle this exception properly in your code
-    //     return null;
-    // }
+	// assertTrue("Expects " + expects + " Actual " + actual,
+	// expects.equals(actual));
+
+	// try {
+	// return expects.cast(actual.newInstance());
+	// } catch (Exception e) {
+	// e.printStackTrace(); // Handle this exception properly in your code
+	// return null;
+	// }
 	// }
 
 	public <A, B> A castExpectClass(Class<A> expects, Object obj)
 	{
 		assertTrue(expects.isInstance(obj), "Expects " + expects + " Actual " + obj.getClass());
-	    // assertTrue("Expects " + expects + " Actual " + obj.getClass(), expects.isInstance(obj));
-	    return expects.cast(obj);
+		// assertTrue("Expects " + expects + " Actual " + obj.getClass(),
+		// expects.isInstance(obj));
+		return expects.cast(obj);
 	}
 }

@@ -88,10 +88,10 @@ public class CodeBuilderFunctionReturn extends CodeBuilderFunction
 		StringBuilder argumentBody = new StringBuilder();
 
 		for (int i = 0; i < argumentsList.size(); i++) {
-		    argumentBody.append(argumentsList.get(i));
-		    if (i < argumentsList.size() - 1) {
-		        argumentBody.append(", ");
-		    }
+			argumentBody.append(argumentsList.get(i));
+			if (i < argumentsList.size() - 1) {
+				argumentBody.append(", ");
+			}
 		}
 
 		for (CodeBuilderVariable variable : variablesList) {
@@ -106,6 +106,7 @@ public class CodeBuilderFunctionReturn extends CodeBuilderFunction
 			functionBody.append(inlineASM).append(" ");
 		}
 
-		return String.format("fn %s(%s): %s { %s ret %s; }", super.id, argumentBody.toString(), this.returnType, functionBody.toString(), this.returnStatement);
+		return String.format("fn %s(%s): %s { %s ret %s; }", super.id, argumentBody.toString(), this.returnType,
+				functionBody.toString(), this.returnStatement);
 	}
 }

@@ -79,7 +79,7 @@ public class ASMProgram extends ASM
 		sb.append(".file \"" + this.fileName + ".knight\"" + ASM.NEWLINE);
 
 		// for (ASMVariable variable : this.variableList) {
-		// 	sb.append(variable);
+		// sb.append(variable);
 		// }
 
 		for (ASMFunction function : this.functionList) {

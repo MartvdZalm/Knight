@@ -55,7 +55,7 @@ public class ASMMinus extends ASMExpression
 
 	@Override
 	public String toString()
-	{	
+	{
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("movq " + this.lhs + ", %rax" + ASM.NEWLINE);

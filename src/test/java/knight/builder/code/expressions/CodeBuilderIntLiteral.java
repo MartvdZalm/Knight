@@ -52,7 +52,7 @@ public class CodeBuilderIntLiteral extends CodeBuilderExpression
 
 		return this;
 	}
-	
+
 	public String toString()
 	{
 		return String.valueOf(value);

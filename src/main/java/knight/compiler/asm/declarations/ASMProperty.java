@@ -40,7 +40,7 @@ public class ASMProperty extends ASM
 
 	public ASMProperty()
 	{
-		
+
 	}
 
 	public void setType(ASMType type)

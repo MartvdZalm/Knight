@@ -17,7 +17,7 @@ import knight.compiler.ast.*;
 
 public class ASTTest
 {
-    ASTProgram program;
+	ASTProgram program;
 
 	public ASTTest()
 	{
@@ -28,50 +28,50 @@ public class ASTTest
 
 			Parser parser = new Parser(br);
 			AST tree = parser.parse();
-            this.program = (ASTProgram) tree;
-		} catch(ParseException e) {
+			this.program = (ASTProgram) tree;
+		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}
 
-    @Test
-    public void classTest()
-    {
-        assertEquals(1, program.getClassListSize());
+	@Test
+	public void classTest()
+	{
+		assertEquals(1, program.getClassListSize());
 
-        assertEquals("person", program.getClassDeclAt(0).getId().toString());
-    }
+		assertEquals("person", program.getClassDeclAt(0).getId().toString());
+	}
 
-    @Test
-    public void functionTest()
-    {
-        assertEquals(2, program.getFunctionListSize());
+	@Test
+	public void functionTest()
+	{
+		assertEquals(2, program.getFunctionListSize());
 
-        assertEquals("calculate", program.getFunctionDeclAt(0).getId().toString());
-        assertTrue(program.getFunctionDeclAt(0).getReturnType() instanceof ASTIntType);
+		assertEquals("calculate", program.getFunctionDeclAt(0).getId().toString());
+		assertTrue(program.getFunctionDeclAt(0).getReturnType() instanceof ASTIntType);
 
-        assertEquals("main", program.getFunctionDeclAt(1).getId().toString());
-        assertTrue(program.getFunctionDeclAt(1).getReturnType() instanceof ASTIntType);
-    }
+		assertEquals("main", program.getFunctionDeclAt(1).getId().toString());
+		assertTrue(program.getFunctionDeclAt(1).getReturnType() instanceof ASTIntType);
+	}
 
-    @Test
-    public void variableTest()
-    {
-        assertEquals(2, program.getVariableListSize());
+	@Test
+	public void variableTest()
+	{
+		assertEquals(2, program.getVariableListSize());
 
-        assertEquals("num1", program.getVariableDeclAt(0).getId().toString());
-        assertTrue(program.getVariableDeclAt(0) instanceof ASTVariableInit);
+		assertEquals("num1", program.getVariableDeclAt(0).getId().toString());
+		assertTrue(program.getVariableDeclAt(0) instanceof ASTVariableInit);
 
-        assertEquals("result", program.getVariableDeclAt(1).getId().toString());
-        assertTrue(program.getVariableDeclAt(1) instanceof ASTVariable);
-    }
+		assertEquals("result", program.getVariableDeclAt(1).getId().toString());
+		assertTrue(program.getVariableDeclAt(1) instanceof ASTVariable);
+	}
 
-    @Test
-    public void ifStatementTest()
-    {
-        ASTFunction mainFunction = program.getFunctionDeclAt(1);
+	@Test
+	public void ifStatementTest()
+	{
+		ASTFunction mainFunction = program.getFunctionDeclAt(1);
 
-        assertEquals(1, mainFunction.getStatementListSize());
-        assertTrue(mainFunction.getStatementDeclAt(0) instanceof ASTIfThenElse);
-    }
+		assertEquals(1, mainFunction.getStatementListSize());
+		assertTrue(mainFunction.getStatementDeclAt(0) instanceof ASTIfThenElse);
+	}
 }

@@ -1,27 +1,3 @@
-/*
- * MIT License
- * 
- * Copyright (c) 2023, Mart van der Zalm
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package knight.compiler.visitor;
 
 import java.util.ArrayList;
@@ -29,17 +5,48 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import knight.compiler.ast.declarations.*;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.expressions.operations.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.statements.conditionals.*;
-import knight.compiler.ast.types.*;
-import knight.compiler.ast.*;
-
-import knight.compiler.lexer.*;
-import knight.compiler.semantics.*;
-
+import knight.compiler.ast.ASTArgument;
+import knight.compiler.ast.ASTArrayAssign;
+import knight.compiler.ast.ASTArrayIndexExpr;
+import knight.compiler.ast.ASTAssign;
+import knight.compiler.ast.ASTBinaryOperation;
+import knight.compiler.ast.ASTBody;
+import knight.compiler.ast.ASTBooleanType;
+import knight.compiler.ast.ASTCallFunctionExpr;
+import knight.compiler.ast.ASTCallFunctionStat;
+import knight.compiler.ast.ASTClass;
+import knight.compiler.ast.ASTConditionalBranch;
+import knight.compiler.ast.ASTFalse;
+import knight.compiler.ast.ASTFunction;
+import knight.compiler.ast.ASTFunctionReturn;
+import knight.compiler.ast.ASTFunctionType;
+import knight.compiler.ast.ASTIdentifier;
+import knight.compiler.ast.ASTIdentifierExpr;
+import knight.compiler.ast.ASTIdentifierType;
+import knight.compiler.ast.ASTIfChain;
+import knight.compiler.ast.ASTIntArrayType;
+import knight.compiler.ast.ASTIntLiteral;
+import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTNewArray;
+import knight.compiler.ast.ASTNewInstance;
+import knight.compiler.ast.ASTPointerAssign;
+import knight.compiler.ast.ASTProgram;
+import knight.compiler.ast.ASTProperty;
+import knight.compiler.ast.ASTReturnStatement;
+import knight.compiler.ast.ASTSkip;
+import knight.compiler.ast.ASTStringLiteral;
+import knight.compiler.ast.ASTStringType;
+import knight.compiler.ast.ASTThis;
+import knight.compiler.ast.ASTTrue;
+import knight.compiler.ast.ASTType;
+import knight.compiler.ast.ASTVariable;
+import knight.compiler.ast.ASTVariableInit;
+import knight.compiler.ast.ASTVisitor;
+import knight.compiler.ast.ASTVoidType;
+import knight.compiler.ast.ASTWhile;
+import knight.compiler.lexer.Token;
+import knight.compiler.semantics.Binding;
+import knight.compiler.semantics.SemanticErrors;
 import knight.compiler.symbol.SymbolClass;
 import knight.compiler.symbol.SymbolFunction;
 import knight.compiler.symbol.SymbolProgram;
@@ -48,8 +55,7 @@ import knight.compiler.symbol.SymbolVariable;
 /*
  * File: TypeAnalyser.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
- * Description:
+ * Date: 2025-04-10
  */
 public class TypeAnalyser implements ASTVisitor<ASTType>
 {
@@ -68,50 +74,55 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTAssign n)
 	{
-		ASTType rhs = n.getExpr().accept(this);
-		ASTType lhs = n.getId().accept(this);
-
-		if (!symbolProgram.compareTypes(lhs, rhs)) {
-			Token sym = n.getToken();
-			if (lhs == null || rhs == null) {
-				// addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
-			} else {
-				addError(sym.getRow(), sym.getCol(), "Operator = cannot be applied to " + lhs + ", " + rhs);
-			}
-
-		} else {
-			n.getExpr().setType(rhs);
-		}
+//		ASTType rhs = n.getExpr().accept(this);
+//		ASTType lhs = n.getId().accept(this);
+//
+//		if (!symbolProgram.compareTypes(lhs, rhs)) {
+//			Token sym = n.getToken();
+//			if (lhs == null || rhs == null) {
+//				// addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
+//			} else {
+//				addError(sym.getRow(), sym.getCol(), "Operator = cannot be applied to " + lhs + ", " + rhs);
+//			}
+//
+//		} else {
+//			n.getExpr().setType(rhs);
+//		}
 
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTBlock n)
+	public ASTType visit(ASTBody body)
 	{
-		for (int i = 0; i < n.getStatementListSize(); i++) {
-			ASTStatement st = n.getStatementAt(i);
-			st.accept(this);
-		}
+//		for (int i = 0; i < body.getVariableListSize(); i++) {
+//			ASTVariable variable = body.getVariableDeclAt(i);
+//			variable.accept(this);
+//		}
+//
+//		for (int i = 0; i < body.getStatementListSize(); i++) {
+//			ASTStatement statement = body.getStatementDeclAt(i);
+//			statement.accept(this);
+//		}
 		return null;
 	}
 
-	@Override
-	public ASTType visit(ASTIfThenElse n)
-	{
-		ASTType texp = n.getExpr().accept(this);
-		if (!(texp instanceof ASTBooleanType)) {
-			Token sym = n.getExpr().getToken();
-			addError(sym.getRow(), sym.getCol(), "Expression must be of type boolean");
-		} else {
-			n.getExpr().setType(texp);
-		}
-
-		n.getThen().accept(this);
-		n.getElze().accept(this);
-
-		return null;
-	}
+//	@Override
+//	public ASTType visit(ASTIfThenElse n)
+//	{
+//		ASTType texp = n.getExpr().accept(this);
+//		if (!(texp instanceof ASTBooleanType)) {
+//			Token sym = n.getExpr().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Expression must be of type boolean");
+//		} else {
+//			n.getExpr().setType(texp);
+//		}
+//
+//		n.getThen().accept(this);
+//		n.getElze().accept(this);
+//
+//		return null;
+//	}
 
 	@Override
 	public ASTType visit(ASTSkip skip)
@@ -122,19 +133,19 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTWhile n)
 	{
-		ASTType texp = n.getExpr().accept(this);
-		if (!(texp instanceof ASTBooleanType)) {
-			Token sym = n.getExpr().getToken();
-			addError(sym.getRow(), sym.getCol(), "Expression must be of type boolean");
-		} else {
-			n.getExpr().setType(texp);
-		}
-
-		n.getBody().accept(this);
+//		ASTType texp = n.getExpr().accept(this);
+//		if (!(texp instanceof ASTBooleanType)) {
+//			Token sym = n.getExpr().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Expression must be of type boolean");
+//		} else {
+//			n.getExpr().setType(texp);
+//		}
+//
+//		n.getBody().accept(this);
 
 		return null;
 	}
-	
+
 	@Override
 	public ASTType visit(ASTIntLiteral n)
 	{
@@ -143,251 +154,273 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		return t;
 	}
 
-	@Override
-	public ASTType visit(ASTPlus n)
-	{
-		ASTType tlhs = n.getLhs().accept(this);
-		ASTType trhs = n.getRhs().accept(this);
+//	@Override
+//	public ASTType visit(ASTPlus n)
+//	{
+//		ASTType tlhs = n.getLhs().accept(this);
+//		ASTType trhs = n.getRhs().accept(this);
+//
+//		if (tlhs == null || !(tlhs instanceof ASTIntType || tlhs instanceof ASTStringType) || trhs == null
+//				|| !(trhs instanceof ASTIntType || trhs instanceof ASTStringType)) {
+//			Token sym = n.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incompatible Types used with + operator");
+//			return new ASTIntType(n.getToken());
+//		}
+//
+//		if (tlhs instanceof ASTIntType) {
+//			n.setType(trhs);
+//			return trhs;
+//		}
+//
+//		if (tlhs instanceof ASTStringType) {
+//			n.setType(tlhs);
+//			return tlhs;
+//		}
+//
+//		ASTType t = new ASTIntType(n.getToken());
+//		n.setType(t);
+//		return t;
+//	}
 
-		if (tlhs == null || !(tlhs instanceof ASTIntType || tlhs instanceof ASTStringType) || trhs == null
-				|| !(trhs instanceof ASTIntType || trhs instanceof ASTStringType)) {
-			Token sym = n.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incompatible Types used with + operator");
-			return new ASTIntType(n.getToken());
-		}
+//	@Override
+//	public ASTType visit(ASTMinus n)
+//	{
+//		ASTType lhs = n.getLhs().accept(this);
+//		ASTType rhs = n.getRhs().accept(this);
+//
+//		if (lhs == null || rhs == null) { 
+//			Token sym = n.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Improper Type used with - operator");
+//			return new ASTIntType(n.getToken());
+//		}
+//
+//		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
+//			Token sym = n.getLhs().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator - cannot be applied to " + lhs + ", " + rhs);
+//		}
+//
+//		ASTType t = new ASTIntType(n.getToken());
+//		n.setType(t);
+//		return t;
+//	}
 
-		if (tlhs instanceof ASTIntType) {
-			n.setType(trhs);
-			return trhs;
-		}
+//	@Override
+//	public ASTType visit(ASTTimes times)
+//	{	
+//		ASTType lhs = times.getLhs().accept(this);
+//		ASTType rhs = times.getRhs().accept(this);
+//
+//		if (lhs == null || rhs == null) { 
+//			Token sym = times.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Improper Type used with * operator");
+//			return new ASTIntType(times.getToken());
+//		}
+//
+//		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
+//			Token sym = times.getLhs().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator * cannot be applied to " + lhs + ", " + rhs);
+//		}
+//
+//		ASTType type = new ASTIntType(times.getToken());
+//		times.setType(type);
+//		return type;
+//	}
+//
+//	@Override
+//	public ASTType visit(ASTModulus modulus)
+//	{
+//		ASTType lhs = modulus.getLhs().accept(this);
+//		ASTType rhs = modulus.getRhs().accept(this);
+//
+//		if (lhs == null || rhs == null) {
+//			Token sym = modulus.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Improper Type used with % operator");
+//			return new ASTIntType(modulus.getToken());
+//		}
+//
+//		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
+//			Token sym = modulus.getLhs().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator % cannot be applied to " + lhs + ", " + rhs);
+//		}
+//
+//		ASTType t = new ASTIntType(modulus.getToken());
+//		modulus.setType(t);
+//		return t;
+//	}
 
-		if (tlhs instanceof ASTStringType) {
-			n.setType(tlhs);
-			return tlhs;
-		}
+//	@Override
+//	public ASTType visit(ASTDivision n)
+//	{
+//		ASTType lhs = n.getLhs().accept(this);
+//		ASTType rhs = n.getRhs().accept(this);
+//
+//		if (lhs == null || rhs == null) { 
+//			Token sym = n.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Improper Type used with / operator");
+//			return new ASTIntType(n.getToken());
+//		}
+//
+//		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
+//			Token sym = n.getLhs().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator / cannot be applied to " + lhs + ", " + rhs);
+//		}
+//		ASTType t = new ASTIntType(n.getToken());
+//		n.setType(t);
+//		return t;
+//	}
+//
+//	@Override
+//	public ASTType visit(ASTEquals n)
+//	{
+//		ASTType t1 = n.getLhs().accept(this);
+//		ASTType t2 = n.getRhs().accept(this);
+//
+//		if (t1 == null || t2 == null) {
+//			Token sym = n.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incorrect types used with == oprator");
+//		} else if ((t1 instanceof ASTIntType && t2 instanceof ASTIntType)
+//				|| (t1 instanceof ASTBooleanType && t2 instanceof ASTBooleanType)
+//				|| (t1 instanceof ASTStringType && t2 instanceof ASTStringType)
+//				|| (t1 instanceof ASTIntArrayType && t2 instanceof ASTIntArrayType)
+//				|| (t1 instanceof ASTIdentifierType && t2 instanceof ASTIdentifierType)) {
+//			n.setType(t1);
+//		} else {
+//			Token sym = n.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Oprator == cannot be applied to " + t1 + ", " + t2);
+//		}
+//		return new ASTBooleanType(n.getToken());
+//	}
+//
+//	@Override
+//	public ASTType visit(ASTNotEquals n)
+//	{
+//		ASTType t1 = n.getLhs().accept(this);
+//		ASTType t2 = n.getRhs().accept(this);
+//
+//		// if (t1 == null || t2 == null) {
+//		// 	Token sym = n.getToken();
+//		// 	addError(sym.getRow(), sym.getCol(), "Incorrect types used with == oprator");
+//		// } else if ((t1 instanceof ASTIntType && t2 instanceof ASTIntType)
+//		// 		|| (t1 instanceof ASTBooleanType && t2 instanceof ASTBooleanType)
+//		// 		|| (t1 instanceof ASTStringType && t2 instanceof ASTStringType)
+//		// 		|| (t1 instanceof ASTIntArrayType && t2 instanceof ASTIntArrayType)
+//		// 		|| (t1 instanceof ASTIdentifierType && t2 instanceof ASTIdentifierType)) {
+//		// 	n.setType(t1);
+//		// } else {
+//		// 	Token sym = n.getToken();
+//		// 	addError(sym.getRow(), sym.getCol(), "Oprator == cannot be applied to " + t1 + ", " + t2);
+//		// }
+//		return new ASTBooleanType(n.getToken());
+//	}
 
-		ASTType t = new ASTIntType(n.getToken());
-		n.setType(t);
-		return t;
-	}
+//	@Override
+//	public ASTType visit(ASTLessThan lessThan)
+//	{
+//		ASTType t1 = lessThan.getLhs().accept(this);
+//		ASTType t2 = lessThan.getRhs().accept(this);
+//
+//		if (t1 == null || t2 == null) {
+//			Token sym = lessThan.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incorrect types used with < oprator");
+//		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
+//			Token sym = lessThan.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator < cannot be applied to " + t1 + ", " + t2);
+//		}
+//
+//		ASTType t = new ASTBooleanType(lessThan.getToken());
+//		lessThan.setType(t);
+//		return t;
+//	}
+//
+//	@Override
+//	public ASTType visit(ASTLessThanOrEqual lessThanOrEqual)
+//	{
+//		ASTType t1 = lessThanOrEqual.getLhs().accept(this);
+//		ASTType t2 = lessThanOrEqual.getRhs().accept(this);
+//
+//		if (t1 == null || t2 == null) {
+//			Token sym = lessThanOrEqual.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incorrect types used with <= oprator");
+//		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
+//			Token sym = lessThanOrEqual.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator <= cannot be applied to " + t1 + ", " + t2);
+//		}
+//		ASTType t = new ASTBooleanType(lessThanOrEqual.getToken());
+//		lessThanOrEqual.setType(t);
+//		return t;
+//	}
+//
+//	@Override
+//	public ASTType visit(ASTGreaterThan greaterThan)
+//	{
+//		ASTType t1 = greaterThan.getLhs().accept(this);
+//		ASTType t2 = greaterThan.getRhs().accept(this);
+//
+//		if (t1 == null || t2 == null) {
+//			Token sym = greaterThan.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incorrect types used with > oprator");
+//		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
+//			Token sym = greaterThan.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator > cannot be applied to " + t1 + ", " + t2);
+//		}
+//		ASTType t = new ASTBooleanType(greaterThan.getToken());
+//		greaterThan.setType(t);
+//		return t;
+//	}
 
-	@Override
-	public ASTType visit(ASTMinus n)
-	{
-		ASTType lhs = n.getLhs().accept(this);
-		ASTType rhs = n.getRhs().accept(this);
+//	@Override
+//	public ASTType visit(ASTGreaterThanOrEqual greaterThanOrEqual)
+//	{
+//		ASTType t1 = greaterThanOrEqual.getLhs().accept(this);
+//		ASTType t2 = greaterThanOrEqual.getRhs().accept(this);
+//
+//		if (t1 == null || t2 == null) {
+//			Token sym = greaterThanOrEqual.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incorrect types used with >= oprator");
+//		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
+//			Token sym = greaterThanOrEqual.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator >= cannot be applied to " + t1 + ", " + t2);
+//		}
+//		ASTType t = new ASTBooleanType(greaterThanOrEqual.getToken());
+//		greaterThanOrEqual.setType(t);
+//		return t;
+//	}
+//
+//	@Override
+//	public ASTType visit(ASTAnd and)
+//	{
+//		ASTType t1 = and.getLhs().accept(this);
+//		ASTType t2 = and.getRhs().accept(this);
+//
+//		if (t1 == null || t2 == null) {
+//			Token sym = and.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incorrect types used with && oprator");
+//		} else if (!(t1 instanceof ASTBooleanType) || !(t2 instanceof ASTBooleanType)) {
+//			Token sym = and.getLhs().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator && cannot be applied to " + t1 + ", " + t2);
+//		}
+//		ASTType t = new ASTBooleanType(and.getToken());
+//		and.setType(t);
+//		return t;
+//	}
 
-		if (lhs == null || rhs == null) { 
-			Token sym = n.getToken();
-			addError(sym.getRow(), sym.getCol(), "Improper Type used with - operator");
-			return new ASTIntType(n.getToken());
-		}
-
-		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
-			Token sym = n.getLhs().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator - cannot be applied to " + lhs + ", " + rhs);
-		}
-
-		ASTType t = new ASTIntType(n.getToken());
-		n.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTTimes times)
-	{	
-		ASTType lhs = times.getLhs().accept(this);
-		ASTType rhs = times.getRhs().accept(this);
-
-		if (lhs == null || rhs == null) { 
-			Token sym = times.getToken();
-			addError(sym.getRow(), sym.getCol(), "Improper Type used with * operator");
-			return new ASTIntType(times.getToken());
-		}
-
-		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
-			Token sym = times.getLhs().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator * cannot be applied to " + lhs + ", " + rhs);
-		}
-
-		ASTType type = new ASTIntType(times.getToken());
-		times.setType(type);
-		return type;
-	}
-
-	@Override
-	public ASTType visit(ASTModulus modulus)
-	{
-		ASTType lhs = modulus.getLhs().accept(this);
-		ASTType rhs = modulus.getRhs().accept(this);
-
-		if (lhs == null || rhs == null) {
-			Token sym = modulus.getToken();
-			addError(sym.getRow(), sym.getCol(), "Improper Type used with % operator");
-			return new ASTIntType(modulus.getToken());
-		}
-
-		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
-			Token sym = modulus.getLhs().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator % cannot be applied to " + lhs + ", " + rhs);
-		}
-
-		ASTType t = new ASTIntType(modulus.getToken());
-		modulus.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTDivision n)
-	{
-		ASTType lhs = n.getLhs().accept(this);
-		ASTType rhs = n.getRhs().accept(this);
-
-		if (lhs == null || rhs == null) { 
-			Token sym = n.getToken();
-			addError(sym.getRow(), sym.getCol(), "Improper Type used with / operator");
-			return new ASTIntType(n.getToken());
-		}
-
-		if (!(lhs instanceof ASTIntType) || !(rhs instanceof ASTIntType)) {
-			Token sym = n.getLhs().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator / cannot be applied to " + lhs + ", " + rhs);
-		}
-		ASTType t = new ASTIntType(n.getToken());
-		n.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTEquals n)
-	{
-		ASTType t1 = n.getLhs().accept(this);
-		ASTType t2 = n.getRhs().accept(this);
-
-		if (t1 == null || t2 == null) {
-			Token sym = n.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with == oprator");
-		} else if ((t1 instanceof ASTIntType && t2 instanceof ASTIntType)
-				|| (t1 instanceof ASTBooleanType && t2 instanceof ASTBooleanType)
-				|| (t1 instanceof ASTStringType && t2 instanceof ASTStringType)
-				|| (t1 instanceof ASTIntArrayType && t2 instanceof ASTIntArrayType)
-				|| (t1 instanceof ASTIdentifierType && t2 instanceof ASTIdentifierType)) {
-			n.setType(t1);
-		} else {
-			Token sym = n.getToken();
-			addError(sym.getRow(), sym.getCol(), "Oprator == cannot be applied to " + t1 + ", " + t2);
-		}
-		return new ASTBooleanType(n.getToken());
-	}
-
-	@Override
-	public ASTType visit(ASTLessThan lessThan)
-	{
-		ASTType t1 = lessThan.getLhs().accept(this);
-		ASTType t2 = lessThan.getRhs().accept(this);
-
-		if (t1 == null || t2 == null) {
-			Token sym = lessThan.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with < oprator");
-		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
-			Token sym = lessThan.getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator < cannot be applied to " + t1 + ", " + t2);
-		}
-
-		ASTType t = new ASTBooleanType(lessThan.getToken());
-		lessThan.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTLessThanOrEqual lessThanOrEqual)
-	{
-		ASTType t1 = lessThanOrEqual.getLhs().accept(this);
-		ASTType t2 = lessThanOrEqual.getRhs().accept(this);
-
-		if (t1 == null || t2 == null) {
-			Token sym = lessThanOrEqual.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with <= oprator");
-		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
-			Token sym = lessThanOrEqual.getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator <= cannot be applied to " + t1 + ", " + t2);
-		}
-		ASTType t = new ASTBooleanType(lessThanOrEqual.getToken());
-		lessThanOrEqual.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTGreaterThan greaterThan)
-	{
-		ASTType t1 = greaterThan.getLhs().accept(this);
-		ASTType t2 = greaterThan.getRhs().accept(this);
-
-		if (t1 == null || t2 == null) {
-			Token sym = greaterThan.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with > oprator");
-		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
-			Token sym = greaterThan.getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator > cannot be applied to " + t1 + ", " + t2);
-		}
-		ASTType t = new ASTBooleanType(greaterThan.getToken());
-		greaterThan.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTGreaterThanOrEqual greaterThanOrEqual)
-	{
-		ASTType t1 = greaterThanOrEqual.getLhs().accept(this);
-		ASTType t2 = greaterThanOrEqual.getRhs().accept(this);
-
-		if (t1 == null || t2 == null) {
-			Token sym = greaterThanOrEqual.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with >= oprator");
-		} else if (!(t1 instanceof ASTIntType) || !(t2 instanceof ASTIntType)) {
-			Token sym = greaterThanOrEqual.getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator >= cannot be applied to " + t1 + ", " + t2);
-		}
-		ASTType t = new ASTBooleanType(greaterThanOrEqual.getToken());
-		greaterThanOrEqual.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTAnd and)
-	{
-		ASTType t1 = and.getLhs().accept(this);
-		ASTType t2 = and.getRhs().accept(this);
-
-		if (t1 == null || t2 == null) {
-			Token sym = and.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with && oprator");
-		} else if (!(t1 instanceof ASTBooleanType) || !(t2 instanceof ASTBooleanType)) {
-			Token sym = and.getLhs().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator && cannot be applied to " + t1 + ", " + t2);
-		}
-		ASTType t = new ASTBooleanType(and.getToken());
-		and.setType(t);
-		return t;
-	}
-
-	@Override
-	public ASTType visit(ASTOr or)
-	{
-		ASTType t1 = or.getLhs().accept(this);
-		ASTType t2 = or.getRhs().accept(this);
-
-		if (t1 == null || t2 == null) {
-			Token sym = or.getToken();
-			addError(sym.getRow(), sym.getCol(), "Incorrect types used with || oprator");
-		} else if (!(t1 instanceof ASTBooleanType) || !(t2 instanceof ASTBooleanType)) {
-			Token sym = or.getLhs().getToken();
-			addError(sym.getRow(), sym.getCol(), "Operator || cannot be applied to " + t1 + ", " + t2);
-		}
-		ASTType t = new ASTBooleanType(or.getToken());
-		or.setType(t);
-		return t;
-	}
+//	@Override
+//	public ASTType visit(ASTOr or)
+//	{
+//		ASTType t1 = or.getLhs().accept(this);
+//		ASTType t2 = or.getRhs().accept(this);
+//
+//		if (t1 == null || t2 == null) {
+//			Token sym = or.getToken();
+//			addError(sym.getRow(), sym.getCol(), "Incorrect types used with || oprator");
+//		} else if (!(t1 instanceof ASTBooleanType) || !(t2 instanceof ASTBooleanType)) {
+//			Token sym = or.getLhs().getToken();
+//			addError(sym.getRow(), sym.getCol(), "Operator || cannot be applied to " + t1 + ", " + t2);
+//		}
+//		ASTType t = new ASTBooleanType(or.getToken());
+//		or.setType(t);
+//		return t;
+//	}
 
 	@Override
 	public ASTType visit(ASTTrue true1)
@@ -446,27 +479,27 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionExpr cm)
 	{
-		if (cm.getInstanceName() == null) {
-			ASTIdentifierExpr callFunc = cm.getFunctionId();
-
-			SymbolFunction func = null;
-			if (symbolClass == null) {
-				func = symbolProgram.getFunction(callFunc.toString());
-			} else {
-				func = symbolProgram.getFunction(callFunc.toString(), symbolClass.getId());
-			}
-			
-			// if (func == null) {
-			// 	Token sym = callFunc.getToken();
-			// 	addError(sym.getRow(), sym.getCol(), "Method " + callFunc + " not declared");
-			// 	return null;
-			// } else {
-			// 	callFunc.setB(func);
-			// 	checkCallArguments(cm, func);
-			// 	cm.setType(func.getType());
-			// 	return func.getType();
-			// }
-		} 
+//		if (cm.getInstanceName() == null) {
+//			ASTIdentifierExpr callFunc = cm.getFunctionName();
+//
+//			SymbolFunction func = null;
+//			if (symbolClass == null) {
+//				func = symbolProgram.getFunction(callFunc.toString());
+//			} else {
+//				func = symbolProgram.getFunction(callFunc.toString(), symbolClass.getId());
+//			}
+//
+//			// if (func == null) {
+//			// Token sym = callFunc.getToken();
+//			// addError(sym.getRow(), sym.getCol(), "Method " + callFunc + " not declared");
+//			// return null;
+//			// } else {
+//			// callFunc.setB(func);
+//			// checkCallArguments(cm, func);
+//			// cm.setType(func.getType());
+//			// return func.getType();
+//			// }
+//		}
 		return null;
 	}
 
@@ -483,16 +516,16 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	private void checkCallArguments(ASTCallFunctionExpr cm, SymbolFunction m)
 	{
 		List<ASTType> argTypes = new ArrayList<>();
-		for (int i = 0; i < cm.getArgExprListSize(); i++) {
-			ASTType t2 = cm.getArgExprAt(i).accept(this);
+		for (int i = 0; i < cm.getArgumentListSize(); i++) {
+			ASTType t2 = cm.getArgumentAt(i).accept(this);
 			argTypes.add(t2);
 		}
 
 		// Check number of arguments & parameters
-		if (cm.getArgExprListSize() != m.getParamsSize()) {
+		if (cm.getArgumentListSize() != m.getParamsSize()) {
 			Token sym = cm.getToken();
-			addError(sym.getRow(), sym.getCol(), "The method " + m.toString()
-					+ " is not applicable for the arguments (" + getArguments(argTypes) + ")");
+			addError(sym.getRow(), sym.getCol(), "The method " + m.toString() + " is not applicable for the arguments ("
+					+ getArguments(argTypes) + ")");
 			return;
 		}
 
@@ -503,7 +536,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			ASTType t2 = argTypes.get(i);
 
 			if (!symbolProgram.compareTypes(t1, t2)) {
-				Token sym = cm.getArgExprAt(i).getToken();
+				Token sym = cm.getArgumentAt(i).getToken();
 				addError(sym.getRow(), sym.getCol(), "The method " + m.toString()
 						+ " is not applicable for the arguments (" + getArguments(argTypes) + ")");
 				return;
@@ -573,7 +606,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTVariable vd)
 	{
-		
+
 		return vd.getType();
 	}
 
@@ -585,26 +618,24 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 		if (vd.getExpr() instanceof ASTCallFunctionExpr) {
 			ASTCallFunctionExpr callFunc = (ASTCallFunctionExpr) vd.getExpr();
-			if (callFunc.getInstanceName() == null) {
-				SymbolFunction func = null;
-				if (symbolClass != null) {
-					func = symbolProgram.getFunction(callFunc.getFunctionId().toString(), symbolClass.getId());
-				} else {
-					func = symbolProgram.getFunction(callFunc.getFunctionId().toString());
-				}
-				
-				if (func != null) {
-					rhs = func.getType();
-				}
+
+			SymbolFunction func = null;
+			if (symbolClass != null) {
+				func = symbolProgram.getFunction(callFunc.getFunctionName().toString(), symbolClass.getId());
 			} else {
-				return null;
+				func = symbolProgram.getFunction(callFunc.getFunctionName().toString());
+			}
+
+			if (func != null) {
+				rhs = func.getType();
 			}
 		}
 
 		if (!symbolProgram.compareTypes(lhs, rhs)) {
 			Token sym = vd.getToken();
 			if (lhs == null || rhs == null) {
-				// addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
+				// addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment
+				// Operator = ");
 			} else {
 				addError(sym.getRow(), sym.getCol(), "Operator = cannot be applied to " + lhs + ", " + rhs);
 			}
@@ -617,15 +648,9 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTArgument ad)
-	{
-		return ad.getType();
-	}
-
-	@Override
 	public ASTType visit(ASTFunction functionDecl)
 	{
-		String functionName = functionDecl.getId().getId();
+		String functionName = functionDecl.getFunctionName().getId();
 
 		if (hsymbolFunction.contains(functionName)) {
 			return functionDecl.getReturnType();
@@ -633,24 +658,19 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 		if (!(functionDecl.getReturnType() instanceof ASTVoidType)) {
 			Token tok = functionDecl.getReturnType().getToken();
-			addError(tok.getRow(), tok.getCol(), "Function " + functionName + " must return a result of Type " + functionDecl.getReturnType());
+			addError(tok.getRow(), tok.getCol(),
+					"Function " + functionName + " must return a result of Type " + functionDecl.getReturnType());
 		}
 
 		hsymbolFunction.add(functionName);
 
-		symbolFunction = (SymbolFunction) functionDecl.getId().getB();
+		symbolFunction = (SymbolFunction) functionDecl.getFunctionName().getB();
 
 		for (int i = 0; i < functionDecl.getArgumentListSize(); i++) {
-			functionDecl.getArgumentDeclAt(i).accept(this);
+			functionDecl.getArgumentAt(i).accept(this);
 		}
 
-		for (int i = 0; i < functionDecl.getVariableListSize(); i++) {
-			functionDecl.getVariableDeclAt(i).accept(this);
-		}
-
-		for (int i = 0; i < functionDecl.getStatementListSize(); i++) {
-			functionDecl.getStatementDeclAt(i).accept(this);
-		}
+		functionDecl.getBody().accept(this);
 
 		symbolFunction = null;
 		return null;
@@ -659,7 +679,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTFunctionReturn functionReturn)
 	{
-		String functionName = functionReturn.getId().getId();
+		String functionName = functionReturn.getFunctionName().getId();
 
 		if (hsymbolFunction.contains(functionName)) {
 			return functionReturn.getReturnType();
@@ -667,19 +687,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 		hsymbolFunction.add(functionName);
 
-		symbolFunction = (SymbolFunction) functionReturn.getId().getB();
+		symbolFunction = (SymbolFunction) functionReturn.getFunctionName().getB();
 
 		for (int i = 0; i < functionReturn.getArgumentListSize(); i++) {
-			functionReturn.getArgumentDeclAt(i).accept(this);
+			functionReturn.getArgumentAt(i).accept(this);
 		}
 
-		for (int i = 0; i < functionReturn.getVariableListSize(); i++) {
-			functionReturn.getVariableDeclAt(i).accept(this);
-		}
-
-		for (int i = 0; i < functionReturn.getStatementListSize(); i++) {
-			functionReturn.getStatementDeclAt(i).accept(this);
-		}
+		functionReturn.getBody().accept(this);
 
 		ASTType t1 = functionReturn.getReturnType();
 		ASTType t2 = functionReturn.getReturnExpr().accept(this);
@@ -696,7 +710,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTProgram program)
-	{	
+	{
 		for (int i = 0; i < program.getClassListSize(); i++) {
 			program.getClassDeclAt(i).accept(this);
 		}
@@ -797,13 +811,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTClass classDecl)
 	{
-		String id = classDecl.getId().getId();
+		String id = classDecl.getClassName().getId();
 		if (hsymbolClass.contains(id)) {
 			return null;
 		}
 		hsymbolClass.add(id);
 
-		Binding b = classDecl.getId().getB();
+		Binding b = classDecl.getClassName().getB();
 		symbolClass = (SymbolClass) b;
 
 		hsymbolFunction.clear();
@@ -818,22 +832,10 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 		return null;
 	}
-	
+
 	public static void addError(int line, int col, String errorText)
 	{
 		SemanticErrors.addError(line, col, errorText);
-	}
-
-	@Override
-	public ASTType visit(ASTForLoop forLoop)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTInlineASM assembly)
-	{
-		return null;
 	}
 
 	@Override
@@ -852,5 +854,33 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTProperty property)
 	{
 		return null;
-	} 
+	}
+
+	@Override
+	public ASTType visit(ASTIfChain ifChain)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTBinaryOperation astBinaryOperation)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTConditionalBranch astConditionalBranch)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTArgument astArgument)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

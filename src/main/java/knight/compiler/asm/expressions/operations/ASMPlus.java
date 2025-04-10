@@ -50,7 +50,7 @@ public class ASMPlus extends ASMExpression
 
 	public void setRhs(ASMExpression rhs)
 	{
-		this.rhs = rhs;		
+		this.rhs = rhs;
 	}
 
 	@Override

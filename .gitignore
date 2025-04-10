@@ -9,3 +9,5 @@
 /logs/
 knight.sublime-project
 knight.sublime-workspace
+.classpath
+.project

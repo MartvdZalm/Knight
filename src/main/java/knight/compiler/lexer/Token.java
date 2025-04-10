@@ -30,42 +30,42 @@ package knight.compiler.lexer;
  * Date: 2024-01-06
  * Description:
  */
-public class Token 
+public class Token
 {
-    private int row;
-    private int col;
-    private Symbol symbol;
+	private int row;
+	private int col;
+	private Symbol symbol;
 
-    public Token(Symbol symbol, int row, int col) 
-    {
-        this.symbol = symbol;
-        this.row = row;
-        this.col = col;
-    }
+	public Token(Symbol symbol, int row, int col)
+	{
+		this.symbol = symbol;
+		this.row = row;
+		this.col = col;
+	}
 
-    public int getRow() 
-    {
-        return row;
-    }
+	public int getRow()
+	{
+		return row;
+	}
 
-    public int getCol() 
-    {
-        return col;
-    }
+	public int getCol()
+	{
+		return col;
+	}
 
-    public Tokens getToken()
-    {
-        return symbol.getToken();
-    }
+	public Tokens getToken()
+	{
+		return symbol.getToken();
+	}
 
-    public String getSymbol()
-    {
-        return symbol.getSymbol();
-    }
+	public String getSymbol()
+	{
+		return symbol.getSymbol();
+	}
 
-    @Override
-    public String toString()
-    {
-        return row + ":" + col + " " + getToken() + (getSymbol() == null ? "()" : ("(" + getSymbol() + ")"));
-    }
+	@Override
+	public String toString()
+	{
+		return row + ":" + col + " " + getToken() + (getSymbol() == null ? "()" : ("(" + getSymbol() + ")"));
+	}
 }

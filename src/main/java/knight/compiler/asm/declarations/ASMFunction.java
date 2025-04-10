@@ -84,22 +84,22 @@ public class ASMFunction extends ASMProgram
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(".globl " + this.id + ASM.NEWLINE);
-		sb.append(".type " + this.id +  ", @function" + ASM.NEWLINE);
+		sb.append(".type " + this.id + ", @function" + ASM.NEWLINE);
 		sb.append(this.id + ":" + ASM.NEWLINE);
 		sb.append("pushq %rbp" + ASM.NEWLINE);
 		sb.append("movq %rsp, %rbp" + ASM.NEWLINE);
 
 		for (int i = 0; i < Math.min(this.argumentList.size(), 6); i++) {
-	        sb.append("movq %" + this.helper.getArgumentRegister(i) + ", -" + this.helper.getLocalVariableReference(i) + "\n");
-	    }
+			sb.append("movq %" + this.helper.getArgumentRegister(i) + ", -" + this.helper.getLocalVariableReference(i)
+					+ "\n");
+		}
 
-	    for (int i = 6; i < this.argumentList.size(); i++) {
-	        sb.append("movq " + (i - 6) * 8 + "(%rbp), -" + this.helper.getLocalVariableReference(i) + "\n");
-	    }
-
+		for (int i = 6; i < this.argumentList.size(); i++) {
+			sb.append("movq " + (i - 6) * 8 + "(%rbp), -" + this.helper.getLocalVariableReference(i) + "\n");
+		}
 
 		// for (ASMArgument asmArgument : this.argumentList) {
-		// 	sb.append(asmArgument).append(ASM.NEWLINE);
+		// sb.append(asmArgument).append(ASM.NEWLINE);
 		// }
 
 		for (ASMVariable asmVariable : this.variableList) {

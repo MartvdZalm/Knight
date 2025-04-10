@@ -40,7 +40,7 @@ public class ASMIdentifier extends ASM
 
 	public ASMIdentifier()
 	{
-		
+
 	}
 
 	public void setId(String id)
