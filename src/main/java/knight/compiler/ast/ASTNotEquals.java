@@ -1,27 +1,23 @@
 package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
+import knight.compiler.ast.ASTVisitor;
 
 /*
- * File: ASTBinaryOperation.java
+ * File: ASTNotEquals.java
  * @author: Mart van der Zalm
  * Date: 2025-04-10
  */
-public class ASTBinaryOperation extends ASTExpression
+public class ASTNotEquals extends ASTExpression
 {
 	private ASTExpression leftSide;
 	private ASTExpression rightSide;
 
-	public ASTBinaryOperation(Token token, ASTExpression leftSide, ASTExpression rightSide)
+	public ASTNotEquals(Token token, ASTExpression leftSide, ASTExpression rightSide)
 	{
 		super(token);
 		this.leftSide = leftSide;
 		this.rightSide = rightSide;
-	}
-
-	public void setLeftSide(ASTExpression leftSide)
-	{
-		this.leftSide = leftSide;
 	}
 
 	public ASTExpression getLeftSide()
@@ -29,14 +25,19 @@ public class ASTBinaryOperation extends ASTExpression
 		return leftSide;
 	}
 
-	public void setRightSide(ASTExpression rightSide)
+	public void setLeftSide(ASTExpression leftSide)
 	{
-		this.rightSide = rightSide;
+		this.leftSide = leftSide;
 	}
 
 	public ASTExpression getRightSide()
 	{
 		return rightSide;
+	}
+
+	public void setRightSide(ASTExpression rightSide)
+	{
+		this.rightSide = rightSide;
 	}
 
 	@Override

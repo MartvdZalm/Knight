@@ -29,6 +29,8 @@ import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
+import knight.compiler.ast.ASTNotEquals;
+import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
@@ -320,7 +322,9 @@ public class Parser
 				eat(Tokens.LEFTPAREN);
 				ASTExpression expr = this.parseExpression();
 				eat(Tokens.RIGHTPAREN);
+				eat(Tokens.LEFTBRACE);
 				ASTBody body = this.parseBody();
+				eat(Tokens.RIGHTBRACE);
 				ASTWhile result = new ASTWhile(tok, expr, body);
 				return result;
 			}
@@ -373,7 +377,7 @@ public class Parser
 						}
 						eat(Tokens.RIGHTPAREN);
 						eat(Tokens.SEMICOLON);
-						ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, null, idExpr, exprList);
+						ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, idExpr, exprList);
 						return callFunc;
 					}
 
@@ -602,15 +606,29 @@ public class Parser
 		switch (tok.getToken())
 		{
 
+			case NOTEQUALS: {
+				ASTExpression rightSide = stOperand.pop();
+				ASTExpression leftSide = stOperand.pop();
+
+				stOperand.push(new ASTNotEquals(tok, rightSide, leftSide));
+			}
+			break;
+
+			case PLUS: {
+				ASTExpression rightSide = stOperand.pop();
+				ASTExpression leftSide = stOperand.pop();
+
+				stOperand.push(new ASTPlus(tok, rightSide, leftSide));
+			}
+			break;
+
 			case OR:
 			case AND:
 			case EQUALS:
-			case NOTEQUALS:
 			case LESSTHAN:
 			case LESSTHANOREQUAL:
 			case GREATERTHAN:
 			case GREATERTHANOREQUAL:
-			case PLUS:
 			case MINUS:
 			case TIMES:
 			case DIV:
@@ -618,7 +636,7 @@ public class Parser
 				ASTExpression rightSide = stOperand.pop();
 				ASTExpression leftSide = stOperand.pop();
 
-				stOperand.push(new ASTBinaryOperation(tok).setRightSide(rightSide).setLeftSide(leftSide));
+				stOperand.push(new ASTBinaryOperation(tok, rightSide, leftSide));
 			}
 			break;
 

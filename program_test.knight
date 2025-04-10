@@ -8,12 +8,12 @@ fn main(): int
 	int guess = 0;
 	int tries = 0;
 
-	// while (guess != secret)
-	// {
-	// 	print("Enter your guess: ");
-	// 	string input = read_line();
-		// guess = to_int(input);
-		// tries = tries + 1;
+	while (guess != secret)
+	{
+		print("Enter your guess: ");
+		string input = read_line();
+		guess = to_int(input);
+		tries = tries + 1;
 
 		// if (guess < secret)
 		// {
@@ -27,7 +27,7 @@ fn main(): int
 		// {
 		// 	print("Correct! You guessed it in ", to_string(tries), " tries!");
 		// }
-	// }
+	}
 
 	ret 0;
 }

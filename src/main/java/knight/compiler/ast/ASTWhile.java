@@ -1,27 +1,3 @@
-/*
- * MIT License
- * 
- * Copyright (c) 2023, Mart van der Zalm
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
@@ -29,15 +5,14 @@ import knight.compiler.lexer.Token;
 /*
  * File: ASTWhile.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
- * Description:
+ * Date: 2025-04-10
  */
 public class ASTWhile extends ASTStatement
 {
 	private ASTExpression expr;
-	private ASTStatement body;
+	private ASTBody body;
 
-	public ASTWhile(Token token, ASTExpression expr, ASTStatement body)
+	public ASTWhile(Token token, ASTExpression expr, ASTBody body)
 	{
 		super(token);
 		this.expr = expr;
@@ -54,12 +29,12 @@ public class ASTWhile extends ASTStatement
 		this.expr = expr;
 	}
 
-	public ASTStatement getBody()
+	public ASTBody getBody()
 	{
 		return body;
 	}
 
-	public void setBody(ASTStatement body)
+	public void setBody(ASTBody body)
 	{
 		this.body = body;
 	}

@@ -11,60 +11,44 @@ import knight.compiler.lexer.Token;
  */
 public class ASTCallFunctionStat extends ASTStatement
 {
-	private ASTExpression instanceName;
-	private ASTIdentifierExpr methodId;
-	private List<ASTExpression> argExprList;
+	private ASTIdentifierExpr functionName;
+	private ASTList<ASTExpression> argumentList;
 
-	public ASTCallFunctionStat(Token token, ASTExpression instanceName, ASTIdentifierExpr methodId,
-			List<ASTExpression> argExprList)
+	public ASTCallFunctionStat(Token token, ASTIdentifierExpr functionName, List<ASTExpression> argumentList)
 	{
 		super(token);
-		this.instanceName = instanceName;
-		this.methodId = methodId;
-		this.argExprList = argExprList;
+		this.functionName = functionName;
+		this.argumentList = new ASTList<>(argumentList);
 	}
 
-	public ASTExpression getInstanceName()
+	public ASTIdentifierExpr getFunctionName()
 	{
-		return instanceName;
+		return functionName;
 	}
 
-	public void setInstanceName(ASTExpression instanceName)
+	public void setFunctionName(ASTIdentifierExpr functionName)
 	{
-		this.instanceName = instanceName;
+		this.functionName = functionName;
 	}
 
-	public ASTIdentifierExpr getFunctionId()
+	public void setArgumentList(List<ASTExpression> argumentList)
 	{
-		return methodId;
+		this.argumentList = new ASTList<>(argumentList);
 	}
 
-	public void setFunctionId(ASTIdentifierExpr methodId)
+	public List<ASTExpression> getArgumentList()
 	{
-		this.methodId = methodId;
+		return argumentList.getList();
 	}
 
-	public void setArgExprList(List<ASTExpression> argExprList)
+	public int getArgumentListSize()
 	{
-		this.argExprList = argExprList;
+		return argumentList.getSize();
 	}
 
-	public List<ASTExpression> getArgExprList()
+	public ASTExpression getArgumentAt(int index)
 	{
-		return argExprList;
-	}
-
-	public int getArgExprListSize()
-	{
-		return argExprList.size();
-	}
-
-	public ASTExpression getArgExprAt(int index)
-	{
-		if (index < argExprList.size()) {
-			return argExprList.get(index);
-		}
-		return null;
+		return argumentList.getAt(index);
 	}
 
 	@Override

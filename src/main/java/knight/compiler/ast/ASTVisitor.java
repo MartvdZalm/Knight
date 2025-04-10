@@ -80,4 +80,8 @@ public interface ASTVisitor<R>
 	public R visit(ASTConditionalBranch astConditionalBranch);
 
 	public R visit(ASTArgument astArgument);
+
+	public R visit(ASTNotEquals astNotEquals);
+
+	public R visit(ASTPlus astPlus);
 }

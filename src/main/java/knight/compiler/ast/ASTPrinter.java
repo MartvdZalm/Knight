@@ -51,11 +51,11 @@ public class ASTPrinter implements ASTVisitor<String>
 		StringBuilder sb = new StringBuilder();
 
 		for (ASTVariable variable : body.getVariableList()) {
-			sb.append(variable.accept(this));
+			sb.append(variable.accept(this) + "\n");
 		}
 
 		for (ASTStatement statement : body.getStatementList()) {
-			sb.append(statement.accept(this));
+			sb.append(statement.accept(this) + "\n");
 		}
 
 		return sb.toString();
@@ -133,6 +133,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionExpr callFunctionExpr)
 	{
 		StringBuilder sb = new StringBuilder();
+		sb.append("(FUN-CALL" + callFunctionExpr.getFunctionName().accept(this));
 		for (ASTExpression expr : callFunctionExpr.getArgumentList()) {
 			sb.append(expr.accept(this));
 		}
@@ -145,8 +146,8 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(DOT (FUN-CALL " + callFunctionStat.getFunctionId().accept(this));
-		for (ASTExpression expr : callFunctionStat.getArgExprList()) {
+		sb.append("(FUN-CALL " + callFunctionStat.getFunctionName().accept(this));
+		for (ASTExpression expr : callFunctionStat.getArgumentList()) {
 			sb.append(expr.accept(this));
 		}
 		sb.append("))");
@@ -405,5 +406,18 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String visit(ASTNotEquals astNotEquals)
+	{
+		return "(NOT-EQUALS " + astNotEquals.getLeftSide().accept(this) + " " + astNotEquals.getRightSide().accept(this)
+				+ ")";
+	}
+
+	@Override
+	public String visit(ASTPlus astPlus)
+	{
+		return "(PLUS " + astPlus.getLeftSide().accept(this) + " " + astPlus.getRightSide().accept(this) + ")";
 	}
 }

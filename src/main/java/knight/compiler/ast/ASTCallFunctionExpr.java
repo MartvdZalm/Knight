@@ -31,6 +31,11 @@ public class ASTCallFunctionExpr extends ASTExpression
 		this.functionName = functionName;
 	}
 
+	public void setArgumentList(List<ASTExpression> argumentList)
+	{
+		this.argumentList = new ASTList<>(argumentList);
+	}
+
 	public List<ASTExpression> getArgumentList()
 	{
 		return argumentList.getList();

@@ -29,6 +29,8 @@ import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
+import knight.compiler.ast.ASTNotEquals;
+import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
@@ -506,8 +508,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionStat cm)
 	{
-		for (int i = 0; i < cm.getArgExprListSize(); i++) {
-			cm.getArgExprAt(i).accept(this);
+		for (int i = 0; i < cm.getArgumentListSize(); i++) {
+			cm.getArgumentAt(i).accept(this);
 		}
 
 		return null;
@@ -879,6 +881,20 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTArgument astArgument)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTNotEquals astNotEquals)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTPlus astPlus)
 	{
 		// TODO Auto-generated method stub
 		return null;

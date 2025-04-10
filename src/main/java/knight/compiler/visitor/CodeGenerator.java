@@ -28,6 +28,8 @@ import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
+import knight.compiler.ast.ASTNotEquals;
+import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
@@ -203,19 +205,19 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
 		StringBuilder sb = new StringBuilder();
-		String funcName = callFunctionStat.getFunctionId().getId();
+		String funcName = callFunctionStat.getFunctionName().getId();
 
 		if (builtInFunctions.contains(funcName)) {
 			sb.append("knight::" + funcName + "(");
-			for (int i = 0; i < callFunctionStat.getArgExprListSize(); i++) {
-				sb.append(callFunctionStat.getArgExprAt(i).accept(this));
+			for (int i = 0; i < callFunctionStat.getArgumentListSize(); i++) {
+				sb.append(callFunctionStat.getArgumentAt(i).accept(this));
 			}
 
 			sb.append(");");
 			return sb.toString();
 		}
 
-		return funcName + "(" + callFunctionStat.getArgExprList().get(0).accept(this) + ");";
+		return funcName + "(" + callFunctionStat.getArgumentList().get(0).accept(this) + ");";
 	}
 
 	@Override
@@ -494,6 +496,20 @@ public class CodeGenerator implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTArgument astArgument)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTNotEquals astNotEquals)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTPlus astPlus)
 	{
 		// TODO Auto-generated method stub
 		return null;

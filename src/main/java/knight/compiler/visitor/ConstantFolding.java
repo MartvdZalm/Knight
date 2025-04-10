@@ -29,6 +29,8 @@ import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
+import knight.compiler.ast.ASTNotEquals;
+import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
@@ -420,11 +422,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	{
 		List<ASTExpression> argExprList = new ArrayList<>();
 
-		for (int i = 0; i < callFunctionStat.getArgExprListSize(); i++) {
-			argExprList.add(callFunctionStat.getArgExprAt(i).accept(this));
+		for (int i = 0; i < callFunctionStat.getArgumentListSize(); i++) {
+			argExprList.add(callFunctionStat.getArgumentAt(i).accept(this));
 		}
 
-		callFunctionStat.setArgExprList(argExprList);
+		callFunctionStat.setArgumentList(argExprList);
 
 		return null;
 	}
@@ -636,6 +638,20 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 
 	@Override
 	public ASTExpression visit(ASTArgument astArgument)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTNotEquals astNotEquals)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTPlus astPlus)
 	{
 		// TODO Auto-generated method stub
 		return null;
