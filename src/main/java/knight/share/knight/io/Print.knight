@@ -1,17 +1,3 @@
-fn length(string input): void
-{
-	asm {
-		"movq %rdi, %rsi"
-		"xorq %rcx, %rcx"
-		"count_loop:"
-		"cmpb $0, (%rsi, %rcx)"
-		"je end_loop"
-		"incq %rcx"
-		"jmp count_loop"
-		"end_loop:"
-	}
-}
-
 fn print(string input): void
 {
 	asm {

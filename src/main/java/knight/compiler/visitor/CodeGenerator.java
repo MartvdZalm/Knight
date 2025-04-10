@@ -27,6 +27,8 @@ package knight.compiler.visitor;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import knight.compiler.ast.declarations.*;
 import knight.compiler.ast.expressions.*;
@@ -230,13 +232,48 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTCallFunctionExpr callFunctionExpr)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+	    String funcName = callFunctionExpr.getFunctionId().getId();
+
+	    Set<String> builtInFunctions = Set.of(
+	        "print", "to_upper", "to_lower", "trim", "split", "read"
+	    );
+
+	    if (builtInFunctions.contains(funcName)) {
+	    	sb.append("knight::" + funcName + "(");
+	    	for (int i = 0; i < callFunctionExpr.getArgExprListSize(); i++) {
+	    		sb.append(callFunctionExpr.getArgExprAt(i).accept(this));
+	    	}
+
+	    	sb.append(")");
+	    	return sb.toString();
+	        // return "knight::" + funcName + "(" + callFunctionExpr.getArgExprList().get(0).accept(this) + ")";
+	    }
+
+	    return funcName + "(" + callFunctionExpr.getArgExprList().get(0).accept(this) + ")";
 	}
 
 	@Override
 	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+	    String funcName = callFunctionStat.getFunctionId().getId();
+
+	    Set<String> builtInFunctions = Set.of(
+	        "print", "to_upper", "to_lower", "trim", "split", "read"
+	    );
+
+	   	if (builtInFunctions.contains(funcName)) {
+	    	sb.append("knight::" + funcName + "(");
+	    	for (int i = 0; i < callFunctionStat.getArgExprListSize(); i++) {
+	    		sb.append(callFunctionStat.getArgExprAt(i).accept(this));
+	    	}
+
+	    	sb.append(");");
+	    	return sb.toString();
+	    }
+
+	    return funcName + "(" + callFunctionStat.getArgExprList().get(0).accept(this) + ");";
 	}
 
 	@Override
@@ -402,7 +439,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTProgram program)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("#include <string>\n");
+		sb.append("#include <knight/knight_std.h>\n");
 
 		for (int i = 0; i < program.getClassListSize(); i++) {
 			program.getClassDeclAt(i).accept(this);

@@ -74,7 +74,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		if (!symbolProgram.compareTypes(lhs, rhs)) {
 			Token sym = n.getToken();
 			if (lhs == null || rhs == null) {
-				addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
+				// addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
 			} else {
 				addError(sym.getRow(), sym.getCol(), "Operator = cannot be applied to " + lhs + ", " + rhs);
 			}
@@ -456,16 +456,16 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 				func = symbolProgram.getFunction(callFunc.toString(), symbolClass.getId());
 			}
 			
-			if (func == null) {
-				Token sym = callFunc.getToken();
-				addError(sym.getRow(), sym.getCol(), "Method " + callFunc + " not declared");
-				return null;
-			} else {
-				callFunc.setB(func);
-				checkCallArguments(cm, func);
-				cm.setType(func.getType());
-				return func.getType();
-			}
+			// if (func == null) {
+			// 	Token sym = callFunc.getToken();
+			// 	addError(sym.getRow(), sym.getCol(), "Method " + callFunc + " not declared");
+			// 	return null;
+			// } else {
+			// 	callFunc.setB(func);
+			// 	checkCallArguments(cm, func);
+			// 	cm.setType(func.getType());
+			// 	return func.getType();
+			// }
 		} 
 		return null;
 	}
@@ -604,7 +604,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		if (!symbolProgram.compareTypes(lhs, rhs)) {
 			Token sym = vd.getToken();
 			if (lhs == null || rhs == null) {
-				addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
+				// addError(sym.getRow(), sym.getCol(), "Incompatible types used with assignment Operator = ");
 			} else {
 				addError(sym.getRow(), sym.getCol(), "Operator = cannot be applied to " + lhs + ", " + rhs);
 			}

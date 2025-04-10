@@ -4,7 +4,6 @@ class Person
 	string name;
 }
 
-
 fn calculate(int a, int b): int
 {
 	ret a * b;
@@ -12,9 +11,17 @@ fn calculate(int a, int b): int
 
 fn main(): int
 {
+	string name = "Mart van der Zalm";
+
+	string str = read_line();
+	print(str);
+
 	int age = 18;
 	int a = 20;
 	int result = a + age;
+
+	print(result);
+	print(age);
 
 	ret 0;
 }
