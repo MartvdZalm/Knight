@@ -8,14 +8,9 @@ import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPrinter;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.parser.Parser;
-import knight.compiler.semantics.NameError;
-import knight.compiler.semantics.SemanticErrors;
-import knight.compiler.symbol.SymbolProgram;
-import knight.compiler.visitor.BuildSymbolTree;
-import knight.compiler.visitor.CodeGenerator;
-import knight.compiler.visitor.ConstantFolding;
-import knight.compiler.visitor.NameAnalyserTree;
-import knight.compiler.visitor.TypeAnalyser;
+import knight.compiler.passes.codegen.CodeGenerator;
+import knight.compiler.passes.symbol.diagnostics.NameError;
+import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.preprocessor.PreProcessor;
 
 /*
@@ -56,7 +51,7 @@ public class Main
 			// if (containsFlag(args, "-ast")) {
 			ASTPrinter printer = new ASTPrinter();
 			System.out.println(printer.visit((ASTProgram) tree));
-			System.exit(0);
+			// System.exit(0);
 			// }
 
 			// if (tree != null) {
@@ -72,11 +67,11 @@ public class Main
 			// ta.visit((ASTProgram) tree);
 
 			// if (SemanticErrors.errorList.size() == 0) {
-			// String path = getFileDirPath(filename);
+			String path = getFileDirPath(filename);
 			// ConstantFolding.optimize(tree);
-			// CodeGenerator cg = new CodeGenerator(path, filename);
-			// cg.visit((ASTProgram) tree);
-			// this.compileCPPFile(args, path, filename);
+			CodeGenerator cg = new CodeGenerator(path, filename);
+			cg.visit((ASTProgram) tree);
+			this.compileCPPFile(args, path, filename);
 			// }
 			// }
 		} catch (Exception e) {

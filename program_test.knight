@@ -15,6 +15,20 @@ fn main(): int
 		guess = to_int(input);
 		tries = tries + 1;
 
+
+		if (guess != secret)
+		{
+			print("Too low!");
+		}
+		else if (guess != secret)
+		{
+			print("Too high!");
+		}
+		else
+		{
+			print("Correct! You guessed it in ", to_string(tries), " tries!");
+		}
+
 		// if (guess < secret)
 		// {
 		// 	print("Too low!");

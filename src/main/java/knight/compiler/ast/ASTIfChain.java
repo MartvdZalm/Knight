@@ -9,7 +9,7 @@ import knight.compiler.lexer.Token;
  * @author: Mart van der Zalm
  * Date: 2025-04-10
  */
-public class ASTIfChain extends AST
+public class ASTIfChain extends ASTStatement
 {
 	private List<ASTConditionalBranch> branches;
 	private ASTBody elseBody;

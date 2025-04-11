@@ -17,6 +17,7 @@ import knight.compiler.ast.ASTBooleanType;
 import knight.compiler.ast.ASTCallFunctionExpr;
 import knight.compiler.ast.ASTCallFunctionStat;
 import knight.compiler.ast.ASTClass;
+import knight.compiler.ast.ASTConditionalBranch;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
@@ -24,6 +25,7 @@ import knight.compiler.ast.ASTFunctionReturn;
 import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
+import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
@@ -301,19 +303,51 @@ public class Parser
 			}
 
 			case IF: {
-//				Token tok = token;
-//				eat(Tokens.IF);
-//				eat(Tokens.LEFTPAREN);
-//				ASTExpression expr = parseExpression();
-//				eat(Tokens.RIGHTPAREN);
-//				ASTStatement then = parseStatement();
-//				ASTStatement elze = new ASTSkip(then.getToken()); 
-//				if (token.getToken() == Tokens.ELSE) {
-//					eat(Tokens.ELSE);
-//					elze = parseStatement();
-//				}
-//				ASTIfThenElse result = new ASTIfThenElse(tok, expr, then, elze);
-//				return result;
+				Token tok = token;
+				eat(Tokens.IF); // Consume the "if" token
+				eat(Tokens.LEFTPAREN); // Consume the "("
+				ASTExpression condition = parseExpression(); // Parse the condition expression
+				eat(Tokens.RIGHTPAREN); // Consume the ")"
+				eat(Tokens.LEFTBRACE);
+
+				ASTBody ifBody = this.parseBody(); // Parse the statement in the "if" block
+				eat(Tokens.RIGHTBRACE);
+
+				List<ASTConditionalBranch> branches = new ArrayList<>();
+				branches.add(new ASTConditionalBranch(tok).setCondition(condition).setBody(ifBody));
+
+				ASTBody elseBody = null;
+
+				// Check for an else-if or else statement
+				while (token.getToken() == Tokens.ELSE) {
+					eat(Tokens.ELSE); // Consume "else"
+
+					if (token.getToken() == Tokens.IF) {
+						// This is an "else if" statement, so we parse it like a regular if statement
+						eat(Tokens.IF);
+						eat(Tokens.LEFTPAREN);
+						condition = parseExpression();
+						eat(Tokens.RIGHTPAREN);
+						eat(Tokens.LEFTBRACE);
+						ASTBody elseIfBody = this.parseBody();
+						eat(Tokens.RIGHTBRACE);
+
+						branches.add(new ASTConditionalBranch(tok).setCondition(condition).setBody(elseIfBody));
+					} else {
+						// This is a regular "else" statement
+						eat(Tokens.LEFTBRACE);
+						elseBody = parseBody(); // Assuming parseBody() parses the else block
+						eat(Tokens.RIGHTBRACE);
+						break; // Once we find the "else" body, we stop parsing further branches
+					}
+				}
+
+				// Create an ASTIfChain with the branches and else body
+				ASTIfChain result = new ASTIfChain(tok);
+				result.setBranches(branches);
+				result.setElseBody(elseBody);
+
+				return result;
 			}
 
 			case WHILE: {

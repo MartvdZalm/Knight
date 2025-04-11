@@ -9,24 +9,24 @@ import knight.compiler.lexer.Token;
  */
 public class ASTAssign extends ASTStatement
 {
-	private ASTIdentifier id;
+	private ASTIdentifier identifier;
 	private ASTExpression expr;
 
-	public ASTAssign(Token token, ASTIdentifier id, ASTExpression expr)
+	public ASTAssign(Token token, ASTIdentifier identifier, ASTExpression expr)
 	{
 		super(token);
-		this.id = id;
+		this.identifier = identifier;
 		this.expr = expr;
 	}
 
-	public ASTIdentifier getId()
+	public ASTIdentifier getIdentifier()
 	{
-		return id;
+		return identifier;
 	}
 
-	public void setId(ASTIdentifier id)
+	public void setIdentifier(ASTIdentifier identifier)
 	{
-		this.id = id;
+		this.identifier = identifier;
 	}
 
 	public ASTExpression getExpr()

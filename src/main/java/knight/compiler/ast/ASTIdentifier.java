@@ -1,7 +1,7 @@
 package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
-import knight.compiler.semantics.Binding;
+import knight.compiler.passes.symbol.model.Binding;
 
 /*
  * File: ASTIdentifier.java

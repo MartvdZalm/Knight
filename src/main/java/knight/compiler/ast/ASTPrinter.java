@@ -36,7 +36,8 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTAssign assign)
 	{
-		return printInc() + "(EQSIGN " + assign.getId().accept(this) + " " + assign.getExpr().accept(this) + ")";
+		return printInc() + "(EQSIGN " + assign.getIdentifier().accept(this) + " " + assign.getExpr().accept(this)
+				+ ")";
 	}
 
 	@Override
@@ -383,19 +384,41 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIfChain ifChain)
 	{
-		// TODO Auto-generated method stub
-		return null;
-	}
+		StringBuilder sb = new StringBuilder();
 
-	@Override
-	public String visit(ASTBinaryOperation astBinaryOperation)
-	{
-		// TODO Auto-generated method stub
-		return null;
+		boolean firstBranch = true;
+		for (ASTConditionalBranch astConditionalBranch : ifChain.getBranches()) {
+			if (!firstBranch) {
+				sb.append(" ELSE ");
+			}
+			sb.append("IF (");
+			sb.append(astConditionalBranch.getCondition().accept(this));
+			sb.append(")\n");
+			sb.append(astConditionalBranch.getBody().accept(this));
+			firstBranch = false;
+		}
+
+		if (ifChain.getElseBody() != null) {
+			sb.append(" ELSE ");
+			sb.append(ifChain.getElseBody().accept(this));
+		}
+
+		return sb.toString();
 	}
 
 	@Override
 	public String visit(ASTConditionalBranch astConditionalBranch)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(astConditionalBranch.getCondition().accept(this));
+		sb.append(astConditionalBranch.getBody().accept(this));
+
+		return sb.toString();
+	}
+
+	@Override
+	public String visit(ASTBinaryOperation astBinaryOperation)
 	{
 		// TODO Auto-generated method stub
 		return null;
