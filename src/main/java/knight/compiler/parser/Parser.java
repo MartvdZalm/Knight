@@ -343,9 +343,7 @@ public class Parser
 				}
 
 				// Create an ASTIfChain with the branches and else body
-				ASTIfChain result = new ASTIfChain(tok);
-				result.setBranches(branches);
-				result.setElseBody(elseBody);
+				ASTIfChain result = new ASTIfChain(tok, branches, elseBody);
 
 				return result;
 			}

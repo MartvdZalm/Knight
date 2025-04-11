@@ -114,7 +114,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("while (");
-		sb.append(w.getExpr().accept(this));
+		sb.append(w.getCondition().accept(this));
 		sb.append(") {\n");
 		sb.append(w.getBody().accept(this));
 		sb.append("}");

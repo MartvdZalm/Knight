@@ -91,7 +91,7 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTWhile w)
 	{
-		w.setExpr(w.getExpr().accept(this));
+		w.setCondition(w.getCondition().accept(this));
 		w.getBody().accept(this);
 		return null;
 	}

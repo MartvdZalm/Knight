@@ -9,24 +9,24 @@ import knight.compiler.lexer.Token;
  */
 public class ASTWhile extends ASTStatement
 {
-	private ASTExpression expr;
+	private ASTExpression condition;
 	private ASTBody body;
 
-	public ASTWhile(Token token, ASTExpression expr, ASTBody body)
+	public ASTWhile(Token token, ASTExpression condition, ASTBody body)
 	{
 		super(token);
-		this.expr = expr;
+		this.condition = condition;
 		this.body = body;
 	}
 
-	public ASTExpression getExpr()
+	public ASTExpression getCondition()
 	{
-		return expr;
+		return condition;
 	}
 
-	public void setExpr(ASTExpression expr)
+	public void setCondition(ASTExpression condition)
 	{
-		this.expr = expr;
+		this.condition = condition;
 	}
 
 	public ASTBody getBody()

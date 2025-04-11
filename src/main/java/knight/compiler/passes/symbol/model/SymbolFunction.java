@@ -2,6 +2,7 @@ package knight.compiler.passes.symbol.model;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Stack;
 import java.util.Vector;
 
 import knight.compiler.ast.ASTType;
@@ -15,14 +16,16 @@ public class SymbolFunction extends Binding
 {
 	private String id;
 	private Vector<SymbolVariable> params;
-	private Hashtable<String, SymbolVariable> variables;
+	private Stack<Hashtable<String, SymbolVariable>> scopes;
 
 	public SymbolFunction(String id, ASTType type)
 	{
 		super(type);
 		this.id = id;
-		variables = new Hashtable<>();
+
 		params = new Vector<>();
+		scopes = new Stack<>();
+		scopes.push(new Hashtable<>());
 	}
 
 	public String getId()
@@ -59,14 +62,20 @@ public class SymbolFunction extends Binding
 		if (containsVariable(id)) {
 			return false;
 		} else {
-			variables.put(id, new SymbolVariable(id, type));
+			SymbolVariable newVar = new SymbolVariable(id, type);
+			getCurrentScope().put(id, newVar);
 			return true;
 		}
 	}
 
+	private Hashtable<String, SymbolVariable> getCurrentScope()
+	{
+		return scopes.peek();
+	}
+
 	public boolean containsVariable(String id)
 	{
-		return containsParam(id) || variables.containsKey(id);
+		return containsParam(id) || getCurrentScope().containsKey(id);
 	}
 
 	public boolean containsParam(String id)
@@ -82,7 +91,7 @@ public class SymbolFunction extends Binding
 	public SymbolVariable getVariable(String id)
 	{
 		if (containsVariable(id)) {
-			return variables.get(id);
+			return getCurrentScope().get(id);
 		} else {
 			return null;
 		}
@@ -102,5 +111,17 @@ public class SymbolFunction extends Binding
 	public int getParamsSize()
 	{
 		return params.size();
+	}
+
+	public void startNewScope()
+	{
+		scopes.push(new Hashtable<>());
+	}
+
+	public void endCurrentScope()
+	{
+		if (!scopes.isEmpty()) {
+			scopes.pop();
+		}
 	}
 }

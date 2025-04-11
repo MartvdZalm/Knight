@@ -70,96 +70,106 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTProgram program)
+	public ASTType visit(ASTProgram astProgram)
 	{
-		for (int i = 0; i < program.getClassListSize(); i++) {
-			program.getClassDeclAt(i).accept(this);
+		for (int i = 0; i < astProgram.getClassListSize(); i++) {
+			astProgram.getClassDeclAt(i).accept(this);
 		}
 
-		for (int i = 0; i < program.getFunctionListSize(); i++) {
-			program.getFunctionDeclAt(i).accept(this);
+		for (int i = 0; i < astProgram.getFunctionListSize(); i++) {
+			astProgram.getFunctionDeclAt(i).accept(this);
 		}
 
-		for (int i = 0; i < program.getVariableListSize(); i++) {
-			program.getVariableDeclAt(i).accept(this);
+		for (int i = 0; i < astProgram.getVariableListSize(); i++) {
+			astProgram.getVariableDeclAt(i).accept(this);
 		}
 
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTClass classDecl)
+	public ASTType visit(ASTClass astClass)
 	{
-		String className = classDecl.getClassName().getId();
+		String className = astClass.getClassName().getId();
 
 		if (!symbolProgram.addClass(className, null)) {
-			Token token = classDecl.getToken();
-			addError(token.getRow(), token.getCol(), "Class " + className + " is already defined!");
+			addError(astClass.getToken(), "Class " + className + " is already defined!");
 			symbolClass = new SymbolClass(className, null);
 		} else {
 			symbolClass = symbolProgram.getClass(className);
 		}
 
-		for (int i = 0; i < classDecl.getPropertyListSize(); i++) {
-			classDecl.getPropertyDeclAt(i).accept(this);
+		for (int i = 0; i < astClass.getPropertyListSize(); i++) {
+			astClass.getPropertyDeclAt(i).accept(this);
 		}
 
-		for (int i = 0; i < classDecl.getFunctionListSize(); i++) {
-			classDecl.getFunctionDeclAt(i).accept(this);
+		for (int i = 0; i < astClass.getFunctionListSize(); i++) {
+			astClass.getFunctionDeclAt(i).accept(this);
 		}
 
 		symbolClass = null;
 		return null;
 	}
 
-	public void checkFunction(ASTFunction funcDecl)
+	@Override
+	public ASTType visit(ASTProperty astProperty)
 	{
-		ASTType type = funcDecl.getReturnType().accept(this);
-		String id = funcDecl.getFunctionName().getId();
+		if (symbolClass == null) {
+			addError(astProperty.getToken(), "Property declared outside of class");
+			return null;
+		}
+
+		ASTType type = astProperty.getType().accept(this);
+		String identifier = astProperty.getId().getId();
+
+		if (!symbolClass.addVariable(identifier, type)) {
+			Token token = astProperty.getId().getToken();
+			addError(token, "Property " + identifier + " already defined in class " + symbolClass.getId());
+		}
+
+		return null;
+	}
+
+	public void checkFunction(ASTFunction astFunction)
+	{
+		ASTType type = astFunction.getReturnType().accept(this);
+		String identifier = astFunction.getFunctionName().getId();
 
 		if (symbolClass == null) {
-			if (!symbolProgram.addFunction(id, type)) {
-				Token tok = funcDecl.getToken();
-				addError(tok.getRow(), tok.getCol(), "Function " + id + " already defined");
+			if (!symbolProgram.addFunction(identifier, type)) {
+				addError(astFunction.getToken(), "Function " + identifier + " already defined");
 			} else {
-				symbolFunction = symbolProgram.getFunction(id);
+				symbolFunction = symbolProgram.getFunction(identifier);
 			}
 		} else {
-			if (!symbolClass.addFunction(id, type)) {
-				Token tok = funcDecl.getToken();
-				addError(tok.getRow(), tok.getCol(),
-						"Function " + id + " already defined in class " + symbolClass.getId());
+			if (!symbolClass.addFunction(identifier, type)) {
+				addError(astFunction.getToken(),
+						"Function " + identifier + " already defined in class " + symbolClass.getId());
 			} else {
-				symbolFunction = symbolClass.getFunction(id);
+				symbolFunction = symbolClass.getFunction(identifier);
 			}
 		}
 
-		for (int i = 0; i < funcDecl.getArgumentListSize(); i++) {
-			funcDecl.getArgumentAt(i).accept(this);
+		for (int i = 0; i < astFunction.getArgumentListSize(); i++) {
+			astFunction.getArgumentAt(i).accept(this);
 		}
 
-//		for (int i = 0; i < funcDecl.getVariableListSize(); i++) {
-//			funcDecl.getVariableDeclAt(i).accept(this);
-//		}
-//
-//		for (int i = 0; i < funcDecl.getStatementListSize(); i++) {
-//			funcDecl.getStatementDeclAt(i).accept(this);
-//		}
+		astFunction.getBody().accept(this);
 	}
 
 	@Override
-	public ASTType visit(ASTFunction functionDecl)
+	public ASTType visit(ASTFunction astFunction)
 	{
-		checkFunction(functionDecl);
+		checkFunction(astFunction);
 		symbolFunction = null;
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTFunctionReturn functionReturn)
+	public ASTType visit(ASTFunctionReturn astFunctionReturn)
 	{
-		checkFunction(functionReturn);
-		functionReturn.getReturnExpr().accept(this);
+		checkFunction(astFunctionReturn);
+		astFunctionReturn.getReturnExpr().accept(this);
 		symbolFunction = null;
 		return null;
 	}
@@ -177,14 +187,28 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTBody body)
+	public ASTType visit(ASTBody astBody)
 	{
+		symbolFunction.startNewScope();
+
+		for (int i = 0; i < astBody.getVariableListSize(); i++) {
+			astBody.getVariableAt(i).accept(this);
+			System.out.println(astBody.getVariableAt(i).getId());
+		}
+
+		for (int i = 0; i < astBody.getStatementListSize(); i++) {
+			astBody.getStatementAt(i).accept(this);
+		}
+
+		symbolFunction.endCurrentScope();
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTWhile while1)
+	public ASTType visit(ASTWhile astWhile)
 	{
+		astWhile.getCondition().accept(this);
+		astWhile.getBody().accept(this);
 		return null;
 	}
 
@@ -225,20 +249,29 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTCallFunctionExpr callFunctionExpr)
+	public ASTType visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
+		for (int i = 0; i < astCallFunctionExpr.getArgumentListSize(); i++) {
+			astCallFunctionExpr.getArgumentAt(i).accept(this);
+		}
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTCallFunctionStat callFunctionStat)
+	public ASTType visit(ASTCallFunctionStat astCallFunctionStat)
 	{
+		for (int i = 0; i < astCallFunctionStat.getArgumentListSize(); i++) {
+			astCallFunctionStat.getArgumentAt(i).accept(this);
+		}
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTReturnStatement returnStatement)
+	public ASTType visit(ASTReturnStatement astReturnStatement)
 	{
+		if (astReturnStatement.getReturnExpr() != null) {
+			astReturnStatement.getReturnExpr().accept(this);
+		}
 		return null;
 	}
 
@@ -279,40 +312,37 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTIdentifierType identifierType)
+	public ASTType visit(ASTIdentifierType astIdentifierType)
 	{
-		String id = identifierType.getId();
+		String identifier = astIdentifierType.getId();
 
-		if (id != null && id.equals(mKlassId)) {
-			Token tok = identifierType.getToken();
-			addError(tok.getRow(), tok.getCol(),
-					"Class " + id + " cannot be used as a type in class " + symbolClass.getId());
+		if (identifier != null && identifier.equals(mKlassId)) {
+			addError(astIdentifierType.getToken(),
+					"Class " + identifier + " cannot be used as a type in class " + symbolClass.getId());
 		}
 
-		return identifierType;
+		return astIdentifierType;
 	}
 
-	public void checkIfVariableExist(ASTVariable varDecl)
+	public void checkIfVariableExist(ASTVariable astVariable)
 	{
-		ASTType t = varDecl.getType().accept(this);
-		String id = varDecl.getId().getId();
+		ASTType type = astVariable.getType().accept(this);
+		String identifier = astVariable.getId().getId();
 
 		if (symbolFunction != null) {
-			if (!symbolFunction.addVariable(id, t)) {
-				Token tok = varDecl.getId().getToken();
-				addError(tok.getRow(), tok.getCol(),
-						"Variable " + id + " already defined in function " + symbolFunction.getId());
+			if (!symbolFunction.addVariable(identifier, type)) {
+				Token token = astVariable.getId().getToken();
+				addError(token, "Variable " + identifier + " already defined in function " + symbolFunction.getId());
 			}
 		} else if (symbolClass != null) {
-			if (!symbolClass.addVariable(id, t)) {
-				Token sym = varDecl.getId().getToken();
-				addError(sym.getRow(), sym.getCol(),
-						"Variable " + id + " already defined in class " + symbolClass.getId());
+			if (!symbolClass.addVariable(identifier, type)) {
+				Token token = astVariable.getId().getToken();
+				addError(token, "Variable " + identifier + " already defined in class " + symbolClass.getId());
 			}
 		} else {
-			if (!symbolProgram.addVariable(id, t)) {
-				Token sym = varDecl.getId().getToken();
-				addError(sym.getRow(), sym.getCol(), "Variable " + id + " already defined");
+			if (!symbolProgram.addVariable(identifier, type)) {
+				Token token = astVariable.getId().getToken();
+				addError(token, "Variable " + identifier + " already defined");
 			}
 		}
 	}
@@ -330,19 +360,6 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		checkIfVariableExist(varDeclInit);
 		return null;
 	}
-//
-//	@Override
-//	public ASTType visit(ASTArgument argDecl)
-//	{
-//		ASTType t = argDecl.getType().accept(this);
-//		String id = argDecl.getId().getId();
-//
-//		if (!symbolFunction.addParam(id, t)) {
-//			Token sym = argDecl.getId().getToken();
-//			addError(sym.getRow(), sym.getCol(), "Argument " + id + " already defined in method " + symbolFunction.getId() + " in class " + symbolClass.getId());
-//		}
-//		return null;
-//	}
 
 	@Override
 	public ASTType visit(ASTIdentifier identifier)
@@ -368,11 +385,6 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		return null;
 	}
 
-	public static void addError(int line, int col, String errorText)
-	{
-		SemanticErrors.addError(line, col, errorText);
-	}
-
 	@Override
 	public ASTType visit(ASTPointerAssign pointerAssign)
 	{
@@ -386,50 +398,62 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTProperty property)
+	public ASTType visit(ASTIfChain astIfChain)
 	{
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTIfChain ifChain)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTBinaryOperation astBinaryOperation)
-	{
-		// TODO Auto-generated method stub
+		for (int i = 0; i < astIfChain.getBranchListSize(); i++) {
+			astIfChain.getBranchAt(i).accept(this);
+		}
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTConditionalBranch astConditionalBranch)
 	{
-		// TODO Auto-generated method stub
+		astConditionalBranch.getCondition().accept(this);
+		astConditionalBranch.getBody().accept(this);
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTBinaryOperation astBinaryOperation)
+	{
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTArgument astArgument)
 	{
-		// TODO Auto-generated method stub
+		ASTType type = astArgument.getType().accept(this);
+		String identifier = astArgument.getIdentifier().getId();
+
+		if (symbolFunction != null) {
+			if (!symbolFunction.addParam(identifier, type)) {
+				Token token = astArgument.getIdentifier().getToken();
+				String classId = symbolClass != null ? symbolClass.getId() : "global";
+				addError(token, "Argument " + identifier + " already defined in function " + symbolFunction.getId()
+						+ " in class " + classId);
+			}
+		} else {
+			addError(astArgument.getToken(), "Argument declared outside of a function");
+		}
+
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTNotEquals astNotEquals)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTPlus astPlus)
 	{
-		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public static void addError(Token token, String errorText)
+	{
+		SemanticErrors.addError(token.getRow(), token.getCol(), errorText);
 	}
 }

@@ -11,23 +11,35 @@ import knight.compiler.lexer.Token;
  */
 public class ASTIfChain extends ASTStatement
 {
-	private List<ASTConditionalBranch> branches;
+	private ASTList<ASTConditionalBranch> branches;
 	private ASTBody elseBody;
 
-	public ASTIfChain(Token token)
+	public ASTIfChain(Token token, List<ASTConditionalBranch> branches, ASTBody elseBody)
 	{
 		super(token);
+		this.branches = new ASTList<>(branches);
+		this.elseBody = elseBody;
 	}
 
 	public ASTIfChain setBranches(List<ASTConditionalBranch> branches)
 	{
-		this.branches = branches;
+		this.branches = new ASTList<>(branches);
 		return this;
 	}
 
 	public List<ASTConditionalBranch> getBranches()
 	{
-		return branches;
+		return branches.getList();
+	}
+
+	public ASTConditionalBranch getBranchAt(int index)
+	{
+		return branches.getAt(index);
+	}
+
+	public int getBranchListSize()
+	{
+		return branches.getSize();
 	}
 
 	public ASTIfChain setElseBody(ASTBody elseBody)

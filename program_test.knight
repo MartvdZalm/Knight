@@ -1,4 +1,6 @@
 
+string name = "Mart van der zalm";
+
 fn main(): int
 {
 	print("Welcome to Guess the Number!");
@@ -7,6 +9,8 @@ fn main(): int
 	int secret = random(1, 100);
 	int guess = 0;
 	int tries = 0;
+	int hello = 0;
+
 
 	while (guess != secret)
 	{
@@ -14,6 +18,8 @@ fn main(): int
 		string input = read_line();
 		guess = to_int(input);
 		tries = tries + 1;
+
+		int hello = 0;
 
 
 		if (guess != secret)

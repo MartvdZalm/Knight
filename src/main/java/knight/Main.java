@@ -8,7 +8,7 @@ import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPrinter;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.parser.Parser;
-import knight.compiler.passes.codegen.CodeGenerator;
+import knight.compiler.passes.symbol.BuildSymbolTree;
 import knight.compiler.passes.symbol.diagnostics.NameError;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.preprocessor.PreProcessor;
@@ -55,8 +55,8 @@ public class Main
 			// }
 
 			// if (tree != null) {
-			// BuildSymbolTree bspv = new BuildSymbolTree();
-			// bspv.visit((ASTProgram) tree);
+			BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
+			buildSymbolTree.visit((ASTProgram) tree);
 
 			// SymbolProgram symbolProgram = bspv.getSymbolProgram();
 
@@ -69,9 +69,9 @@ public class Main
 			// if (SemanticErrors.errorList.size() == 0) {
 			String path = getFileDirPath(filename);
 			// ConstantFolding.optimize(tree);
-			CodeGenerator cg = new CodeGenerator(path, filename);
-			cg.visit((ASTProgram) tree);
-			this.compileCPPFile(args, path, filename);
+			// CodeGenerator cg = new CodeGenerator(path, filename);
+			// cg.visit((ASTProgram) tree);
+			// this.compileCPPFile(args, path, filename);
 			// }
 			// }
 		} catch (Exception e) {

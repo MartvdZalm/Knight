@@ -84,7 +84,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTWhile w)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append(printInc() + "(WHILE " + w.getExpr().accept(this) + "\n");
+		strBuilder.append(printInc() + "(WHILE " + w.getCondition().accept(this) + "\n");
 
 		incLevel();
 		strBuilder.append(w.getBody().accept(this));

@@ -22,7 +22,7 @@ knight::print("Too high!");
 
 }
 else {
-knight::print("Correct! You guessed it in" + knight::to_string(tries) +
+knight::print("Correct! You guessed it in"knight::to_string(tries) 
 "tries!"); 
 
 }

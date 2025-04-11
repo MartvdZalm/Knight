@@ -96,15 +96,6 @@ public class NameResolutionPass implements ASTVisitor<ASTType>
 		return null;
 	}
 
-//	@Override
-//	public ASTType visit(ASTIfThenElse ifThenElse)
-//	{
-//		ifThenElse.getExpr().accept(this);
-//		ifThenElse.getThen().accept(this);
-//		ifThenElse.getElze().accept(this);
-//		return null;
-//	}
-
 	@Override
 	public ASTType visit(ASTSkip skip)
 	{
@@ -114,7 +105,7 @@ public class NameResolutionPass implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTWhile while1)
 	{
-		while1.getExpr().accept(this);
+		while1.getCondition().accept(this);
 		while1.getBody().accept(this);
 		return null;
 	}
@@ -161,16 +152,6 @@ public class NameResolutionPass implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionExpr cm)
 	{
-		/*
-		 * The call function expression can be written like this
-		 * 'object.functionName()'. Here is object the instancename, but if there is no
-		 * instancename 'functionName()', the instancename will be null. So This check
-		 * needs to be done.
-		 */
-//		if (cm.getInstanceName() != null) {
-//			cm.getInstanceName().accept(this);
-//		}
-
 		for (int i = 0; i < cm.getArgumentListSize(); i++) {
 			ASTExpression e = cm.getArgumentAt(i);
 			e.accept(this);
@@ -290,13 +271,6 @@ public class NameResolutionPass implements ASTVisitor<ASTType>
 		varDeclInit.getExpr().accept(this);
 		return null;
 	}
-
-//	@Override
-//	public ASTType visit(ASTArgument ad)
-//	{
-//		ad.getId().accept(this);
-//		return null;
-//	}
 
 	public void checkFunction(ASTFunction functionDecl)
 	{
