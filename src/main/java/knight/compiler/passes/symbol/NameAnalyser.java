@@ -1,26 +1,28 @@
 package knight.compiler.passes.symbol;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
+import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
 import knight.compiler.ast.ASTArrayIndexExpr;
 import knight.compiler.ast.ASTAssign;
-import knight.compiler.ast.ASTBinaryOperation;
 import knight.compiler.ast.ASTBody;
 import knight.compiler.ast.ASTBooleanType;
 import knight.compiler.ast.ASTCallFunctionExpr;
 import knight.compiler.ast.ASTCallFunctionStat;
 import knight.compiler.ast.ASTClass;
 import knight.compiler.ast.ASTConditionalBranch;
+import knight.compiler.ast.ASTDivision;
+import knight.compiler.ast.ASTEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
 import knight.compiler.ast.ASTFunctionType;
+import knight.compiler.ast.ASTGreaterThan;
+import knight.compiler.ast.ASTGreaterThanOrEqual;
 import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
@@ -28,9 +30,14 @@ import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTLessThan;
+import knight.compiler.ast.ASTLessThanOrEqual;
+import knight.compiler.ast.ASTMinus;
+import knight.compiler.ast.ASTModulus;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
 import knight.compiler.ast.ASTNotEquals;
+import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
@@ -40,6 +47,7 @@ import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTThis;
+import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTType;
 import knight.compiler.ast.ASTVariable;
@@ -49,11 +57,11 @@ import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
 import knight.compiler.lexer.Token;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
+import knight.compiler.passes.symbol.model.Scope;
 import knight.compiler.passes.symbol.model.SymbolClass;
 import knight.compiler.passes.symbol.model.SymbolFunction;
 import knight.compiler.passes.symbol.model.SymbolProgram;
 import knight.compiler.passes.symbol.model.SymbolVariable;
-import knight.compiler.passes.symbol.model.Scope;
 
 /*
  * File: NameAnalyser.java
@@ -429,14 +437,6 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTBinaryOperation astBinaryOperation)
-	{
-		astBinaryOperation.getLeftSide().accept(this);
-		astBinaryOperation.getRightSide().accept(this);
-		return null;
-	}
-
-	@Override
 	public ASTType visit(ASTConditionalBranch astConditionalBranch)
 	{
 		astConditionalBranch.getCondition().accept(this);
@@ -465,6 +465,83 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	{
 		astPlus.getLeftSide().accept(this);
 		astPlus.getRightSide().accept(this);
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTOr astOr)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTAnd astAnd)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTEquals astEquals)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTLessThan astLessThan)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTLessThanOrEqual astLessThanOrEqual)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTGreaterThan astGreaterThan)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTMinus astMinus)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTTimes astTimes)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTDivision astDivision)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTModulus astModulus)
+	{
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

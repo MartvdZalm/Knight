@@ -73,8 +73,6 @@ public interface ASTVisitor<R>
 
 	public R visit(ASTProperty property);
 
-	public R visit(ASTBinaryOperation astBinaryOperation);
-
 	public R visit(ASTConditionalBranch astConditionalBranch);
 
 	public R visit(ASTArgument astArgument);
@@ -82,4 +80,26 @@ public interface ASTVisitor<R>
 	public R visit(ASTNotEquals astNotEquals);
 
 	public R visit(ASTPlus astPlus);
+
+	public R visit(ASTOr astOr);
+
+	public R visit(ASTAnd astAnd);
+
+	public R visit(ASTEquals astEquals);
+
+	public R visit(ASTLessThan astLessThan);
+
+	public R visit(ASTLessThanOrEqual astLessThanOrEqual);
+
+	public R visit(ASTGreaterThan astGreaterThan);
+
+	public R visit(ASTGreaterThanOrEqual astGreaterThanOrEqual);
+
+	public R visit(ASTMinus astMinus);
+
+	public R visit(ASTTimes astTimes);
+
+	public R visit(ASTDivision astDivision);
+
+	public R visit(ASTModulus astModulus);
 }

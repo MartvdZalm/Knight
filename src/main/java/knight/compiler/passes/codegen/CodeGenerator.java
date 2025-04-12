@@ -4,21 +4,25 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Set;
 
+import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
 import knight.compiler.ast.ASTArrayIndexExpr;
 import knight.compiler.ast.ASTAssign;
-import knight.compiler.ast.ASTBinaryOperation;
 import knight.compiler.ast.ASTBody;
 import knight.compiler.ast.ASTBooleanType;
 import knight.compiler.ast.ASTCallFunctionExpr;
 import knight.compiler.ast.ASTCallFunctionStat;
 import knight.compiler.ast.ASTClass;
 import knight.compiler.ast.ASTConditionalBranch;
+import knight.compiler.ast.ASTDivision;
+import knight.compiler.ast.ASTEquals;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
 import knight.compiler.ast.ASTFunctionType;
+import knight.compiler.ast.ASTGreaterThan;
+import knight.compiler.ast.ASTGreaterThanOrEqual;
 import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
@@ -26,9 +30,14 @@ import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTLessThan;
+import knight.compiler.ast.ASTLessThanOrEqual;
+import knight.compiler.ast.ASTMinus;
+import knight.compiler.ast.ASTModulus;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
 import knight.compiler.ast.ASTNotEquals;
+import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
@@ -37,6 +46,7 @@ import knight.compiler.ast.ASTReturnStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTThis;
+import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTVariable;
 import knight.compiler.ast.ASTVariableInit;
@@ -506,13 +516,6 @@ public class CodeGenerator implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTBinaryOperation astBinaryOperation)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String visit(ASTArgument astArgument)
 	{
 		// TODO Auto-generated method stub
@@ -537,5 +540,82 @@ public class CodeGenerator implements ASTVisitor<String>
 		sb.append("+");
 		sb.append(astPlus.getRightSide().accept(this));
 		return sb.toString();
+	}
+
+	@Override
+	public String visit(ASTOr astOr)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTAnd astAnd)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTEquals astEquals)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTLessThan astLessThan)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTLessThanOrEqual astLessThanOrEqual)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTGreaterThan astGreaterThan)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTMinus astMinus)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTTimes astTimes)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTDivision astDivision)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTModulus astModulus)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

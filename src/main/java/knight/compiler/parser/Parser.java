@@ -7,21 +7,25 @@ import java.util.Deque;
 import java.util.List;
 
 import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
 import knight.compiler.ast.ASTArrayIndexExpr;
 import knight.compiler.ast.ASTAssign;
-import knight.compiler.ast.ASTBinaryOperation;
 import knight.compiler.ast.ASTBody;
 import knight.compiler.ast.ASTBooleanType;
 import knight.compiler.ast.ASTCallFunctionExpr;
 import knight.compiler.ast.ASTCallFunctionStat;
 import knight.compiler.ast.ASTClass;
 import knight.compiler.ast.ASTConditionalBranch;
+import knight.compiler.ast.ASTDivision;
+import knight.compiler.ast.ASTEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
+import knight.compiler.ast.ASTGreaterThan;
+import knight.compiler.ast.ASTGreaterThanOrEqual;
 import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
@@ -29,9 +33,13 @@ import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTLessThan;
+import knight.compiler.ast.ASTLessThanOrEqual;
+import knight.compiler.ast.ASTMinus;
+import knight.compiler.ast.ASTModulus;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
-import knight.compiler.ast.ASTNotEquals;
+import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
@@ -41,6 +49,7 @@ import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTThis;
+import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTType;
 import knight.compiler.ast.ASTVariable;
@@ -638,37 +647,99 @@ public class Parser
 		switch (tok.getToken())
 		{
 
-			case NOTEQUALS: {
-				ASTExpression rightSide = stOperand.pop();
-				ASTExpression leftSide = stOperand.pop();
+			case OR: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTOr or = new ASTOr(tok, lhs, rhs);
+				stOperand.push(or);
+			}
+			break;
 
-				stOperand.push(new ASTNotEquals(tok, rightSide, leftSide));
+			case AND: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTAnd and = new ASTAnd(tok, lhs, rhs);
+				stOperand.push(and);
+			}
+			break;
+
+			case EQUALS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTEquals equals = new ASTEquals(tok, lhs, rhs);
+				stOperand.push(equals);
+			}
+			break;
+
+			case LESSTHAN: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTLessThan lessThan = new ASTLessThan(tok, lhs, rhs);
+				stOperand.push(lessThan);
+			}
+			break;
+
+			case LESSTHANOREQUAL: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTLessThanOrEqual lessThanOrEqual = new ASTLessThanOrEqual(tok, lhs, rhs);
+				stOperand.push(lessThanOrEqual);
+			}
+			break;
+
+			case GREATERTHAN: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTGreaterThan greaterThan = new ASTGreaterThan(tok, lhs, rhs);
+				stOperand.push(greaterThan);
+			}
+			break;
+
+			case GREATERTHANOREQUAL: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTGreaterThanOrEqual greaterThanOrEqual = new ASTGreaterThanOrEqual(tok, lhs, rhs);
+				stOperand.push(greaterThanOrEqual);
 			}
 			break;
 
 			case PLUS: {
-				ASTExpression rightSide = stOperand.pop();
-				ASTExpression leftSide = stOperand.pop();
-
-				stOperand.push(new ASTPlus(tok, rightSide, leftSide));
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTPlus plus = new ASTPlus(tok, lhs, rhs);
+				stOperand.push(plus);
 			}
 			break;
 
-			case OR:
-			case AND:
-			case EQUALS:
-			case LESSTHAN:
-			case LESSTHANOREQUAL:
-			case GREATERTHAN:
-			case GREATERTHANOREQUAL:
-			case MINUS:
-			case TIMES:
-			case DIV:
-			case MODULUS: {
-				ASTExpression rightSide = stOperand.pop();
-				ASTExpression leftSide = stOperand.pop();
+			case MINUS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTMinus minus = new ASTMinus(tok, lhs, rhs);
+				stOperand.push(minus);
+			}
+			break;
 
-				stOperand.push(new ASTBinaryOperation(tok, rightSide, leftSide));
+			case TIMES: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTTimes times = new ASTTimes(tok, lhs, rhs);
+				stOperand.push(times);
+			}
+			break;
+
+			case DIV: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTDivision div = new ASTDivision(tok, lhs, rhs);
+				stOperand.push(div);
+			}
+			break;
+
+			case MODULUS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTModulus modulus = new ASTModulus(tok, lhs, rhs);
+				stOperand.push(modulus);
 			}
 			break;
 
@@ -676,6 +747,7 @@ public class Parser
 				ASTExpression rhs = stOperand.pop();
 				ASTExpression lhs = stOperand.pop();
 				ASTCallFunctionExpr cm = (ASTCallFunctionExpr) rhs;
+				// cm.setInstanceName(lhs);
 				stOperand.push(cm);
 			}
 			break;

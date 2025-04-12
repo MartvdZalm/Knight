@@ -412,13 +412,6 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTBinaryOperation astBinaryOperation)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public String visit(ASTArgument astArgument)
 	{
 		// TODO Auto-generated method stub
@@ -436,5 +429,82 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTPlus astPlus)
 	{
 		return "(PLUS " + astPlus.getLeftSide().accept(this) + " " + astPlus.getRightSide().accept(this) + ")";
+	}
+
+	@Override
+	public String visit(ASTOr astOr)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTAnd astAnd)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTEquals astEquals)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTLessThan astLessThan)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTLessThanOrEqual astLessThanOrEqual)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTGreaterThan astGreaterThan)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTMinus astMinus)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTTimes astTimes)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTDivision astDivision)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTModulus astModulus)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
