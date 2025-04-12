@@ -20,6 +20,7 @@ import knight.compiler.ast.ASTClass;
 import knight.compiler.ast.ASTConditionalBranch;
 import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
+import knight.compiler.ast.ASTNotEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
@@ -646,7 +647,6 @@ public class Parser
 	{
 		switch (tok.getToken())
 		{
-
 			case OR: {
 				ASTExpression rhs = stOperand.pop();
 				ASTExpression lhs = stOperand.pop();
@@ -668,6 +668,14 @@ public class Parser
 				ASTExpression lhs = stOperand.pop();
 				ASTEquals equals = new ASTEquals(tok, lhs, rhs);
 				stOperand.push(equals);
+			}
+			break;
+
+			case NOTEQUALS: {
+				ASTExpression rhs = stOperand.pop();
+				ASTExpression lhs = stOperand.pop();
+				ASTNotEquals notEquals = new ASTNotEquals(tok, lhs, rhs);
+				stOperand.push(notEquals);
 			}
 			break;
 

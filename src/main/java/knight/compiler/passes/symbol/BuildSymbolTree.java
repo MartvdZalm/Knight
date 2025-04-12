@@ -29,6 +29,8 @@ import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTLessThan;
 import knight.compiler.ast.ASTLessThanOrEqual;
 import knight.compiler.ast.ASTMinus;
+import knight.compiler.ast.ASTStatement;
+import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTModulus;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
@@ -67,7 +69,6 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	private SymbolProgram symbolProgram;
 	private SymbolClass symbolClass;
 	private SymbolFunction symbolFunction;
-
 	private Scope currentScope;
 
 	public BuildSymbolTree()
@@ -83,16 +84,16 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-		for (int i = 0; i < astProgram.getClassListSize(); i++) {
-			astProgram.getClassDeclAt(i).accept(this);
+		for (ASTClass astClass : astProgram.getClassList()) {
+			astClass.accept(this);
 		}
 
-		for (int i = 0; i < astProgram.getFunctionListSize(); i++) {
-			astProgram.getFunctionDeclAt(i).accept(this);
+		for (ASTFunction astFunction : astProgram.getFunctionList()) {
+			astFunction.accept(this);
 		}
 
-		for (int i = 0; i < astProgram.getVariableListSize(); i++) {
-			astProgram.getVariableDeclAt(i).accept(this);
+		for (ASTVariable astVariable : astProgram.getVariableList()) {
+			astVariable.accept(this);
 		}
 
 		return null;
@@ -110,12 +111,12 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			symbolClass = symbolProgram.getClass(className);
 		}
 
-		for (int i = 0; i < astClass.getPropertyListSize(); i++) {
-			astClass.getPropertyDeclAt(i).accept(this);
+		for (ASTProperty astProperty : astClass.getPropertyList()) {
+			astProperty.accept(this);
 		}
 
-		for (int i = 0; i < astClass.getFunctionListSize(); i++) {
-			astClass.getFunctionDeclAt(i).accept(this);
+		for (ASTFunction astFunction : astClass.getFunctionList()) {
+			astFunction.accept(this);
 		}
 
 		symbolClass = null;
@@ -187,7 +188,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTAssign assign)
+	public ASTType visit(ASTAssign astAssign)
 	{
 		return null;
 	}
@@ -197,12 +198,12 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	{
 		currentScope = new Scope(currentScope);
 
-		for (int i = 0; i < astBody.getVariableListSize(); i++) {
-			astBody.getVariableAt(i).accept(this);
+		for (ASTVariable astVariable : astBody.getVariableList()) {
+			astVariable.accept(this);
 		}
 
-		for (int i = 0; i < astBody.getStatementListSize(); i++) {
-			astBody.getStatementAt(i).accept(this);
+		for (ASTStatement astStatement : astBody.getStatementList()) {
+			astStatement.accept(this);
 		}
 
 		astBody.setScope(currentScope);
@@ -219,19 +220,19 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTIntLiteral intLiteral)
+	public ASTType visit(ASTIntLiteral astIntLiteral)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTTrue true1)
+	public ASTType visit(ASTTrue astTrue)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTFalse false1)
+	public ASTType visit(ASTFalse astFalse)
 	{
 		return null;
 	}
@@ -243,13 +244,13 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTNewArray newArray)
+	public ASTType visit(ASTNewArray astNewArray)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTNewInstance newInstance)
+	public ASTType visit(ASTNewInstance astNewInstance)
 	{
 		return null;
 	}
@@ -257,8 +258,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
-		for (int i = 0; i < astCallFunctionExpr.getArgumentListSize(); i++) {
-			astCallFunctionExpr.getArgumentAt(i).accept(this);
+		for (ASTExpression astExpression : astCallFunctionExpr.getArgumentList()) {
+			astExpression.accept(this);
 		}
 		return null;
 	}
@@ -266,8 +267,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		for (int i = 0; i < astCallFunctionStat.getArgumentListSize(); i++) {
-			astCallFunctionStat.getArgumentAt(i).accept(this);
+		for (ASTExpression astExpression : astCallFunctionStat.getArgumentList()) {
+			astExpression.accept(this);
 		}
 		return null;
 	}
@@ -282,39 +283,39 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTFunctionType functionType)
+	public ASTType visit(ASTFunctionType astFunctionType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTIntType intType)
+	public ASTType visit(ASTIntType astIntType)
 	{
-		return intType;
+		return astIntType;
 	}
 
 	@Override
-	public ASTType visit(ASTStringType stringType)
+	public ASTType visit(ASTStringType astStringType)
 	{
-		return stringType;
+		return astStringType;
 	}
 
 	@Override
-	public ASTType visit(ASTVoidType voidType)
+	public ASTType visit(ASTVoidType astVoidType)
 	{
-		return voidType;
+		return astVoidType;
 	}
 
 	@Override
-	public ASTType visit(ASTBooleanType booleanType)
+	public ASTType visit(ASTBooleanType astBooleanType)
 	{
-		return booleanType;
+		return astBooleanType;
 	}
 
 	@Override
-	public ASTType visit(ASTIntArrayType intArrayType)
+	public ASTType visit(ASTIntArrayType astIntArrayType)
 	{
-		return intArrayType;
+		return astIntArrayType;
 	}
 
 	@Override
@@ -372,25 +373,25 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTArrayIndexExpr indexArray)
+	public ASTType visit(ASTArrayIndexExpr astIndexArray)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTArrayAssign arrayAssign)
+	public ASTType visit(ASTArrayAssign astArrayAssign)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTStringLiteral stringLiteral)
+	public ASTType visit(ASTStringLiteral astStringLiteral)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTPointerAssign pointerAssign)
+	public ASTType visit(ASTPointerAssign astPointerAssign)
 	{
 		return null;
 	}
@@ -404,9 +405,14 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIfChain astIfChain)
 	{
-		for (int i = 0; i < astIfChain.getBranchListSize(); i++) {
-			astIfChain.getBranchAt(i).accept(this);
+		for (ASTConditionalBranch astConditionalBranch : astIfChain.getBranches()) {
+			astConditionalBranch.accept(this);
 		}
+
+		if (astIfChain.getElseBody() != null) {
+			astIfChain.getElseBody().accept(this);
+		}
+
 		return null;
 	}
 
@@ -441,89 +447,104 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTNotEquals astNotEquals)
 	{
+		astNotEquals.getLeftSide().accept(this);
+		astNotEquals.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTPlus astPlus)
 	{
+		astPlus.getLeftSide().accept(this);
+		astPlus.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTOr astOr)
 	{
-		// TODO Auto-generated method stub
+		astOr.getLeftSide().accept(this);
+		astOr.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTAnd astAnd)
 	{
-		// TODO Auto-generated method stub
+		astAnd.getLeftSide().accept(this);
+		astAnd.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTEquals astEquals)
 	{
-		// TODO Auto-generated method stub
+		astEquals.getLeftSide().accept(this);
+		astEquals.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLessThan astLessThan)
 	{
-		// TODO Auto-generated method stub
+		astLessThan.getLeftSide().accept(this);
+		astLessThan.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
-		// TODO Auto-generated method stub
+		astLessThanOrEqual.getLeftSide().accept(this);
+		astLessThanOrEqual.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTGreaterThan astGreaterThan)
 	{
-		// TODO Auto-generated method stub
+		astGreaterThan.getLeftSide().accept(this);
+		astGreaterThan.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
-		// TODO Auto-generated method stub
+		astGreaterThanOrEqual.getLeftSide().accept(this);
+		astGreaterThanOrEqual.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTMinus astMinus)
 	{
-		// TODO Auto-generated method stub
+		astMinus.getLeftSide().accept(this);
+		astMinus.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTTimes astTimes)
 	{
-		// TODO Auto-generated method stub
+		astTimes.getLeftSide().accept(this);
+		astTimes.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTDivision astDivision)
 	{
-		// TODO Auto-generated method stub
+		astDivision.getLeftSide().accept(this);
+		astDivision.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTModulus astModulus)
 	{
-		// TODO Auto-generated method stub
+		astModulus.getLeftSide().accept(this);
+		astModulus.getRightSide().accept(this);
 		return null;
 	}
 }
