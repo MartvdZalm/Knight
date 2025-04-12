@@ -16,7 +16,7 @@ public class SymbolFunction extends Binding
 {
 	private String id;
 	private Vector<SymbolVariable> params;
-	private Scope scope;
+	// private Scope scope;
 
 	public SymbolFunction(String id, ASTType type)
 	{
@@ -30,6 +30,11 @@ public class SymbolFunction extends Binding
 	{
 		return id;
 	}
+
+	// public void setScope(Scope scope)
+	// {
+	// this.scope = scope;
+	// }
 
 	public boolean addParam(String id, ASTType type)
 	{
@@ -55,14 +60,14 @@ public class SymbolFunction extends Binding
 		}
 	}
 
-	public boolean addVariable(String id, ASTType type)
-	{
-		if (scope.contains(id)) {
-			return false;
-		}
-		scope.addVariable(id, new SymbolVariable(id, type));
-		return true;
-	}
+	// public boolean addVariable(String id, ASTType type)
+	// {
+	// if (scope.contains(id)) {
+	// return false;
+	// }
+	// scope.addVariable(id, new SymbolVariable(id, type));
+	// return true;
+	// }
 
 	public boolean containsParam(String id)
 	{
@@ -74,13 +79,13 @@ public class SymbolFunction extends Binding
 		return false;
 	}
 
-	public SymbolVariable getVariable(String id)
-	{
-		SymbolVariable var = scope.getVariable(id);
-		if (var != null)
-			return var;
-		return getParam(id);
-	}
+	// public SymbolVariable getVariable(String id)
+	// {
+	// SymbolVariable var = scope.getVariable(id);
+	// if (var != null)
+	// return var;
+	// return getParam(id);
+	// }
 
 	public SymbolVariable getParam(String id)
 	{
@@ -96,26 +101,5 @@ public class SymbolFunction extends Binding
 	public int getParamsSize()
 	{
 		return params.size();
-	}
-
-	public void startScope()
-	{
-		if (scope != null) {
-			scope = scope.addChild();
-		} else {
-			scope = new Scope(null);
-		}
-	}
-
-	public void endScope()
-	{
-		if (scope.getParent() != null) {
-			scope = scope.getParent();
-		}
-	}
-
-	public void printScope()
-	{
-		System.out.println(scope);
 	}
 }

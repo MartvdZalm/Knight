@@ -34,7 +34,6 @@ import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTSkip;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTThis;
@@ -101,12 +100,6 @@ public class CodeGenerator implements ASTVisitor<String>
 		}
 
 		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTSkip skip)
-	{
-		return null;
 	}
 
 	@Override

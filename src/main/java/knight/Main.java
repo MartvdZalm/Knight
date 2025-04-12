@@ -63,12 +63,12 @@ public class Main
 
 			SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
 
-			for (SymbolFunction func : symbolProgram.getFunctions().values()) {
-				func.printScope();
-			}
+			// for (SymbolFunction func : symbolProgram.getFunctions().values()) {
+			// func.printScope();
+			// }
 
-			// NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
-			// nameAnalyser.visit((ASTProgram) tree);
+			NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
+			nameAnalyser.visit((ASTProgram) tree);
 
 			// TypeAnalyser ta = new TypeAnalyser(symbolProgram);
 			// ta.visit((ASTProgram) tree);

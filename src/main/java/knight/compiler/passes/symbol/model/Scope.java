@@ -4,6 +4,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import knight.compiler.ast.ASTType;
 
 /*
  * File: Scope.java
@@ -13,71 +15,40 @@ import java.util.ArrayList;
  */
 public class Scope
 {
-	private Hashtable<String, SymbolVariable> variables;
-	private List<Scope> children;
-	private Scope parent;
+	private final Scope parent;
+	private final Map<String, SymbolVariable> variables = new HashMap<>();
 
 	public Scope(Scope parent)
 	{
-		this.variables = new Hashtable<>();
-		this.children = new ArrayList<>();
 		this.parent = parent;
 	}
 
-	public Scope addChild()
+	public boolean addVariable(String name, ASTType type)
 	{
-		Scope scope = new Scope(this);
-		children.add(scope);
-		return scope;
+		if (contains(name)) {
+			return false;
+		}
+		variables.put(name, new SymbolVariable(name, type));
+		return true;
 	}
 
-	public void addVariable(String id, SymbolVariable variable)
+	public SymbolVariable getVariable(String name)
 	{
-		variables.put(id, variable);
-	}
-
-	public SymbolVariable getVariable(String id)
-	{
-		if (contains(id)) {
-			return variables.get(id);
+		if (contains(name)) {
+			return variables.get(name);
 		} else if (parent != null) {
-			return parent.getVariable(id);
+			return parent.getVariable(name);
 		}
 		return null;
 	}
 
-	public boolean contains(String id)
+	public boolean contains(String name)
 	{
-		return variables.containsKey(id);
+		return variables.containsKey(name);
 	}
 
 	public Scope getParent()
 	{
 		return parent;
 	}
-
-	@Override
-	public String toString()
-	{
-		StringBuilder sb = new StringBuilder();
-		toString(sb, 0);
-		return sb.toString();
-	}
-
-	public void toString(StringBuilder sb, int level)
-	{
-		String indent = "\t".repeat(level);
-
-		sb.append(indent).append("Scope Level ").append(level).append(":\n");
-
-		for (SymbolVariable variable : variables.values()) {
-			sb.append(indent).append("\t").append(variable.getId()).append(" -> ").append(variable.getType())
-					.append("\n");
-		}
-
-		for (Scope scope : children) {
-			scope.toString(sb, level + 1);
-		}
-	}
-
 }

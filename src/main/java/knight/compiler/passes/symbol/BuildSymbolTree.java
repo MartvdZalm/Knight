@@ -30,7 +30,6 @@ import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTSkip;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTThis;
@@ -45,7 +44,9 @@ import knight.compiler.lexer.Token;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.compiler.passes.symbol.model.SymbolClass;
 import knight.compiler.passes.symbol.model.SymbolFunction;
+import knight.compiler.passes.symbol.model.SymbolVariable;
 import knight.compiler.passes.symbol.model.SymbolProgram;
+import knight.compiler.passes.symbol.model.Scope;
 
 /*
  * File: BuildSymbolTree.java
@@ -58,6 +59,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	private SymbolClass symbolClass;
 	private SymbolFunction symbolFunction;
 	private String mKlassId;
+
+	private Scope currentScope;
 
 	public BuildSymbolTree()
 	{
@@ -93,7 +96,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		String className = astClass.getClassName().getId();
 
 		if (!symbolProgram.addClass(className, null)) {
-			addError(astClass.getToken(), "Class " + className + " is already defined!");
+			SemanticErrors.addError(astClass.getToken(), "Class " + className + " is already defined!");
 			symbolClass = new SymbolClass(className, null);
 		} else {
 			symbolClass = symbolProgram.getClass(className);
@@ -115,7 +118,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTProperty astProperty)
 	{
 		if (symbolClass == null) {
-			addError(astProperty.getToken(), "Property declared outside of class");
+			SemanticErrors.addError(astProperty.getToken(), "Property declared outside of class");
 			return null;
 		}
 
@@ -124,7 +127,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 
 		if (!symbolClass.addVariable(identifier, type)) {
 			Token token = astProperty.getId().getToken();
-			addError(token, "Property " + identifier + " already defined in class " + symbolClass.getId());
+			SemanticErrors.addError(token,
+					"Property " + identifier + " already defined in class " + symbolClass.getId());
 		}
 
 		return null;
@@ -137,13 +141,13 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 
 		if (symbolClass == null) {
 			if (!symbolProgram.addFunction(identifier, type)) {
-				addError(astFunction.getToken(), "Function " + identifier + " already defined");
+				SemanticErrors.addError(astFunction.getToken(), "Function " + identifier + " already defined");
 			} else {
 				symbolFunction = symbolProgram.getFunction(identifier);
 			}
 		} else {
 			if (!symbolClass.addFunction(identifier, type)) {
-				addError(astFunction.getToken(),
+				SemanticErrors.addError(astFunction.getToken(),
 						"Function " + identifier + " already defined in class " + symbolClass.getId());
 			} else {
 				symbolFunction = symbolClass.getFunction(identifier);
@@ -175,12 +179,6 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTSkip skip)
-	{
-		return null;
-	}
-
-	@Override
 	public ASTType visit(ASTAssign assign)
 	{
 		return null;
@@ -189,7 +187,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTBody astBody)
 	{
-		symbolFunction.startScope();
+		currentScope = new Scope(currentScope);
 
 		for (int i = 0; i < astBody.getVariableListSize(); i++) {
 			astBody.getVariableAt(i).accept(this);
@@ -199,7 +197,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			astBody.getStatementAt(i).accept(this);
 		}
 
-		symbolFunction.endScope();
+		astBody.setScope(currentScope);
+		currentScope = currentScope.getParent();
 		return null;
 	}
 
@@ -230,7 +229,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTIdentifierExpr identifierExpr)
+	public ASTType visit(ASTIdentifierExpr astIdentifierExpr)
 	{
 		return null;
 	}
@@ -314,12 +313,6 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTIdentifierType astIdentifierType)
 	{
 		String identifier = astIdentifierType.getId();
-
-		if (identifier != null && identifier.equals(mKlassId)) {
-			addError(astIdentifierType.getToken(),
-					"Class " + identifier + " cannot be used as a type in class " + symbolClass.getId());
-		}
-
 		return astIdentifierType;
 	}
 
@@ -329,39 +322,43 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		String identifier = astVariable.getId().getId();
 
 		if (symbolFunction != null) {
-			if (!symbolFunction.addVariable(identifier, type)) {
+			if (!currentScope.addVariable(identifier, type)) {
 				Token token = astVariable.getId().getToken();
-				addError(token, "Variable " + identifier + " already defined in function " + symbolFunction.getId());
+				SemanticErrors.addError(token,
+						"Variable " + identifier + " already defined in function " + symbolFunction.getId());
 			}
 		} else if (symbolClass != null) {
 			if (!symbolClass.addVariable(identifier, type)) {
 				Token token = astVariable.getId().getToken();
-				addError(token, "Variable " + identifier + " already defined in class " + symbolClass.getId());
+				SemanticErrors.addError(token,
+						"Variable " + identifier + " already defined in class " + symbolClass.getId());
 			}
 		} else {
 			if (!symbolProgram.addVariable(identifier, type)) {
 				Token token = astVariable.getId().getToken();
-				addError(token, "Variable " + identifier + " already defined");
+				SemanticErrors.addError(token, "Variable " + identifier + " already defined");
 			}
 		}
 	}
 
 	@Override
-	public ASTType visit(ASTVariable varDecl)
+	public ASTType visit(ASTVariable astVariable)
 	{
-		checkIfVariableExist(varDecl);
+		checkIfVariableExist(astVariable);
+		astVariable.getId().accept(this);
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTVariableInit varDeclInit)
+	public ASTType visit(ASTVariableInit astVariableInit)
 	{
-		checkIfVariableExist(varDeclInit);
+		checkIfVariableExist(astVariableInit);
+		astVariableInit.getId().accept(this);
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTIdentifier identifier)
+	public ASTType visit(ASTIdentifier astIdentifier)
 	{
 		return null;
 	}
@@ -429,11 +426,11 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			if (!symbolFunction.addParam(identifier, type)) {
 				Token token = astArgument.getIdentifier().getToken();
 				String classId = symbolClass != null ? symbolClass.getId() : "global";
-				addError(token, "Argument " + identifier + " already defined in function " + symbolFunction.getId()
-						+ " in class " + classId);
+				SemanticErrors.addError(token, "Argument " + identifier + " already defined in function "
+						+ symbolFunction.getId() + " in class " + classId);
 			}
 		} else {
-			addError(astArgument.getToken(), "Argument declared outside of a function");
+			SemanticErrors.addError(astArgument.getToken(), "Argument declared outside of a function");
 		}
 
 		return null;
@@ -449,10 +446,5 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTPlus astPlus)
 	{
 		return null;
-	}
-
-	public static void addError(Token token, String errorText)
-	{
-		SemanticErrors.addError(token.getRow(), token.getCol(), errorText);
 	}
 }

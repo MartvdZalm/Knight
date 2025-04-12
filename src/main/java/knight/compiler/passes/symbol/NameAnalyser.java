@@ -1,5 +1,7 @@
 package knight.compiler.passes.symbol;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -34,7 +36,6 @@ import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTSkip;
 import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
@@ -52,6 +53,7 @@ import knight.compiler.passes.symbol.model.SymbolClass;
 import knight.compiler.passes.symbol.model.SymbolFunction;
 import knight.compiler.passes.symbol.model.SymbolProgram;
 import knight.compiler.passes.symbol.model.SymbolVariable;
+import knight.compiler.passes.symbol.model.Scope;
 
 /*
  * File: NameAnalyser.java
@@ -67,9 +69,19 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	private Set<String> hsymbolClass = new HashSet<>();
 	private Set<String> hsymbolFunction = new HashSet<>();
 
+	private Scope currentScope;
+
 	public NameAnalyser(SymbolProgram symbolProgram)
 	{
 		this.symbolProgram = symbolProgram;
+	}
+
+	private SymbolVariable getVariable(String id, SymbolClass sClass, SymbolFunction sFunction)
+	{
+		if (currentScope != null) {
+			return currentScope.getVariable(id);
+		}
+		return symbolProgram.getVariable(id, sClass, sFunction);
 	}
 
 	@Override
@@ -81,24 +93,21 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTBody body)
+	public ASTType visit(ASTBody astBody)
 	{
-		for (int i = 0; i < body.getVariableListSize(); i++) {
-			ASTVariable variable = body.getVariableAt(i);
-			variable.accept(this);
+		Scope bodyScope = astBody.getScope();
+		Scope savedScope = currentScope;
+		currentScope = bodyScope;
+
+		for (ASTVariable astVariable : astBody.getVariableList()) {
+			astVariable.accept(this);
 		}
 
-		for (int i = 0; i < body.getStatementListSize(); i++) {
-			ASTStatement statement = body.getStatementAt(i);
-			statement.accept(this);
+		for (ASTStatement astStatement : astBody.getStatementList()) {
+			astStatement.accept(this);
 		}
 
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTSkip skip)
-	{
+		currentScope = savedScope;
 		return null;
 	}
 
@@ -142,7 +151,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		SymbolClass klass = symbolProgram.getClass(id);
 		if (klass == null) {
 			Token sym = ni.getClassName().getToken();
-			addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
+			SemanticErrors.addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
 		}
 
 		ni.getClassName().setB(klass);
@@ -207,56 +216,49 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTIdentifier identifier)
+	public ASTType visit(ASTIdentifier astIdentifier)
 	{
-		String id = identifier.getId();
-		SymbolVariable var = symbolProgram.getVariable(id, symbolClass, symbolFunction);
+		String identifier = astIdentifier.getId();
+		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
 
-		if (var == null) {
-			System.out.println("Hello World");
-
-			Token sym = identifier.getToken();
-			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
+		if (symbolVariable == null) {
+			SemanticErrors.addError(astIdentifier.getToken(), "variable " + identifier + " is not declared");
 		}
 
-		identifier.setB(var);
+		astIdentifier.setB(symbolVariable);
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTIdentifierType identifierType)
+	public ASTType visit(ASTIdentifierType astIdentifierType)
 	{
-		String id = identifierType.getId();
-		SymbolClass klass = symbolProgram.getClass(id);
-		if (klass == null) {
-			Token sym = identifierType.getToken();
-			addError(sym.getRow(), sym.getCol(), "class " + id + " is not declared");
+		String identifier = astIdentifierType.getId();
+		SymbolClass symbolClass = symbolProgram.getClass(identifier);
+		if (symbolClass == null) {
+			SemanticErrors.addError(astIdentifierType.getToken(), "class " + identifier + " is not declared");
 		}
 
-		identifierType.setB(klass);
+		astIdentifierType.setB(symbolClass);
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTIdentifierExpr identifierExpr)
+	public ASTType visit(ASTIdentifierExpr astIdentifierExpr)
 	{
-		String id = identifierExpr.getId();
-		SymbolVariable var = symbolProgram.getVariable(id, symbolClass, symbolFunction);
-		if (var == null) {
-			Token sym = identifierExpr.getToken();
-			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
+		String identifier = astIdentifierExpr.getId();
+		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
+		if (symbolVariable == null) {
+			SemanticErrors.addError(astIdentifierExpr.getToken(), "variable " + identifier + " is not declared");
 		}
 
-		identifierExpr.setB(var);
+		astIdentifierExpr.setB(symbolVariable);
 		return null;
 	}
 
-	public void checkVariable(ASTVariable varDecl)
+	public void checkVariable(ASTVariable astVariable)
 	{
-		String id = varDecl.getId().getId();
-
-		varDecl.getType().accept(this);
-		varDecl.getId().accept(this);
+		astVariable.getType().accept(this);
+		astVariable.getId().accept(this);
 	}
 
 	@Override
@@ -393,11 +395,6 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		return null;
 	}
 
-	public static void addError(int line, int col, String errorText)
-	{
-		SemanticErrors.addError(line, col, errorText);
-	}
-
 	@Override
 	public ASTType visit(ASTPointerAssign pointerAssign)
 	{
@@ -411,50 +408,63 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTProperty property)
+	public ASTType visit(ASTProperty astProperty)
 	{
+		astProperty.getId().accept(this);
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTIfChain ifChain)
+	public ASTType visit(ASTIfChain astIfChain)
 	{
-		// TODO Auto-generated method stub
+		for (ASTConditionalBranch astConditionalBranch : astIfChain.getBranches()) {
+			astConditionalBranch.accept(this);
+		}
+
+		if (astIfChain.getElseBody() != null) {
+			astIfChain.getElseBody().accept(this);
+		}
+
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTBinaryOperation astBinaryOperation)
 	{
-		// TODO Auto-generated method stub
+		astBinaryOperation.getLeftSide().accept(this);
+		astBinaryOperation.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTConditionalBranch astConditionalBranch)
 	{
-		// TODO Auto-generated method stub
+		astConditionalBranch.getCondition().accept(this);
+		astConditionalBranch.getBody().accept(this);
+
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTArgument astArgument)
 	{
-		// TODO Auto-generated method stub
+		astArgument.getIdentifier().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTNotEquals astNotEquals)
 	{
-		// TODO Auto-generated method stub
+		astNotEquals.getLeftSide().accept(this);
+		astNotEquals.getRightSide().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTPlus astPlus)
 	{
-		// TODO Auto-generated method stub
+		astPlus.getLeftSide().accept(this);
+		astPlus.getRightSide().accept(this);
 		return null;
 	}
 }

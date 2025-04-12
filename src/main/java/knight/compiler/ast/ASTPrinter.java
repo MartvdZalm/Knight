@@ -41,12 +41,6 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTSkip skip)
-	{
-		return "";
-	}
-
-	@Override
 	public String visit(ASTBody body)
 	{
 		StringBuilder sb = new StringBuilder();

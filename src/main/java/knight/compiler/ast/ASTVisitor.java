@@ -59,8 +59,6 @@ public interface ASTVisitor<R>
 
 	public R visit(ASTVoidType voidType);
 
-	public R visit(ASTSkip skip);
-
 	public R visit(ASTCallFunctionStat callFunction);
 
 	public R visit(ASTFunctionReturn functionDeclReturn);

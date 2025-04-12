@@ -3,6 +3,7 @@ package knight.compiler.ast;
 import java.util.List;
 
 import knight.compiler.lexer.Token;
+import knight.compiler.passes.symbol.model.Scope;
 
 /*
  * File: ASTBody.java
@@ -13,6 +14,7 @@ public class ASTBody extends ASTStatement
 {
 	private ASTList<ASTStatement> statementList;
 	private ASTList<ASTVariable> variableList;
+	private Scope scope;
 
 	public ASTBody(Token token, List<ASTVariable> variableList, List<ASTStatement> statementList)
 	{
@@ -50,6 +52,16 @@ public class ASTBody extends ASTStatement
 	public ASTStatement getStatementAt(int index)
 	{
 		return statementList.getAt(index);
+	}
+
+	public void setScope(Scope scope)
+	{
+		this.scope = scope;
+	}
+
+	public Scope getScope()
+	{
+		return scope;
 	}
 
 	@Override

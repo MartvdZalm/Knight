@@ -124,9 +124,9 @@ public class SymbolProgram
 	public SymbolVariable getVariable(String id, SymbolClass sClass, SymbolFunction sFunction)
 	{
 		if (sFunction != null) {
-			if (sFunction.getVariable(id) != null) {
-				return sFunction.getVariable(id);
-			}
+			// if (sFunction.getVariable(id) != null) {
+			// return sFunction.getVariable(id);
+			// }
 			if (sFunction.getParam(id) != null) {
 				return sFunction.getParam(id);
 			}

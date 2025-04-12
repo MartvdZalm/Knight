@@ -35,7 +35,6 @@ import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTSkip;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTThis;
@@ -125,12 +124,6 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 //
 //		return null;
 //	}
-
-	@Override
-	public ASTType visit(ASTSkip skip)
-	{
-		return null;
-	}
 
 	@Override
 	public ASTType visit(ASTWhile n)
