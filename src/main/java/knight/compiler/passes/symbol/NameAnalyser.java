@@ -54,11 +54,11 @@ import knight.compiler.passes.symbol.model.SymbolProgram;
 import knight.compiler.passes.symbol.model.SymbolVariable;
 
 /*
- * File: NameAnalyserTreeVisitor.java
+ * File: NameAnalyser.java
  * @author: Mart van der Zalm
  * Date: 2025-04-10
  */
-public class NameResolutionPass implements ASTVisitor<ASTType>
+public class NameAnalyser implements ASTVisitor<ASTType>
 {
 	private SymbolProgram symbolProgram;
 	private SymbolClass symbolClass;
@@ -67,7 +67,7 @@ public class NameResolutionPass implements ASTVisitor<ASTType>
 	private Set<String> hsymbolClass = new HashSet<>();
 	private Set<String> hsymbolFunction = new HashSet<>();
 
-	public NameResolutionPass(SymbolProgram symbolProgram)
+	public NameAnalyser(SymbolProgram symbolProgram)
 	{
 		this.symbolProgram = symbolProgram;
 	}
@@ -213,6 +213,8 @@ public class NameResolutionPass implements ASTVisitor<ASTType>
 		SymbolVariable var = symbolProgram.getVariable(id, symbolClass, symbolFunction);
 
 		if (var == null) {
+			System.out.println("Hello World");
+
 			Token sym = identifier.getToken();
 			addError(sym.getRow(), sym.getCol(), "variable " + id + " is not declared");
 		}

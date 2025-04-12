@@ -9,8 +9,11 @@ import knight.compiler.ast.ASTPrinter;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.parser.Parser;
 import knight.compiler.passes.symbol.BuildSymbolTree;
+import knight.compiler.passes.symbol.NameAnalyser;
 import knight.compiler.passes.symbol.diagnostics.NameError;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
+import knight.compiler.passes.symbol.model.SymbolProgram;
+import knight.compiler.passes.symbol.model.SymbolFunction;
 import knight.preprocessor.PreProcessor;
 
 /*
@@ -48,20 +51,24 @@ public class Main
 			Parser p = new Parser(bufferedReader);
 			AST tree = p.parse();
 
-			// if (containsFlag(args, "-ast")) {
-			ASTPrinter printer = new ASTPrinter();
-			System.out.println(printer.visit((ASTProgram) tree));
-			// System.exit(0);
-			// }
+			if (containsFlag(args, "-ast")) {
+				ASTPrinter printer = new ASTPrinter();
+				System.out.println(printer.visit((ASTProgram) tree));
+				System.exit(0);
+			}
 
 			// if (tree != null) {
 			BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
 			buildSymbolTree.visit((ASTProgram) tree);
 
-			// SymbolProgram symbolProgram = bspv.getSymbolProgram();
+			SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
 
-			// NameAnalyserTree natv = new NameAnalyserTree(symbolProgram);
-			// natv.visit((ASTProgram) tree);
+			for (SymbolFunction func : symbolProgram.getFunctions().values()) {
+				func.printScope();
+			}
+
+			// NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
+			// nameAnalyser.visit((ASTProgram) tree);
 
 			// TypeAnalyser ta = new TypeAnalyser(symbolProgram);
 			// ta.visit((ASTProgram) tree);

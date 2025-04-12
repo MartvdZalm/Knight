@@ -48,7 +48,7 @@ import knight.compiler.passes.symbol.model.SymbolFunction;
 import knight.compiler.passes.symbol.model.SymbolProgram;
 
 /*
- * File: BuildSymbolProgramVisitor.java
+ * File: BuildSymbolTree.java
  * @author: Mart van der Zalm
  * Date: 2025-04-10
  */
@@ -189,18 +189,17 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTBody astBody)
 	{
-		symbolFunction.startNewScope();
+		symbolFunction.startScope();
 
 		for (int i = 0; i < astBody.getVariableListSize(); i++) {
 			astBody.getVariableAt(i).accept(this);
-			System.out.println(astBody.getVariableAt(i).getId());
 		}
 
 		for (int i = 0; i < astBody.getStatementListSize(); i++) {
 			astBody.getStatementAt(i).accept(this);
 		}
 
-		symbolFunction.endCurrentScope();
+		symbolFunction.endScope();
 		return null;
 	}
 

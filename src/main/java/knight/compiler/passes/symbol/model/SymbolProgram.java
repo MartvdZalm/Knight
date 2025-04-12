@@ -102,9 +102,9 @@ public class SymbolProgram
 		return null;
 	}
 
-	public Enumeration<String> getFunctions()
+	public Hashtable<String, SymbolFunction> getFunctions()
 	{
-		return functions.keys();
+		return functions;
 	}
 
 	public ASTType getFunctionType(String id, String classScope)

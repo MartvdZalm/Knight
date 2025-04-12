@@ -1,53 +1,83 @@
 
-string name = "Mart van der zalm";
-
 fn main(): int
 {
-	print("Welcome to Guess the Number!");
-	print("I'm thinking of a number between 1 and 100");
+	int counter = 0;
 
-	int secret = random(1, 100);
-	int guess = 0;
-	int tries = 0;
-	int hello = 0;
-
-
-	while (guess != secret)
-	{
-		print("Enter your guess: ");
-		string input = read_line();
-		guess = to_int(input);
-		tries = tries + 1;
-
-		int hello = 0;
+	if (counter != 0) {
+		int num = 0;
+		counter = 1;
+	}
 
 
-		if (guess != secret)
-		{
-			print("Too low!");
+	if (counter != 0) {
+		counter = 1;
+
+		if (counter != 0) {
+			counter = 1;
+			if (counter != 0) {
+				string name;
+				counter = 1;
+
+					if (counter != 0) {
+						int age;
+						counter = 1;
+					}
+			}
 		}
-		else if (guess != secret)
-		{
-			print("Too high!");
-		}
-		else
-		{
-			print("Correct! You guessed it in ", to_string(tries), " tries!");
-		}
-
-		// if (guess < secret)
-		// {
-		// 	print("Too low!");
-		// }
-		// else if (guess > secret)
-		// {
-		// 	print("Too high!");
-		// }
-		// else
-		// {
-		// 	print("Correct! You guessed it in ", to_string(tries), " tries!");
-		// }
 	}
 
 	ret 0;
 }
+
+// string name = "Mart van der zalm";
+
+// fn main(): int
+// {
+// 	print("Welcome to Guess the Number!");
+// 	print("I'm thinking of a number between 1 and 100");
+
+// 	int secret = random(1, 100);
+// 	int guess = 0;
+// 	int tries = 0;
+// 	// int hello = 0;
+
+
+// 	while (guess != secret)
+// 	{
+// 		print("Enter your guess: ");
+// 		string input = read_line();
+// 		guess = to_int(input);
+// 		tries = tries + 1;
+
+// 		// hello = 0;
+
+
+// 		if (guess != secret)
+// 		{
+// 			print("Too low!");
+// 		}
+// 		else if (guess != secret)
+// 		{
+// 			print("Too high!");
+// 		}
+// 		else
+// 		{
+// 			print("Correct! You guessed it in ", to_string(tries), " tries!");
+// 		}
+
+// 		// if (guess < secret)
+// 		// {
+// 		// 	print("Too low!");
+// 		// }
+// 		// else if (guess > secret)
+// 		// {
+// 		// 	print("Too high!");
+// 		// }
+// 		// else
+// 		// {
+// 		// 	print("Correct! You guessed it in ", to_string(tries), " tries!");
+// 		// }
+// 	}
+
+// 	ret 0;
+// }
