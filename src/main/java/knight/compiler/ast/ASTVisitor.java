@@ -7,71 +7,67 @@ package knight.compiler.ast;
  */
 public interface ASTVisitor<R>
 {
-	public R visit(ASTProgram program);
+	public R visit(ASTProgram astProgram);
 
-	public R visit(ASTClass classDecl);
+	public R visit(ASTClass astClass);
 
-	public R visit(ASTFunction functionDecl);
+	public R visit(ASTFunction astFunction);
 
-	public R visit(ASTIdentifierExpr identifierExpr);
+	public R visit(ASTIdentifierExpr astIdentifierExpr);
 
-	public R visit(ASTBody body);
+	public R visit(ASTBody astBody);
 
-	public R visit(ASTIntLiteral intLiteral);
+	public R visit(ASTIntLiteral astIntLiteral);
 
-	public R visit(ASTTrue true1);
+	public R visit(ASTTrue astTrue);
 
-	public R visit(ASTFalse false1);
+	public R visit(ASTFalse astFalse);
 
-	public R visit(ASTIdentifierType identifierType);
+	public R visit(ASTIdentifierType astIdentifierType);
 
-	public R visit(ASTIntType intType);
+	public R visit(ASTIntType astIntType);
 
-	public R visit(ASTIntArrayType intArrayType);
+	public R visit(ASTIntArrayType astIntArrayType);
 
-	public R visit(ASTIfChain ifChain);
+	public R visit(ASTIfChain astIfChain);
 
-	public R visit(ASTWhile while1);
+	public R visit(ASTWhile astWhile);
 
-	public R visit(ASTAssign assign);
+	public R visit(ASTAssign astAssign);
 
-	public R visit(ASTArrayAssign arrayAssign);
+	public R visit(ASTArrayAssign astArrayAssign);
 
-	public R visit(ASTArrayIndexExpr indexArray);
+	public R visit(ASTArrayIndexExpr astIndexArray);
 
-	public R visit(ASTNewArray newArray);
+	public R visit(ASTNewArray astNewArray);
 
-	public R visit(ASTCallFunctionExpr callFunc);
+	public R visit(ASTCallFunctionExpr astCallFunctionExpr);
 
-	public R visit(ASTIdentifier identifier);
+	public R visit(ASTIdentifier astIdentifier);
 
-	public R visit(ASTBooleanType booleanType);
+	public R visit(ASTBooleanType astBooleanType);
 
-	public R visit(ASTStringLiteral stringLiteral);
+	public R visit(ASTStringLiteral astStringLiteral);
 
-	public R visit(ASTStringType stringType);
+	public R visit(ASTStringType astStringType);
 
-	public R visit(ASTNewInstance newInstance);
+	public R visit(ASTNewInstance astNewInstance);
 
-	public R visit(ASTVariable variableDecl);
+	public R visit(ASTVariable astVariable);
 
-	public R visit(ASTVariableInit variableDeclInit);
+	public R visit(ASTVariableInit astVariableInit);
 
-	public R visit(ASTVoidType voidType);
+	public R visit(ASTVoidType astVoidType);
 
-	public R visit(ASTCallFunctionStat callFunction);
+	public R visit(ASTCallFunctionStat astCallFunctionStat);
 
-	public R visit(ASTFunctionReturn functionDeclReturn);
+	public R visit(ASTFunctionReturn astFunctionReturn);
 
-	public R visit(ASTReturnStatement returnStatement);
+	public R visit(ASTReturnStatement astReturnStatement);
 
-	public R visit(ASTFunctionType functionType);
+	public R visit(ASTFunctionType astFunctionType);
 
-	public R visit(ASTPointerAssign pointerAssign);
-
-	public R visit(ASTThis this1);
-
-	public R visit(ASTProperty property);
+	public R visit(ASTProperty astProperty);
 
 	public R visit(ASTConditionalBranch astConditionalBranch);
 

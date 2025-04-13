@@ -67,9 +67,6 @@ public class TokenType
 		Symbol.symbol("new", Tokens.NEW);
 		Symbol.symbol("include", Tokens.INCLUDE);
 		Symbol.symbol("fn", Tokens.FUNCTION);
-		Symbol.symbol("ext", Tokens.EXTENDS);
-		Symbol.symbol("use", Tokens.IMPLEMENTS);
-		Symbol.symbol("asm", Tokens.ASM);
 
 		Symbol.symbol("if", Tokens.IF);
 		Symbol.symbol("else", Tokens.ELSE);
@@ -95,8 +92,5 @@ public class TokenType
 
 		Symbol.symbol("ret", Tokens.RETURN);
 		Symbol.symbol("void", Tokens.VOID);
-
-		Symbol.symbol("->", Tokens.ARROW);
-		Symbol.symbol("this", Tokens.THIS);
 	}
 }

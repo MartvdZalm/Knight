@@ -18,11 +18,10 @@ import knight.compiler.ast.ASTClass;
 import knight.compiler.ast.ASTConditionalBranch;
 import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
+import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
-import knight.compiler.ast.ASTStatement;
-import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFunctionType;
 import knight.compiler.ast.ASTGreaterThan;
 import knight.compiler.ast.ASTGreaterThanOrEqual;
@@ -42,13 +41,12 @@ import knight.compiler.ast.ASTNewInstance;
 import knight.compiler.ast.ASTNotEquals;
 import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
+import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
-import knight.compiler.ast.ASTThis;
 import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTType;
@@ -57,13 +55,14 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
-import knight.compiler.lexer.Token;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.compiler.passes.symbol.model.Binding;
 import knight.compiler.passes.symbol.model.SymbolClass;
 import knight.compiler.passes.symbol.model.SymbolFunction;
 import knight.compiler.passes.symbol.model.SymbolProgram;
 import knight.compiler.passes.symbol.model.SymbolVariable;
+import knight.compiler.passes.symbol.utils.BuiltInFunctions;
+import knight.compiler.passes.symbol.utils.BuiltInFunctions.FunctionSignature;
 
 /*
  * File: TypeAnalyser.java
@@ -451,6 +450,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	{
 		ASTIdentifierExpr functionName = astCallFunctionExpr.getFunctionName();
 
+		if (BuiltInFunctions.isBuiltIn(functionName.toString())) {
+			FunctionSignature signature = BuiltInFunctions.getSignature(functionName.toString());
+			checkBuiltInCall(astCallFunctionExpr, signature);
+			astCallFunctionExpr.setType(signature.returnType);
+			return signature.returnType;
+		}
+
 		SymbolFunction symbolFunction = null;
 		if (symbolClass == null) {
 			symbolFunction = symbolProgram.getFunction(functionName.toString());
@@ -463,7 +469,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			return null;
 		}
 
-		functionName.setB(symbolFunction);
+		astCallFunctionExpr.getFunctionName().setB(symbolFunction);
 		checkCallArguments(astCallFunctionExpr, symbolFunction);
 		astCallFunctionExpr.setType(symbolFunction.getType());
 		return symbolFunction.getType();
@@ -476,6 +482,34 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			astExpression.accept(this);
 		}
 		return null;
+	}
+
+	private void checkBuiltInCall(ASTCallFunctionExpr call, FunctionSignature signature)
+	{
+		List<ASTType> argumentTypes = new ArrayList<>();
+
+		for (ASTExpression astExpression : call.getArgumentList()) {
+			ASTType astType = astExpression.accept(this);
+			argumentTypes.add(astType);
+		}
+
+		// Check argument count
+		if (call.getArgumentListSize() != signature.parameterTypes.size()) {
+			SemanticErrors.addError(call.getToken(), "Built-in function '" + call.getFunctionName() + "' expects "
+					+ signature.parameterTypes.size() + " arguments but got " + call.getArgumentListSize());
+			return;
+		}
+
+		// Check argument types
+		for (int i = 0; i < call.getArgumentListSize(); i++) {
+			ASTType expected = signature.parameterTypes.get(i);
+			ASTType actual = argumentTypes.get(i);
+
+			if (!symbolProgram.compareTypes(expected, actual)) {
+				SemanticErrors.addError(call.getArgumentAt(i).getToken(), "Argument " + (i + 1) + " of '"
+						+ call.getFunctionName() + "' must be " + expected + " but got " + actual);
+			}
+		}
 	}
 
 	private void checkCallArguments(ASTCallFunctionExpr astCallFunctionExpr, SymbolFunction symbolFunction)
@@ -780,18 +814,6 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			astFunction.accept(this);
 		}
 
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTPointerAssign astPointerAssign)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTThis astThis)
-	{
 		return null;
 	}
 

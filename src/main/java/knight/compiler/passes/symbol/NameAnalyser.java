@@ -39,14 +39,12 @@ import knight.compiler.ast.ASTNewInstance;
 import knight.compiler.ast.ASTNotEquals;
 import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
 import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
-import knight.compiler.ast.ASTThis;
 import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTType;
@@ -55,7 +53,6 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
-import knight.compiler.lexer.Token;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.compiler.passes.symbol.model.Scope;
 import knight.compiler.passes.symbol.model.SymbolClass;
@@ -396,18 +393,6 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 
 		hsymbolFunction.clear();
 		symbolClass = null;
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTPointerAssign astPointerAssign)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTThis astThis)
-	{
 		return null;
 	}
 

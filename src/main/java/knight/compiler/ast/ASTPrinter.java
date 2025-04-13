@@ -56,24 +56,6 @@ public class ASTPrinter implements ASTVisitor<String>
 		return sb.toString();
 	}
 
-//	@Override
-//	public String visit(ASTIfThenElse ifThenElse)
-//	{
-//		StringBuilder strBuilder = new StringBuilder();
-//		strBuilder.append(printInc() + "(IF " + ifThenElse.getExpr().accept(this) + "\n");
-//
-//		incLevel();
-//		strBuilder.append(ifThenElse.getThen().accept(this) + "\n");
-//		String elze = ifThenElse.getElze().accept(this);
-//		if (elze != null && elze.trim().length() > 0) {
-//			strBuilder.append(elze + "\n");
-//		}
-//		decLevel();
-//
-//		strBuilder.append(printInc() + ")\n");
-//		return strBuilder.toString();
-//	}
-
 	@Override
 	public String visit(ASTWhile w)
 	{
@@ -341,24 +323,6 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTPointerAssign pointerAssign)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(printInc() + pointerAssign.getPointer().accept(this) + " -> ");
-		sb.append(pointerAssign.getVariable().accept(this) + " = ");
-		sb.append(pointerAssign.getExpression().accept(this));
-
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTThis astThis)
-	{
-		return "(THIS)";
-	}
-
-	@Override
 	public String visit(ASTProperty property)
 	{
 		return null;
@@ -455,8 +419,11 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTLessThan astLessThan)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder sb = new StringBuilder();
+		sb.append(astLessThan.getLeftSide().accept(this));
+		sb.append("<");
+		sb.append(astLessThan.getRightSide().accept(this));
+		return sb.toString();
 	}
 
 	@Override
@@ -469,8 +436,11 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTGreaterThan astGreaterThan)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder sb = new StringBuilder();
+		sb.append(astGreaterThan.getLeftSide().accept(this));
+		sb.append(">");
+		sb.append(astGreaterThan.getRightSide().accept(this));
+		return sb.toString();
 	}
 
 	@Override

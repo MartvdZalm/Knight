@@ -13,6 +13,7 @@ import knight.compiler.ast.ASTClass;
 import knight.compiler.ast.ASTConditionalBranch;
 import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
+import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
@@ -29,21 +30,18 @@ import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTLessThan;
 import knight.compiler.ast.ASTLessThanOrEqual;
 import knight.compiler.ast.ASTMinus;
-import knight.compiler.ast.ASTStatement;
-import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTModulus;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
 import knight.compiler.ast.ASTNotEquals;
 import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
+import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
-import knight.compiler.ast.ASTThis;
 import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTType;
@@ -386,18 +384,6 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTStringLiteral astStringLiteral)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTPointerAssign astPointerAssign)
-	{
-		return null;
-	}
-
-	@Override
-	public ASTType visit(ASTThis astThis)
 	{
 		return null;
 	}

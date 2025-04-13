@@ -12,15 +12,16 @@ public class ASTConditionalBranch extends AST
 	private ASTExpression condition;
 	private ASTBody body;
 
-	public ASTConditionalBranch(Token token)
+	public ASTConditionalBranch(Token token, ASTExpression condition, ASTBody body)
 	{
 		super(token);
+		this.condition = condition;
+		this.body = body;
 	}
 
-	public ASTConditionalBranch setCondition(ASTExpression condition)
+	public void setCondition(ASTExpression condition)
 	{
 		this.condition = condition;
-		return this;
 	}
 
 	public ASTExpression getCondition()
@@ -33,10 +34,9 @@ public class ASTConditionalBranch extends AST
 		return body;
 	}
 
-	public ASTConditionalBranch setBody(ASTBody body)
+	public void setBody(ASTBody body)
 	{
 		this.body = body;
-		return this;
 	}
 
 	@Override

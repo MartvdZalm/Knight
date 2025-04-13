@@ -40,13 +40,12 @@ import knight.compiler.ast.ASTNewInstance;
 import knight.compiler.ast.ASTNotEquals;
 import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
+import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
-import knight.compiler.ast.ASTThis;
 import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTType;
@@ -66,69 +65,80 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 {
 	private int changes;
 
-	@Override
-	public ASTExpression visit(ASTAssign assign)
+	public static void optimize(AST program) throws ParseException
 	{
-		assign.setExpr(assign.getExpr().accept(this));
+		int total = 0;
+		ConstantFolding optimizer = new ConstantFolding();
+		optimizer.changes = 0;
+		program.accept(optimizer);
+
+		while (optimizer.changes > 0) {
+			total += optimizer.changes;
+			optimizer.changes = 0;
+			program.accept(optimizer);
+		}
+
+		System.out.println("Total optimization changes: " + total);
+	}
+
+	@Override
+	public ASTExpression visit(ASTAssign astAssign)
+	{
+		astAssign.setExpr(astAssign.getExpr().accept(this));
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTBody body)
+	public ASTExpression visit(ASTBody astBody)
 	{
-		// for (int i = 0; i < body.getStatementListSize(); i++) {
-		// ASTStatement st = body.getStatementAt(i);
-		// st.accept(this);
-		// }
-		return null;
-	}
+		for (ASTVariable astVariable : astBody.getVariableList()) {
+			astVariable.accept(this);
+		}
 
-//	@Override
-//	public ASTExpression visit(ASTIfThenElse ifThenElse)
-//	{
-//		ifThenElse.setExpr(ifThenElse.getExpr().accept(this));
-//		ifThenElse.getThen().accept(this);
-//		ifThenElse.getElze().accept(this);
-//		return null;
-//	}
-
-	@Override
-	public ASTExpression visit(ASTWhile w)
-	{
-		w.setCondition(w.getCondition().accept(this));
-		w.getBody().accept(this);
+		for (ASTStatement astStatement : astBody.getStatementList()) {
+			astStatement.accept(this);
+		}
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTIntLiteral n)
+	public ASTExpression visit(ASTWhile astWhile)
 	{
-		return n;
+		astWhile.setCondition(astWhile.getCondition().accept(this));
+		astWhile.getBody().accept(this);
+		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTPlus plus)
+	public ASTExpression visit(ASTIntLiteral astIntLiteral)
 	{
-		plus.setLeftSide(plus.getLeftSide().accept(this));
-		plus.setRightSide(plus.getRightSide().accept(this));
+		return astIntLiteral;
+	}
 
-		if (plus.getType() instanceof ASTIntType) {
+	@Override
+	public ASTExpression visit(ASTPlus astPlus)
+	{
+		astPlus.setLeftSide(astPlus.getLeftSide().accept(this));
+		astPlus.setRightSide(astPlus.getRightSide().accept(this));
 
-			if (plus.getLeftSide() instanceof ASTIntLiteral && plus.getRightSide() instanceof ASTIntLiteral) {
-				ASTIntLiteral l = (ASTIntLiteral) plus.getLeftSide();
-				ASTIntLiteral r = (ASTIntLiteral) plus.getRightSide();
-				int result = l.getValue() + r.getValue();
+		if (astPlus.getType() instanceof ASTIntType) {
+
+			if (astPlus.getLeftSide() instanceof ASTIntLiteral && astPlus.getRightSide() instanceof ASTIntLiteral) {
+				ASTIntLiteral leftSide = (ASTIntLiteral) astPlus.getLeftSide();
+				ASTIntLiteral rightSide = (ASTIntLiteral) astPlus.getRightSide();
+				int result = leftSide.getValue() + rightSide.getValue();
 				incChanges();
-				ASTIntLiteral op = new ASTIntLiteral(l.getToken(), result);
-				op.setType(plus.getType());
-				return op;
+				ASTIntLiteral astIntLiteral = new ASTIntLiteral(leftSide.getToken(), result);
+				astIntLiteral.setType(astPlus.getType());
+				return astIntLiteral;
 			}
 
 		} else {
 
-			if (plus.getLeftSide() instanceof ASTStringLiteral && plus.getRightSide() instanceof ASTStringLiteral) {
-				ASTStringLiteral l = (ASTStringLiteral) plus.getLeftSide();
-				ASTStringLiteral r = (ASTStringLiteral) plus.getRightSide();
+			if (astPlus.getLeftSide() instanceof ASTStringLiteral
+					&& astPlus.getRightSide() instanceof ASTStringLiteral) {
+				ASTStringLiteral l = (ASTStringLiteral) astPlus.getLeftSide();
+				ASTStringLiteral r = (ASTStringLiteral) astPlus.getRightSide();
 				StringBuilder sb = new StringBuilder();
 				sb.append(l.getValue());
 				sb.append(r.getValue());
@@ -137,9 +147,10 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 				op.setType(new ASTStringType(l.getToken()));
 				return op;
 
-			} else if (plus.getLeftSide() instanceof ASTIntLiteral && plus.getRightSide() instanceof ASTStringLiteral) {
-				ASTIntLiteral l = (ASTIntLiteral) plus.getLeftSide();
-				ASTStringLiteral r = (ASTStringLiteral) plus.getRightSide();
+			} else if (astPlus.getLeftSide() instanceof ASTIntLiteral
+					&& astPlus.getRightSide() instanceof ASTStringLiteral) {
+				ASTIntLiteral l = (ASTIntLiteral) astPlus.getLeftSide();
+				ASTStringLiteral r = (ASTStringLiteral) astPlus.getRightSide();
 				StringBuilder sb = new StringBuilder();
 				sb.append(l.getValue());
 				sb.append(r.getValue());
@@ -148,9 +159,10 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 				op.setType(new ASTStringType(r.getToken()));
 				return op;
 
-			} else if (plus.getLeftSide() instanceof ASTStringLiteral && plus.getRightSide() instanceof ASTIntLiteral) {
-				ASTStringLiteral l = (ASTStringLiteral) plus.getLeftSide();
-				ASTIntLiteral r = (ASTIntLiteral) plus.getRightSide();
+			} else if (astPlus.getLeftSide() instanceof ASTStringLiteral
+					&& astPlus.getRightSide() instanceof ASTIntLiteral) {
+				ASTStringLiteral l = (ASTStringLiteral) astPlus.getLeftSide();
+				ASTIntLiteral r = (ASTIntLiteral) astPlus.getRightSide();
 				StringBuilder sb = new StringBuilder();
 				sb.append(l.getValue());
 				sb.append(r.getValue());
@@ -160,443 +172,533 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 				return op;
 			}
 		}
-		return plus;
+		return astPlus;
 	}
 
 	@Override
-	public ASTExpression visit(ASTMinus minus)
+	public ASTExpression visit(ASTMinus astMinus)
 	{
-		minus.setLeftSide(minus.getLeftSide().accept(this));
-		minus.setRightSide(minus.getRightSide().accept(this));
+		astMinus.setLeftSide(astMinus.getLeftSide().accept(this));
+		astMinus.setRightSide(astMinus.getRightSide().accept(this));
 
-		if (minus.getLeftSide() instanceof ASTIntLiteral && minus.getRightSide() instanceof ASTIntLiteral) {
-			ASTIntLiteral l = (ASTIntLiteral) minus.getLeftSide();
-			ASTIntLiteral r = (ASTIntLiteral) minus.getRightSide();
-			int result = l.getValue() - r.getValue();
+		if (astMinus.getLeftSide() instanceof ASTIntLiteral && astMinus.getRightSide() instanceof ASTIntLiteral) {
+			ASTIntLiteral leftSide = (ASTIntLiteral) astMinus.getLeftSide();
+			ASTIntLiteral rightSide = (ASTIntLiteral) astMinus.getRightSide();
+			int result = leftSide.getValue() - rightSide.getValue();
 			incChanges();
-			ASTIntLiteral op = new ASTIntLiteral(l.getToken(), result);
-			op.setType(new ASTIntType(l.getToken()));
-			return op;
+			ASTIntLiteral astIntLiteral = new ASTIntLiteral(leftSide.getToken(), result);
+			astIntLiteral.setType(new ASTIntType(leftSide.getToken()));
+			return astIntLiteral;
 		}
-		return minus;
+		return astMinus;
 	}
 
 	@Override
-	public ASTExpression visit(ASTTimes times)
+	public ASTExpression visit(ASTTimes astTimes)
 	{
-		times.setLeftSide(times.getLeftSide().accept(this));
-		times.setRightSide(times.getRightSide().accept(this));
+		astTimes.setLeftSide(astTimes.getLeftSide().accept(this));
+		astTimes.setRightSide(astTimes.getRightSide().accept(this));
 
-		if (times.getLeftSide() instanceof ASTIntLiteral && times.getRightSide() instanceof ASTIntLiteral) {
-			ASTIntLiteral l = (ASTIntLiteral) times.getLeftSide();
-			ASTIntLiteral r = (ASTIntLiteral) times.getRightSide();
-			int result = l.getValue() * r.getValue();
+		if (astTimes.getLeftSide() instanceof ASTIntLiteral && astTimes.getRightSide() instanceof ASTIntLiteral) {
+			ASTIntLiteral leftSide = (ASTIntLiteral) astTimes.getLeftSide();
+			ASTIntLiteral rightSide = (ASTIntLiteral) astTimes.getRightSide();
+			int result = leftSide.getValue() * rightSide.getValue();
 			incChanges();
-			ASTIntLiteral op = new ASTIntLiteral(l.getToken(), result);
-			op.setType(new ASTIntType(l.getToken()));
-			return op;
+			ASTIntLiteral astIntLiteral = new ASTIntLiteral(leftSide.getToken(), result);
+			astIntLiteral.setType(new ASTIntType(leftSide.getToken()));
+			return astIntLiteral;
 		}
-		return times;
+		return astTimes;
 	}
 
 	@Override
-	public ASTExpression visit(ASTDivision division)
+	public ASTExpression visit(ASTDivision astDivision)
 	{
-		division.setLeftSide(division.getLeftSide().accept(this));
-		division.setRightSide(division.getRightSide().accept(this));
+		astDivision.setLeftSide(astDivision.getLeftSide().accept(this));
+		astDivision.setRightSide(astDivision.getRightSide().accept(this));
 
-		if (division.getLeftSide() instanceof ASTIntLiteral && division.getRightSide() instanceof ASTIntLiteral) {
-			ASTIntLiteral l = (ASTIntLiteral) division.getLeftSide();
-			ASTIntLiteral r = (ASTIntLiteral) division.getRightSide();
-			if (r.getValue() != 0) {
-				int result = l.getValue() / r.getValue();
+		if (astDivision.getLeftSide() instanceof ASTIntLiteral && astDivision.getRightSide() instanceof ASTIntLiteral) {
+			ASTIntLiteral leftSide = (ASTIntLiteral) astDivision.getLeftSide();
+			ASTIntLiteral rightSide = (ASTIntLiteral) astDivision.getRightSide();
+			if (rightSide.getValue() != 0) {
+				int result = leftSide.getValue() / rightSide.getValue();
 				incChanges();
-				ASTIntLiteral op = new ASTIntLiteral(l.getToken(), result);
-				op.setType(new ASTIntType(l.getToken()));
-				return op;
+				ASTIntLiteral astIntLiteral = new ASTIntLiteral(leftSide.getToken(), result);
+				astIntLiteral.setType(new ASTIntType(leftSide.getToken()));
+				return astIntLiteral;
 			}
 		}
 
-		return division;
+		return astDivision;
 	}
 
 	@Override
-	public ASTExpression visit(ASTEquals equals)
+	public ASTExpression visit(ASTEquals astEquals)
 	{
-		equals.setLeftSide(equals.getLeftSide().accept(this));
-		equals.setRightSide(equals.getRightSide().accept(this));
+		astEquals.setLeftSide(astEquals.getLeftSide().accept(this));
+		astEquals.setRightSide(astEquals.getRightSide().accept(this));
 
-		ASTType t = equals.getType();
+		ASTType t = astEquals.getType();
 		if (t instanceof ASTIntType) {
-			if (equals.getLeftSide() instanceof ASTIntLiteral && equals.getRightSide() instanceof ASTIntLiteral) {
-				ASTIntLiteral l = (ASTIntLiteral) equals.getLeftSide();
-				ASTIntLiteral r = (ASTIntLiteral) equals.getRightSide();
+			if (astEquals.getLeftSide() instanceof ASTIntLiteral && astEquals.getRightSide() instanceof ASTIntLiteral) {
+				ASTIntLiteral l = (ASTIntLiteral) astEquals.getLeftSide();
+				ASTIntLiteral r = (ASTIntLiteral) astEquals.getRightSide();
 				if (l.getValue() == r.getValue()) {
 					incChanges();
-					ASTTrue op = new ASTTrue(equals.getToken());
-					op.setType(new ASTBooleanType(equals.getToken()));
+					ASTTrue op = new ASTTrue(astEquals.getToken());
+					op.setType(new ASTBooleanType(astEquals.getToken()));
 					return op;
 				} else {
 					incChanges();
-					ASTFalse op = new ASTFalse(equals.getToken());
-					op.setType(new ASTBooleanType(equals.getToken()));
+					ASTFalse op = new ASTFalse(astEquals.getToken());
+					op.setType(new ASTBooleanType(astEquals.getToken()));
 					return op;
 				}
 			}
 		} else if (t instanceof ASTBooleanType) {
-			if ((equals.getLeftSide() instanceof ASTTrue && equals.getRightSide() instanceof ASTTrue)
-					|| (equals.getLeftSide() instanceof ASTFalse && equals.getRightSide() instanceof ASTFalse)) {
+			if ((astEquals.getLeftSide() instanceof ASTTrue && astEquals.getRightSide() instanceof ASTTrue)
+					|| (astEquals.getLeftSide() instanceof ASTFalse && astEquals.getRightSide() instanceof ASTFalse)) {
 				incChanges();
-				ASTTrue op = new ASTTrue(equals.getToken());
-				op.setType(new ASTBooleanType(equals.getToken()));
+				ASTTrue op = new ASTTrue(astEquals.getToken());
+				op.setType(new ASTBooleanType(astEquals.getToken()));
 				return op;
 
-			} else if ((equals.getLeftSide() instanceof ASTTrue && equals.getRightSide() instanceof ASTFalse)
-					|| (equals.getLeftSide() instanceof ASTFalse && equals.getRightSide() instanceof ASTTrue)) {
+			} else if ((astEquals.getLeftSide() instanceof ASTTrue && astEquals.getRightSide() instanceof ASTFalse)
+					|| (astEquals.getLeftSide() instanceof ASTFalse && astEquals.getRightSide() instanceof ASTTrue)) {
 				incChanges();
-				ASTFalse op = new ASTFalse(equals.getToken());
-				op.setType(new ASTBooleanType(equals.getToken()));
+				ASTFalse op = new ASTFalse(astEquals.getToken());
+				op.setType(new ASTBooleanType(astEquals.getToken()));
 				return op;
 			}
 		} else if (t instanceof ASTStringType) {
-			if (equals.getLeftSide() instanceof ASTStringLiteral && equals.getRightSide() instanceof ASTStringLiteral) {
-				ASTStringLiteral l = (ASTStringLiteral) equals.getLeftSide();
-				ASTStringLiteral r = (ASTStringLiteral) equals.getRightSide();
+			if (astEquals.getLeftSide() instanceof ASTStringLiteral
+					&& astEquals.getRightSide() instanceof ASTStringLiteral) {
+				ASTStringLiteral l = (ASTStringLiteral) astEquals.getLeftSide();
+				ASTStringLiteral r = (ASTStringLiteral) astEquals.getRightSide();
 
 				if (l.getValue() == null) {
 					if (r.getValue() == null) {
 						incChanges();
-						ASTTrue op = new ASTTrue(equals.getToken());
-						op.setType(new ASTBooleanType(equals.getToken()));
+						ASTTrue op = new ASTTrue(astEquals.getToken());
+						op.setType(new ASTBooleanType(astEquals.getToken()));
 						return op;
 					}
 				} else if (l.getValue().equals(r.getValue())) {
 					incChanges();
-					ASTTrue op = new ASTTrue(equals.getToken());
-					op.setType(new ASTBooleanType(equals.getToken()));
+					ASTTrue op = new ASTTrue(astEquals.getToken());
+					op.setType(new ASTBooleanType(astEquals.getToken()));
 					return op;
 				} else {
 					incChanges();
-					ASTFalse op = new ASTFalse(equals.getToken());
-					op.setType(new ASTBooleanType(equals.getToken()));
+					ASTFalse op = new ASTFalse(astEquals.getToken());
+					op.setType(new ASTBooleanType(astEquals.getToken()));
 					return op;
 				}
 			}
 		} else if (t instanceof ASTIdentifierType) {
-			if (equals.getLeftSide() instanceof ASTIdentifierExpr
-					&& equals.getRightSide() instanceof ASTIdentifierExpr) {
-				ASTIdentifierExpr l = (ASTIdentifierExpr) equals.getLeftSide();
-				ASTIdentifierExpr r = (ASTIdentifierExpr) equals.getRightSide();
+			if (astEquals.getLeftSide() instanceof ASTIdentifierExpr
+					&& astEquals.getRightSide() instanceof ASTIdentifierExpr) {
+				ASTIdentifierExpr l = (ASTIdentifierExpr) astEquals.getLeftSide();
+				ASTIdentifierExpr r = (ASTIdentifierExpr) astEquals.getRightSide();
 				if (l.getId().equals(r.getId())) {
 					incChanges();
-					ASTTrue op = new ASTTrue(equals.getToken());
-					op.setType(new ASTBooleanType(equals.getToken()));
+					ASTTrue op = new ASTTrue(astEquals.getToken());
+					op.setType(new ASTBooleanType(astEquals.getToken()));
 					return op;
 				}
 			}
 		}
 
-		return equals;
+		return astEquals;
 	}
 
 	@Override
-	public ASTExpression visit(ASTNotEquals equals)
+	public ASTExpression visit(ASTNotEquals notEquals)
 	{
-		equals.setLeftSide(equals.getLeftSide().accept(this));
-		equals.setRightSide(equals.getRightSide().accept(this));
-		return equals;
+		notEquals.setLeftSide(notEquals.getLeftSide().accept(this));
+		notEquals.setRightSide(notEquals.getRightSide().accept(this));
+		return notEquals;
 	}
 
 	@Override
-	public ASTExpression visit(ASTLessThan lessThan)
+	public ASTExpression visit(ASTLessThan astLessThan)
 	{
-		lessThan.setLeftSide(lessThan.getLeftSide().accept(this));
-		lessThan.setRightSide(lessThan.getRightSide().accept(this));
+		astLessThan.setLeftSide(astLessThan.getLeftSide().accept(this));
+		astLessThan.setRightSide(astLessThan.getRightSide().accept(this));
 
-		ASTType t = lessThan.getType();
-		if (t instanceof ASTIntType) {
-			if (lessThan.getLeftSide() instanceof ASTIntLiteral && lessThan.getRightSide() instanceof ASTIntLiteral) {
-				ASTIntLiteral l = (ASTIntLiteral) lessThan.getLeftSide();
-				ASTIntLiteral r = (ASTIntLiteral) lessThan.getRightSide();
-				if (l.getValue() < r.getValue()) {
+		ASTType astType = astLessThan.getType();
+		if (astType instanceof ASTIntType) {
+			if (astLessThan.getLeftSide() instanceof ASTIntLiteral
+					&& astLessThan.getRightSide() instanceof ASTIntLiteral) {
+				ASTIntLiteral leftSide = (ASTIntLiteral) astLessThan.getLeftSide();
+				ASTIntLiteral rightSide = (ASTIntLiteral) astLessThan.getRightSide();
+				if (leftSide.getValue() < rightSide.getValue()) {
 					incChanges();
-					ASTTrue op = new ASTTrue(lessThan.getToken());
-					op.setType(new ASTBooleanType(lessThan.getToken()));
-					return op;
+					ASTTrue astTrue = new ASTTrue(astLessThan.getToken());
+					astTrue.setType(new ASTBooleanType(astLessThan.getToken()));
+					return astTrue;
 				} else {
 					incChanges();
-					ASTFalse op = new ASTFalse(lessThan.getToken());
-					op.setType(new ASTBooleanType(lessThan.getToken()));
-					return op;
+					ASTFalse astFalse = new ASTFalse(astLessThan.getToken());
+					astFalse.setType(new ASTBooleanType(astLessThan.getToken()));
+					return astFalse;
 				}
 			}
 		}
-		return lessThan;
+		return astLessThan;
 	}
 
 	@Override
-	public ASTExpression visit(ASTAnd and)
+	public ASTExpression visit(ASTAnd astAnd)
 	{
-		and.setLeftSide(and.getLeftSide().accept(this));
-		and.setRightSide(and.getRightSide().accept(this));
+		astAnd.setLeftSide(astAnd.getLeftSide().accept(this));
+		astAnd.setRightSide(astAnd.getRightSide().accept(this));
 
-		ASTType t = and.getType();
-		if (t instanceof ASTBooleanType) {
-			if ((and.getLeftSide() instanceof ASTTrue) && (and.getRightSide() instanceof ASTTrue)) {
+		ASTType astType = astAnd.getType();
+		if (astType instanceof ASTBooleanType) {
+			if ((astAnd.getLeftSide() instanceof ASTTrue) && (astAnd.getRightSide() instanceof ASTTrue)) {
 				incChanges();
-				ASTTrue op = new ASTTrue(and.getToken());
-				op.setType(new ASTBooleanType(and.getToken()));
-				return op;
+				ASTTrue astTrue = new ASTTrue(astAnd.getToken());
+				astTrue.setType(new ASTBooleanType(astAnd.getToken()));
+				return astTrue;
 
-			} else if ((and.getLeftSide() instanceof ASTFalse) || (and.getRightSide() instanceof ASTFalse)) {
+			} else if ((astAnd.getLeftSide() instanceof ASTFalse) || (astAnd.getRightSide() instanceof ASTFalse)) {
 				incChanges();
-				ASTFalse op = new ASTFalse(and.getToken());
-				op.setType(new ASTBooleanType(and.getToken()));
-				return op;
+				ASTFalse astFalse = new ASTFalse(astAnd.getToken());
+				astFalse.setType(new ASTBooleanType(astAnd.getToken()));
+				return astFalse;
 
 			}
 		}
 
-		return and;
+		return astAnd;
 	}
 
 	@Override
-	public ASTExpression visit(ASTOr or)
+	public ASTExpression visit(ASTOr astOr)
 	{
-		or.setLeftSide(or.getLeftSide().accept(this));
-		or.setRightSide(or.getRightSide().accept(this));
+		astOr.setLeftSide(astOr.getLeftSide().accept(this));
+		astOr.setRightSide(astOr.getRightSide().accept(this));
 
-		ASTType t = or.getType();
-		if (t instanceof ASTBooleanType) {
-			if ((or.getLeftSide() instanceof ASTTrue) || (or.getRightSide() instanceof ASTTrue)) {
+		ASTType astType = astOr.getType();
+		if (astType instanceof ASTBooleanType) {
+			if ((astOr.getLeftSide() instanceof ASTTrue) || (astOr.getRightSide() instanceof ASTTrue)) {
 				incChanges();
-				ASTTrue op = new ASTTrue(or.getToken());
-				op.setType(new ASTBooleanType(or.getToken()));
-				return op;
+				ASTTrue astTrue = new ASTTrue(astOr.getToken());
+				astTrue.setType(new ASTBooleanType(astOr.getToken()));
+				return astTrue;
 
-			} else if ((or.getLeftSide() instanceof ASTFalse) && (or.getRightSide() instanceof ASTFalse)) {
+			} else if ((astOr.getLeftSide() instanceof ASTFalse) && (astOr.getRightSide() instanceof ASTFalse)) {
 				incChanges();
-				ASTFalse op = new ASTFalse(or.getToken());
-				op.setType(new ASTBooleanType(or.getToken()));
-				return op;
-
+				ASTFalse astFalse = new ASTFalse(astOr.getToken());
+				astFalse.setType(new ASTBooleanType(astOr.getToken()));
+				return astFalse;
 			}
 		}
 
-		return or;
+		return astOr;
 	}
 
 	@Override
-	public ASTExpression visit(ASTTrue true1)
+	public ASTExpression visit(ASTTrue astTrue)
 	{
-		return true1;
+		return astTrue;
 	}
 
 	@Override
-	public ASTExpression visit(ASTFalse false1)
+	public ASTExpression visit(ASTFalse astFalse)
 	{
-		return false1;
+		return astFalse;
 	}
 
 	@Override
-	public ASTExpression visit(ASTIdentifierExpr identifier)
+	public ASTExpression visit(ASTIdentifierExpr astIdentifier)
 	{
-		return identifier;
+		return astIdentifier;
 	}
 
 	@Override
-	public ASTExpression visit(ASTNewArray newArray)
+	public ASTExpression visit(ASTNewArray astNewArray)
 	{
-		return newArray;
+		return astNewArray;
 	}
 
 	@Override
-	public ASTExpression visit(ASTNewInstance newInstance)
+	public ASTExpression visit(ASTNewInstance astNewInstance)
 	{
-		return newInstance;
+		return astNewInstance;
 	}
 
 	@Override
-	public ASTExpression visit(ASTCallFunctionExpr callFunctionExpr)
+	public ASTExpression visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
-		return callFunctionExpr;
+		return astCallFunctionExpr;
 	}
 
 	@Override
-	public ASTExpression visit(ASTCallFunctionStat callFunctionStat)
+	public ASTExpression visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		List<ASTExpression> argExprList = new ArrayList<>();
+		List<ASTExpression> argumentList = new ArrayList<>();
 
-		for (int i = 0; i < callFunctionStat.getArgumentListSize(); i++) {
-			argExprList.add(callFunctionStat.getArgumentAt(i).accept(this));
+		for (int i = 0; i < astCallFunctionStat.getArgumentListSize(); i++) {
+			argumentList.add(astCallFunctionStat.getArgumentAt(i).accept(this));
 		}
 
-		callFunctionStat.setArgumentList(argExprList);
+		astCallFunctionStat.setArgumentList(argumentList);
 
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTIntType intType)
+	public ASTExpression visit(ASTIntType astIntType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTStringType stringType)
+	public ASTExpression visit(ASTStringType astStringType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTBooleanType booleanType)
+	public ASTExpression visit(ASTBooleanType astBooleanType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTFunctionType functionType)
+	public ASTExpression visit(ASTFunctionType astFunctionType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTIntArrayType intArrayType)
+	public ASTExpression visit(ASTIntArrayType astIntArrayType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTVoidType voidType)
+	public ASTExpression visit(ASTVoidType astVoidType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTIdentifierType referenceType)
+	public ASTExpression visit(ASTIdentifierType astIdentifierType)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTVariable variable)
+	public ASTExpression visit(ASTVariable astVariable)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTVariableInit variable)
+	public ASTExpression visit(ASTVariableInit astVariableInit)
 	{
-		variable.setExpr(variable.getExpr().accept(this));
-
-		return null;
-	}
-
-//	@Override
-//	public ASTExpression visit(ASTArgument argument)
-//	{
-//		return null;
-//	}
-
-	@Override
-	public ASTExpression visit(ASTFunction function)
-	{
-//		for (int i = 0; i < function.getStatementListSize(); i++) {
-//			function.getStatementDeclAt(i).accept(this);
-//		}
-
+		astVariableInit.setExpr(astVariableInit.getExpr().accept(this));
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTFunctionReturn function)
+	public ASTExpression visit(ASTFunction astFunction)
 	{
-//		for (int i = 0; i < function.getStatementListSize(); i++) {
-//			function.getStatementDeclAt(i).accept(this);
-//		}
-//
-//		for (int i = 0; i < function.getVariableListSize(); i++) {
-//			function.getVariableDeclAt(i).accept(this);
-//		}
-
-		function.setReturnExpr(function.getReturnExpr().accept(this));
+		astFunction.getBody().accept(this);
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTProgram program)
+	public ASTExpression visit(ASTFunctionReturn astFunctionReturn)
 	{
-		for (int i = 0; i < program.getFunctionListSize(); i++) {
-			program.getFunctionDeclAt(i).accept(this);
+		astFunctionReturn.getBody().accept(this);
+		astFunctionReturn.setReturnExpr(astFunctionReturn.getReturnExpr().accept(this));
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTProgram astProgram)
+	{
+		for (ASTFunction astFunction : astProgram.getFunctionList()) {
+			astFunction.accept(this);
 		}
 
-		for (int i = 0; i < program.getVariableListSize(); i++) {
-			program.getVariableDeclAt(i).accept(this);
+		for (ASTVariable astVariable : astProgram.getVariableList()) {
+			astVariable.accept(this);
 		}
 
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTIdentifier id)
+	public ASTExpression visit(ASTIdentifier astIdentifier)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTArrayIndexExpr arrayIndexExpr)
+	public ASTExpression visit(ASTArrayIndexExpr astArrayIndexExpr)
 	{
-		arrayIndexExpr.setArray(arrayIndexExpr.getArray().accept(this));
-		arrayIndexExpr.setIndex(arrayIndexExpr.getIndex().accept(this));
-		return arrayIndexExpr;
+		astArrayIndexExpr.setArray(astArrayIndexExpr.getArray().accept(this));
+		astArrayIndexExpr.setIndex(astArrayIndexExpr.getIndex().accept(this));
+		return astArrayIndexExpr;
 	}
 
 	@Override
-	public ASTExpression visit(ASTArrayAssign arrayAssign)
+	public ASTExpression visit(ASTArrayAssign astArrayAssign)
 	{
-		arrayAssign.setE1(arrayAssign.getExpression1().accept(this));
-		arrayAssign.setE2(arrayAssign.getExpression2().accept(this));
+		astArrayAssign.setE1(astArrayAssign.getExpression1().accept(this));
+		astArrayAssign.setE2(astArrayAssign.getExpression2().accept(this));
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTStringLiteral stringLiteral)
+	public ASTExpression visit(ASTStringLiteral astStringLiteral)
 	{
-		return stringLiteral;
+		return astStringLiteral;
 	}
 
 	@Override
-	public ASTExpression visit(ASTClass classDecl)
+	public ASTExpression visit(ASTClass astClass)
 	{
-		for (ASTProperty property : classDecl.getPropertyList()) {
+		for (ASTProperty property : astClass.getPropertyList()) {
 			property.accept(this);
 		}
-		for (ASTFunction function : classDecl.getFunctionList()) {
+		for (ASTFunction function : astClass.getFunctionList()) {
 			function.accept(this);
 		}
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTReturnStatement returnStatement)
+	public ASTExpression visit(ASTReturnStatement astReturnStatement)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTPointerAssign pointerAssign)
+	public ASTExpression visit(ASTProperty astProperty)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTThis astThis)
+	public ASTExpression visit(ASTIfChain astIfChain)
+	{
+		for (ASTConditionalBranch astConditionalBranch : astIfChain.getBranches()) {
+			astConditionalBranch.accept(this);
+		}
+
+		if (astIfChain.getElseBody() != null) {
+			astIfChain.getElseBody().accept(this);
+		}
+
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTConditionalBranch astConditionalBranch)
+	{
+		astConditionalBranch.setCondition(astConditionalBranch.getCondition().accept(this));
+		astConditionalBranch.getBody().accept(this);
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTArgument astArgument)
 	{
 		return null;
 	}
 
 	@Override
-	public ASTExpression visit(ASTProperty property)
+	public ASTExpression visit(ASTLessThanOrEqual astLessThanOrEqual)
+	{
+		astLessThanOrEqual.setLeftSide(astLessThanOrEqual.getLeftSide().accept(this));
+		astLessThanOrEqual.setRightSide(astLessThanOrEqual.getRightSide().accept(this));
+
+		ASTType astType = astLessThanOrEqual.getType();
+		if (astType instanceof ASTIntType) {
+			if (astLessThanOrEqual.getLeftSide() instanceof ASTIntLiteral
+					&& astLessThanOrEqual.getRightSide() instanceof ASTIntLiteral) {
+				ASTIntLiteral leftSide = (ASTIntLiteral) astLessThanOrEqual.getLeftSide();
+				ASTIntLiteral rightSide = (ASTIntLiteral) astLessThanOrEqual.getRightSide();
+				if (leftSide.getValue() > rightSide.getValue()) {
+					incChanges();
+					ASTTrue astTrue = new ASTTrue(astLessThanOrEqual.getToken());
+					astTrue.setType(new ASTBooleanType(astLessThanOrEqual.getToken()));
+					return astTrue;
+				} else {
+					incChanges();
+					ASTFalse astFalse = new ASTFalse(astLessThanOrEqual.getToken());
+					astFalse.setType(new ASTBooleanType(astLessThanOrEqual.getToken()));
+					return astFalse;
+				}
+			}
+		}
+		return astLessThanOrEqual;
+	}
+
+	@Override
+	public ASTExpression visit(ASTGreaterThan astGreaterThan)
+	{
+		astGreaterThan.setLeftSide(astGreaterThan.getLeftSide().accept(this));
+		astGreaterThan.setRightSide(astGreaterThan.getRightSide().accept(this));
+
+		ASTType t = astGreaterThan.getType();
+		if (t instanceof ASTIntType) {
+			if (astGreaterThan.getLeftSide() instanceof ASTIntLiteral
+					&& astGreaterThan.getRightSide() instanceof ASTIntLiteral) {
+				ASTIntLiteral l = (ASTIntLiteral) astGreaterThan.getLeftSide();
+				ASTIntLiteral r = (ASTIntLiteral) astGreaterThan.getRightSide();
+				if (l.getValue() > r.getValue()) {
+					incChanges();
+					ASTTrue astTrue = new ASTTrue(astGreaterThan.getToken());
+					astTrue.setType(new ASTBooleanType(astGreaterThan.getToken()));
+					return astTrue;
+				} else {
+					incChanges();
+					ASTFalse astFalse = new ASTFalse(astGreaterThan.getToken());
+					astFalse.setType(new ASTBooleanType(astGreaterThan.getToken()));
+					return astFalse;
+				}
+			}
+		}
+		return astGreaterThan;
+	}
+
+	@Override
+	public ASTExpression visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
+	{
+		astGreaterThanOrEqual.setLeftSide(astGreaterThanOrEqual.getLeftSide().accept(this));
+		astGreaterThanOrEqual.setRightSide(astGreaterThanOrEqual.getRightSide().accept(this));
+
+		ASTType astType = astGreaterThanOrEqual.getType();
+		if (astType instanceof ASTIntType) {
+			if (astGreaterThanOrEqual.getLeftSide() instanceof ASTIntLiteral
+					&& astGreaterThanOrEqual.getRightSide() instanceof ASTIntLiteral) {
+				ASTIntLiteral leftSide = (ASTIntLiteral) astGreaterThanOrEqual.getLeftSide();
+				ASTIntLiteral rightSide = (ASTIntLiteral) astGreaterThanOrEqual.getRightSide();
+				if (leftSide.getValue() >= leftSide.getValue()) {
+					incChanges();
+					ASTTrue astTrue = new ASTTrue(astGreaterThanOrEqual.getToken());
+					astTrue.setType(new ASTBooleanType(astGreaterThanOrEqual.getToken()));
+					return astTrue;
+				} else {
+					incChanges();
+					ASTFalse astFalse = new ASTFalse(astGreaterThanOrEqual.getToken());
+					astFalse.setType(new ASTBooleanType(astGreaterThanOrEqual.getToken()));
+					return astFalse;
+				}
+			}
+		}
+		return astGreaterThanOrEqual;
+	}
+
+	@Override
+	public ASTExpression visit(ASTModulus astModulus)
 	{
 		return null;
 	}
@@ -604,68 +706,5 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	private void incChanges()
 	{
 		changes++;
-	}
-
-	public static void optimize(AST prog) throws ParseException
-	{
-		int total = 0;
-		ConstantFolding optimizer = new ConstantFolding();
-		optimizer.changes = 0;
-		prog.accept(optimizer);
-		while (optimizer.changes > 0) {
-			total += optimizer.changes;
-			optimizer.changes = 0;
-			prog.accept(optimizer);
-		}
-		System.out.println("Total optimization changes = " + total);
-	}
-
-	@Override
-	public ASTExpression visit(ASTIfChain ifChain)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTConditionalBranch astConditionalBranch)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTArgument astArgument)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTLessThanOrEqual astLessThanOrEqual)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTGreaterThan astGreaterThan)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ASTExpression visit(ASTModulus astModulus)
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

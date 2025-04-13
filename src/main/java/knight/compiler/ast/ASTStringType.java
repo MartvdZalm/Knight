@@ -23,6 +23,6 @@ public class ASTStringType extends ASTType
 	@Override
 	public String toString()
 	{
-		return "std::string";
+		return "string";
 	}
 }

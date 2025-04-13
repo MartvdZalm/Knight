@@ -8,8 +8,11 @@ import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPrinter;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.parser.Parser;
+import knight.compiler.passes.codegen.CodeGenerator;
+import knight.compiler.passes.optimizations.ConstantFolding;
 import knight.compiler.passes.symbol.BuildSymbolTree;
 import knight.compiler.passes.symbol.NameAnalyser;
+import knight.compiler.passes.symbol.TypeAnalyser;
 import knight.compiler.passes.symbol.diagnostics.NameError;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.compiler.passes.symbol.model.SymbolProgram;
@@ -57,30 +60,28 @@ public class Main
 				System.exit(0);
 			}
 
-			// if (tree != null) {
-			BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
-			buildSymbolTree.visit((ASTProgram) tree);
+			if (tree != null) {
+				BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
+				buildSymbolTree.visit((ASTProgram) tree);
 
-			SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
+				SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
 
-			// for (SymbolFunction func : symbolProgram.getFunctions().values()) {
-			// func.printScope();
-			// }
+				NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
+				nameAnalyser.visit((ASTProgram) tree);
 
-			NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
-			nameAnalyser.visit((ASTProgram) tree);
+				TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
+				typeAnalyser.visit((ASTProgram) tree);
 
-			// TypeAnalyser ta = new TypeAnalyser(symbolProgram);
-			// ta.visit((ASTProgram) tree);
+				if (SemanticErrors.errorList.size() == 0) {
+					String path = getFileDirPath(filename);
+					ConstantFolding.optimize(tree);
 
-			// if (SemanticErrors.errorList.size() == 0) {
-			String path = getFileDirPath(filename);
-			// ConstantFolding.optimize(tree);
-			// CodeGenerator cg = new CodeGenerator(path, filename);
-			// cg.visit((ASTProgram) tree);
-			// this.compileCPPFile(args, path, filename);
-			// }
-			// }
+					CodeGenerator cg = new CodeGenerator(path, filename);
+					cg.visit((ASTProgram) tree);
+
+					this.compileCPPFile(args, path, filename);
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -94,20 +95,20 @@ public class Main
 		}
 	}
 
-	private File write(String code, String path, String filename)
-	{
-		try {
-			File f = new File(path + filename + ".s");
-			PrintWriter writer = new PrintWriter(f, "UTF-8");
-			writer.println(code);
-			writer.close();
-			return f;
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
+	// private File write(String code, String path, String filename)
+	// {
+	// try {
+	// File f = new File(path + filename + ".s");
+	// PrintWriter writer = new PrintWriter(f, "UTF-8");
+	// writer.println(code);
+	// writer.close();
+	// return f;
+	// } catch (Exception e) {
+	// System.err.println(e.getMessage());
+	// }
 
-		return null;
-	}
+	// return null;
+	// }
 
 	private boolean containsFlag(String[] args, String flag)
 	{
@@ -148,42 +149,47 @@ public class Main
 		}
 	}
 
-	private void compileAssemblyFile(String[] args, String path, String fileName)
-	{
-		String filename = removeFileExtension(fileName);
+	// private void compileAssemblyFile(String[] args, String path, String fileName)
+	// {
+	// String filename = removeFileExtension(fileName);
 
-		try {
-			ProcessBuilder assemblerProcessBuilder = null;
-			if (containsFlag(args, "-debug")) {
-				assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename + ".o", "-gstabs",
-						path + filename + ".s");
-			} else {
-				assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename + ".o",
-						path + filename + ".s");
-			}
-			Process assemblerProcess = assemblerProcessBuilder.start();
-			int assemblerExitCode = assemblerProcess.waitFor();
+	// try {
+	// ProcessBuilder assemblerProcessBuilder = null;
+	// if (containsFlag(args, "-debug")) {
+	// assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename +
+	// ".o", "-gstabs",
+	// path + filename + ".s");
+	// } else {
+	// assemblerProcessBuilder = new ProcessBuilder("as", "-o", path + filename +
+	// ".o",
+	// path + filename + ".s");
+	// }
+	// Process assemblerProcess = assemblerProcessBuilder.start();
+	// int assemblerExitCode = assemblerProcess.waitFor();
 
-			if (assemblerExitCode == 0) {
-				ProcessBuilder linkerProcessBuilder = new ProcessBuilder("ld", "-o", path + filename,
-						path + filename + ".o", "-e", "main");
-				Process linkerProcess = linkerProcessBuilder.start();
-				int linkerExitCode = linkerProcess.waitFor();
-			}
+	// if (assemblerExitCode == 0) {
+	// ProcessBuilder linkerProcessBuilder = new ProcessBuilder("ld", "-o", path +
+	// filename,
+	// path + filename + ".o", "-e", "main");
+	// Process linkerProcess = linkerProcessBuilder.start();
+	// int linkerExitCode = linkerProcess.waitFor();
+	// }
 
-			if (!containsFlag(args, "-debug")) {
-				ProcessBuilder removeAssemblyFileBuilder = new ProcessBuilder("rm", path + filename + ".s");
-				removeAssemblyFileBuilder.start();
-			}
+	// if (!containsFlag(args, "-debug")) {
+	// ProcessBuilder removeAssemblyFileBuilder = new ProcessBuilder("rm", path +
+	// filename + ".s");
+	// removeAssemblyFileBuilder.start();
+	// }
 
-			ProcessBuilder removeObjectFileBuilder = new ProcessBuilder("rm", path + filename + ".o");
-			removeObjectFileBuilder.start();
+	// ProcessBuilder removeObjectFileBuilder = new ProcessBuilder("rm", path +
+	// filename + ".o");
+	// removeObjectFileBuilder.start();
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// System.exit(1);
+	// }
+	// }
 
 	private boolean isFileValid(String filename)
 	{

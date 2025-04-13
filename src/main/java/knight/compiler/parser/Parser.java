@@ -20,7 +20,6 @@ import knight.compiler.ast.ASTClass;
 import knight.compiler.ast.ASTConditionalBranch;
 import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
-import knight.compiler.ast.ASTNotEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTFunction;
@@ -40,16 +39,15 @@ import knight.compiler.ast.ASTMinus;
 import knight.compiler.ast.ASTModulus;
 import knight.compiler.ast.ASTNewArray;
 import knight.compiler.ast.ASTNewInstance;
+import knight.compiler.ast.ASTNotEquals;
 import knight.compiler.ast.ASTOr;
 import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTPointerAssign;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
 import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
-import knight.compiler.ast.ASTThis;
 import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
 import knight.compiler.ast.ASTType;
@@ -204,18 +202,6 @@ public class Parser
 				}
 				break;
 
-				case THIS: {
-					ASTThis pointer = new ASTThis(token);
-					eat(Tokens.THIS);
-					eat(Tokens.ARROW);
-					ASTIdentifier variable = parseIdentifier();
-					eat(Tokens.ASSIGN);
-					ASTExpression expression = parseExpression();
-
-					statements.add(new ASTPointerAssign(token, pointer, variable, expression));
-				}
-				break;
-
 				default: {
 					throw new ParseException(token.getRow(), token.getCol(), "Invalid token :" + token.getToken());
 				}
@@ -324,7 +310,7 @@ public class Parser
 				eat(Tokens.RIGHTBRACE);
 
 				List<ASTConditionalBranch> branches = new ArrayList<>();
-				branches.add(new ASTConditionalBranch(tok).setCondition(condition).setBody(ifBody));
+				branches.add(new ASTConditionalBranch(tok, condition, ifBody));
 
 				ASTBody elseBody = null;
 
@@ -342,7 +328,7 @@ public class Parser
 						ASTBody elseIfBody = this.parseBody();
 						eat(Tokens.RIGHTBRACE);
 
-						branches.add(new ASTConditionalBranch(tok).setCondition(condition).setBody(elseIfBody));
+						branches.add(new ASTConditionalBranch(tok, condition, elseIfBody));
 					} else {
 						// This is a regular "else" statement
 						eat(Tokens.LEFTBRACE);
@@ -828,6 +814,10 @@ public class Parser
 			}
 
 			case LESSTHAN: {
+				return 3;
+			}
+
+			case GREATERTHAN: {
 				return 3;
 			}
 

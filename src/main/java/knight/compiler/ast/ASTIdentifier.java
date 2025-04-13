@@ -8,7 +8,7 @@ import knight.compiler.passes.symbol.model.Binding;
  * @author: Mart van der Zalm
  * Date: 2025-04-10
  */
-public class ASTIdentifier extends AST implements ASTPointer
+public class ASTIdentifier extends AST
 {
 	private String id;
 	private Binding b;
