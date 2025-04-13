@@ -1,139 +1,101 @@
-/*
- * MIT License
- * 
- * Copyright (c) 2023, Mart van der Zalm
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package knight.compiler.ast;
-
-import knight.compiler.ast.declarations.*;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.expressions.operations.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.statements.conditionals.*;
-import knight.compiler.ast.types.*;
 
 /*
  * File: ASTVisitor.java
  * @author: Mart van der Zalm
- * Date: 2024-01-06
- * Description:
+ * Date: 2025-04-10
  */
 public interface ASTVisitor<R>
 {
-    public R visit(ASTProgram program);
+	public R visit(ASTProgram astProgram);
 
-    public R visit(ASTClass classDecl);
+	public R visit(ASTClass astClass);
 
-    public R visit(ASTFunction functionDecl);
+	public R visit(ASTFunction astFunction);
 
-    public R visit(ASTAnd and);
+	public R visit(ASTIdentifierExpr astIdentifierExpr);
 
-    public R visit(ASTIdentifierExpr identifierExpr);
+	public R visit(ASTBody astBody);
 
-    public R visit(ASTBlock block);
+	public R visit(ASTIntLiteral astIntLiteral);
 
-    public R visit(ASTIntLiteral intLiteral);
+	public R visit(ASTTrue astTrue);
 
-    public R visit(ASTTrue true1);
+	public R visit(ASTFalse astFalse);
 
-    public R visit(ASTFalse false1);
+	public R visit(ASTIdentifierType astIdentifierType);
 
-    public R visit(ASTArgument argDecl);
+	public R visit(ASTIntType astIntType);
 
-    public R visit(ASTIdentifierType identifierType);
+	public R visit(ASTIntArrayType astIntArrayType);
 
-    public R visit(ASTIntType intType);
+	public R visit(ASTIfChain astIfChain);
 
-    public R visit(ASTIntArrayType intArrayType);
+	public R visit(ASTWhile astWhile);
 
-    public R visit(ASTIfThenElse ifThenElse);
+	public R visit(ASTAssign astAssign);
 
-    public R visit(ASTWhile while1);
+	public R visit(ASTArrayAssign astArrayAssign);
 
-    public R visit(ASTForLoop forLoop);
+	public R visit(ASTArrayIndexExpr astIndexArray);
 
-    public R visit(ASTAssign assign);
+	public R visit(ASTNewArray astNewArray);
 
-    public R visit(ASTArrayAssign arrayAssign);
+	public R visit(ASTCallFunctionExpr astCallFunctionExpr);
 
-    public R visit(ASTArrayIndexExpr indexArray);
+	public R visit(ASTIdentifier astIdentifier);
 
-    public R visit(ASTDivision division);
+	public R visit(ASTBooleanType astBooleanType);
 
-    public R visit(ASTTimes times);
+	public R visit(ASTStringLiteral astStringLiteral);
 
-    public R visit(ASTPlus plus);
+	public R visit(ASTStringType astStringType);
 
-    public R visit(ASTMinus minus);
+	public R visit(ASTNewInstance astNewInstance);
 
-    public R visit(ASTLessThan lessThan);
+	public R visit(ASTVariable astVariable);
 
-    public R visit(ASTEquals equals);
+	public R visit(ASTVariableInit astVariableInit);
 
-    public R visit(ASTOr or);
+	public R visit(ASTVoidType astVoidType);
 
-    public R visit(ASTNewArray newArray);
+	public R visit(ASTCallFunctionStat astCallFunctionStat);
 
-    public R visit(ASTCallFunctionExpr callFunc);
+	public R visit(ASTFunctionReturn astFunctionReturn);
 
-    public R visit(ASTIdentifier identifier);
+	public R visit(ASTReturnStatement astReturnStatement);
 
-    public R visit(ASTBooleanType booleanType);
+	public R visit(ASTFunctionType astFunctionType);
 
-    public R visit(ASTStringLiteral stringLiteral);
+	public R visit(ASTProperty astProperty);
 
-    public R visit(ASTStringType stringType);
+	public R visit(ASTConditionalBranch astConditionalBranch);
 
-    public R visit(ASTNewInstance newInstance);
+	public R visit(ASTArgument astArgument);
 
-    public R visit(ASTVariable variableDecl);
+	public R visit(ASTNotEquals astNotEquals);
 
-    public R visit(ASTVariableInit variableDeclInit);
+	public R visit(ASTPlus astPlus);
 
-    public R visit(ASTVoidType voidType);
+	public R visit(ASTOr astOr);
 
-    public R visit(ASTSkip skip);
+	public R visit(ASTAnd astAnd);
 
-    public R visit(ASTCallFunctionStat callFunction);
+	public R visit(ASTEquals astEquals);
 
-    public R visit(ASTFunctionReturn functionDeclReturn);
+	public R visit(ASTLessThan astLessThan);
 
-    public R visit(ASTLessThanOrEqual lessThanOrEqual);
+	public R visit(ASTLessThanOrEqual astLessThanOrEqual);
 
-    public R visit(ASTGreaterThan greaterThan);
+	public R visit(ASTGreaterThan astGreaterThan);
 
-    public R visit(ASTGreaterThanOrEqual greaterThanOrEqual);
+	public R visit(ASTGreaterThanOrEqual astGreaterThanOrEqual);
 
-    public R visit(ASTReturnStatement returnStatement);
+	public R visit(ASTMinus astMinus);
 
-    public R visit(ASTModulus modulus);
+	public R visit(ASTTimes astTimes);
 
-    public R visit(ASTFunctionType functionType);
+	public R visit(ASTDivision astDivision);
 
-    public R visit(ASTInlineASM assemblyDecl);
-
-    public R visit(ASTPointerAssign pointerAssign);
-
-    public R visit(ASTThis this1);
-
-    public R visit(ASTProperty property);
+	public R visit(ASTModulus astModulus);
 }

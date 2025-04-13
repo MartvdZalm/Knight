@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-
 package knight.builder.code.statements;
 
 /*
@@ -37,7 +36,7 @@ public class CodeBuilderReturnStatement extends CodeBuilderStatement
 
 	public CodeBuilderReturnStatement()
 	{
-		this.mock();	
+		this.mock();
 	}
 
 	public void setExpr(String expression)

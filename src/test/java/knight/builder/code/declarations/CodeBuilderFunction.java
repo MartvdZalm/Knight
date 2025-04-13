@@ -100,7 +100,7 @@ public class CodeBuilderFunction extends CodeBuilder
 	protected CodeBuilderFunction mock()
 	{
 		this.id = super.random.identifier();
-		
+
 		return this;
 	}
 
@@ -110,10 +110,10 @@ public class CodeBuilderFunction extends CodeBuilder
 		StringBuilder argumentBody = new StringBuilder();
 
 		for (int i = 0; i < argumentsList.size(); i++) {
-		    argumentBody.append(argumentsList.get(i));
-		    if (i < argumentsList.size() - 1) {
-		        argumentBody.append(", ");
-		    }
+			argumentBody.append(argumentsList.get(i));
+			if (i < argumentsList.size() - 1) {
+				argumentBody.append(", ");
+			}
 		}
 
 		for (CodeBuilderVariable variable : variablesList) {

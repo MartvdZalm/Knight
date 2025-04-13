@@ -1,19 +1,36 @@
 #include <knight/knight_std.h>
-class Person {
-int age;
-std::string name;
-};
 int calculate(int a, int b) { 
-	return a * b;
+	return a*b;
 } 
 int main() { 
-	std::string name = "Mart van der Zalm";
-	int age = 18;
-	int a = 20;
-	int result = a + age;
-knight::read();
-knight::print(result);
-knight::print(age);
-	return 0;
+int secret = knight::random(1, 100) 
+; 
+int guess = 0; 
+int tries = 0; 
+knight::print("Welcome to Guess the Number!"); 
+knight::print("I'm thinking of a number between 1 and 100"); 
+knight::print(calculate(10, 10) 
+); 
+while (guess!=secret) {
+std::string input = knight::read_line() 
+; 
+knight::print("Enter your guess:"); 
+guess=knight::to_int(input) 
+;
+tries=tries+1;
+if (guess<secret) {
+knight::print("Too low!"); 
+
+}
+ else if (guess>secret) {
+knight::print("Too high!"); 
+
+}
+else {
+knight::print("Correct! You guessed it in" + knight::to_string(tries) 
+ + "tries!"); 
+
+}
+}	return 0;
 } 
 

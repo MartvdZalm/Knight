@@ -36,5 +36,5 @@ import knight.builder.code.expressions.CodeBuilderExpression;
  */
 public abstract class CodeBuilderType extends CodeBuilder
 {
-    public abstract CodeBuilderExpression getExpr();
+	public abstract CodeBuilderExpression getExpr();
 }

@@ -45,149 +45,149 @@ import knight.builder.code.types.*;
  */
 public class CodeBuilderRandom
 {
-    private final List<Class<? extends CodeBuilderStatement>> statements = new ArrayList<>();
-    private final List<Class<? extends CodeBuilderExpression>> expressions = new ArrayList<>();
-    private final List<Class<? extends CodeBuilderExpression>> conditions = new ArrayList<>();
-    private final List<Class<? extends CodeBuilderType>> types = new ArrayList<>();
-    private final List<Class<? extends CodeBuilderStatement>> body = new ArrayList<>();
+	private final List<Class<? extends CodeBuilderStatement>> statements = new ArrayList<>();
+	private final List<Class<? extends CodeBuilderExpression>> expressions = new ArrayList<>();
+	private final List<Class<? extends CodeBuilderExpression>> conditions = new ArrayList<>();
+	private final List<Class<? extends CodeBuilderType>> types = new ArrayList<>();
+	private final List<Class<? extends CodeBuilderStatement>> body = new ArrayList<>();
 
-    private final Random random;
-    private final Faker faker;
+	private final Random random;
+	private final Faker faker;
 
-    private final String[] tokens = {
-        "int", "string", "bool", "true", "false",
-        "public", "protected", "private", "class",
-        "new", "include", "fn", "ext", "use", "asm",
-        "if", "else", "while", "for", "ret", "void"
-    };
+	private final String[] tokens = { "int", "string", "bool", "true", "false", "public", "protected", "private",
+			"class", "new", "include", "fn", "ext", "use", "asm", "if", "else", "while", "for", "ret", "void" };
 
-    public CodeBuilderRandom()
-    {
-        this.random = new Random();
-        this.faker = new Faker();
+	public CodeBuilderRandom()
+	{
+		this.random = new Random();
+		this.faker = new Faker();
 
-        // Statements
-        statements.add(CodeBuilderAssign.class);
-        // statements.add(CodeBuilderWhile.class);
-        // statements.add(CodeBuilderForLoop.class);
-        // statements.add(CodeBuilderIfThenElse.class);
+		// Statements
+		statements.add(CodeBuilderAssign.class);
+		// statements.add(CodeBuilderWhile.class);
+		// statements.add(CodeBuilderForLoop.class);
+		// statements.add(CodeBuilderIfThenElse.class);
 
-        // Expressions
-        expressions.add(CodeBuilderIntLiteral.class);
-        expressions.add(CodeBuilderStringLiteral.class);
-        expressions.add(CodeBuilderBooleanLiteral.class);
-        expressions.add(CodeBuilderIdentifierExpr.class);
+		// Expressions
+		expressions.add(CodeBuilderIntLiteral.class);
+		expressions.add(CodeBuilderStringLiteral.class);
+		expressions.add(CodeBuilderBooleanLiteral.class);
+		expressions.add(CodeBuilderIdentifierExpr.class);
 
-        // Conditions
-        conditions.add(CodeBuilderLessThan.class);
-        conditions.add(CodeBuilderLessThanOrEqual.class);
-        conditions.add(CodeBuilderGreaterThan.class);
-        conditions.add(CodeBuilderGreaterThanOrEqual.class);
-        conditions.add(CodeBuilderEquals.class);
+		// Conditions
+		conditions.add(CodeBuilderLessThan.class);
+		conditions.add(CodeBuilderLessThanOrEqual.class);
+		conditions.add(CodeBuilderGreaterThan.class);
+		conditions.add(CodeBuilderGreaterThanOrEqual.class);
+		conditions.add(CodeBuilderEquals.class);
 
-        // Types
-        types.add(CodeBuilderIntType.class);
-        // types.add(CodeBuilderStringType.class);
-        types.add(CodeBuilderBooleanType.class);
-        types.add(CodeBuilderIdentifierType.class);
+		// Types
+		types.add(CodeBuilderIntType.class);
+		// types.add(CodeBuilderStringType.class);
+		types.add(CodeBuilderBooleanType.class);
+		types.add(CodeBuilderIdentifierType.class);
 
-        // Body
-        body.add(CodeBuilderAssign.class);
-    }
+		// Body
+		body.add(CodeBuilderAssign.class);
+	}
 
-    public String className()
-    {
-        String input = this.identifier();
+	public String className()
+	{
+		String input = this.identifier();
 
-        return String.join("", (input.substring(0, 1).toUpperCase() + input.substring(1)).split("\\s+"));
-    }
+		return String.join("", (input.substring(0, 1).toUpperCase() + input.substring(1)).split("\\s+"));
+	}
 
-    public String identifier()
-    {
-        String id;
-        
-        do {
-            id = this.faker.lorem().word();
-        } while (isToken(id));
+	public String identifier()
+	{
+		String id;
 
-        return id;
-    }
+		do {
+			id = this.faker.lorem().word();
+		} while (isToken(id));
 
-    public int integer()
-    {
-        int min = 1;
-        int max = 10000;
-        
-        return this.random.nextInt(max - min + 1) + min;
-    }
+		return id;
+	}
 
-    public String string()
-    {
-        String str;
+	public int integer()
+	{
+		int min = 1;
+		int max = 10000;
 
-        do {
-            str = this.faker.lorem().sentence();
-        } while (isToken(str));
+		return this.random.nextInt(max - min + 1) + min;
+	}
 
-        return str;
-    }
+	public String string()
+	{
+		String str;
 
-    public boolean bool()
-    {
-        return faker.bool().bool();
-    }
+		do {
+			str = this.faker.lorem().sentence();
+		} while (isToken(str));
 
-    public CodeBuilderStatement statement()
-    {        
-        try {
-        	Constructor<? extends CodeBuilderStatement> constructor = statements.get(random.nextInt(statements.size())).getDeclaredConstructor();
-            return constructor.newInstance();
-        } catch (Exception e) {
-          	e.printStackTrace();
-          	return null;
-        }
-    }
+		return str;
+	}
 
-    public CodeBuilderExpression expression()
-    {
-    	try {
-    		Constructor<? extends CodeBuilderExpression> constructor = expressions.get(random.nextInt(expressions.size())).getDeclaredConstructor();
-            return constructor.newInstance();
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		return null;
-    	}
-    }
+	public boolean bool()
+	{
+		return faker.bool().bool();
+	}
 
-    public CodeBuilderExpression condition()
-    {
-        try {
-            Constructor<? extends CodeBuilderExpression> constructor = conditions.get(random.nextInt(conditions.size())).getDeclaredConstructor();
-            return constructor.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+	public CodeBuilderStatement statement()
+	{
+		try {
+			Constructor<? extends CodeBuilderStatement> constructor = statements.get(random.nextInt(statements.size()))
+					.getDeclaredConstructor();
+			return constructor.newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
-    public CodeBuilderType type()
-    {
-        try {
-            Constructor<? extends CodeBuilderType> constructor = types.get(random.nextInt(types.size())).getDeclaredConstructor();
-            return constructor.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+	public CodeBuilderExpression expression()
+	{
+		try {
+			Constructor<? extends CodeBuilderExpression> constructor = expressions
+					.get(random.nextInt(expressions.size())).getDeclaredConstructor();
+			return constructor.newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
-    private boolean isToken(String word)
-    {
-        for (String token : tokens) {
-            if (token.equals(word)) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public CodeBuilderExpression condition()
+	{
+		try {
+			Constructor<? extends CodeBuilderExpression> constructor = conditions.get(random.nextInt(conditions.size()))
+					.getDeclaredConstructor();
+			return constructor.newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public CodeBuilderType type()
+	{
+		try {
+			Constructor<? extends CodeBuilderType> constructor = types.get(random.nextInt(types.size()))
+					.getDeclaredConstructor();
+			return constructor.newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private boolean isToken(String word)
+	{
+		for (String token : tokens) {
+			if (token.equals(word)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

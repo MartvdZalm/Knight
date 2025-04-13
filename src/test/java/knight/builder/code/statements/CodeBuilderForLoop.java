@@ -52,7 +52,7 @@ public class CodeBuilderForLoop extends CodeBuilderStatement
 	public CodeBuilderForLoop setInitialization(CodeBuilderVariableInit initialization)
 	{
 		this.initialization = initialization;
-	
+
 		return this;
 	}
 
@@ -79,8 +79,10 @@ public class CodeBuilderForLoop extends CodeBuilderStatement
 
 	protected CodeBuilderForLoop mock()
 	{
-		this.initialization = new CodeBuilderVariableInit().setType(new CodeBuilderIntType()).setId("i").setExpr(new CodeBuilderIntLiteral().setValue(0));
-		this.condition = new CodeBuilderLessThan().setLhs(new CodeBuilderIdentifierExpr().setId("i")).setRhs(new CodeBuilderIntLiteral().setValue(10));
+		this.initialization = new CodeBuilderVariableInit().setType(new CodeBuilderIntType()).setId("i")
+				.setExpr(new CodeBuilderIntLiteral().setValue(0));
+		this.condition = new CodeBuilderLessThan().setLhs(new CodeBuilderIdentifierExpr().setId("i"))
+				.setRhs(new CodeBuilderIntLiteral().setValue(10));
 		this.update = "i = i + 1";
 		this.body = super.random.statement();
 

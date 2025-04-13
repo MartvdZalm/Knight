@@ -40,7 +40,7 @@ public class CodeBuilderVariableInit extends CodeBuilderVariable
 
 	public CodeBuilderVariableInit()
 	{
-		this.mock();	
+		this.mock();
 	}
 
 	@Override
@@ -73,7 +73,7 @@ public class CodeBuilderVariableInit extends CodeBuilderVariable
 		super.mock();
 
 		this.expr = this.type.getExpr();
-		
+
 		return this;
 	}
 

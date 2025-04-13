@@ -39,14 +39,14 @@ public abstract class CodeBuilder
 		this.random = new CodeBuilderRandom();
 	}
 
-    protected Boolean empty(String str)
-    {
-    	if (str == null || str.isEmpty()) {
-    		return true;
+	protected Boolean empty(String str)
+	{
+		if (str == null || str.isEmpty()) {
+			return true;
 		} else {
 			return false;
 		}
-    }
+	}
 
 	protected abstract CodeBuilder mock();
 

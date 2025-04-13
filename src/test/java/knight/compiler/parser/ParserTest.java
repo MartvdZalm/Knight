@@ -26,10 +26,8 @@ package knight.compiler.parser;
 
 import java.io.*;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
 
 import java.util.*;
 import java.lang.reflect.Method;
@@ -66,28 +64,17 @@ public class ParserTest extends TestUtils
 	@Test
 	public void testParseWithAll() throws ParseException
 	{
-		CodeBuilderProgram codeBuilderProgram = new CodeBuilderProgram()
-			.addClasses(
-				new CodeBuilderClass()
-			)
-			.addFunctions(
-				new CodeBuilderFunction(),
-				new CodeBuilderFunctionReturn()
-			)
-			.addVariables(
-				new CodeBuilderVariable(),
-				new CodeBuilderVariableInit()
-			)
-			.addInlineASM(
-				new CodeBuilderInlineASM()
-			);
+		CodeBuilderProgram codeBuilderProgram = new CodeBuilderProgram().addClasses(new CodeBuilderClass())
+				.addFunctions(new CodeBuilderFunction(), new CodeBuilderFunctionReturn())
+				.addVariables(new CodeBuilderVariable(), new CodeBuilderVariableInit())
+				.addInlineASM(new CodeBuilderInlineASM());
 
 		StringReader stringReader = new StringReader(codeBuilderProgram.toString());
 		BufferedReader bufferedReader = new BufferedReader(stringReader);
 		Parser parser = new Parser(bufferedReader);
 
 		AST ast = parser.parse();
-		ASTProgram program  = castExpectClass(ASTProgram.class, ast);
+		ASTProgram program = castExpectClass(ASTProgram.class, ast);
 
 		assertEquals(1, program.getClassListSize());
 		expectsClass(ASTClass.class, program.getClassDeclAt(0).getClass());
@@ -107,8 +94,7 @@ public class ParserTest extends TestUtils
 	@Test
 	public void testParseClassValid() throws ParseException
 	{
-		CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
-			.setId("MyClass");
+		CodeBuilderClass codeBuilderClass = new CodeBuilderClass().setId("MyClass");
 
 		ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
 
@@ -117,14 +103,12 @@ public class ParserTest extends TestUtils
 		assertEquals(0, classDecl.getVariableListSize());
 	}
 
-    @Test
+	@Test
 	public void testParseClassWithFunctions() throws ParseException
 	{
-		CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
-			.addFunctions(
+		CodeBuilderClass codeBuilderClass = new CodeBuilderClass().addFunctions(
 				new CodeBuilderFunction().setId("MyFunction"),
-				new CodeBuilderFunctionReturn().setReturnType(new CodeBuilderIntType())
-			);
+				new CodeBuilderFunctionReturn().setReturnType(new CodeBuilderIntType()));
 
 		ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
 
@@ -138,11 +122,9 @@ public class ParserTest extends TestUtils
 	@Test
 	public void testParseClassWithVariables() throws ParseException
 	{
-		CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
-			.addVariables(
+		CodeBuilderClass codeBuilderClass = new CodeBuilderClass().addVariables(
 				new CodeBuilderVariable().setId("MyVariable"),
-				new CodeBuilderVariableInit().setType(new CodeBuilderIntType())
-			);
+				new CodeBuilderVariableInit().setType(new CodeBuilderIntType()));
 
 		ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
 
@@ -154,37 +136,29 @@ public class ParserTest extends TestUtils
 	}
 
 	@Test
-    public void testParseClassWithAll() throws ParseException
-    {
-    	CodeBuilderClass codeBuilderClass = new CodeBuilderClass()
-    		.setId("MyClass")
-    		.addFunctions(
-    			new CodeBuilderFunction(),
-    			new CodeBuilderFunctionReturn()
-    		)
-    		.addVariables(
-    			new CodeBuilderVariable(),
-    			new CodeBuilderVariableInit()
-    		);
+	public void testParseClassWithAll() throws ParseException
+	{
+		CodeBuilderClass codeBuilderClass = new CodeBuilderClass().setId("MyClass")
+				.addFunctions(new CodeBuilderFunction(), new CodeBuilderFunctionReturn())
+				.addVariables(new CodeBuilderVariable(), new CodeBuilderVariableInit());
 
-    	ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
+		ASTClass classDecl = parse(codeBuilderClass.toString()).parseClass();
 
-    	assertEquals("MyClass", classDecl.getId().toString());
+		assertEquals("MyClass", classDecl.getId().toString());
 
-    	assertEquals(2, classDecl.getFunctionListSize());
-    	expectsClass(ASTFunction.class, classDecl.getFunctionDeclAt(0).getClass());
-    	expectsClass(ASTFunctionReturn.class, classDecl.getFunctionDeclAt(1).getClass());
+		assertEquals(2, classDecl.getFunctionListSize());
+		expectsClass(ASTFunction.class, classDecl.getFunctionDeclAt(0).getClass());
+		expectsClass(ASTFunctionReturn.class, classDecl.getFunctionDeclAt(1).getClass());
 
-    	assertEquals(2, classDecl.getVariableListSize());
-    	expectsClass(ASTVariable.class, classDecl.getVariableDeclAt(0).getClass());
-    	expectsClass(ASTVariableInit.class, classDecl.getVariableDeclAt(1).getClass());
-    }
+		assertEquals(2, classDecl.getVariableListSize());
+		expectsClass(ASTVariable.class, classDecl.getVariableDeclAt(0).getClass());
+		expectsClass(ASTVariableInit.class, classDecl.getVariableDeclAt(1).getClass());
+	}
 
 	@Test
 	public void testParseFunctionValid() throws ParseException
 	{
-		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.setId("MyFunction");
+		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction().setId("MyFunction");
 
 		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
@@ -199,24 +173,21 @@ public class ParserTest extends TestUtils
 	public void testParseFunctionReturnValid() throws ParseException
 	{
 		CodeBuilderFunctionReturn codeBuilderFunctionReturn = new CodeBuilderFunctionReturn()
-			.setReturnType(new CodeBuilderIntType())
-			.setId("MyFunction");
+				.setReturnType(new CodeBuilderIntType()).setId("MyFunction");
 
 		ASTFunction function = parse(codeBuilderFunctionReturn.toString()).parseFunction();
 
 		assertEquals("MyFunction", function.getId().toString());
 		expectsClass(ASTIntType.class, function.getReturnType().getClass());
 		ASTFunctionReturn functionReturn = castExpectClass(ASTFunctionReturn.class, function);
-    	assertNotNull(functionReturn.getReturnExpr());
+		assertNotNull(functionReturn.getReturnExpr());
 	}
 
 	@Test
 	public void testParseFunctionWithArguments() throws ParseException
 	{
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.addArguments(
-				new CodeBuilderArgument().setId("MyArgument")
-			);
+				.addArguments(new CodeBuilderArgument().setId("MyArgument"));
 
 		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
@@ -229,9 +200,7 @@ public class ParserTest extends TestUtils
 	public void testParseFunctionWithVariables() throws ParseException
 	{
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.addVariables(
-				new CodeBuilderVariable().setId("MyVariable")
-			);
+				.addVariables(new CodeBuilderVariable().setId("MyVariable"));
 
 		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
@@ -244,9 +213,7 @@ public class ParserTest extends TestUtils
 	public void testParseFunctionWithStatements() throws ParseException
 	{
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.addStatements(
-				new CodeBuilderAssign().setId("MyStatement")
-			);
+				.addStatements(new CodeBuilderAssign().setId("MyStatement"));
 
 		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
@@ -259,28 +226,19 @@ public class ParserTest extends TestUtils
 	public void testParseFunctionWithAll() throws ParseException
 	{
 		CodeBuilderFunction codeBuilderFunction = new CodeBuilderFunction()
-			.addArguments(
-				new CodeBuilderArgument().setType(new CodeBuilderIntType()),
-				new CodeBuilderArgument().setType(new CodeBuilderStringType()),
-				new CodeBuilderArgument().setType(new CodeBuilderBooleanType()),
-				new CodeBuilderArgument().setType(new CodeBuilderIdentifierType())
-			)
-			.addVariables(
-				new CodeBuilderVariable().setType(new CodeBuilderIntType()),
-				new CodeBuilderVariable().setType(new CodeBuilderStringType()),
-				new CodeBuilderVariable().setType(new CodeBuilderIdentifierType()),
-				new CodeBuilderVariableInit().setType(new CodeBuilderBooleanType()),
-				new CodeBuilderVariableInit().setType(new CodeBuilderIdentifierType())
-			)
-			.addStatements(
-				new CodeBuilderWhile(),
-				// new CodeBuilderForLoop(),
-				new CodeBuilderIfThenElse(),
-				new CodeBuilderAssign()
-			)
-			.addInlineASM(
-				new CodeBuilderInlineASM()
-			);
+				.addArguments(new CodeBuilderArgument().setType(new CodeBuilderIntType()),
+						new CodeBuilderArgument().setType(new CodeBuilderStringType()),
+						new CodeBuilderArgument().setType(new CodeBuilderBooleanType()),
+						new CodeBuilderArgument().setType(new CodeBuilderIdentifierType()))
+				.addVariables(new CodeBuilderVariable().setType(new CodeBuilderIntType()),
+						new CodeBuilderVariable().setType(new CodeBuilderStringType()),
+						new CodeBuilderVariable().setType(new CodeBuilderIdentifierType()),
+						new CodeBuilderVariableInit().setType(new CodeBuilderBooleanType()),
+						new CodeBuilderVariableInit().setType(new CodeBuilderIdentifierType()))
+				.addStatements(new CodeBuilderWhile(),
+						// new CodeBuilderForLoop(),
+						new CodeBuilderIfThenElse(), new CodeBuilderAssign())
+				.addInlineASM(new CodeBuilderInlineASM());
 
 		ASTFunction function = parse(codeBuilderFunction.toString()).parseFunction();
 
@@ -300,38 +258,35 @@ public class ParserTest extends TestUtils
 		assertEquals(1, function.getInlineASMListSize());
 	}
 
-    @Test
-    public void testParseVariableValid() throws ParseException
-    {
-    	CodeBuilderVariable codeBuilderVariable = new CodeBuilderVariable()
-    		.setId("MyVariable")
-    		.setType(new CodeBuilderIntType());
+	@Test
+	public void testParseVariableValid() throws ParseException
+	{
+		CodeBuilderVariable codeBuilderVariable = new CodeBuilderVariable().setId("MyVariable")
+				.setType(new CodeBuilderIntType());
 
-    	ASTVariable variable = parse(codeBuilderVariable.toString()).parseVariable();
+		ASTVariable variable = parse(codeBuilderVariable.toString()).parseVariable();
 
-    	assertEquals("MyVariable", variable.getId().toString());
-    	expectsClass(ASTIntType.class, variable.getType().getClass());
-    }
+		assertEquals("MyVariable", variable.getId().toString());
+		expectsClass(ASTIntType.class, variable.getType().getClass());
+	}
 
-    @Test
-    public void testParseVariableInitValid() throws ParseException
-    {
-    	CodeBuilderVariableInit codeBuilderVariableInit = new CodeBuilderVariableInit()
-    		.setId("MyVariable")
-    		.setType(new CodeBuilderStringType())
-    		.setExpr(new CodeBuilderStringLiteral().setId("Hello World"));
+	@Test
+	public void testParseVariableInitValid() throws ParseException
+	{
+		CodeBuilderVariableInit codeBuilderVariableInit = new CodeBuilderVariableInit().setId("MyVariable")
+				.setType(new CodeBuilderStringType()).setExpr(new CodeBuilderStringLiteral().setId("Hello World"));
 
-    	ASTVariable variable = parse(codeBuilderVariableInit.toString()).parseVariable();
-    	ASTVariableInit variableInit = castExpectClass(ASTVariableInit.class, variable);
+		ASTVariable variable = parse(codeBuilderVariableInit.toString()).parseVariable();
+		ASTVariableInit variableInit = castExpectClass(ASTVariableInit.class, variable);
 
-    	assertEquals("MyVariable", variableInit.getId().toString());
-    	expectsClass(ASTStringType.class, variableInit.getType().getClass());
-    	expectsClass(ASTStringLiteral.class, variableInit.getExpr().getClass());
-    	ASTStringLiteral stringLiteral = castExpectClass(ASTStringLiteral.class, variableInit.getExpr());
-    	assertEquals("\"Hello World\"", stringLiteral.getValue());
-    }
+		assertEquals("MyVariable", variableInit.getId().toString());
+		expectsClass(ASTStringType.class, variableInit.getType().getClass());
+		expectsClass(ASTStringLiteral.class, variableInit.getExpr().getClass());
+		ASTStringLiteral stringLiteral = castExpectClass(ASTStringLiteral.class, variableInit.getExpr());
+		assertEquals("\"Hello World\"", stringLiteral.getValue());
+	}
 
-    @Test
+	@Test
 	public void testParseExpression() throws ParseException
 	{
 		ASTExpression exprInt = parse("10;").parseExpression();
@@ -393,112 +348,107 @@ public class ParserTest extends TestUtils
 		assertEquals(52, arrayLengthIntLiteral.getValue());
 	}
 
-    @Test
-    public void testParseArguments() throws ParseException
-    {
-    	String arguments = "(";
-    	for (int i = 0; i < 10; i++) {
-    		if (i < 9) {
-    			arguments += new CodeBuilderArgument().toString() +  ", ";
-    		} else {
-    			arguments += new CodeBuilderArgument().toString();
-    		}
-    	}
-    	arguments += ")";
-
-    	List<ASTArgument> argumentList = parse(arguments).parseArguments();
-    	assertEquals(10, argumentList.size());
-    }
-
-    @Test
-    public void testParseArgument() throws ParseException
-    {
-    	CodeBuilderArgument codeBuilderArgumentInt = new CodeBuilderArgument()
-    		.setId("MyArgument")
-    		.setType(new CodeBuilderIntType());
-
-    	ASTArgument argumentInt = parse(codeBuilderArgumentInt.toString()).parseArgument();
-    	assertEquals("MyArgument", argumentInt.getId().toString());
-    	expectsClass(ASTIntType.class, argumentInt.getType().getClass());
-
-    	CodeBuilderArgument codeBuilderArgumentString = new CodeBuilderArgument()
-    		.setId("MyArgument")
-    		.setType(new CodeBuilderStringType());
-
-    	ASTArgument argumentString = parse(codeBuilderArgumentString.toString()).parseArgument();
-    	assertEquals("MyArgument", argumentString.getId().toString());
-    	expectsClass(ASTStringType.class, argumentString.getType().getClass());
-
-    	CodeBuilderArgument codeBuilderArgumentBoolean = new CodeBuilderArgument()
-    		.setId("MyArgument")
-    		.setType(new CodeBuilderBooleanType());
-
-    	ASTArgument argumentBoolean = parse(codeBuilderArgumentBoolean.toString()).parseArgument();
-    	assertEquals("MyArgument", argumentBoolean.getId().toString());
-    	expectsClass(ASTBooleanType.class, argumentBoolean.getType().getClass());
-    }
-
-   	@Test
-    public void testParseStatement() throws ParseException
-    {
-    	CodeBuilderIfThenElse codeBuilderIfThenElse = new CodeBuilderIfThenElse();
-    	ASTStatement ifThenElse = parse(codeBuilderIfThenElse.toString()).parseStatement();
-    	expectsClass(ASTIfThenElse.class, ifThenElse.getClass());
-
-    	CodeBuilderWhile codeBuilderWhile = new CodeBuilderWhile();
-    	ASTStatement astWhile = parse(codeBuilderWhile.toString()).parseStatement();
-    	expectsClass(ASTWhile.class, astWhile.getClass());
-
-    	// The for loop will be added later on
-    	// CodeBuilderForLoop codeBuilderForLoop = new CodeBuilderForLoop();
-    	// ASTStatement forLoop = parse(codeBuilderForLoop.toString()).parseStatement();
-    	// expectsClass(ASTForLoop.class, forLoop.getClass());
-    }
-
-   	@Test
-    public void testParseIdentifier() throws ParseException
-    {
-    	CodeBuilderIdentifier codeBuilderIdentifier = new CodeBuilderIdentifier()
-    		.setId("MyIdentifier");
-
-    	ASTIdentifier identifier = parse(codeBuilderIdentifier.toString()).parseIdentifier();
-    	assertEquals("MyIdentifier", identifier.getId().toString());
-    }
-
-    @Test
-    public void testParseType() throws ParseException
-    {
-    	CodeBuilderVariable codeBuilderVariableIntType = new CodeBuilderVariable()
-    		.setType(new CodeBuilderIntType());
-    	ASTType intType = parse(codeBuilderVariableIntType.toString()).parseType();
-    	expectsClass(ASTIntType.class, intType.getClass());
-
-    	CodeBuilderStringType codeBuilderStringType = new CodeBuilderStringType();
-    	ASTType stringType = parse(codeBuilderStringType.toString()).parseType();
-    	expectsClass(ASTStringType.class, stringType.getClass());
-
-    	CodeBuilderBooleanType codeBuilderBooleanType = new CodeBuilderBooleanType();
-    	ASTType booleanType = parse(codeBuilderBooleanType.toString()).parseType();
-    	expectsClass(ASTBooleanType.class, booleanType.getClass());
-
-    	CodeBuilderIdentifierType codeBuilderIdentifierType = new CodeBuilderIdentifierType();
-    	ASTType identifierType = parse(codeBuilderIdentifierType.toString()).parseType();
-    	expectsClass(ASTIdentifierType.class, identifierType.getClass());
-
-    	CodeBuilderVoidType codeBuilderVoidType = new CodeBuilderVoidType();
-    	ASTType voidType = parse(codeBuilderVoidType.toString()).parseType();
-    	expectsClass(ASTVoidType.class, voidType.getClass());
-
-    	CodeBuilderIntArrayType codeBuilderIntArrayType = new CodeBuilderIntArrayType();
-    	ASTType intArrayType = parse(codeBuilderIntArrayType.toString()).parseType();
-    	expectsClass(ASTIntArrayType.class, intArrayType.getClass());
-    }
-
-    private Parser parse(String input)
+	@Test
+	public void testParseArguments() throws ParseException
 	{
-	    if (input == null || input.isEmpty()) {
-	        throw new IllegalArgumentException("Input must not be empty");
-	    }
+		String arguments = "(";
+		for (int i = 0; i < 10; i++) {
+			if (i < 9) {
+				arguments += new CodeBuilderArgument().toString() + ", ";
+			} else {
+				arguments += new CodeBuilderArgument().toString();
+			}
+		}
+		arguments += ")";
+
+		List<ASTArgument> argumentList = parse(arguments).parseArguments();
+		assertEquals(10, argumentList.size());
+	}
+
+	@Test
+	public void testParseArgument() throws ParseException
+	{
+		CodeBuilderArgument codeBuilderArgumentInt = new CodeBuilderArgument().setId("MyArgument")
+				.setType(new CodeBuilderIntType());
+
+		ASTArgument argumentInt = parse(codeBuilderArgumentInt.toString()).parseArgument();
+		assertEquals("MyArgument", argumentInt.getId().toString());
+		expectsClass(ASTIntType.class, argumentInt.getType().getClass());
+
+		CodeBuilderArgument codeBuilderArgumentString = new CodeBuilderArgument().setId("MyArgument")
+				.setType(new CodeBuilderStringType());
+
+		ASTArgument argumentString = parse(codeBuilderArgumentString.toString()).parseArgument();
+		assertEquals("MyArgument", argumentString.getId().toString());
+		expectsClass(ASTStringType.class, argumentString.getType().getClass());
+
+		CodeBuilderArgument codeBuilderArgumentBoolean = new CodeBuilderArgument().setId("MyArgument")
+				.setType(new CodeBuilderBooleanType());
+
+		ASTArgument argumentBoolean = parse(codeBuilderArgumentBoolean.toString()).parseArgument();
+		assertEquals("MyArgument", argumentBoolean.getId().toString());
+		expectsClass(ASTBooleanType.class, argumentBoolean.getType().getClass());
+	}
+
+	@Test
+	public void testParseStatement() throws ParseException
+	{
+		CodeBuilderIfThenElse codeBuilderIfThenElse = new CodeBuilderIfThenElse();
+		ASTStatement ifThenElse = parse(codeBuilderIfThenElse.toString()).parseStatement();
+		expectsClass(ASTIfThenElse.class, ifThenElse.getClass());
+
+		CodeBuilderWhile codeBuilderWhile = new CodeBuilderWhile();
+		ASTStatement astWhile = parse(codeBuilderWhile.toString()).parseStatement();
+		expectsClass(ASTWhile.class, astWhile.getClass());
+
+		// The for loop will be added later on
+		// CodeBuilderForLoop codeBuilderForLoop = new CodeBuilderForLoop();
+		// ASTStatement forLoop = parse(codeBuilderForLoop.toString()).parseStatement();
+		// expectsClass(ASTForLoop.class, forLoop.getClass());
+	}
+
+	@Test
+	public void testParseIdentifier() throws ParseException
+	{
+		CodeBuilderIdentifier codeBuilderIdentifier = new CodeBuilderIdentifier().setId("MyIdentifier");
+
+		ASTIdentifier identifier = parse(codeBuilderIdentifier.toString()).parseIdentifier();
+		assertEquals("MyIdentifier", identifier.getId().toString());
+	}
+
+	@Test
+	public void testParseType() throws ParseException
+	{
+		CodeBuilderVariable codeBuilderVariableIntType = new CodeBuilderVariable().setType(new CodeBuilderIntType());
+		ASTType intType = parse(codeBuilderVariableIntType.toString()).parseType();
+		expectsClass(ASTIntType.class, intType.getClass());
+
+		CodeBuilderStringType codeBuilderStringType = new CodeBuilderStringType();
+		ASTType stringType = parse(codeBuilderStringType.toString()).parseType();
+		expectsClass(ASTStringType.class, stringType.getClass());
+
+		CodeBuilderBooleanType codeBuilderBooleanType = new CodeBuilderBooleanType();
+		ASTType booleanType = parse(codeBuilderBooleanType.toString()).parseType();
+		expectsClass(ASTBooleanType.class, booleanType.getClass());
+
+		CodeBuilderIdentifierType codeBuilderIdentifierType = new CodeBuilderIdentifierType();
+		ASTType identifierType = parse(codeBuilderIdentifierType.toString()).parseType();
+		expectsClass(ASTIdentifierType.class, identifierType.getClass());
+
+		CodeBuilderVoidType codeBuilderVoidType = new CodeBuilderVoidType();
+		ASTType voidType = parse(codeBuilderVoidType.toString()).parseType();
+		expectsClass(ASTVoidType.class, voidType.getClass());
+
+		CodeBuilderIntArrayType codeBuilderIntArrayType = new CodeBuilderIntArrayType();
+		ASTType intArrayType = parse(codeBuilderIntArrayType.toString()).parseType();
+		expectsClass(ASTIntArrayType.class, intArrayType.getClass());
+	}
+
+	private Parser parse(String input)
+	{
+		if (input == null || input.isEmpty()) {
+			throw new IllegalArgumentException("Input must not be empty");
+		}
 
 		StringReader stringReader = new StringReader(input);
 		BufferedReader bufferedReader = new BufferedReader(stringReader);

@@ -78,12 +78,12 @@ public class CodeBuilderClass extends CodeBuilder
 	protected CodeBuilderClass mock()
 	{
 		this.id = super.random.className();
-		
+
 		return this;
 	}
 
 	public String toString()
-	{		
+	{
 		StringBuilder classBody = new StringBuilder();
 
 		for (CodeBuilderVariable variable : variablesList) {

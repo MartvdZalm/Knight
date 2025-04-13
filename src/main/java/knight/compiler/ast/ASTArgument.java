@@ -1,0 +1,48 @@
+package knight.compiler.ast;
+
+import knight.compiler.lexer.Token;
+
+/*
+ * File: ASTArgument.java
+ * @author: Mart van der Zalm
+ * Date: 2025-04-10
+ */
+public class ASTArgument extends AST
+{
+	private ASTType type;
+	private ASTIdentifier identifier;
+
+	public ASTArgument(Token token, ASTType type, ASTIdentifier identifier)
+	{
+		super(token);
+		this.type = type;
+		this.identifier = identifier;
+	}
+
+	public ASTArgument setType(ASTType type)
+	{
+		this.type = type;
+		return this;
+	}
+
+	public ASTType getType()
+	{
+		return type;
+	}
+
+	public ASTArgument setIdentifier(ASTIdentifier identifier)
+	{
+		this.identifier = identifier;
+		return this;
+	}
+
+	public ASTIdentifier getIdentifier()
+	{
+		return identifier;
+	}
+
+	public <R> R accept(ASTVisitor<R> v)
+	{
+		return v.visit(this);
+	}
+}
