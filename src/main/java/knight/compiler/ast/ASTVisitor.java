@@ -29,6 +29,8 @@ public interface ASTVisitor<R>
 
 	public R visit(ASTIntArrayType astIntArrayType);
 
+	public R visit(ASTStringArrayType astStringArrayType);
+
 	public R visit(ASTIfChain astIfChain);
 
 	public R visit(ASTWhile astWhile);
@@ -98,4 +100,6 @@ public interface ASTVisitor<R>
 	public R visit(ASTDivision astDivision);
 
 	public R visit(ASTModulus astModulus);
+
+	public R visit(ASTArrayLiteral astArrayLiteral);
 }

@@ -1,0 +1,17 @@
+
+string[] spinner = {"|", "/", "-", "\\"};
+
+fn main(): int
+{
+	int i = 0;
+
+	while (i < 20) {
+		print("\r" + spinner[i % len(spinner)]);
+
+		i = i + 1;
+	}
+
+	print("Done");
+
+	ret 0;
+}

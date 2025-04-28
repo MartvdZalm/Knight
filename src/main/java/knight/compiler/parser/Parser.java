@@ -11,6 +11,7 @@ import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
 import knight.compiler.ast.ASTArrayIndexExpr;
+import knight.compiler.ast.ASTArrayLiteral;
 import knight.compiler.ast.ASTAssign;
 import knight.compiler.ast.ASTBody;
 import knight.compiler.ast.ASTBooleanType;
@@ -46,6 +47,7 @@ import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
 import knight.compiler.ast.ASTStatement;
+import knight.compiler.ast.ASTStringArrayType;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTTimes;
@@ -223,17 +225,11 @@ public class Parser
 	{
 		ASTType type = parseType();
 		ASTIdentifier id = parseIdentifier();
-
 		ASTVariable variable = null;
 
-		// Change this to a switch if it gets to ugly.
 		if (checkNotNull(token).getToken() == Tokens.SEMICOLON) {
 			variable = new ASTVariable(token, type, id);
 			eat(Tokens.SEMICOLON);
-		} else if (checkNotNull(token).getToken() == Tokens.LEFTBRACE) {
-			eat(Tokens.LEFTBRACE);
-			variable = new ASTVariableInit(token, type, id, parseExpression());
-			eat(Tokens.RIGHTBRACE);
 		} else {
 			eat(Tokens.ASSIGN);
 			variable = new ASTVariableInit(token, type, id, parseExpression());
@@ -300,13 +296,13 @@ public class Parser
 
 			case IF: {
 				Token tok = token;
-				eat(Tokens.IF); // Consume the "if" token
-				eat(Tokens.LEFTPAREN); // Consume the "("
-				ASTExpression condition = parseExpression(); // Parse the condition expression
-				eat(Tokens.RIGHTPAREN); // Consume the ")"
+				eat(Tokens.IF);
+				eat(Tokens.LEFTPAREN);
+				ASTExpression condition = parseExpression();
+				eat(Tokens.RIGHTPAREN);
 				eat(Tokens.LEFTBRACE);
 
-				ASTBody ifBody = this.parseBody(); // Parse the statement in the "if" block
+				ASTBody ifBody = this.parseBody();
 				eat(Tokens.RIGHTBRACE);
 
 				List<ASTConditionalBranch> branches = new ArrayList<>();
@@ -314,12 +310,10 @@ public class Parser
 
 				ASTBody elseBody = null;
 
-				// Check for an else-if or else statement
 				while (token.getToken() == Tokens.ELSE) {
-					eat(Tokens.ELSE); // Consume "else"
+					eat(Tokens.ELSE);
 
 					if (token.getToken() == Tokens.IF) {
-						// This is an "else if" statement, so we parse it like a regular if statement
 						eat(Tokens.IF);
 						eat(Tokens.LEFTPAREN);
 						condition = parseExpression();
@@ -330,15 +324,12 @@ public class Parser
 
 						branches.add(new ASTConditionalBranch(tok, condition, elseIfBody));
 					} else {
-						// This is a regular "else" statement
 						eat(Tokens.LEFTBRACE);
-						elseBody = parseBody(); // Assuming parseBody() parses the else block
+						elseBody = parseBody();
 						eat(Tokens.RIGHTBRACE);
-						break; // Once we find the "else" body, we stop parsing further branches
+						break;
 					}
 				}
-
-				// Create an ASTIfChain with the branches and else body
 				ASTIfChain result = new ASTIfChain(tok, branches, elseBody);
 
 				return result;
@@ -446,9 +437,17 @@ public class Parser
 			}
 
 			case STRING: {
-				ASTStringType stringType = new ASTStringType(token);
+				Token tok = token;
 				eat(Tokens.STRING);
-				return stringType;
+
+				if (checkNotNull(token).getToken() == Tokens.LEFTBRACKET) {
+					tok = token;
+					eat(Tokens.LEFTBRACKET);
+					eat(Tokens.RIGHTBRACKET);
+					return new ASTStringArrayType(tok);
+				}
+
+				return new ASTStringType(tok);
 			}
 
 			case BOOLEAN: {
@@ -525,6 +524,25 @@ public class Parser
 			}
 			break;
 
+			case LEFTBRACE: {
+				Token tok = token;
+				eat(Tokens.LEFTBRACE);
+				List<ASTExpression> elements = new ArrayList<>();
+
+				if (token.getToken() != Tokens.RIGHTBRACE) {
+					elements.add(parseExpression());
+					while (token.getToken() == Tokens.COMMA) {
+						eat(Tokens.COMMA);
+						elements.add(parseExpression());
+					}
+				}
+				eat(Tokens.RIGHTBRACE);
+
+				ASTArrayLiteral arrayLiteral = new ASTArrayLiteral(tok, elements);
+				stOperand.push(arrayLiteral);
+			}
+			break;
+
 			case NEW: {
 				pushOperator(token);
 				eat(Tokens.NEW);
@@ -533,6 +551,19 @@ public class Parser
 				{
 					case INTEGER: {
 						eat(Tokens.INTEGER);
+						eat(Tokens.LEFTBRACKET);
+						stOperator.push(SENTINEL);
+						ASTExpression arrayLength = parseExpression();
+						eat(Tokens.RIGHTBRACKET);
+						stOperator.pop();
+						stOperator.pop();
+						ASTNewArray array = new ASTNewArray(arrayLength.getToken(), arrayLength);
+						stOperand.push(array);
+					}
+					break;
+
+					case STRING: {
+						eat(Tokens.STRING);
 						eat(Tokens.LEFTBRACKET);
 						stOperator.push(SENTINEL);
 						ASTExpression arrayLength = parseExpression();
@@ -983,7 +1014,8 @@ public class Parser
 			case RIGHTPAREN:
 			case SEMICOLON:
 			case COMMA:
-			case RIGHTBRACKET: {
+			case RIGHTBRACKET:
+			case RIGHTBRACE: {
 				// Epsilon expected
 			}
 			break;

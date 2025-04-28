@@ -477,4 +477,18 @@ public class ASTPrinter implements ASTVisitor<String>
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public String visit(ASTStringArrayType astStringArrayType)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTArrayLiteral astArrayLiteral)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

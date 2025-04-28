@@ -8,6 +8,7 @@ import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
 import knight.compiler.ast.ASTArrayIndexExpr;
+import knight.compiler.ast.ASTArrayLiteral;
 import knight.compiler.ast.ASTAssign;
 import knight.compiler.ast.ASTBody;
 import knight.compiler.ast.ASTBooleanType;
@@ -44,6 +45,7 @@ import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
 import knight.compiler.ast.ASTStatement;
+import knight.compiler.ast.ASTStringArrayType;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTTimes;
@@ -706,5 +708,19 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	private void incChanges()
 	{
 		changes++;
+	}
+
+	@Override
+	public ASTExpression visit(ASTStringArrayType astStringArrayType)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTArrayLiteral astArrayLiteral)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

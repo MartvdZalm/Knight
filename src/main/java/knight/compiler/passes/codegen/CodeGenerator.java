@@ -8,6 +8,7 @@ import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
 import knight.compiler.ast.ASTArrayIndexExpr;
+import knight.compiler.ast.ASTArrayLiteral;
 import knight.compiler.ast.ASTAssign;
 import knight.compiler.ast.ASTBody;
 import knight.compiler.ast.ASTBooleanType;
@@ -43,6 +44,7 @@ import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
+import knight.compiler.ast.ASTStringArrayType;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTTimes;
@@ -471,15 +473,12 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTConditionalBranch astConditionalBranch)
 	{
-		// In C++, we typically print the body as a block of statements.
 		StringBuilder sb = new StringBuilder();
 
-		// The condition part of the if/else if (already enclosed in parentheses)
 		sb.append(astConditionalBranch.getCondition().accept(this));
 
-		// For now, assume the body is a list of statements enclosed in curly braces.
 		sb.append(" {\n");
-		sb.append(astConditionalBranch.getBody().accept(this)); // Body of the if or else if
+		sb.append(astConditionalBranch.getBody().accept(this));
 		sb.append("\n}");
 
 		return sb.toString();
@@ -622,5 +621,19 @@ public class CodeGenerator implements ASTVisitor<String>
 		sb.append("%");
 		sb.append(astModulus.getRightSide().accept(this));
 		return sb.toString();
+	}
+
+	@Override
+	public String visit(ASTStringArrayType astStringArrayType)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTArrayLiteral astArrayLiteral)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
