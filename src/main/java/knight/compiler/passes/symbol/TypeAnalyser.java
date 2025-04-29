@@ -614,6 +614,9 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		ASTType typeRightSide = astVariableInit.getExpr().accept(this);
 		ASTType typeLeftSide = astVariableInit.getId().accept(this);
 
+		System.out.println(astVariableInit.getId());
+		System.out.println(astVariableInit.getExpr().accept(this));
+
 		if (astVariableInit.getExpr() instanceof ASTCallFunctionExpr) {
 			ASTCallFunctionExpr astCallFunctionExpr = (ASTCallFunctionExpr) astVariableInit.getExpr();
 
@@ -864,14 +867,14 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTStringArrayType astStringArrayType)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return astStringArrayType;
 	}
 
 	@Override
 	public ASTType visit(ASTArrayLiteral astArrayLiteral)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		ASTType astType = new ASTStringArrayType(astArrayLiteral.getToken());
+		astArrayLiteral.setType(astType);
+		return astType;
 	}
 }

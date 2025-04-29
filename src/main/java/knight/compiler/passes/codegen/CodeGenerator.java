@@ -385,6 +385,10 @@ public class CodeGenerator implements ASTVisitor<String>
 		StringBuilder sb = new StringBuilder();
 		sb.append("#include <knight/knight_std.h>\n");
 
+		for (ASTVariable astVariable : astProgram.getVariableList()) {
+			sb.append(astVariable.accept(this));
+		}
+
 		for (ASTClass astClass : astProgram.getClassList()) {
 			astClass.accept(this);
 		}
@@ -438,7 +442,6 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		// Flag to check if we need to add "else if" or just "if"
 		boolean firstBranch = true;
 
 		for (ASTConditionalBranch branch : astIfChain.getBranches()) {
@@ -446,24 +449,21 @@ public class CodeGenerator implements ASTVisitor<String>
 				sb.append(" else ");
 			}
 
-			// Check if this branch is an "if" or an "else if" and print accordingly
 			sb.append("if (");
-			sb.append(branch.getCondition().accept(this)); // Print the condition for this branch
+			sb.append(branch.getCondition().accept(this));
 			sb.append(") ");
 
-			// Print the body of the branch (in curly braces)
 			sb.append("{\n");
-			sb.append(branch.getBody().accept(this)); // Print the body of the if/else if
+			sb.append(branch.getBody().accept(this));
 			sb.append("\n}\n");
 
-			firstBranch = false; // After the first branch, subsequent branches are "else if"
+			firstBranch = false;
 		}
 
-		// Handle the "else" part, if there is one
 		if (astIfChain.getElseBody() != null) {
 			sb.append("else ");
 			sb.append("{\n");
-			sb.append(astIfChain.getElseBody().accept(this)); // Print the else body
+			sb.append(astIfChain.getElseBody().accept(this));
 			sb.append("\n}\n");
 		}
 
@@ -626,14 +626,30 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTStringArrayType astStringArrayType)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return "std::vector<std::string>";
 	}
 
 	@Override
 	public String visit(ASTArrayLiteral astArrayLiteral)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < astArrayLiteral.getExpressionListSize(); i++) {
+			ASTExpression astExpression = astArrayLiteral.getExpressionAt(i);
+			sb.append(astExpression.accept(this));
+
+			if (i < astArrayLiteral.getExpressionListSize() - 1) {
+				boolean currentIsString = astExpression.getType() instanceof ASTStringType;
+				boolean nextIsString = astArrayLiteral.getExpressionAt(i + 1).getType() instanceof ASTStringType;
+
+				if (currentIsString && nextIsString) {
+					sb.append(" + ");
+				} else {
+					sb.append(", ");
+				}
+			}
+		}
+
+		return sb.toString();
 	}
 }

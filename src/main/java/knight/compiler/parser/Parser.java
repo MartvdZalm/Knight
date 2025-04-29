@@ -232,7 +232,9 @@ public class Parser
 			eat(Tokens.SEMICOLON);
 		} else {
 			eat(Tokens.ASSIGN);
-			variable = new ASTVariableInit(token, type, id, parseExpression());
+			ASTExpression expr = parseExpression();
+			variable = new ASTVariableInit(token, type, id, expr);
+			System.out.println(expr);
 		}
 		return variable;
 	}
@@ -537,7 +539,6 @@ public class Parser
 					}
 				}
 				eat(Tokens.RIGHTBRACE);
-
 				ASTArrayLiteral arrayLiteral = new ASTArrayLiteral(tok, elements);
 				stOperand.push(arrayLiteral);
 			}

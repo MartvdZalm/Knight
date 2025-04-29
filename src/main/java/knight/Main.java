@@ -72,15 +72,15 @@ public class Main
 				TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
 				typeAnalyser.visit((ASTProgram) tree);
 
-				if (SemanticErrors.errorList.size() == 0) {
-					String path = getFileDirPath(filename);
-					ConstantFolding.optimize(tree);
+				// if (SemanticErrors.errorList.size() == 0) {
+				String path = getFileDirPath(filename);
+				ConstantFolding.optimize(tree);
 
-					CodeGenerator cg = new CodeGenerator(path, filename);
-					cg.visit((ASTProgram) tree);
+				CodeGenerator cg = new CodeGenerator(path, filename);
+				cg.visit((ASTProgram) tree);
 
-					this.compileCPPFile(args, path, filename);
-				}
+				this.compileCPPFile(args, path, filename);
+				// }
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
