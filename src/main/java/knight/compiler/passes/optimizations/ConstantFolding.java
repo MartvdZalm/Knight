@@ -713,14 +713,12 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTStringArrayType astStringArrayType)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ASTExpression visit(ASTArrayLiteral astArrayLiteral)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return astArrayLiteral;
 	}
 }

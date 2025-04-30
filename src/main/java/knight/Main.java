@@ -61,16 +61,16 @@ public class Main
 			}
 
 			if (tree != null) {
-				BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
-				buildSymbolTree.visit((ASTProgram) tree);
+				// BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
+				// buildSymbolTree.visit((ASTProgram) tree);
 
-				SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
+				// SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
 
-				NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
-				nameAnalyser.visit((ASTProgram) tree);
+				// NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
+				// nameAnalyser.visit((ASTProgram) tree);
 
-				TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
-				typeAnalyser.visit((ASTProgram) tree);
+				// TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
+				// typeAnalyser.visit((ASTProgram) tree);
 
 				// if (SemanticErrors.errorList.size() == 0) {
 				String path = getFileDirPath(filename);

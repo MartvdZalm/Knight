@@ -300,7 +300,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTArrayIndexExpr astArrayIndexExpr)
 	{
-		return null;
+		return astArrayIndexExpr.getArray().accept(this) + "[" + astArrayIndexExpr.getIndex().accept(this) + "]";
 	}
 
 	@Override
@@ -634,6 +634,8 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
+		sb.append("{");
+
 		for (int i = 0; i < astArrayLiteral.getExpressionListSize(); i++) {
 			ASTExpression astExpression = astArrayLiteral.getExpressionAt(i);
 			sb.append(astExpression.accept(this));
@@ -649,6 +651,7 @@ public class CodeGenerator implements ASTVisitor<String>
 				}
 			}
 		}
+		sb.append("}");
 
 		return sb.toString();
 	}
