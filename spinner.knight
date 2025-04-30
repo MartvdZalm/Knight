@@ -1,10 +1,38 @@
 
 string[] spinner = {"|", "/", "-", "\\"};
+int[] nums = {4, 5, 1, 2, 3};
+
+fn check(string value): bool
+{
+	if (value == "|") {
+		ret false;
+	}
+
+	ret true;
+}
 
 fn main(): int
 {
-	for (string s : spinner) {
-		print(s);
+	// for (string s : spinner) {
+	// 	print(s);
+	// }
+
+	// print(join(spinner, " + "));
+
+	// for (string s : filter(spinner, check)) {
+	// 	print(s);
+	// }
+
+	// for (int n : nums) {
+	// 	print(n);
+	// }
+
+    sort(nums, fn(int a, int b): bool { ret a > b; });
+
+	// sort(nums);
+
+	for (int n : nums) {
+		print(n);
 	}
 
 	ret 0;

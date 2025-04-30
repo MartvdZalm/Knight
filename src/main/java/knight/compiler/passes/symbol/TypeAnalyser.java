@@ -33,6 +33,7 @@ import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTLambda;
 import knight.compiler.ast.ASTLessThan;
 import knight.compiler.ast.ASTLessThanOrEqual;
 import knight.compiler.ast.ASTMinus;
@@ -882,6 +883,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTForeach astForeach)
 	{
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTLambda astLambda)
+	{
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

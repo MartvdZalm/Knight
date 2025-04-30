@@ -12,14 +12,12 @@
 
 namespace knight
 {
-    // Print function with support for different types
     template <typename T>
     void print(const T& value)
     {
         std::cout << value << std::endl;
     }
 
-    // Print function for multiple arguments
     template <typename T, typename... Args>
     void print(const T& first, const Args&... rest)
     {
@@ -27,7 +25,6 @@ namespace knight
         print(rest...);
     }
 
-    // Read input from user
     template <typename T>
     T read()
     {
@@ -36,7 +33,6 @@ namespace knight
         return value;
     }
 
-    // Read a full line from input
     std::string read_line()
     {
         std::string value;
@@ -44,7 +40,6 @@ namespace knight
         return value;
     }
 
-    // String split function
     std::vector<std::string> split(const std::string& str, char delimiter)
     {
         std::vector<std::string> tokens;
@@ -57,7 +52,6 @@ namespace knight
         return tokens;
     }
 
-    // Trim leading and trailing spaces
     std::string trim(const std::string& str)
     {
         auto start = str.find_first_not_of(" \t\n\r");
@@ -65,7 +59,6 @@ namespace knight
         return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
     }
 
-    // Min and max functions
     template <typename T>
     T min(const T& a, const T& b)
     {
@@ -78,14 +71,12 @@ namespace knight
         return (a > b) ? a : b;
     }
 
-    // Convert to uppercase
     std::string to_upper(std::string str)
     {
         std::transform(str.begin(), str.end(), str.begin(), ::toupper);
         return str;
     }
 
-    // Convert to lowercase
     std::string to_lower(std::string str)
     {
         std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -96,7 +87,7 @@ namespace knight
     {
         auto now = std::chrono::system_clock::now();
         std::time_t time_now = std::chrono::system_clock::to_time_t(now);
-        return std::ctime(&time_now); // Has newline at end
+        return std::ctime(&time_now);
     }
 
     int random(int min, int max)
@@ -118,6 +109,40 @@ namespace knight
     std::string to_string(int n)
     {
         return std::to_string(n);
+    }
+
+    std::string join(const std::vector<std::string>& strings, const std::string& delimiter)
+    {
+        std::ostringstream oss;
+        for (size_t i = 0; i < strings.size(); ++i)
+        {
+            oss << strings[i];
+            if (i != strings.size() - 1) oss << delimiter;
+        }
+        return oss.str();
+    }
+
+    template <typename T, typename Func>
+    std::vector<T> filter(const std::vector<T>& vec, Func func)
+    {
+        std::vector<T> result;
+        for (const auto& item : vec)
+        {
+            if (func(item)) result.push_back(item);
+        }
+        return result;
+    }
+
+    template <typename T>
+    void sort(std::vector<T>& vec)
+    {
+        std::sort(vec.begin(), vec.end());
+    }
+
+    template <typename T, typename Comparator>
+    void sort(std::vector<T>& vec, Comparator comp)
+    {
+        std::sort(vec.begin(), vec.end(), comp);
     }
 }
 

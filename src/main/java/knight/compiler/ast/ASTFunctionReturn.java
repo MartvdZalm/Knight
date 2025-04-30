@@ -14,10 +14,10 @@ public class ASTFunctionReturn extends ASTFunction
 	private ASTExpression returnExpr;
 
 	public ASTFunctionReturn(Token token, ASTType returnType, ASTIdentifier id, List<ASTArgument> argumentList,
-			ASTBody body, ASTExpression returnExpr)
+			ASTBody body)
 	{
 		super(token, returnType, id, argumentList, body);
-		this.returnExpr = returnExpr;
+		// this.returnExpr = returnExpr;
 	}
 
 	public ASTExpression getReturnExpr()

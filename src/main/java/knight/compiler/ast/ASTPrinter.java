@@ -498,4 +498,11 @@ public class ASTPrinter implements ASTVisitor<String>
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public String visit(ASTLambda astLambda)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

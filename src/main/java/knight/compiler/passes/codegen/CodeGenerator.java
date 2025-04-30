@@ -32,6 +32,7 @@ import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTLambda;
 import knight.compiler.ast.ASTLessThan;
 import knight.compiler.ast.ASTLessThanOrEqual;
 import knight.compiler.ast.ASTMinus;
@@ -72,7 +73,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	private final String FILENAME;
 
 	Set<String> builtInFunctions = Set.of("print", "to_upper", "to_lower", "trim", "split", "read", "now", "random",
-			"to_int", "to_string", "read_line");
+			"to_int", "to_string", "read_line", "join", "filter", "sort");
 
 	StringBuilder code = new StringBuilder();
 
@@ -283,7 +284,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIntArrayType astIntArrayType)
 	{
-		return "int[]";
+		return "std::vector<int>";
 	}
 
 	@Override
@@ -355,7 +356,8 @@ public class CodeGenerator implements ASTVisitor<String>
 
 		code.append(astFunctionReturn.getBody().accept(this));
 
-		code.append("\treturn " + astFunctionReturn.getReturnExpr().accept(this) + ";\n");
+		// code.append("\treturn " + astFunctionReturn.getReturnExpr().accept(this) +
+		// ";\n");
 
 		code.append("} \n");
 
@@ -421,7 +423,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTReturnStatement astReturnStatement)
 	{
-		return null;
+		return "return " + astReturnStatement.getReturnExpr().accept(this) + ";\n";
 	}
 
 	@Override
@@ -668,6 +670,28 @@ public class CodeGenerator implements ASTVisitor<String>
 		sb.append(astForeach.getIterable().accept(this));
 		sb.append(") {");
 		sb.append(astForeach.getBody().accept(this));
+		sb.append("}");
+
+		return sb.toString();
+	}
+
+	@Override
+	public String visit(ASTLambda astLambda)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("[](");
+
+		for (int i = 0; i < astLambda.getArgumentListSize(); i++) {
+			sb.append(astLambda.getArgumentAt(i).accept(this));
+
+			if (i != astLambda.getArgumentListSize() - 1) {
+				sb.append(", ");
+			}
+		}
+
+		sb.append(") -> " + astLambda.getReturnType().accept(this) + " { ");
+		sb.append(astLambda.getBody().accept(this));
 		sb.append("}");
 
 		return sb.toString();

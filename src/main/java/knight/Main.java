@@ -74,7 +74,7 @@ public class Main
 
 				// if (SemanticErrors.errorList.size() == 0) {
 				String path = getFileDirPath(filename);
-				ConstantFolding.optimize(tree);
+				// ConstantFolding.optimize(tree);
 
 				CodeGenerator cg = new CodeGenerator(path, filename);
 				cg.visit((ASTProgram) tree);

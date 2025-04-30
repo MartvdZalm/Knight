@@ -58,6 +58,7 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
 import knight.compiler.ast.ASTForeach;
+import knight.compiler.ast.ASTLambda;
 import knight.compiler.lexer.Lexer;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
@@ -158,18 +159,20 @@ public class Parser
 
 		ASTBody body = this.parseBody();
 
-		ASTExpression returnExpr = null;
-		if (token.getToken() == Tokens.RETURN) {
-			eat(Tokens.RETURN);
-			returnExpr = parseExpression();
-		}
+		// ASTExpression returnExpr = null;
+		// if (token.getToken() == Tokens.RETURN) {
+		// eat(Tokens.RETURN);
+		// returnExpr = parseExpression();
+		// }
 		eat(Tokens.RIGHTBRACE);
 
-		if (returnExpr != null) {
-			return new ASTFunctionReturn(token, returnType, id, argumentList, body, returnExpr);
-		}
+		// if (returnExpr != null) {
+		// return new ASTFunctionReturn(token, returnType, id, argumentList, body,
+		// returnExpr);
+		// }
+		return new ASTFunctionReturn(token, returnType, id, argumentList, body);
 
-		return new ASTFunction(token, returnType, id, argumentList, body);
+		// return new ASTFunction(token, returnType, id, argumentList, body);
 	}
 
 	private ASTBody parseBody() throws ParseException
@@ -178,12 +181,13 @@ public class Parser
 		List<ASTVariable> variables = new ArrayList<>();
 		List<ASTStatement> statements = new ArrayList<>();
 
-		while (token.getToken() != Tokens.RIGHTBRACE && token.getToken() != Tokens.RETURN) {
+		while (token.getToken() != Tokens.RIGHTBRACE) {
 
 			switch (token.getToken())
 			{
 				case WHILE:
 				case FOR:
+				case RETURN:
 				case IF: {
 					statements.add(parseStatement());
 				}
@@ -540,6 +544,19 @@ public class Parser
 					stOperand.push(id);
 				}
 				parseTerm1();
+			}
+			break;
+
+			case FUNCTION: {
+				Token tok = token;
+				eat(Tokens.FUNCTION);
+				List<ASTArgument> arguments = this.parseArguments();
+				eat(Tokens.COLON);
+				ASTType returnType = parseType();
+				eat(Tokens.LEFTBRACE);
+				ASTBody body = this.parseBody();
+				eat(Tokens.RIGHTBRACE);
+				stOperand.push(new ASTLambda(tok, returnType, arguments, body));
 			}
 			break;
 
