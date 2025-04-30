@@ -491,4 +491,11 @@ public class ASTPrinter implements ASTVisitor<String>
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public String visit(ASTForeach astForeach)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

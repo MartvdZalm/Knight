@@ -57,6 +57,7 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.compiler.passes.symbol.model.Binding;
 import knight.compiler.passes.symbol.model.SymbolClass;
@@ -876,5 +877,11 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		ASTType astType = new ASTStringArrayType(astArrayLiteral.getToken());
 		astArrayLiteral.setType(astType);
 		return astType;
+	}
+
+	@Override
+	public ASTType visit(ASTForeach astForeach)
+	{
+		return null;
 	}
 }

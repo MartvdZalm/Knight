@@ -56,6 +56,7 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.parser.ParseException;
 
 /*
@@ -720,5 +721,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	public ASTExpression visit(ASTArrayLiteral astArrayLiteral)
 	{
 		return astArrayLiteral;
+	}
+
+	@Override
+	public ASTExpression visit(ASTForeach astForeach)
+	{
+		return null;
 	}
 }

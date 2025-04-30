@@ -57,6 +57,7 @@ import knight.compiler.ast.ASTVariable;
 import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.lexer.Lexer;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
@@ -182,7 +183,7 @@ public class Parser
 			switch (token.getToken())
 			{
 				case WHILE:
-					// case FOR:
+				case FOR:
 				case IF: {
 					statements.add(parseStatement());
 				}
@@ -230,12 +231,14 @@ public class Parser
 		if (checkNotNull(token).getToken() == Tokens.SEMICOLON) {
 			variable = new ASTVariable(token, type, id);
 			eat(Tokens.SEMICOLON);
-		} else {
+		} else if (checkNotNull(token).getToken() == Tokens.ASSIGN) {
 			eat(Tokens.ASSIGN);
 			ASTExpression expr = parseExpression();
 			variable = new ASTVariableInit(token, type, id, expr);
-			System.out.println(expr);
+		} else {
+			variable = new ASTVariable(token, type, id);
 		}
+
 		return variable;
 	}
 
@@ -335,6 +338,20 @@ public class Parser
 				ASTIfChain result = new ASTIfChain(tok, branches, elseBody);
 
 				return result;
+			}
+
+			case FOR: {
+				Token tok = token;
+				eat(Tokens.FOR);
+				eat(Tokens.LEFTPAREN);
+				ASTVariable variable = this.parseVariable();
+				eat(Tokens.COLON);
+				ASTExpression iterable = this.parseExpression();
+				eat(Tokens.RIGHTPAREN);
+				eat(Tokens.LEFTBRACE);
+				ASTBody body = this.parseBody();
+				eat(Tokens.RIGHTBRACE);
+				return new ASTForeach(tok, variable, iterable, body);
 			}
 
 			case WHILE: {

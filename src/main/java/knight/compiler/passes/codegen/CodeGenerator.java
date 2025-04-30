@@ -54,6 +54,7 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.passes.symbol.model.SymbolClass;
 import knight.compiler.passes.symbol.model.SymbolFunction;
 
@@ -100,7 +101,7 @@ public class CodeGenerator implements ASTVisitor<String>
 		StringBuilder sb = new StringBuilder();
 
 		for (int i = 0; i < astBody.getVariableListSize(); i++) {
-			sb.append(astBody.getVariableAt(i).accept(this));
+			sb.append(astBody.getVariableAt(i).accept(this) + ";\n");
 		}
 
 		for (int i = 0; i < astBody.getStatementListSize(); i++) {
@@ -320,7 +321,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		String type = astVariable.getType().accept(this);
 		String identifier = astVariable.getId().accept(this);
-		return type + " " + identifier + "; \n";
+		return type + " " + identifier;
 	}
 
 	@Override
@@ -651,6 +652,22 @@ public class CodeGenerator implements ASTVisitor<String>
 				}
 			}
 		}
+		sb.append("}");
+
+		return sb.toString();
+	}
+
+	@Override
+	public String visit(ASTForeach astForeach)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("for (");
+		sb.append(astForeach.getVariable().accept(this));
+		sb.append(" : ");
+		sb.append(astForeach.getIterable().accept(this));
+		sb.append(") {");
+		sb.append(astForeach.getBody().accept(this));
 		sb.append("}");
 
 		return sb.toString();

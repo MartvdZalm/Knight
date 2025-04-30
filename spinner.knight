@@ -3,7 +3,9 @@ string[] spinner = {"|", "/", "-", "\\"};
 
 fn main(): int
 {
-
+	for (string s : spinner) {
+		print(s);
+	}
 
 	ret 0;
 }

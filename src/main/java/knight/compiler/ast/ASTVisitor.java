@@ -102,4 +102,6 @@ public interface ASTVisitor<R>
 	public R visit(ASTModulus astModulus);
 
 	public R visit(ASTArrayLiteral astArrayLiteral);
+
+	public R visit(ASTForeach astForeach);
 }

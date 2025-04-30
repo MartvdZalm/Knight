@@ -52,6 +52,7 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.lexer.Token;
 import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
 import knight.compiler.passes.symbol.model.Scope;
@@ -545,6 +546,13 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTArrayLiteral astArrayLiteral)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTForeach astForeach)
 	{
 		// TODO Auto-generated method stub
 		return null;
