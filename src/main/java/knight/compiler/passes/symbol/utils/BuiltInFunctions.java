@@ -12,12 +12,6 @@ import knight.compiler.ast.ASTVoidType;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
 
-/*
- * File: BuiltInFunctions.java
- * @author: Mart van der Zalm
- * Date: 2025-04-13
- * Description:
- */
 public class BuiltInFunctions
 {
 	private static final Map<String, FunctionSignature> STANDARD_LIB = new HashMap<>();

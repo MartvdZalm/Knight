@@ -1,5 +1,6 @@
 package knight.compiler.passes.symbol;
 
+import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
@@ -200,12 +201,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	{
 		currentScope = new Scope(currentScope);
 
-		for (ASTVariable astVariable : astBody.getVariableList()) {
-			astVariable.accept(this);
-		}
-
-		for (ASTStatement astStatement : astBody.getStatementList()) {
-			astStatement.accept(this);
+		for (AST node : astBody.getNodesList()) {
+			node.accept(this);
 		}
 
 		astBody.setScope(currentScope);

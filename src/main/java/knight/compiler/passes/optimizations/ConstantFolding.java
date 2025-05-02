@@ -95,13 +95,10 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTBody astBody)
 	{
-		for (ASTVariable astVariable : astBody.getVariableList()) {
-			astVariable.accept(this);
+		for (AST node : astBody.getNodesList()) {
+			node.accept(this);
 		}
 
-		for (ASTStatement astStatement : astBody.getStatementList()) {
-			astStatement.accept(this);
-		}
 		return null;
 	}
 

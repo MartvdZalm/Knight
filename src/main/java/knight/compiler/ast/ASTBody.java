@@ -12,46 +12,28 @@ import knight.compiler.passes.symbol.model.Scope;
  */
 public class ASTBody extends ASTStatement
 {
-	private ASTList<ASTStatement> statementList;
-	private ASTList<ASTVariable> variableList;
+	private ASTList<AST> nodes;
 	private Scope scope;
 
-	public ASTBody(Token token, List<ASTVariable> variableList, List<ASTStatement> statementList)
+	public ASTBody(Token token, List<AST> nodes)
 	{
 		super(token);
-
-		this.variableList = new ASTList<>(variableList);
-		this.statementList = new ASTList<>(statementList);
+		this.nodes = new ASTList<>(nodes);
 	}
 
-	public List<ASTVariable> getVariableList()
+	public List<AST> getNodesList()
 	{
-		return variableList.getList();
+		return nodes.getList();
 	}
 
-	public List<ASTStatement> getStatementList()
+	public int getNodesListSize()
 	{
-		return statementList.getList();
+		return nodes.getSize();
 	}
 
-	public int getVariableListSize()
+	public AST getNodesAt(int index)
 	{
-		return variableList.getSize();
-	}
-
-	public int getStatementListSize()
-	{
-		return statementList.getSize();
-	}
-
-	public ASTVariable getVariableAt(int index)
-	{
-		return variableList.getAt(index);
-	}
-
-	public ASTStatement getStatementAt(int index)
-	{
-		return statementList.getAt(index);
+		return nodes.getAt(index);
 	}
 
 	public void setScope(Scope scope)

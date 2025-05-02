@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
@@ -110,13 +111,10 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTBody astBody)
 	{
-		for (ASTVariable astVariable : astBody.getVariableList()) {
-			astVariable.accept(this);
+		for (AST node : astBody.getNodesList()) {
+			node.accept(this);
 		}
 
-		for (ASTStatement astStatement : astBody.getStatementList()) {
-			astStatement.accept(this);
-		}
 		return null;
 	}
 

@@ -5,7 +5,8 @@ import knight.compiler.lexer.Token;
 /*
  * File: ASTFunctionType.java
  * @author: Mart van der Zalm
- * Date: 2025-04-10
+ * Date: 2025-04-30
+ * Description:
  */
 public class ASTFunctionType extends ASTType
 {
@@ -23,6 +24,6 @@ public class ASTFunctionType extends ASTType
 	@Override
 	public String toString()
 	{
-		return "function";
+		return "int";
 	}
 }

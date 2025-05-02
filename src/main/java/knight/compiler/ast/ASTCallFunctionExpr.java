@@ -11,14 +11,22 @@ import knight.compiler.lexer.Token;
  */
 public class ASTCallFunctionExpr extends ASTExpression
 {
+	private ASTIdentifierExpr instance;
 	private ASTIdentifierExpr functionName;
 	private ASTList<ASTExpression> argumentList;
 
-	public ASTCallFunctionExpr(Token token, ASTIdentifierExpr functionName, List<ASTExpression> argumentList)
+	public ASTCallFunctionExpr(Token token, ASTIdentifierExpr instance, ASTIdentifierExpr functionName,
+			List<ASTExpression> argumentList)
 	{
 		super(token);
+		this.instance = instance;
 		this.functionName = functionName;
 		this.argumentList = new ASTList<>(argumentList);
+	}
+
+	public ASTIdentifierExpr getInstance()
+	{
+		return instance;
 	}
 
 	public ASTIdentifierExpr getFunctionName()

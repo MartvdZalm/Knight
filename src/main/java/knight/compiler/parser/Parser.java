@@ -178,8 +178,7 @@ public class Parser
 	private ASTBody parseBody() throws ParseException
 	{
 		Token tok = token;
-		List<ASTVariable> variables = new ArrayList<>();
-		List<ASTStatement> statements = new ArrayList<>();
+		List<AST> nodes = new ArrayList<>();
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
 
@@ -189,22 +188,22 @@ public class Parser
 				case FOR:
 				case RETURN:
 				case IF: {
-					statements.add(parseStatement());
+					nodes.add(parseStatement());
 				}
 				break;
 
 				case INTEGER:
 				case STRING:
 				case BOOLEAN: {
-					variables.add(parseVariable());
+					nodes.add(parseVariable());
 				}
 				break;
 
 				case IDENTIFIER: {
 					if (peek().getToken() != Tokens.ASSIGN && peek().getToken() != Tokens.LEFTPAREN) {
-						variables.add(parseVariable());
+						nodes.add(parseVariable());
 					} else {
-						statements.add(parseStatement());
+						nodes.add(parseStatement());
 					}
 				}
 				break;
@@ -215,7 +214,7 @@ public class Parser
 			}
 		}
 
-		return new ASTBody(tok, variables, statements);
+		return new ASTBody(tok, nodes);
 	}
 
 	public ASTProperty parseProperty() throws ParseException
@@ -537,7 +536,7 @@ public class Parser
 			case IDENTIFIER: {
 				ASTIdentifierExpr id = new ASTIdentifierExpr(token, (String) token.getSymbol());
 				eat(Tokens.IDENTIFIER);
-				if (token.getToken() == Tokens.LEFTPAREN) {
+				if (token.getToken() == Tokens.LEFTPAREN || token.getToken() == Tokens.DOT) {
 					ASTExpression expr = parseCallFunction(id);
 					stOperand.push(expr);
 				} else {
@@ -634,10 +633,22 @@ public class Parser
 		}
 	}
 
-	public ASTExpression parseCallFunction(ASTIdentifierExpr methodId) throws ParseException
+	public ASTExpression parseCallFunction(ASTIdentifierExpr id) throws ParseException
 	{
 		Token tok = token;
 		List<ASTExpression> exprList = new ArrayList<ASTExpression>();
+
+		ASTIdentifierExpr instance = null;
+		ASTIdentifierExpr function = null;
+
+		if (token.getToken() == Tokens.DOT) {
+			instance = id;
+			eat(Tokens.DOT);
+			function = new ASTIdentifierExpr(token, (String) token.getSymbol());
+			eat(Tokens.IDENTIFIER);
+		} else {
+			function = id;
+		}
 
 		eat(Tokens.LEFTPAREN);
 		if (token.getToken() != Tokens.RIGHTPAREN) {
@@ -649,8 +660,9 @@ public class Parser
 				exprList.add(exprArg);
 			}
 		}
+
 		eat(Tokens.RIGHTPAREN);
-		return new ASTCallFunctionExpr(tok, methodId, exprList);
+		return new ASTCallFunctionExpr(tok, instance, function, exprList);
 	}
 
 	public void pushOperator(Token current)

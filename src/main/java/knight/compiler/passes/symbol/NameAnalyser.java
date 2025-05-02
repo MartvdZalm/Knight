@@ -3,6 +3,7 @@ package knight.compiler.passes.symbol;
 import java.util.HashSet;
 import java.util.Set;
 
+import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
@@ -108,12 +109,8 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		Scope savedScope = currentScope;
 		currentScope = bodyScope;
 
-		for (ASTVariable astVariable : astBody.getVariableList()) {
-			astVariable.accept(this);
-		}
-
-		for (ASTStatement astStatement : astBody.getStatementList()) {
-			astStatement.accept(this);
+		for (AST node : astBody.getNodesList()) {
+			node.accept(this);
 		}
 
 		currentScope = savedScope;

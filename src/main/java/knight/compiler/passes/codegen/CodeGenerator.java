@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Set;
 
+import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
 import knight.compiler.ast.ASTArrayAssign;
@@ -101,12 +102,8 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < astBody.getVariableListSize(); i++) {
-			sb.append(astBody.getVariableAt(i).accept(this) + ";\n");
-		}
-
-		for (int i = 0; i < astBody.getStatementListSize(); i++) {
-			sb.append(astBody.getStatementAt(i).accept(this));
+		for (AST node : astBody.getNodesList()) {
+			sb.append(node.accept(this) + ";\n");
 		}
 
 		return sb.toString();
@@ -189,7 +186,11 @@ public class CodeGenerator implements ASTVisitor<String>
 			return sb.toString();
 		}
 
-		sb.append(funcName + "(");;
+		if (astCallFunctionExpr.getInstance() != null) {
+			sb.append(astCallFunctionExpr.getInstance().accept(this) + ".");
+		}
+
+		sb.append(funcName + "(");
 		for (int i = 0; i < astCallFunctionExpr.getArgumentListSize(); i++) {
 			ASTExpression astArgument = astCallFunctionExpr.getArgumentAt(i);
 			sb.append(astArgument.accept(this));
@@ -237,7 +238,7 @@ public class CodeGenerator implements ASTVisitor<String>
 			return sb.toString();
 		}
 
-		sb.append(funcName + "(");;
+		sb.append(funcName + "(");
 		for (int i = 0; i < astCallFunctionStat.getArgumentListSize(); i++) {
 			ASTExpression astArgument = astCallFunctionStat.getArgumentAt(i);
 			sb.append(astArgument.accept(this));
@@ -342,7 +343,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTFunctionReturn astFunctionReturn)
 	{
-		code.append(astFunctionReturn.getReturnType() + " " + astFunctionReturn.getFunctionName() + "(");
+		code.append(astFunctionReturn.getReturnType().accept(this) + " " + astFunctionReturn.getFunctionName() + "(");
 
 		for (int i = 0; i < astFunctionReturn.getArgumentListSize(); i++) {
 			code.append(astFunctionReturn.getArgumentAt(i).accept(this));

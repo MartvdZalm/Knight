@@ -1,39 +1,71 @@
-
-string[] spinner = {"|", "/", "-", "\\"};
-int[] nums = {4, 5, 1, 2, 3};
-
-fn check(string value): bool
+// A simple class representing a 2D point
+class Point
 {
-	if (value == "|") {
-		ret false;
-	}
+    int x;
+    int y;
 
-	ret true;
+    // Constructor
+    fn init(int x, int y): Point
+    {
+        this.x = x;
+        this.y = y;
+        ret this;
+    }
+
+    // Method to calculate distance from origin
+    fn distance(): float
+    {
+        ret sqrt(x*x + y*y);
+    }
+
+    // Method to add another point
+    fn add(Point other): Point
+    {
+        ret new Point(x + other.x, y + other.y);
+    }
+
+    // String representation
+    fn to_string(): string
+    {
+        ret "(" + to_string(x) + ", " + to_string(y) + ")";
+    }
 }
 
+// A class that uses the Point class
+class Shape
+{
+    string name;
+    Point position;
+
+    fn init(string name, Point position): Shape
+    {
+        this.name = name;
+        this.position = position;
+        ret this;
+    }
+
+    fn describe(): string
+    {
+        ret name + " at position " + position.to_string();
+    }
+}
+
+// Updated main function using classes
 fn main(): int
 {
-	// for (string s : spinner) {
-	// 	print(s);
-	// }
-
-	// print(join(spinner, " + "));
-
-	// for (string s : filter(spinner, check)) {
-	// 	print(s);
-	// }
-
-	// for (int n : nums) {
-	// 	print(n);
-	// }
-
-    sort(nums, fn(int a, int b): bool { ret a > b; });
-
-	// sort(nums);
-
-	for (int n : nums) {
-		print(n);
-	}
-
-	ret 0;
+    print("Welcome to the Class Demo!");
+    
+    Point p1 = new Point(3, 4);
+    Point p2 = new Point(5, 6);
+    
+    print("Point 1: " + p1.to_string());
+    print("Point 2: " + p2.to_string());
+    
+    Point sum = p1.add(p2);
+    print("Sum of points: " + sum.to_string());
+    
+    Shape circle = new Shape("Circle", p1);
+    print(circle.describe());
+    
+    ret 0;
 }

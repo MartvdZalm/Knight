@@ -45,12 +45,8 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (ASTVariable variable : body.getVariableList()) {
-			sb.append(variable.accept(this) + "\n");
-		}
-
-		for (ASTStatement statement : body.getStatementList()) {
-			sb.append(statement.accept(this) + "\n");
+		for (AST node : body.getNodesList()) {
+			sb.append(node.accept(this) + "\n");
 		}
 
 		return sb.toString();
