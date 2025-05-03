@@ -2,12 +2,6 @@ package knight.compiler.semantics.utils;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/*
- * File: Counter.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- * Description:
- */
 public class Counter
 {
 	private static Counter instance;

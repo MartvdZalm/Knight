@@ -1,6 +1,7 @@
 package knight.compiler.semantics;
 
 import java.util.Optional;
+
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
@@ -18,6 +19,7 @@ import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
 import knight.compiler.ast.ASTFunctionType;
@@ -44,7 +46,6 @@ import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringArrayType;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
@@ -56,7 +57,6 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
-import knight.compiler.ast.ASTForeach;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.diagnostics.SemanticErrors;
 import knight.compiler.semantics.model.Scope;

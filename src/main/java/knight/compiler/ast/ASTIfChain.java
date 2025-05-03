@@ -4,11 +4,6 @@ import java.util.List;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTIfChain.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTIfChain extends ASTStatement
 {
 	private ASTList<ASTConditionalBranch> branches;

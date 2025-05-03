@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTLessThanOrEqual.java
- * @author: Mart van der Zalm
- * Date: 2025-04-12
- */
 public class ASTLessThanOrEqual extends ASTExpression
 {
 	private ASTExpression leftSide;

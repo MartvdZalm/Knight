@@ -3,11 +3,6 @@ package knight.compiler.ast;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.model.Binding;
 
-/*
- * File: ASTIdentifierExpr.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTIdentifierExpr extends ASTExpression
 {
 	private String id;

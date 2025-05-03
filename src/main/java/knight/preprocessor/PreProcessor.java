@@ -1,7 +1,9 @@
 package knight.preprocessor;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
 
 public class PreProcessor
 {

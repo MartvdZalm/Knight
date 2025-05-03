@@ -4,11 +4,6 @@ import java.util.List;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTArrayLiteral.java
- * @author: Mart van der Zalm
- * Date: 2025-04-28
- */
 public class ASTArrayLiteral extends ASTExpression
 {
 	private ASTList<ASTExpression> expressions;

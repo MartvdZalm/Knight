@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTProperty.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTProperty extends AST
 {
 	private ASTType type;

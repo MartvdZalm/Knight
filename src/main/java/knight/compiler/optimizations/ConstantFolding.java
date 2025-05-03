@@ -60,11 +60,6 @@ import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
 import knight.compiler.parser.ParseException;
 
-/*
- * File: ConstantFolding.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ConstantFolding implements ASTVisitor<ASTExpression>
 {
 	private int changes;

@@ -7,11 +7,6 @@ import java.io.FileReader;
 import knight.compiler.parser.ParseException;
 import knight.compiler.parser.Parser;
 
-/*
- * File: ASTPrinter.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTPrinter implements ASTVisitor<String>
 {
 	int level = 0;

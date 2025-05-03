@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTExpression.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public abstract class ASTExpression extends AST
 {
 	private ASTType type;

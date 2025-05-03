@@ -4,11 +4,6 @@ import java.util.List;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTLambda.java
- * @author: Mart van der Zalm
- * Date: 2025-04-30
- */
 public class ASTLambda extends ASTExpression
 {
 	private ASTType returnType;

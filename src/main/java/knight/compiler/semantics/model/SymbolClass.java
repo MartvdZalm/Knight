@@ -6,11 +6,6 @@ import java.util.Hashtable;
 import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTType;
 
-/*
- * File: SymbolClass.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class SymbolClass extends Binding
 {
 	private String id;

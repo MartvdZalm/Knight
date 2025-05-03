@@ -1,22 +1,14 @@
 package knight.compiler.semantics.model;
 
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Stack;
 import java.util.Vector;
 
 import knight.compiler.ast.ASTType;
 
-/*
- * File: SymbolFunction.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class SymbolFunction extends Binding
 {
 	private String id;
 	private Vector<SymbolVariable> params;
-	// private Scope scope;
 
 	public SymbolFunction(String id, ASTType type)
 	{
@@ -30,11 +22,6 @@ public class SymbolFunction extends Binding
 	{
 		return id;
 	}
-
-	// public void setScope(Scope scope)
-	// {
-	// this.scope = scope;
-	// }
 
 	public boolean addParam(String id, ASTType type)
 	{
@@ -60,15 +47,6 @@ public class SymbolFunction extends Binding
 		}
 	}
 
-	// public boolean addVariable(String id, ASTType type)
-	// {
-	// if (scope.contains(id)) {
-	// return false;
-	// }
-	// scope.addVariable(id, new SymbolVariable(id, type));
-	// return true;
-	// }
-
 	public boolean containsParam(String id)
 	{
 		for (int i = 0; i < params.size(); i++) {
@@ -78,14 +56,6 @@ public class SymbolFunction extends Binding
 		}
 		return false;
 	}
-
-	// public SymbolVariable getVariable(String id)
-	// {
-	// SymbolVariable var = scope.getVariable(id);
-	// if (var != null)
-	// return var;
-	// return getParam(id);
-	// }
 
 	public SymbolVariable getParam(String id)
 	{

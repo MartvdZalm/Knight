@@ -1,6 +1,7 @@
 package knight.compiler.ast;
 
 import java.util.List;
+
 import knight.compiler.lexer.Token;
 
 public class ASTProgram extends AST

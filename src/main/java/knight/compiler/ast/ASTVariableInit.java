@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTVariableInit.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTVariableInit extends ASTVariable
 {
 	private ASTExpression expr;

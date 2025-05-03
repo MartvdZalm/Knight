@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTWhile.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTWhile extends ASTStatement
 {
 	private ASTExpression condition;

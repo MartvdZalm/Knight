@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTConditionalBranch.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTConditionalBranch extends AST
 {
 	private ASTExpression condition;

@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTModulus.java
- * @author: Mart van der Zalm
- * Date: 2025-04-12
- */
 public class ASTModulus extends ASTExpression
 {
 	private ASTExpression leftSide;

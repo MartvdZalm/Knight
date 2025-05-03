@@ -1,10 +1,5 @@
 package knight.compiler.ast;
 
-/*
- * File: ASTVisitor.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public interface ASTVisitor<R>
 {
 	public R visit(ASTProgram astProgram);

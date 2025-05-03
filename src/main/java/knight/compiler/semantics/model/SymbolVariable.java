@@ -2,11 +2,6 @@ package knight.compiler.semantics.model;
 
 import knight.compiler.ast.ASTType;
 
-/*
- * File: SymbolVariable.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class SymbolVariable extends Binding
 {
 	private String id;

@@ -5,11 +5,6 @@ import java.util.List;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.model.Scope;
 
-/*
- * File: ASTBody.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTBody extends ASTStatement
 {
 	private ASTList<AST> nodes;

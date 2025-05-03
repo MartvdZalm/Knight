@@ -2,7 +2,6 @@ package knight.compiler.semantics.model;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 import knight.compiler.ast.ASTBooleanType;
@@ -12,11 +11,6 @@ import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTType;
 
-/*
- * File: SymbolProgram.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class SymbolProgram
 {
 	private Hashtable<String, SymbolClass> classes;

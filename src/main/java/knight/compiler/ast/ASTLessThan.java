@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTLessThan.java
- * @author: Mart van der Zalm
- * Date: 2025-04-12
- */
 public class ASTLessThan extends ASTExpression
 {
 	private ASTExpression leftSide;

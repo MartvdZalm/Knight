@@ -23,6 +23,7 @@ import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
 import knight.compiler.ast.ASTGreaterThan;
@@ -35,6 +36,7 @@ import knight.compiler.ast.ASTImport;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
+import knight.compiler.ast.ASTLambda;
 import knight.compiler.ast.ASTLessThan;
 import knight.compiler.ast.ASTLessThanOrEqual;
 import knight.compiler.ast.ASTMinus;
@@ -58,18 +60,11 @@ import knight.compiler.ast.ASTVariable;
 import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
-import knight.compiler.ast.ASTForeach;
-import knight.compiler.ast.ASTLambda;
 import knight.compiler.lexer.Lexer;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
 import knight.compiler.lexer.Tokens;
 
-/*
- * File: Parser.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class Parser
 {
 	public Lexer lexer;

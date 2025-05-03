@@ -1,10 +1,5 @@
 package knight.compiler.semantics.diagnostics;
 
-/*
- * File: NameError.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class NameError implements Comparable<NameError>
 {
 	private int line;

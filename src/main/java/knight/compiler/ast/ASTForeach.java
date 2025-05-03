@@ -2,11 +2,6 @@ package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTForeach.java
- * @author: Mart van der Zalm
- * Date: 2025-04-30
- */
 public class ASTForeach extends ASTStatement
 {
 	private ASTVariable variable;

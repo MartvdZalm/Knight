@@ -1,18 +1,10 @@
 package knight.compiler.semantics.model;
 
-import java.util.Hashtable;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+
 import knight.compiler.ast.ASTType;
 
-/*
- * File: Scope.java
- * @author: Mart van der Zalm
- * Date: 2025-04-12
- * Description:
- */
 public class Scope
 {
 	private final Scope parent;
