@@ -1,7 +1,7 @@
-package knight.compiler.passes.symbol.model;
+package knight.compiler.semantics.model;
 
 import knight.compiler.ast.ASTType;
-import knight.compiler.passes.symbol.utils.Counter;
+import knight.compiler.semantics.utils.Counter;
 
 /*
  * File: Binding.java

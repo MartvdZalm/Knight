@@ -9,8 +9,7 @@ public class LibraryManager
 {
 	private static final Map<String, Library> libraries = new HashMap<>();
 
-	public static void loadLibraries()
-	{
+	static {
 		registerLibrary(new StdLib());
 	}
 
@@ -23,5 +22,10 @@ public class LibraryManager
 	{
 		return libraries.values().stream().flatMap(lib -> lib.getFunctions().stream())
 				.filter(f -> f.getName().equals(name)).findFirst();
+	}
+
+	public static Optional<Library> findLibrary(String name)
+	{
+		return libraries.values().stream().filter(lib -> lib.getName().equals(name)).findFirst();
 	}
 }

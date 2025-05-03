@@ -246,21 +246,25 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTProgram program)
+	public String visit(ASTProgram astProgram)
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < program.getVariableListSize(); i++) {
-			sb.append(program.getVariableDeclAt(i).accept(this) + "\n");
+		for (AST node : astProgram.getNodeList()) {
+			sb.append(node.accept(this));
 		}
 
-		for (ASTFunction function : program.getFunctionList()) {
-			sb.append(function.accept(this) + "\n");
-		}
-
-		for (ASTClass astClass : program.getClassList()) {
-			sb.append(astClass.accept(this) + "\n");
-		}
+//		for (int i = 0; i < program.getVariableListSize(); i++) {
+//			sb.append(program.getVariableDeclAt(i).accept(this) + "\n");
+//		}
+//
+//		for (ASTFunction function : program.getFunctionList()) {
+//			sb.append(function.accept(this) + "\n");
+//		}
+//
+//		for (ASTClass astClass : program.getClassList()) {
+//			sb.append(astClass.accept(this) + "\n");
+//		}
 
 		return sb.toString();
 	}
@@ -497,6 +501,13 @@ public class ASTPrinter implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTLambda astLambda)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTImport astImport)
 	{
 		// TODO Auto-generated method stub
 		return null;

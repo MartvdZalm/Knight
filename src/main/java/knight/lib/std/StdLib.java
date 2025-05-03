@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import knight.lib.FunctionSignature;
 import knight.lib.Library;
-
+import knight.compiler.lexer.Tokens;
+import java.util.Arrays;
 import knight.utils.FileContentLoader;
 
 public class StdLib implements Library
@@ -13,7 +14,7 @@ public class StdLib implements Library
 
 	public StdLib()
 	{
-		this.functions.add(null);
+		this.functions.add(new FunctionSignature("print", Tokens.VOID, Arrays.asList(Tokens.STRING)));
 	}
 
 	@Override
@@ -32,11 +33,5 @@ public class StdLib implements Library
 	public List<FunctionSignature> getFunctions()
 	{
 		return functions;
-	}
-
-	@Override
-	public String getSourceCode()
-	{
-		return FileContentLoader.loadFromResources("std.h");
 	}
 }

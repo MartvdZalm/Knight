@@ -1,91 +1,59 @@
 package knight.compiler.ast;
 
 import java.util.List;
-
 import knight.compiler.lexer.Token;
 
-/*
- * File: ASTProgram.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class ASTProgram extends AST
 {
-	private ASTList<ASTClass> classList;
-	private ASTList<ASTFunction> functionList;
-	private ASTList<ASTVariable> variableList;
+	private ASTList<ASTImport> importList;
+	private ASTList<AST> nodeList;
 
-	public ASTProgram(Token token, List<ASTClass> classList, List<ASTFunction> functionList,
-			List<ASTVariable> variableList)
+	public ASTProgram(Token token, List<ASTImport> importList, List<AST> nodeList)
 	{
 		super(token);
 
-		this.classList = new ASTList<>(classList);
-		this.functionList = new ASTList<>(functionList);
-		this.variableList = new ASTList<>(variableList);
+		this.importList = new ASTList<>(importList);
+		this.nodeList = new ASTList<>(nodeList);
 	}
 
-	public ASTProgram setClassList(List<ASTClass> classList)
+	public void setImportList(List<ASTImport> importList)
 	{
-		this.classList = new ASTList<>(classList);
-		return this;
+		this.importList = new ASTList<>(importList);
 	}
 
-	public List<ASTClass> getClassList()
+	public List<ASTImport> getImportList()
 	{
-		return classList.getList();
+		return importList.getList();
 	}
 
-	public int getClassListSize()
+	public int getImportListSize()
 	{
-		return classList.getSize();
+		return importList.getSize();
 	}
 
-	public ASTClass getClassDeclAt(int index)
+	public AST getImportAt(int index)
 	{
-		return classList.getAt(index);
+		return importList.getAt(index);
 	}
 
-	public ASTProgram setFunctionList(List<ASTFunction> functionList)
+	public void setNodeList(List<AST> nodeList)
 	{
-		this.functionList = new ASTList<>(functionList);
-		return this;
+		this.nodeList = new ASTList<>(nodeList);
 	}
 
-	public List<ASTFunction> getFunctionList()
+	public List<AST> getNodeList()
 	{
-		return functionList.getList();
+		return nodeList.getList();
 	}
 
-	public int getFunctionListSize()
+	public int getNodeListSize()
 	{
-		return functionList.getSize();
+		return nodeList.getSize();
 	}
 
-	public ASTFunction getFunctionDeclAt(int index)
+	public AST getNodeAt(int index)
 	{
-		return functionList.getAt(index);
-	}
-
-	public ASTProgram setVariableList(List<ASTVariable> variableList)
-	{
-		this.variableList = new ASTList<>(variableList);
-		return this;
-	}
-
-	public List<ASTVariable> getVariableList()
-	{
-		return variableList.getList();
-	}
-
-	public int getVariableListSize()
-	{
-		return variableList.getSize();
-	}
-
-	public ASTVariable getVariableDeclAt(int index)
-	{
-		return variableList.getAt(index);
+		return nodeList.getAt(index);
 	}
 
 	@Override

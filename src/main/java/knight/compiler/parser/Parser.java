@@ -31,6 +31,7 @@ import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
+import knight.compiler.ast.ASTImport;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
@@ -85,9 +86,8 @@ public class Parser
 
 	public AST parse() throws ParseException
 	{
-		List<ASTClass> classList = new ArrayList<>();
-		List<ASTFunction> functionList = new ArrayList<>();
-		List<ASTVariable> variableList = new ArrayList<>();
+		List<ASTImport> importList = new ArrayList<>();
+		List<AST> nodeList = new ArrayList<>();
 
 		try {
 			token = lexer.nextToken();
@@ -95,13 +95,18 @@ public class Parser
 			do {
 				switch (token.getToken())
 				{
+					case IMPORT: {
+						importList = parseImports();
+					}
+					break;
+
 					case CLASS: {
-						classList.add(parseClass());
+						nodeList.add(parseClass());
 					}
 					break;
 
 					case FUNCTION: {
-						functionList.add(parseFunction());
+						nodeList.add(parseFunction());
 					}
 					break;
 
@@ -109,7 +114,7 @@ public class Parser
 					case STRING:
 					case BOOLEAN:
 					case IDENTIFIER: {
-						variableList.add(parseVariable());
+						nodeList.add(parseVariable());
 					}
 					break;
 
@@ -124,7 +129,20 @@ public class Parser
 			e.printStackTrace();
 		}
 
-		return new ASTProgram(token, classList, functionList, variableList);
+		return new ASTProgram(token, importList, nodeList);
+	}
+
+	public List<ASTImport> parseImports() throws ParseException
+	{
+		List<ASTImport> importList = new ArrayList<>();
+
+		while (token.getToken() == Tokens.IMPORT) {
+			Token tok = token;
+			eat(Tokens.IMPORT);
+			importList.add(new ASTImport(tok, this.parseIdentifier()));
+		}
+
+		return importList;
 	}
 
 	public ASTClass parseClass() throws ParseException

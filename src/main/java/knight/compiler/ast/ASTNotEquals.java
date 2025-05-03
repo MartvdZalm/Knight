@@ -1,7 +1,6 @@
 package knight.compiler.ast;
 
 import knight.compiler.lexer.Token;
-import knight.compiler.ast.ASTVisitor;
 
 /*
  * File: ASTNotEquals.java

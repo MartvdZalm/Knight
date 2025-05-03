@@ -2,29 +2,27 @@ package knight;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPrinter;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.parser.Parser;
-import knight.compiler.passes.codegen.CodeGenerator;
-import knight.compiler.passes.optimizations.ConstantFolding;
-import knight.compiler.passes.symbol.BuildSymbolTree;
-import knight.compiler.passes.symbol.NameAnalyser;
-import knight.compiler.passes.symbol.TypeAnalyser;
-import knight.compiler.passes.symbol.diagnostics.NameError;
-import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
-import knight.compiler.passes.symbol.model.SymbolProgram;
-import knight.compiler.passes.symbol.model.SymbolFunction;
+import knight.compiler.codegen.CodeGenerator;
+import knight.compiler.optimizations.ConstantFolding;
+import knight.compiler.semantics.BuildSymbolTree;
+import knight.compiler.semantics.NameAnalyser;
+import knight.compiler.semantics.TypeAnalyser;
+import knight.compiler.semantics.diagnostics.NameError;
+import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.model.SymbolProgram;
+import knight.compiler.semantics.model.SymbolFunction;
 import knight.preprocessor.PreProcessor;
+import knight.lib.Library;
+import knight.lib.LibraryManager;
 
-/*
- * File: Main.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- * Description:
- */
 public class Main
 {
 	public static void main(String[] args)
@@ -48,8 +46,9 @@ public class Main
 				return;
 			}
 
-			PreProcessor preProcessor = new PreProcessor(filename);
-			BufferedReader bufferedReader = preProcessor.process();
+			// PreProcessor preProcessor = new PreProcessor(filename);
+			// BufferedReader bufferedReader = preProcessor.process();
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
 
 			Parser p = new Parser(bufferedReader);
 			AST tree = p.parse();
@@ -60,9 +59,14 @@ public class Main
 				System.exit(0);
 			}
 
+			// Optional<Library> stdLib = LibraryManager.findLibrary("std");
+			// if (stdLib.isPresent()) {
+			// System.out.println(stdLib.get().getSourceCode());
+			// }
+
 			if (tree != null) {
-				// BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
-				// buildSymbolTree.visit((ASTProgram) tree);
+				BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
+				buildSymbolTree.visit((ASTProgram) tree);
 
 				// SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
 
@@ -72,15 +76,15 @@ public class Main
 				// TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
 				// typeAnalyser.visit((ASTProgram) tree);
 
-				// if (SemanticErrors.errorList.size() == 0) {
-				String path = getFileDirPath(filename);
-				// ConstantFolding.optimize(tree);
+				if (SemanticErrors.errorList.size() == 0) {
+					String path = getFileDirPath(filename);
+					// ConstantFolding.optimize(tree);
 
-				CodeGenerator cg = new CodeGenerator(path, filename);
-				cg.visit((ASTProgram) tree);
+					CodeGenerator cg = new CodeGenerator(path, filename);
+					cg.visit((ASTProgram) tree);
 
-				this.compileCPPFile(args, path, filename);
-				// }
+					this.compileCPPFile(args, path, filename);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

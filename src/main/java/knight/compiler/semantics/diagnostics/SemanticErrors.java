@@ -1,4 +1,4 @@
-package knight.compiler.passes.symbol.diagnostics;
+package knight.compiler.semantics.diagnostics;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,8 +12,7 @@ import knight.compiler.lexer.Token;
  */
 public class SemanticErrors
 {
-	public static List<NameError> errorList = new ArrayList<>(); // List to store NameError objects representing
-																	// semantic errors
+	public static List<NameError> errorList = new ArrayList<>();
 
 	public static void addError(int line, int col, String errorText)
 	{

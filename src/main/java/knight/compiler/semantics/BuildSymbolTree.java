@@ -1,5 +1,6 @@
-package knight.compiler.passes.symbol;
+package knight.compiler.semantics;
 
+import java.util.Optional;
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTAnd;
 import knight.compiler.ast.ASTArgument;
@@ -26,6 +27,7 @@ import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
+import knight.compiler.ast.ASTImport;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
@@ -56,17 +58,14 @@ import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
 import knight.compiler.ast.ASTForeach;
 import knight.compiler.lexer.Token;
-import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
-import knight.compiler.passes.symbol.model.Scope;
-import knight.compiler.passes.symbol.model.SymbolClass;
-import knight.compiler.passes.symbol.model.SymbolFunction;
-import knight.compiler.passes.symbol.model.SymbolProgram;
+import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.model.Scope;
+import knight.compiler.semantics.model.SymbolClass;
+import knight.compiler.semantics.model.SymbolFunction;
+import knight.compiler.semantics.model.SymbolProgram;
+import knight.lib.Library;
+import knight.lib.LibraryManager;
 
-/*
- * File: BuildSymbolTree.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class BuildSymbolTree implements ASTVisitor<ASTType>
 {
 	private SymbolProgram symbolProgram;
@@ -87,16 +86,12 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-		for (ASTClass astClass : astProgram.getClassList()) {
-			astClass.accept(this);
+		for (ASTImport astImport : astProgram.getImportList()) {
+			astImport.accept(this);
 		}
 
-		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-			astFunction.accept(this);
-		}
-
-		for (ASTVariable astVariable : astProgram.getVariableList()) {
-			astVariable.accept(this);
+		for (AST node : astProgram.getNodeList()) {
+			node.accept(this);
 		}
 
 		return null;
@@ -185,7 +180,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTFunctionReturn astFunctionReturn)
 	{
 		checkFunction(astFunctionReturn);
-		astFunctionReturn.getReturnExpr().accept(this);
+		// astFunctionReturn.getReturnExpr().accept(this);
 		symbolFunction = null;
 		return null;
 	}
@@ -560,6 +555,17 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTLambda astLambda)
 	{
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTImport astImport)
+	{
+		Optional<Library> library = LibraryManager.findLibrary(astImport.getLibrary().toString());
+		if (!library.isPresent()) {
+			SemanticErrors.addError(astImport.getToken(), "Library " + astImport.getLibrary() + " not found.");
+			return null;
+		}
 		return null;
 	}
 }

@@ -1,4 +1,4 @@
-package knight.compiler.passes.symbol;
+package knight.compiler.semantics;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +29,7 @@ import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
+import knight.compiler.ast.ASTImport;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
@@ -58,12 +59,12 @@ import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
 import knight.compiler.ast.ASTForeach;
-import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
-import knight.compiler.passes.symbol.model.Scope;
-import knight.compiler.passes.symbol.model.SymbolClass;
-import knight.compiler.passes.symbol.model.SymbolFunction;
-import knight.compiler.passes.symbol.model.SymbolProgram;
-import knight.compiler.passes.symbol.model.SymbolVariable;
+import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.model.Scope;
+import knight.compiler.semantics.model.SymbolClass;
+import knight.compiler.semantics.model.SymbolFunction;
+import knight.compiler.semantics.model.SymbolProgram;
+import knight.compiler.semantics.model.SymbolVariable;
 
 /*
  * File: NameAnalyser.java
@@ -326,17 +327,22 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-		for (ASTClass astClass : astProgram.getClassList()) {
-			astClass.accept(this);
+
+		for (AST node : astProgram.getNodeList()) {
+			node.accept(this);
 		}
 
-		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-			astFunction.accept(this);
-		}
-
-		for (ASTVariable astVariable : astProgram.getVariableList()) {
-			astVariable.accept(this);
-		}
+//		for (ASTClass astClass : astProgram.getClassList()) {
+//			astClass.accept(this);
+//		}
+//
+//		for (ASTFunction astFunction : astProgram.getFunctionList()) {
+//			astFunction.accept(this);
+//		}
+//
+//		for (ASTVariable astVariable : astProgram.getVariableList()) {
+//			astVariable.accept(this);
+//		}
 
 		return null;
 	}
@@ -560,6 +566,13 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTLambda astLambda)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTImport astImport)
 	{
 		// TODO Auto-generated method stub
 		return null;

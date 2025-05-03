@@ -3,7 +3,7 @@ package knight.compiler.ast;
 import java.util.List;
 
 import knight.compiler.lexer.Token;
-import knight.compiler.passes.symbol.model.Scope;
+import knight.compiler.semantics.model.Scope;
 
 /*
  * File: ASTBody.java

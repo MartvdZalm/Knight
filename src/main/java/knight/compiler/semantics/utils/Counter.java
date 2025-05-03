@@ -1,4 +1,4 @@
-package knight.compiler.passes.symbol.utils;
+package knight.compiler.semantics.utils;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

@@ -1,8 +1,9 @@
-package knight.compiler.passes.symbol;
+package knight.compiler.semantics;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import knight.compiler.ast.AST;
@@ -31,6 +32,7 @@ import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
+import knight.compiler.ast.ASTImport;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
@@ -60,20 +62,16 @@ import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
 import knight.compiler.ast.ASTForeach;
-import knight.compiler.passes.symbol.diagnostics.SemanticErrors;
-import knight.compiler.passes.symbol.model.Binding;
-import knight.compiler.passes.symbol.model.SymbolClass;
-import knight.compiler.passes.symbol.model.SymbolFunction;
-import knight.compiler.passes.symbol.model.SymbolProgram;
-import knight.compiler.passes.symbol.model.SymbolVariable;
-import knight.compiler.passes.symbol.utils.BuiltInFunctions;
-import knight.compiler.passes.symbol.utils.BuiltInFunctions.FunctionSignature;
+import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.model.Binding;
+import knight.compiler.semantics.model.SymbolClass;
+import knight.compiler.semantics.model.SymbolFunction;
+import knight.compiler.semantics.model.SymbolProgram;
+import knight.compiler.semantics.model.SymbolVariable;
+import java.util.Optional;
+import knight.lib.LibraryManager;
+import knight.lib.FunctionSignature;
 
-/*
- * File: TypeAnalyser.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class TypeAnalyser implements ASTVisitor<ASTType>
 {
 	private SymbolProgram symbolProgram;
@@ -452,11 +450,11 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	{
 		ASTIdentifierExpr functionName = astCallFunctionExpr.getFunctionName();
 
-		if (BuiltInFunctions.isBuiltIn(functionName.toString())) {
-			FunctionSignature signature = BuiltInFunctions.getSignature(functionName.toString());
-			checkBuiltInCall(astCallFunctionExpr, signature);
-			astCallFunctionExpr.setType(signature.returnType);
-			return signature.returnType;
+		Optional<FunctionSignature> functionSignature = LibraryManager.findFunction(functionName.toString());
+
+		if (functionSignature.isPresent()) {
+			// Check the function call with types and arguments.
+//			return functionSignature.get().getReturnType();
 		}
 
 		SymbolFunction symbolFunction = null;
@@ -488,30 +486,28 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 	private void checkBuiltInCall(ASTCallFunctionExpr call, FunctionSignature signature)
 	{
-		List<ASTType> argumentTypes = new ArrayList<>();
-
-		for (ASTExpression astExpression : call.getArgumentList()) {
-			ASTType astType = astExpression.accept(this);
-			argumentTypes.add(astType);
-		}
-
-		// Check argument count
-		if (call.getArgumentListSize() != signature.parameterTypes.size()) {
-			SemanticErrors.addError(call.getToken(), "Built-in function '" + call.getFunctionName() + "' expects "
-					+ signature.parameterTypes.size() + " arguments but got " + call.getArgumentListSize());
-			return;
-		}
-
-		// Check argument types
-		for (int i = 0; i < call.getArgumentListSize(); i++) {
-			ASTType expected = signature.parameterTypes.get(i);
-			ASTType actual = argumentTypes.get(i);
-
-			if (!symbolProgram.compareTypes(expected, actual)) {
-				SemanticErrors.addError(call.getArgumentAt(i).getToken(), "Argument " + (i + 1) + " of '"
-						+ call.getFunctionName() + "' must be " + expected + " but got " + actual);
-			}
-		}
+//		List<ASTType> argumentTypes = new ArrayList<>();
+//
+//		for (ASTExpression astExpression : call.getArgumentList()) {
+//			ASTType astType = astExpression.accept(this);
+//			argumentTypes.add(astType);
+//		}
+//
+//		if (call.getArgumentListSize() != signature.parameterTypes.size()) {
+//			SemanticErrors.addError(call.getToken(), "Built-in function '" + call.getFunctionName() + "' expects "
+//					+ signature.parameterTypes.size() + " arguments but got " + call.getArgumentListSize());
+//			return;
+//		}
+//
+//		for (int i = 0; i < call.getArgumentListSize(); i++) {
+//			ASTType expected = signature.parameterTypes.get(i);
+//			ASTType actual = argumentTypes.get(i);
+//
+//			if (!symbolProgram.compareTypes(expected, actual)) {
+//				SemanticErrors.addError(call.getArgumentAt(i).getToken(), "Argument " + (i + 1) + " of '"
+//						+ call.getFunctionName() + "' must be " + expected + " but got " + actual);
+//			}
+//		}
 	}
 
 	private void checkCallArguments(ASTCallFunctionExpr astCallFunctionExpr, SymbolFunction symbolFunction)
@@ -709,17 +705,21 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-		for (ASTClass astClass : astProgram.getClassList()) {
-			astClass.accept(this);
+		for (AST node : astProgram.getNodeList()) {
+			node.accept(this);
 		}
 
-		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-			astFunction.accept(this);
-		}
-
-		for (ASTVariable astVariable : astProgram.getVariableList()) {
-			astVariable.accept(this);
-		}
+//		for (ASTClass astClass : astProgram.getClassList()) {
+//			astClass.accept(this);
+//		}
+//
+//		for (ASTFunction astFunction : astProgram.getFunctionList()) {
+//			astFunction.accept(this);
+//		}
+//
+//		for (ASTVariable astVariable : astProgram.getVariableList()) {
+//			astVariable.accept(this);
+//		}
 
 		return null;
 	}
@@ -886,6 +886,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 
 	@Override
 	public ASTType visit(ASTLambda astLambda)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTImport astImport)
 	{
 		// TODO Auto-generated method stub
 		return null;

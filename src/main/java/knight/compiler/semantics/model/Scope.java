@@ -1,4 +1,4 @@
-package knight.compiler.passes.symbol.model;
+package knight.compiler.semantics.model;
 
 import java.util.Hashtable;
 import java.util.Map;

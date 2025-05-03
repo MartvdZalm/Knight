@@ -1,4 +1,4 @@
-package knight.compiler.passes.symbol.diagnostics;
+package knight.compiler.semantics.diagnostics;
 
 /*
  * File: NameError.java

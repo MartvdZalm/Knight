@@ -65,7 +65,7 @@ public class TokenType
 		Symbol.symbol("class", Tokens.CLASS);
 		Symbol.symbol("//", Tokens.COMMENT);
 		Symbol.symbol("new", Tokens.NEW);
-		Symbol.symbol("include", Tokens.INCLUDE);
+		Symbol.symbol("import", Tokens.IMPORT);
 		Symbol.symbol("fn", Tokens.FUNCTION);
 
 		Symbol.symbol("if", Tokens.IF);

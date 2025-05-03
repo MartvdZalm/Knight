@@ -1,4 +1,4 @@
-package knight.compiler.passes.codegen;
+package knight.compiler.codegen;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -21,6 +21,7 @@ import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
 import knight.compiler.ast.ASTFunctionType;
@@ -30,6 +31,7 @@ import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
+import knight.compiler.ast.ASTImport;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
@@ -56,15 +58,9 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
-import knight.compiler.ast.ASTForeach;
-import knight.compiler.passes.symbol.model.SymbolClass;
-import knight.compiler.passes.symbol.model.SymbolFunction;
+import knight.compiler.semantics.model.SymbolClass;
+import knight.compiler.semantics.model.SymbolFunction;
 
-/*
- * File: CodeGenerator.java
- * @author: Mart van der Zalm
- * Date: 2025-04-10
- */
 public class CodeGenerator implements ASTVisitor<String>
 {
 	private SymbolClass currentClass;
@@ -75,8 +71,6 @@ public class CodeGenerator implements ASTVisitor<String>
 
 	Set<String> builtInFunctions = Set.of("print", "to_upper", "to_lower", "trim", "split", "read", "now", "random",
 			"to_int", "to_string", "read_line", "join", "filter", "sort");
-
-	StringBuilder code = new StringBuilder();
 
 	public CodeGenerator(String progPath, String filename)
 	{
@@ -343,65 +337,76 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTFunctionReturn astFunctionReturn)
 	{
-		code.append(astFunctionReturn.getReturnType().accept(this) + " " + astFunctionReturn.getFunctionName() + "(");
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(astFunctionReturn.getReturnType().accept(this) + " " + astFunctionReturn.getFunctionName() + "(");
 
 		for (int i = 0; i < astFunctionReturn.getArgumentListSize(); i++) {
-			code.append(astFunctionReturn.getArgumentAt(i).accept(this));
+			sb.append(astFunctionReturn.getArgumentAt(i).accept(this));
 
 			if (i != astFunctionReturn.getArgumentListSize() - 1) {
-				code.append(", ");
+				sb.append(", ");
 			}
 		}
 
-		code.append(") { \n");
+		sb.append(") { \n");
 
-		code.append(astFunctionReturn.getBody().accept(this));
+		sb.append(astFunctionReturn.getBody().accept(this));
 
-		// code.append("\treturn " + astFunctionReturn.getReturnExpr().accept(this) +
+		// sb.append("\treturn " + astFunctionReturn.getReturnExpr().accept(this) +
 		// ";\n");
 
-		code.append("} \n");
+		sb.append("} \n");
 
-		return null;
+		return sb.toString();
 	}
 
 	@Override
 	public String visit(ASTClass astClass)
 	{
-		code.append("class " + astClass.getClassName().accept(this) + " {\n");
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("class " + astClass.getClassName().accept(this) + " {\n");
 
 		for (int i = 0; i < astClass.getPropertyListSize(); i++) {
-			code.append(astClass.getPropertyDeclAt(i).accept(this) + "\n");
+			sb.append(astClass.getPropertyDeclAt(i).accept(this) + "\n");
 		}
 
 		for (int i = 0; i < astClass.getFunctionListSize(); i++) {
-			code.append(astClass.getFunctionDeclAt(i).accept(this) + "\n");
+			sb.append(astClass.getFunctionDeclAt(i).accept(this) + "\n");
 		}
 
-		code.append("};\n");
+		sb.append("};\n");
 
-		return null;
+		return sb.toString();
 	}
 
 	@Override
 	public String visit(ASTProgram astProgram)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("#include <knight/knight_std.h>\n");
 
-		for (ASTVariable astVariable : astProgram.getVariableList()) {
-			sb.append(astVariable.accept(this));
+		for (ASTImport astImport : astProgram.getImportList()) {
+			sb.append(astImport.accept(this));
 		}
 
-		for (ASTClass astClass : astProgram.getClassList()) {
-			astClass.accept(this);
+		for (AST node : astProgram.getNodeList()) {
+			sb.append(node.accept(this));
 		}
 
-		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-			astFunction.accept(this);
-		}
+//		for (ASTVariable astVariable : astProgram.getVariableList()) {
+//			sb.append(astVariable.accept(this));
+//		}
+//
+//		for (ASTClass astClass : astProgram.getClassList()) {
+//			astClass.accept(this);
+//		}
+//
+//		for (ASTFunction astFunction : astProgram.getFunctionList()) {
+//			astFunction.accept(this);
+//		}
 
-		write(sb.append(code).toString());
+		write(sb.toString());
 
 		return null;
 	}
@@ -696,5 +701,11 @@ public class CodeGenerator implements ASTVisitor<String>
 		sb.append("}");
 
 		return sb.toString();
+	}
+
+	@Override
+	public String visit(ASTImport astImport)
+	{
+		return "#include <knight/" + astImport.getLibrary() + ".h>\n";
 	}
 }

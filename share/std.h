@@ -5,8 +5,8 @@
 #include <iostream>
 #include <string>
 
-namespace knight {
-    // Print functions
+namespace knight
+{
     template<typename T>
     void print(const T& value)
     {

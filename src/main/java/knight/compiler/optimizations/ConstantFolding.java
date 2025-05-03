@@ -1,4 +1,4 @@
-package knight.compiler.passes.optimizations;
+package knight.compiler.optimizations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,7 @@ import knight.compiler.ast.ASTDivision;
 import knight.compiler.ast.ASTEquals;
 import knight.compiler.ast.ASTExpression;
 import knight.compiler.ast.ASTFalse;
+import knight.compiler.ast.ASTForeach;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
 import knight.compiler.ast.ASTFunctionType;
@@ -29,6 +30,7 @@ import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
 import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
+import knight.compiler.ast.ASTImport;
 import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
 import knight.compiler.ast.ASTIntType;
@@ -45,7 +47,6 @@ import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTStatement;
 import knight.compiler.ast.ASTStringArrayType;
 import knight.compiler.ast.ASTStringLiteral;
 import knight.compiler.ast.ASTStringType;
@@ -57,7 +58,6 @@ import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
-import knight.compiler.ast.ASTForeach;
 import knight.compiler.parser.ParseException;
 
 /*
@@ -523,13 +523,17 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTProgram astProgram)
 	{
-		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-			astFunction.accept(this);
+		for (AST node : astProgram.getNodeList()) {
+			node.accept(this);
 		}
 
-		for (ASTVariable astVariable : astProgram.getVariableList()) {
-			astVariable.accept(this);
-		}
+//		for (ASTFunction astFunction : astProgram.getFunctionList()) {
+//			astFunction.accept(this);
+//		}
+//
+//		for (ASTVariable astVariable : astProgram.getVariableList()) {
+//			astVariable.accept(this);
+//		}
 
 		return null;
 	}
@@ -729,6 +733,13 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 
 	@Override
 	public ASTExpression visit(ASTLambda astLambda)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTImport astImport)
 	{
 		// TODO Auto-generated method stub
 		return null;

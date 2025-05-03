@@ -4,11 +4,9 @@ import java.util.List;
 
 public interface Library
 {
-	String getName();
+	public String getName();
 
-	String getNamespace();
+	public String getNamespace();
 
-	List<FunctionSignature> getFunctions();
-
-	String getSourceCode();
+	public List<FunctionSignature> getFunctions();
 }

@@ -1,16 +1,15 @@
 package knight.lib;
 
 import java.util.List;
-
-import knight.compiler.ast.ASTType;
+import knight.compiler.lexer.Tokens;
 
 public class FunctionSignature
 {
 	private String name;
-	private ASTType returnType;
-	private List<ASTType> parameterTypes;
+	private Tokens returnType;
+	private List<Tokens> parameterTypes;
 
-	public FunctionSignature(String name, ASTType returnType, List<ASTType> parameterTypes)
+	public FunctionSignature(String name, Tokens returnType, List<Tokens> parameterTypes)
 	{
 		this.name = name;
 		this.returnType = returnType;
@@ -27,22 +26,22 @@ public class FunctionSignature
 		this.name = name;
 	}
 
-	public ASTType getReturnType()
+	public Tokens getReturnType()
 	{
 		return returnType;
 	}
 
-	public void setReturnType(ASTType returnType)
+	public void setReturnType(Tokens returnType)
 	{
 		this.returnType = returnType;
 	}
 
-	public List<ASTType> getParameterTypes()
+	public List<Tokens> getParameterTypes()
 	{
 		return parameterTypes;
 	}
 
-	public void setParameterTypes(List<ASTType> parameterTypes)
+	public void setParameterTypes(List<Tokens> parameterTypes)
 	{
 		this.parameterTypes = parameterTypes;
 	}
