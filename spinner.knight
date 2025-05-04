@@ -1,8 +1,0 @@
-import std
-
-fn main(): int
-{
-    print("Hello World");
-
-    ret 0;
-}
