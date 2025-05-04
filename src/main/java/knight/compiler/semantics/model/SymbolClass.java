@@ -3,8 +3,8 @@ package knight.compiler.semantics.model;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import knight.compiler.ast.ASTIdentifierType;
-import knight.compiler.ast.ASTType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTType;
 
 public class SymbolClass extends Binding
 {

@@ -1,5 +1,6 @@
-package knight.compiler.ast;
+package knight.compiler.ast.types;
 
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
 public class ASTStringType extends ASTType

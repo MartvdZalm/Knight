@@ -1,6 +1,6 @@
 package knight.compiler.semantics.model;
 
-import knight.compiler.ast.ASTType;
+import knight.compiler.ast.types.ASTType;
 
 public class SymbolVariable extends Binding
 {

@@ -3,7 +3,7 @@ package knight.compiler.semantics.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import knight.compiler.ast.ASTType;
+import knight.compiler.ast.types.ASTType;
 
 public class Scope
 {

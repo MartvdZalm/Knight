@@ -14,7 +14,6 @@ import knight.compiler.ast.ASTArrayIndexExpr;
 import knight.compiler.ast.ASTArrayLiteral;
 import knight.compiler.ast.ASTAssign;
 import knight.compiler.ast.ASTBody;
-import knight.compiler.ast.ASTBooleanType;
 import knight.compiler.ast.ASTCallFunctionExpr;
 import knight.compiler.ast.ASTCallFunctionStat;
 import knight.compiler.ast.ASTClass;
@@ -30,12 +29,9 @@ import knight.compiler.ast.ASTGreaterThan;
 import knight.compiler.ast.ASTGreaterThanOrEqual;
 import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
-import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTImport;
-import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
-import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTLambda;
 import knight.compiler.ast.ASTLessThan;
 import knight.compiler.ast.ASTLessThanOrEqual;
@@ -50,16 +46,21 @@ import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
 import knight.compiler.ast.ASTStatement;
-import knight.compiler.ast.ASTStringArrayType;
 import knight.compiler.ast.ASTStringLiteral;
-import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
-import knight.compiler.ast.ASTType;
 import knight.compiler.ast.ASTVariable;
 import knight.compiler.ast.ASTVariableInit;
-import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTParameterizedType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.lexer.Lexer;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
@@ -213,7 +214,8 @@ public class Parser
 				break;
 
 				case IDENTIFIER: {
-					if (peek().getToken() != Tokens.ASSIGN && peek().getToken() != Tokens.LEFTPAREN) {
+					if (peek().getToken() != Tokens.ASSIGN && peek().getToken() != Tokens.LEFTPAREN
+							&& peek().getToken() != Tokens.DOT) {
 						nodes.add(parseVariable());
 					} else {
 						nodes.add(parseStatement());
@@ -431,7 +433,33 @@ public class Parser
 						}
 						eat(Tokens.RIGHTPAREN);
 						eat(Tokens.SEMICOLON);
-						ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, idExpr, exprList);
+						ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, null, idExpr, exprList);
+						return callFunc;
+					}
+
+					case DOT: {
+						Token tok = token;
+
+						ASTIdentifierExpr instance = new ASTIdentifierExpr(id.getToken(), id.getId());
+						eat(Tokens.DOT);
+						ASTIdentifierExpr functionName = new ASTIdentifierExpr(token, checkNotNull(token).getSymbol());
+						eat(Tokens.IDENTIFIER);
+
+						List<ASTExpression> exprList = new ArrayList<ASTExpression>();
+
+						eat(Tokens.LEFTPAREN);
+						if (token.getToken() != Tokens.RIGHTPAREN) {
+							ASTExpression exprArg = parseExpression();
+							exprList.add(exprArg);
+							while (token.getToken() == Tokens.COMMA) {
+								eat(Tokens.COMMA);
+								exprArg = parseExpression();
+								exprList.add(exprArg);
+							}
+						}
+						eat(Tokens.RIGHTPAREN);
+						eat(Tokens.SEMICOLON);
+						ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, instance, functionName, exprList);
 						return callFunc;
 					}
 
@@ -494,6 +522,21 @@ public class Parser
 			case IDENTIFIER: {
 				ASTIdentifierType identifierType = new ASTIdentifierType(token, token.getSymbol());
 				eat(Tokens.IDENTIFIER);
+
+				if (token.getToken() == Tokens.LESSTHAN) {
+					Token tok = token;
+					eat(Tokens.LESSTHAN);
+					List<ASTType> templateArguments = new ArrayList<>();
+					while (token.getToken() != Tokens.GREATERTHAN) {
+						templateArguments.add(this.parseType());
+						if (token.getToken() == Tokens.COMMA) {
+							eat(Tokens.COMMA);
+						}
+					}
+					eat(Tokens.GREATERTHAN);
+					return new ASTParameterizedType(tok, identifierType, templateArguments);
+				}
+
 				return identifierType;
 			}
 

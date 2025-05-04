@@ -4,6 +4,15 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTParameterizedType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.parser.ParseException;
 import knight.compiler.parser.Parser;
 
@@ -503,6 +512,13 @@ public class ASTPrinter implements ASTVisitor<String>
 
 	@Override
 	public String visit(ASTImport astImport)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String visit(ASTParameterizedType astParameterizedType)
 	{
 		// TODO Auto-generated method stub
 		return null;

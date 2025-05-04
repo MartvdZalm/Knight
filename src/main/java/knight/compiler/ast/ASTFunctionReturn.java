@@ -2,6 +2,7 @@ package knight.compiler.ast;
 
 import java.util.List;
 
+import knight.compiler.ast.types.ASTType;
 import knight.compiler.lexer.Token;
 
 public class ASTFunctionReturn extends ASTFunction

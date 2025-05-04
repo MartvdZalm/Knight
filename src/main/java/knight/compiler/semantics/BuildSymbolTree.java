@@ -10,7 +10,6 @@ import knight.compiler.ast.ASTArrayIndexExpr;
 import knight.compiler.ast.ASTArrayLiteral;
 import knight.compiler.ast.ASTAssign;
 import knight.compiler.ast.ASTBody;
-import knight.compiler.ast.ASTBooleanType;
 import knight.compiler.ast.ASTCallFunctionExpr;
 import knight.compiler.ast.ASTCallFunctionStat;
 import knight.compiler.ast.ASTClass;
@@ -22,17 +21,13 @@ import knight.compiler.ast.ASTFalse;
 import knight.compiler.ast.ASTForeach;
 import knight.compiler.ast.ASTFunction;
 import knight.compiler.ast.ASTFunctionReturn;
-import knight.compiler.ast.ASTFunctionType;
 import knight.compiler.ast.ASTGreaterThan;
 import knight.compiler.ast.ASTGreaterThanOrEqual;
 import knight.compiler.ast.ASTIdentifier;
 import knight.compiler.ast.ASTIdentifierExpr;
-import knight.compiler.ast.ASTIdentifierType;
 import knight.compiler.ast.ASTIfChain;
 import knight.compiler.ast.ASTImport;
-import knight.compiler.ast.ASTIntArrayType;
 import knight.compiler.ast.ASTIntLiteral;
-import knight.compiler.ast.ASTIntType;
 import knight.compiler.ast.ASTLambda;
 import knight.compiler.ast.ASTLessThan;
 import knight.compiler.ast.ASTLessThanOrEqual;
@@ -46,17 +41,23 @@ import knight.compiler.ast.ASTPlus;
 import knight.compiler.ast.ASTProgram;
 import knight.compiler.ast.ASTProperty;
 import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTStringArrayType;
 import knight.compiler.ast.ASTStringLiteral;
-import knight.compiler.ast.ASTStringType;
 import knight.compiler.ast.ASTTimes;
 import knight.compiler.ast.ASTTrue;
-import knight.compiler.ast.ASTType;
 import knight.compiler.ast.ASTVariable;
 import knight.compiler.ast.ASTVariableInit;
 import knight.compiler.ast.ASTVisitor;
-import knight.compiler.ast.ASTVoidType;
 import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTParameterizedType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.diagnostics.SemanticErrors;
 import knight.compiler.semantics.model.Scope;
@@ -566,6 +567,13 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			SemanticErrors.addError(astImport.getToken(), "Library " + astImport.getLibrary() + " not found.");
 			return null;
 		}
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTParameterizedType astParameterizedType)
+	{
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

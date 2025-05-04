@@ -3,7 +3,7 @@ package knight.compiler.semantics.model;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import knight.compiler.ast.ASTType;
+import knight.compiler.ast.types.ASTType;
 
 public class SymbolFunction extends Binding
 {

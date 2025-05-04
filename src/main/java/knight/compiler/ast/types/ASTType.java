@@ -1,5 +1,6 @@
-package knight.compiler.ast;
+package knight.compiler.ast.types;
 
+import knight.compiler.ast.AST;
 import knight.compiler.lexer.Token;
 
 public abstract class ASTType extends AST

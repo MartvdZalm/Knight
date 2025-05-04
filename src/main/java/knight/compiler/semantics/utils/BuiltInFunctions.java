@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import knight.compiler.ast.ASTIntType;
-import knight.compiler.ast.ASTStringType;
-import knight.compiler.ast.ASTType;
-import knight.compiler.ast.ASTVoidType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
 

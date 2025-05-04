@@ -4,12 +4,12 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Hashtable;
 
-import knight.compiler.ast.ASTBooleanType;
-import knight.compiler.ast.ASTIdentifierType;
-import knight.compiler.ast.ASTIntArrayType;
-import knight.compiler.ast.ASTIntType;
-import knight.compiler.ast.ASTStringType;
-import knight.compiler.ast.ASTType;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
 
 public class SymbolProgram
 {

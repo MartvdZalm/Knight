@@ -1,10 +1,11 @@
-package knight.compiler.ast;
+package knight.compiler.ast.types;
 
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
-public class ASTBooleanType extends ASTType
+public class ASTVoidType extends ASTType
 {
-	public ASTBooleanType(Token token)
+	public ASTVoidType(Token token)
 	{
 		super(token);
 	}
@@ -18,6 +19,6 @@ public class ASTBooleanType extends ASTType
 	@Override
 	public String toString()
 	{
-		return "bool";
+		return "void";
 	}
 }

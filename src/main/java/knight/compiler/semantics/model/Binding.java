@@ -1,6 +1,6 @@
 package knight.compiler.semantics.model;
 
-import knight.compiler.ast.ASTType;
+import knight.compiler.ast.types.ASTType;
 import knight.compiler.semantics.utils.Counter;
 
 public abstract class Binding

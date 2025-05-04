@@ -1,5 +1,6 @@
 package knight.compiler.ast;
 
+import knight.compiler.ast.types.ASTType;
 import knight.compiler.lexer.Token;
 
 public abstract class ASTExpression extends AST

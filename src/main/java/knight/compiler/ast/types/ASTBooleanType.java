@@ -1,10 +1,11 @@
-package knight.compiler.ast;
+package knight.compiler.ast.types;
 
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
-public class ASTStringArrayType extends ASTType
+public class ASTBooleanType extends ASTType
 {
-	public ASTStringArrayType(Token token)
+	public ASTBooleanType(Token token)
 	{
 		super(token);
 	}
@@ -18,6 +19,6 @@ public class ASTStringArrayType extends ASTType
 	@Override
 	public String toString()
 	{
-		return "string[]";
+		return "bool";
 	}
 }

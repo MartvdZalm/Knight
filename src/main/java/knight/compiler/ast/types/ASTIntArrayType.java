@@ -1,10 +1,11 @@
-package knight.compiler.ast;
+package knight.compiler.ast.types;
 
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
-public class ASTVoidType extends ASTType
+public class ASTIntArrayType extends ASTType
 {
-	public ASTVoidType(Token token)
+	public ASTIntArrayType(Token token)
 	{
 		super(token);
 	}
@@ -18,6 +19,6 @@ public class ASTVoidType extends ASTType
 	@Override
 	public String toString()
 	{
-		return "void";
+		return "int[]";
 	}
 }
