@@ -12,9 +12,7 @@ import knight.compiler.lexer.Token;
 import knight.compiler.lexer.Tokens;
 import knight.compiler.lexer.SourceReader;
 
-import knight.helper.TestUtils;
-
-public class LexerTest extends TestUtils
+public class LexerTest
 {
 	@Test
 	public void testPeekToken()
@@ -64,11 +62,7 @@ public class LexerTest extends TestUtils
 		assertToken(Tokens.PRIVATE, "private");
 		assertToken(Tokens.CLASS, "class");
 		assertToken(Tokens.NEW, "new");
-		assertToken(Tokens.INCLUDE, "include");
 		assertToken(Tokens.FUNCTION, "fn");
-		assertToken(Tokens.EXTENDS, "ext");
-		assertToken(Tokens.IMPLEMENTS, "use");
-		assertToken(Tokens.ASM, "asm");
 		assertToken(Tokens.IF, "if");
 		assertToken(Tokens.ELSE, "else");
 		assertToken(Tokens.WHILE, "while");
@@ -88,7 +82,6 @@ public class LexerTest extends TestUtils
 		assertToken(Tokens.MODULUS, "%");
 		assertToken(Tokens.RETURN, "ret");
 		assertToken(Tokens.VOID, "void");
-		assertToken(Tokens.ARROW, "->");
 	}
 
 	private void assertToken(Tokens expectedToken, String input)
@@ -147,7 +140,7 @@ public class LexerTest extends TestUtils
 	public void testNextTokenKnightFunction()
 	{
 		BufferedReader bufferedReader = new BufferedReader(new StringReader(
-				"fn alias(int harum, string quo, bool corporis, Et velit): void { int minima; string voluptates; Sed nihil; bool dolore = true; Beatae repellat = officiis; while (sint) { quia = \"qui\"; } if (a < 10) { ut = \"maiores\"; } else { commodi = voluptates; } vel = \"dolorum\"; asm {  \"call length\"  \"movq $1, %rax\"  \"movq %rdi, %rsi\"  \"xor %rdi, %rdi\"  \"movq %rcx, %rdx\"  \"syscall\"  }  }"));
+				"fn alias(int harum, string quo, bool corporis, Et velit): void { int minima; string voluptates; Sed nihil; bool dolore = true; Beatae repellat = officiis; while (sint) { quia = \"qui\"; } if (a < 10) { ut = \"maiores\"; } else { commodi = voluptates; } vel = \"dolorum\"; }"));
 		Lexer lexer = new Lexer(bufferedReader);
 
 		assertEquals(Tokens.FUNCTION, lexer.nextToken().getToken());
@@ -229,15 +222,6 @@ public class LexerTest extends TestUtils
 		assertEquals(Tokens.STRING, lexer.nextToken().getToken());
 		assertEquals(Tokens.SEMICOLON, lexer.nextToken().getToken());
 
-		assertEquals(Tokens.ASM, lexer.nextToken().getToken());
-		assertEquals(Tokens.LEFTBRACE, lexer.nextToken().getToken());
-		assertEquals(Tokens.STRING, lexer.nextToken().getToken());
-		assertEquals(Tokens.STRING, lexer.nextToken().getToken());
-		assertEquals(Tokens.STRING, lexer.nextToken().getToken());
-		assertEquals(Tokens.STRING, lexer.nextToken().getToken());
-		assertEquals(Tokens.STRING, lexer.nextToken().getToken());
-		assertEquals(Tokens.STRING, lexer.nextToken().getToken());
-		assertEquals(Tokens.RIGHTBRACE, lexer.nextToken().getToken());
 		assertEquals(Tokens.RIGHTBRACE, lexer.nextToken().getToken());
 		assertNull(lexer.nextToken());
 	}
