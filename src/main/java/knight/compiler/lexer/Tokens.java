@@ -2,7 +2,7 @@ package knight.compiler.lexer;
 
 public enum Tokens
 {
-	INVALID, SENTINEL,
+	INVALID, SENTINEL, EOF,
 
 	LEFTPAREN, RIGHTPAREN, LEFTBRACE, RIGHTBRACE, LEFTBRACKET, RIGHTBRACKET,
 

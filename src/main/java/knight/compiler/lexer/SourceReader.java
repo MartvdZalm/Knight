@@ -3,74 +3,87 @@ package knight.compiler.lexer;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class SourceReader
+public class SourceReader implements AutoCloseable
 {
-	private BufferedReader source;
-	public SourceReaderProperties props;
-	public SourceReaderProperties savedProps;
+	public static final char EOF = (char) -1;
+
+	private final BufferedReader source;
+	private SourceReaderProperties props;
+	private SourceReaderProperties savedProps;
+	private boolean closed = false;
 
 	public SourceReader(BufferedReader bufferedReader)
 	{
-		source = bufferedReader;
-		props = new SourceReaderProperties();
+		if (bufferedReader == null) {
+			throw new IllegalArgumentException("bufferedReader cannot be null");
+		}
+
+		this.source = bufferedReader;
+		this.props = new SourceReaderProperties(source);
 	}
 
-	public void mark(int index) throws IOException
+	public void mark(int readAheadLimit) throws IOException
 	{
-		if (index < 0) {
-			throw new IllegalArgumentException("Index must not be negative");
+		checkNotClosed();
+		if (readAheadLimit < 0) {
+			throw new IllegalArgumentException("Read ahead limit must not be negative");
 		}
 
-		try {
-			if (!source.markSupported()) {
-				throw new UnsupportedOperationException("Mark operation is not supported");
-			}
-
-			source.mark(index);
-			this.savedProps = new SourceReaderProperties(props);
-		} catch (IOException e) {
-			throw new IOException("Error occurred while marking input stream", e);
+		if (!source.markSupported()) {
+			throw new UnsupportedOperationException("Mark operation is not supported by the underlying reader");
 		}
+
+		source.mark(readAheadLimit);
+		this.savedProps = new SourceReaderProperties(props);
 	}
 
 	public void reset() throws IOException
 	{
-		try {
-			if (!source.markSupported()) {
-				throw new UnsupportedOperationException("Reset operation is not supported");
-			}
-
-			source.reset();
-			this.props = new SourceReaderProperties(this.savedProps);
-		} catch (IOException e) {
-			throw new IOException("Error occurred while resetting input stream", e);
+		checkNotClosed();
+		if (!source.markSupported()) {
+			throw new UnsupportedOperationException("Reset operation is not supported by the underlying reader");
 		}
+
+		if (savedProps == null) {
+			throw new IllegalStateException("No mark position set");
+		}
+
+		source.reset();
+		this.props = new SourceReaderProperties(this.savedProps);
 	}
 
 	public char read() throws IOException
 	{
-		if (props.isPriorEndLine) {
-			props.row++;
-			props.col = -1;
-			props.line = source.readLine();
-			props.isPriorEndLine = false;
-		}
+		checkNotClosed();
 
 		if (props.line == null) {
-			throw new IOException(
-					"Error occurred when attempting to read from a source where the next line was null or empty");
-		} else if (props.line.length() == 0) {
+			return EOF;
+		}
+
+		if (props.isPriorEndLine) {
+			props.row++;
+			props.col = 0;
+			props.line = source.readLine();
+			props.isPriorEndLine = false;
+
+			if (props.line == null) {
+				return EOF;
+			}
+		}
+
+		if (props.line.isEmpty()) {
 			props.isPriorEndLine = true;
 			return ' ';
 		}
+
+		char c = props.line.charAt(props.col);
 
 		props.col++;
 		if (props.col >= props.line.length()) {
 			props.isPriorEndLine = true;
-			return ' ';
 		}
 
-		return props.line.charAt(props.col);
+		return c;
 	}
 
 	public int getCol()
@@ -85,12 +98,24 @@ public class SourceReader
 
 	public void close()
 	{
+		if (closed) {
+			return;
+		}
+
 		Symbol.symbols.clear();
 
 		try {
 			source.close();
-		} catch (Exception e) {
-			e.getStackTrace();
+		} catch (IOException ignored) {
+		} finally {
+			closed = true;
+		}
+	}
+
+	private void checkNotClosed()
+	{
+		if (closed) {
+			throw new IllegalStateException("SourceReader has been closed");
 		}
 	}
 }
@@ -98,19 +123,24 @@ public class SourceReader
 class SourceReaderProperties
 {
 	public int row = 0;
-	public int col;
-	public boolean isPriorEndLine = true;
+	public int col = 0;
+	public boolean isPriorEndLine = false;
 	public String line;
 
-	public SourceReaderProperties()
+	public SourceReaderProperties(BufferedReader bufferedReader)
 	{
+		try {
+			this.line = bufferedReader.readLine();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public SourceReaderProperties(SourceReaderProperties props)
+	public SourceReaderProperties(SourceReaderProperties other)
 	{
-		this.row = props.row;
-		this.col = props.col;
-		this.isPriorEndLine = props.isPriorEndLine;
-		this.line = props.line;
+		this.row = other.row;
+		this.col = other.col;
+		this.isPriorEndLine = other.isPriorEndLine;
+		this.line = other.line;
 	}
 }

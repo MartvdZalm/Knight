@@ -13,6 +13,7 @@ import knight.compiler.ast.types.ASTParameterizedType;
 import knight.compiler.ast.types.ASTStringArrayType;
 import knight.compiler.ast.types.ASTStringType;
 import knight.compiler.ast.types.ASTVoidType;
+import knight.compiler.lexer.Lexer;
 import knight.compiler.parser.ParseException;
 import knight.compiler.parser.Parser;
 
@@ -60,13 +61,13 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTWhile w)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append(printInc() + "(WHILE " + w.getCondition().accept(this) + "\n");
+		strBuilder.append(printInc()).append("(WHILE ").append(w.getCondition().accept(this)).append("\n");
 
 		incLevel();
 		strBuilder.append(w.getBody().accept(this));
 		decLevel();
 
-		strBuilder.append(printInc() + ")\n");
+		strBuilder.append(printInc()).append(")\n");
 		return strBuilder.toString();
 	}
 
@@ -110,7 +111,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionExpr callFunctionExpr)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(FUN-CALL" + callFunctionExpr.getFunctionName().accept(this));
+		sb.append("(FUN-CALL").append(callFunctionExpr.getFunctionName().accept(this));
 		for (ASTExpression expr : callFunctionExpr.getArgumentList()) {
 			sb.append(expr.accept(this));
 		}
@@ -123,7 +124,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTCallFunctionStat callFunctionStat)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(FUN-CALL " + callFunctionStat.getFunctionName().accept(this));
+		sb.append("(FUN-CALL ").append(callFunctionStat.getFunctionName().accept(this));
 		for (ASTExpression expr : callFunctionStat.getArgumentList()) {
 			sb.append(expr.accept(this));
 		}
@@ -199,7 +200,7 @@ public class ASTPrinter implements ASTVisitor<String>
 //			sb.append(arg.accept(this));
 //		}
 
-		sb.append(" : " + function.getReturnType().accept(this) + "\n");
+		sb.append(" : ").append(function.getReturnType().accept(this)).append("\n");
 
 		sb.append(function.getBody().accept(this));
 
@@ -222,15 +223,15 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTFunctionReturn functionReturn)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("(FUNC " + functionReturn.getReturnType().accept(this) + " "
-				+ functionReturn.getFunctionName().accept(this));
+		sb.append("(FUNC ").append(functionReturn.getReturnType().accept(this)).append(" ")
+				.append(functionReturn.getFunctionName().accept(this));
 
 		sb.append("(ARG-LIST ");
 		for (ASTArgument argument : functionReturn.getArgumentList()) {
 			sb.append(argument.accept(this));
 		}
 		sb.append(")\n");
-		sb.append(printInc() + "(BODY\n");
+		sb.append(printInc()).append("(BODY\n");
 
 		sb.append(functionReturn.getBody().accept(this));
 
@@ -241,11 +242,11 @@ public class ASTPrinter implements ASTVisitor<String>
 		// for (ASTStatement stat : functionReturn.getStatementList()) {
 		// sb.append(stat.accept(this) + "\n");
 		// }
-		sb.append(printInc() + "(RETURN " + functionReturn.getReturnExpr().accept(this) + ")\n");
+		sb.append(printInc()).append("(RETURN ").append(functionReturn.getReturnExpr().accept(this)).append(")\n");
 		// decLevel();
 
-		sb.append(printInc() + ")\n");
-		sb.append(printInc() + ")");
+		sb.append(printInc()).append(")\n");
+		sb.append(printInc()).append(")");
 		return sb.toString();
 	}
 
@@ -307,11 +308,11 @@ public class ASTPrinter implements ASTVisitor<String>
 		incLevel();
 
 		for (ASTProperty property : classDecl.getPropertyList()) {
-			sb.append(property.accept(this) + "\n");
+			sb.append(property.accept(this)).append("\n");
 		}
 
 		for (ASTFunction function : classDecl.getFunctionList()) {
-			sb.append(function.accept(this) + "\n");
+			sb.append(function.accept(this)).append("\n");
 		}
 
 		decLevel();
@@ -337,7 +338,8 @@ public class ASTPrinter implements ASTVisitor<String>
 		ASTPrinter printer = new ASTPrinter();
 
 		BufferedReader br = new BufferedReader(new FileReader(filename));
-		Parser p = new Parser(br);
+		Lexer lexer = new Lexer(br);
+		Parser p = new Parser(lexer);
 		AST tree = p.parse();
 
 		return printer.visit((ASTProgram) tree);

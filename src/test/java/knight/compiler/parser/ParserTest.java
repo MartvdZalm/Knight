@@ -1,11 +1,16 @@
 package knight.compiler.parser;
 
-import java.io.StringReader;
+import knight.compiler.lexer.Lexer;
+import knight.compiler.lexer.Symbol;
+import knight.compiler.lexer.Token;
+import knight.compiler.lexer.Tokens;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
-import knight.compiler.ast.*;
-import knight.compiler.lexer.*;
-import static org.mockito.Mockito.*;
+
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ParserTest
 {
@@ -16,12 +21,12 @@ public class ParserTest
 	public void setUp()
 	{
 		mockLexer = mock(Lexer.class);
-		parser = new Parser(new BufferedReader(new StringReader(""))
-		{
-			{
-				this.lexer = mockLexer;
-			}
-		});
+		parser = new Parser(mockLexer);
+	}
+
+	protected Token createToken(String text, Tokens type)
+	{
+		return new Token(Symbol.symbol(text, type), 1, 1);
 	}
 
 	protected void mockTokens(Token... tokens)
@@ -30,16 +35,14 @@ public class ParserTest
 				.thenReturn(null);
 	}
 
+	protected void mockPeekToken(Token token)
+	{
+		when(mockLexer.peekToken()).thenReturn(token);
+	}
+
 	protected static Stream<Arguments> arithmeticOperatorProvider()
 	{
 		return Stream.of(Arguments.of(Tokens.PLUS, "+"), Arguments.of(Tokens.MINUS, "-"),
 				Arguments.of(Tokens.TIMES, "*"), Arguments.of(Tokens.DIV, "/"), Arguments.of(Tokens.MODULUS, "%"));
-	}
-
-	protected static Stream<Arguments> comparisonOperatorProvider()
-	{
-		return Stream.of(Arguments.of(Tokens.EQUALS, "=="), Arguments.of(Tokens.NOTEQUALS, "!="),
-				Arguments.of(Tokens.LESSTHAN, "<"), Arguments.of(Tokens.LESSTHANOREQUAL, "<="),
-				Arguments.of(Tokens.GREATERTHAN, ">"), Arguments.of(Tokens.GREATERTHANOREQUAL, ">="));
 	}
 }

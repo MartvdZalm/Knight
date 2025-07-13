@@ -2,12 +2,13 @@ package knight.compiler.lexer;
 
 public class TokenType
 {
-	public TokenType()
+	public static void initialize()
 	{
 		// These two can be removed I think. I will do this later when I am done
 		// testing.
 		Symbol.symbol("INVALID", Tokens.INVALID);
 		Symbol.symbol("SENTINEL", Tokens.SENTINEL);
+		Symbol.symbol("EOF", Tokens.EOF);
 
 		Symbol.symbol("(", Tokens.LEFTPAREN);
 		Symbol.symbol(")", Tokens.RIGHTPAREN);

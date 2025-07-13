@@ -62,14 +62,17 @@ import knight.compiler.ast.types.ASTStringArrayType;
 import knight.compiler.ast.types.ASTStringType;
 import knight.compiler.ast.types.ASTType;
 import knight.compiler.ast.types.ASTVoidType;
+import knight.compiler.lexer.Symbol;
+import knight.compiler.lexer.Token;
+import knight.compiler.lexer.Tokens;
 import knight.compiler.semantics.diagnostics.SemanticErrors;
 import knight.compiler.semantics.model.Binding;
 import knight.compiler.semantics.model.SymbolClass;
 import knight.compiler.semantics.model.SymbolFunction;
 import knight.compiler.semantics.model.SymbolProgram;
 import knight.compiler.semantics.model.SymbolVariable;
-import knight.lib.FunctionSignature;
 import knight.lib.LibraryManager;
+import knight.lib.signatures.FunctionSignature;
 
 public class TypeAnalyser implements ASTVisitor<ASTType>
 {
@@ -452,8 +455,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		Optional<FunctionSignature> functionSignature = LibraryManager.findFunction(functionName.toString());
 
 		if (functionSignature.isPresent()) {
-			// Check the function call with types and arguments.
-//			return functionSignature.get().getReturnType();
+			return functionSignature.get().getReturnType();
 		}
 
 		SymbolFunction symbolFunction = null;

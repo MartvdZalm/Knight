@@ -1,7 +1,5 @@
 package knight.compiler.ast.types;
 
-import java.util.List;
-
 import knight.compiler.ast.ASTList;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
