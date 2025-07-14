@@ -1,10 +1,6 @@
 package knight.compiler.parser;
 
-import java.io.BufferedReader;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import java.util.*;
 
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTAnd;
@@ -74,9 +70,9 @@ public class Parser
 	private Deque<Token> stOperator = new ArrayDeque<>();
 	private Deque<ASTExpression> stOperand = new ArrayDeque<>();
 
-	public Parser(BufferedReader bufferedReader)
+	public Parser(Lexer lexer)
 	{
-		lexer = new Lexer(bufferedReader);
+		this.lexer = lexer;
 		stOperator.push(SENTINEL);
 	}
 
@@ -119,7 +115,7 @@ public class Parser
 					}
 				}
 
-			} while (token != null);
+			} while (token.getToken() != Tokens.EOF);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -556,7 +552,6 @@ public class Parser
 	{
 		switch (token.getToken())
 		{
-
 			case INTEGER: {
 				ASTIntLiteral lit = new ASTIntLiteral(token, Integer.parseInt(token.getSymbol()));
 				eat(Tokens.INTEGER);
@@ -746,20 +741,13 @@ public class Parser
 
 	public void parseUnary(Token tok)
 	{
-		switch (tok.getToken())
-		{
-
-			case NEW: {
-				ASTExpression expr = stOperand.pop();
-				ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
-				ASTNewInstance instance = new ASTNewInstance(tok, idExpr);
-				stOperand.push(instance);
-			}
-			break;
-
-			default: {
-				System.err.println("parseUnary(): Error in parsing " + token.getToken() + " " + token.getRow());
-			}
+		if (Objects.requireNonNull(tok.getToken()) == Tokens.NEW) {
+			ASTExpression expr = stOperand.pop();
+			ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
+			ASTNewInstance instance = new ASTNewInstance(tok, idExpr);
+			stOperand.push(instance);
+		} else {
+			System.err.println("parseUnary(): Error in parsing " + token.getToken() + " " + token.getRow());
 		}
 	}
 
@@ -997,7 +985,6 @@ public class Parser
 	{
 		switch (token.getToken())
 		{
-
 			case AND: {
 				pushOperator(token);
 				eat(Tokens.AND);

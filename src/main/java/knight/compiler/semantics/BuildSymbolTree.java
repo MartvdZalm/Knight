@@ -142,7 +142,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		return null;
 	}
 
-	public void checkFunction(ASTFunction astFunction)
+	private void checkFunction(ASTFunction astFunction)
 	{
 		ASTType type = astFunction.getReturnType().accept(this);
 		String identifier = astFunction.getFunctionName().getId();
@@ -280,7 +280,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTFunctionType astFunctionType)
 	{
-		return null;
+		return astFunctionType;
 	}
 
 	@Override
@@ -316,11 +316,10 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIdentifierType astIdentifierType)
 	{
-		String identifier = astIdentifierType.getId();
 		return astIdentifierType;
 	}
 
-	public void checkIfVariableExist(ASTVariable astVariable)
+	private void checkIfVariableExist(ASTVariable astVariable)
 	{
 		ASTType type = astVariable.getType().accept(this);
 		String identifier = astVariable.getId().getId();
@@ -534,28 +533,24 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTStringArrayType astStringArrayType)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return astStringArrayType;
 	}
 
 	@Override
 	public ASTType visit(ASTArrayLiteral astArrayLiteral)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTForeach astForeach)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLambda astLambda)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -573,7 +568,6 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTParameterizedType astParameterizedType)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return astParameterizedType;
 	}
 }

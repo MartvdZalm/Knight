@@ -5,159 +5,166 @@ import java.io.IOException;
 
 public class Lexer
 {
-	public boolean exception;
-	private char charachter;
-	public SourceReader source;
+	private static final int PEEK_BUFFER_SIZE = 1024;
+	private final SourceReader source;
+	private char currentChar;
+	private boolean exceptionOccurred = false;
 
 	public Lexer(BufferedReader bufferedReader)
 	{
-		new TokenType();
+		TokenType.initialize();
+		source = new SourceReader(bufferedReader);
+
 		try {
-			source = new SourceReader(bufferedReader);
-			charachter = source.read();
+			currentChar = source.read();
 		} catch (IOException e) {
-			e.printStackTrace();
+			exceptionOccurred = true;
+			throw new LexerException("Failed to initialize lexer", e);
 		}
 	}
 
 	public Token peekToken()
 	{
-		Token token = null;
 		try {
-			char tempChar = charachter;
-			source.mark(100); // needs to be changes!!!
-			token = nextToken();
+			char tempChar = currentChar;
+			source.mark(PEEK_BUFFER_SIZE);
+			Token token = nextToken();
 			source.reset();
-			charachter = tempChar;
-		} catch (Exception e) {
-			exception = true;
+			currentChar = tempChar;
+			return token;
+		} catch (IOException e) {
+			exceptionOccurred = true;
+			throw new LexerException("Failed to peek token", e);
 		}
-
-		return token;
 	}
 
 	public Token nextToken()
 	{
-		if (exception) {
-			if (source != null) {
-				source.close();
-				source = null;
-			}
+		if (exceptionOccurred) {
 			return null;
 		}
 
 		try {
-			while (Character.isWhitespace(charachter)) {
-				charachter = source.read();
-			}
-		} catch (Exception e) {
-			exception = true;
-			return nextToken();
-		}
-
-		if (Character.isJavaIdentifierStart(charachter)) {
-			return processIdentifier();
-		}
-
-		if (Character.isDigit(charachter)) {
-			return processNumber();
-		}
-
-		if (charachter == '\"') {
-			return processString();
-		}
-
-		String charOld = "" + charachter;
-		String op = charOld;
-
-		try {
-			charachter = source.read();
-			op += charachter;
-			Symbol symbol = Symbol.symbol(op, Tokens.INVALID);
-
-			if (symbol == null) {
-				return makeToken(charOld);
+			if (currentChar == SourceReader.EOF) {
+				return new Token(Symbol.symbol("EOF", Tokens.EOF), source.getRow(), source.getCol());
 			}
 
-			charachter = source.read();
-			return makeToken(op);
+			while (Character.isWhitespace(currentChar)) {
+				currentChar = source.read();
+			}
 
-		} catch (Exception e) {
-			exception = true;
+			if (Character.isJavaIdentifierStart(currentChar)) {
+				return processIdentifier();
+			}
+
+			if (Character.isDigit(currentChar)) {
+				return processNumber();
+			}
+
+			if (currentChar == '\"') {
+				return processString();
+			}
+
+			return processOperator();
+		} catch (IOException e) {
+			exceptionOccurred = true;
+			throw new LexerException("Failed to read next token", e);
 		}
-		return makeToken(op);
 	}
 
-	public Token processIdentifier()
+	private Token processIdentifier() throws IOException
 	{
+		int startRow = source.getRow();
+		int endCol = source.getCol();
+
 		StringBuilder sb = new StringBuilder();
+		sb.append(currentChar);
 
-		try {
-			do {
-				sb.append(charachter);
-				charachter = source.read();
-			} while (Character.isJavaIdentifierPart(charachter));
-		} catch (Exception e) {
-			exception = true;
-		}
-
-		return new Token(Symbol.symbol(sb.toString(), Tokens.IDENTIFIER), source.getRow(), source.getCol());
-	}
-
-	public Token processNumber()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		try {
-			do {
-				sb.append(charachter);
-				charachter = source.read();
-			} while (Character.isDigit(charachter));
-		} catch (Exception e) {
-			exception = true;
-		}
-
-		return new Token(Symbol.symbol(sb.toString(), Tokens.INTEGER), source.getRow(), source.getCol());
-	}
-
-	public Token processString()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		try {
-			charachter = source.read();
-			while (charachter != '\"') {
-				sb.append(charachter);
-				charachter = source.read();
+		while (true) {
+			currentChar = source.read();
+			if (!Character.isJavaIdentifierPart(currentChar)) {
+				break;
 			}
-			charachter = source.read();
-		} catch (Exception e) {
-			exception = true;
+			sb.append(currentChar);
+			endCol++;
 		}
 
-		return new Token(Symbol.symbol("\"" + sb.toString().trim() + "\"", Tokens.STRING), source.getRow(),
-				source.getCol());
+		return new Token(Symbol.symbol(sb.toString(), Tokens.IDENTIFIER), startRow, endCol);
 	}
 
-	private Token makeToken(String newSymbol)
+	private Token processNumber() throws IOException
 	{
-		if (newSymbol.equals("//")) {
-			try {
-				int oldLine = source.getRow();
-				do {
-					charachter = source.read();
-				} while (oldLine == source.getRow());
-			} catch (Exception e) {
-				exception = true;
+		int startRow = source.getRow();
+		int endCol = source.getCol();
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(currentChar);
+
+		while (true) {
+			currentChar = source.read();
+			if (!Character.isDigit(currentChar)) {
+				break;
 			}
-			return nextToken();
+			sb.append(currentChar);
+			endCol++;
 		}
 
-		Symbol symbol = Symbol.symbol(newSymbol, Tokens.INVALID);
-		if (symbol == null) {
-			exception = true;
-			return nextToken();
+		return new Token(Symbol.symbol(sb.toString(), Tokens.INTEGER), startRow, endCol);
+	}
+
+	private Token processString() throws IOException
+	{
+		int startRow = source.getRow();
+		int endCol = source.getCol();
+
+		StringBuilder sb = new StringBuilder();
+		currentChar = source.read();
+		endCol++;
+
+		boolean escapeNext = false;
+
+		while (true) {
+			if (currentChar == '\\' && !escapeNext) {
+				escapeNext = true;
+				sb.append('\\');
+			} else if (currentChar == '\"' && !escapeNext) {
+				break;
+			} else {
+				sb.append(currentChar);
+				escapeNext = false;
+			}
+
+			currentChar = source.read();
+			endCol++;
 		}
-		return new Token(symbol, source.getRow(), source.getCol());
+
+		currentChar = source.read();
+		endCol++;
+
+		return new Token(Symbol.symbol("\"" + sb.toString() + "\"", Tokens.STRING), startRow, endCol - 1);
+	}
+
+	private Token processOperator() throws IOException
+	{
+		String singleChar = String.valueOf(currentChar);
+		currentChar = source.read();
+
+		if (currentChar != SourceReader.EOF) {
+			String twoChars = singleChar + currentChar;
+			Symbol twoCharSymbol = Symbol.symbol(twoChars, Tokens.INVALID);
+
+			if (twoCharSymbol != null) {
+				currentChar = source.read();
+				return new Token(twoCharSymbol, source.getRow(), source.getCol());
+			}
+		}
+
+		Symbol singleCharSymbol = Symbol.symbol(singleChar, Tokens.INVALID);
+		if (singleCharSymbol == null) {
+			exceptionOccurred = true;
+			throw new LexerException("Invalid operator: " + singleChar);
+		}
+
+		return new Token(singleCharSymbol, source.getRow(), source.getCol());
 	}
 }

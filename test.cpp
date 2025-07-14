@@ -1,13 +1,10 @@
 #include <knight/std.h>
 int main() { 
-knight::List<int> v;
-v.add(25);
-v.add(10);
-v.add(66);
-v.add(20);
-v.sort();
-v.print();
-knight::print(v.size());
+std::vector<int> nums = {10, 40, 25, 30}; 
+;
+knight::sort(nums);
+for (int num : nums) {knight::print(num);
+};
 return 0;
 } 
 

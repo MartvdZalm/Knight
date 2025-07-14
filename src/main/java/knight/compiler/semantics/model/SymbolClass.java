@@ -1,10 +1,10 @@
 package knight.compiler.semantics.model;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 import knight.compiler.ast.types.ASTIdentifierType;
 import knight.compiler.ast.types.ASTType;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class SymbolClass extends Binding
 {

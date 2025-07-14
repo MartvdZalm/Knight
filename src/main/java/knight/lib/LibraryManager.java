@@ -3,6 +3,8 @@ package knight.lib;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
+
+import knight.lib.signatures.FunctionSignature;
 import knight.lib.std.StdLib;
 
 public class LibraryManager
