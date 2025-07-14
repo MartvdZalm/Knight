@@ -4,6 +4,8 @@ import knight.compiler.ast.ASTList;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
+import java.util.List;
+
 public class ASTParameterizedType extends ASTType
 {
 	private ASTIdentifierType baseType;
