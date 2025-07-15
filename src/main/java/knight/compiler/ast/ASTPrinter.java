@@ -220,37 +220,6 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTFunctionReturn functionReturn)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("(FUNC ").append(functionReturn.getReturnType().accept(this)).append(" ")
-				.append(functionReturn.getFunctionName().accept(this));
-
-		sb.append("(ARG-LIST ");
-		for (ASTArgument argument : functionReturn.getArgumentList()) {
-			sb.append(argument.accept(this));
-		}
-		sb.append(")\n");
-		sb.append(printInc()).append("(BODY\n");
-
-		sb.append(functionReturn.getBody().accept(this));
-
-		// incLevel();
-		// for (ASTVariable variable : functionReturn.getVariableList()) {
-		// sb.append(variable.accept(this) + "\n");
-		// }
-		// for (ASTStatement stat : functionReturn.getStatementList()) {
-		// sb.append(stat.accept(this) + "\n");
-		// }
-		sb.append(printInc()).append("(RETURN ").append(functionReturn.getReturnExpr().accept(this)).append(")\n");
-		// decLevel();
-
-		sb.append(printInc()).append(")\n");
-		sb.append(printInc()).append(")");
-		return sb.toString();
-	}
-
-	@Override
 	public String visit(ASTProgram astProgram)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -524,5 +493,11 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String visit(ASTInterface astInterface)
+	{
+		return "";
 	}
 }

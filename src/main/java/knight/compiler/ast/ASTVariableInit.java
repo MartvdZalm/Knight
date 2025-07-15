@@ -5,22 +5,23 @@ import knight.compiler.lexer.Token;
 
 public class ASTVariableInit extends ASTVariable
 {
-	private ASTExpression expr;
+	private ASTExpression expression;
 
-	public ASTVariableInit(Token token, ASTType type, ASTIdentifier id, ASTExpression expr)
+	public ASTVariableInit(Token token, ASTType type, ASTIdentifier identifier, ASTExpression expression,
+			boolean isStatic)
 	{
-		super(token, type, id);
-		this.expr = expr;
+		super(token, type, identifier, isStatic);
+		this.expression = expression;
 	}
 
-	public void setExpr(ASTExpression expr)
+	public void setExpr(ASTExpression expression)
 	{
-		this.expr = expr;
+		this.expression = expression;
 	}
 
 	public ASTExpression getExpr()
 	{
-		return expr;
+		return expression;
 	}
 
 	@Override

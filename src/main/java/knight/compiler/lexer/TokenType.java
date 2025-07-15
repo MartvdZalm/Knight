@@ -4,8 +4,6 @@ public class TokenType
 {
 	public static void initialize()
 	{
-		// These two can be removed I think. I will do this later when I am done
-		// testing.
 		Symbol.symbol("INVALID", Tokens.INVALID);
 		Symbol.symbol("SENTINEL", Tokens.SENTINEL);
 		Symbol.symbol("EOF", Tokens.EOF);
@@ -38,6 +36,7 @@ public class TokenType
 		Symbol.symbol("new", Tokens.NEW);
 		Symbol.symbol("import", Tokens.IMPORT);
 		Symbol.symbol("fn", Tokens.FUNCTION);
+		Symbol.symbol("interface", Tokens.INTERFACE);
 
 		Symbol.symbol("if", Tokens.IF);
 		Symbol.symbol("else", Tokens.ELSE);
@@ -63,5 +62,11 @@ public class TokenType
 
 		Symbol.symbol("ret", Tokens.RETURN);
 		Symbol.symbol("void", Tokens.VOID);
+
+		Symbol.symbol("abstract", Tokens.ABSTRACT);
+		Symbol.symbol("static", Tokens.STATIC);
+		Symbol.symbol("extends", Tokens.EXTENDS);
+		Symbol.symbol("default", Tokens.DEFAULT);
+		Symbol.symbol("implements", Tokens.IMPLEMENTS);
 	}
 }

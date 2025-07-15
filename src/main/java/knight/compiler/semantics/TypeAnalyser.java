@@ -6,52 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import knight.compiler.ast.AST;
-import knight.compiler.ast.ASTAnd;
-import knight.compiler.ast.ASTArgument;
-import knight.compiler.ast.ASTArrayAssign;
-import knight.compiler.ast.ASTArrayIndexExpr;
-import knight.compiler.ast.ASTArrayLiteral;
-import knight.compiler.ast.ASTAssign;
-import knight.compiler.ast.ASTBody;
-import knight.compiler.ast.ASTCallFunctionExpr;
-import knight.compiler.ast.ASTCallFunctionStat;
-import knight.compiler.ast.ASTClass;
-import knight.compiler.ast.ASTConditionalBranch;
-import knight.compiler.ast.ASTDivision;
-import knight.compiler.ast.ASTEquals;
-import knight.compiler.ast.ASTExpression;
-import knight.compiler.ast.ASTFalse;
-import knight.compiler.ast.ASTForeach;
-import knight.compiler.ast.ASTFunction;
-import knight.compiler.ast.ASTFunctionReturn;
-import knight.compiler.ast.ASTGreaterThan;
-import knight.compiler.ast.ASTGreaterThanOrEqual;
-import knight.compiler.ast.ASTIdentifier;
-import knight.compiler.ast.ASTIdentifierExpr;
-import knight.compiler.ast.ASTIfChain;
-import knight.compiler.ast.ASTImport;
-import knight.compiler.ast.ASTIntLiteral;
-import knight.compiler.ast.ASTLambda;
-import knight.compiler.ast.ASTLessThan;
-import knight.compiler.ast.ASTLessThanOrEqual;
-import knight.compiler.ast.ASTMinus;
-import knight.compiler.ast.ASTModulus;
-import knight.compiler.ast.ASTNewArray;
-import knight.compiler.ast.ASTNewInstance;
-import knight.compiler.ast.ASTNotEquals;
-import knight.compiler.ast.ASTOr;
-import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTProgram;
-import knight.compiler.ast.ASTProperty;
-import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTStringLiteral;
-import knight.compiler.ast.ASTTimes;
-import knight.compiler.ast.ASTTrue;
-import knight.compiler.ast.ASTVariable;
-import knight.compiler.ast.ASTVariableInit;
-import knight.compiler.ast.ASTVisitor;
-import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.*;
 import knight.compiler.ast.types.ASTBooleanType;
 import knight.compiler.ast.types.ASTFunctionType;
 import knight.compiler.ast.types.ASTIdentifierType;
@@ -62,9 +17,6 @@ import knight.compiler.ast.types.ASTStringArrayType;
 import knight.compiler.ast.types.ASTStringType;
 import knight.compiler.ast.types.ASTType;
 import knight.compiler.ast.types.ASTVoidType;
-import knight.compiler.lexer.Symbol;
-import knight.compiler.lexer.Token;
-import knight.compiler.lexer.Tokens;
 import knight.compiler.semantics.diagnostics.SemanticErrors;
 import knight.compiler.semantics.model.Binding;
 import knight.compiler.semantics.model.SymbolClass;
@@ -672,36 +624,36 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		return null;
 	}
 
-	@Override
-	public ASTType visit(ASTFunctionReturn astFunctionReturn)
-	{
-		String functionName = astFunctionReturn.getFunctionName().getId();
-
-		if (hsymbolFunction.contains(functionName)) {
-			return astFunctionReturn.getReturnType();
-		}
-
-		hsymbolFunction.add(functionName);
-		symbolFunction = (SymbolFunction) astFunctionReturn.getFunctionName().getB();
-
-		for (ASTArgument astArgument : astFunctionReturn.getArgumentList()) {
-			astArgument.accept(this);;
-		}
-
-		astFunctionReturn.getBody().accept(this);
-
-		ASTType type1 = astFunctionReturn.getReturnType();
-		ASTType type2 = astFunctionReturn.getReturnExpr().accept(this);
-
-		if (!symbolProgram.compareTypes(type1, type2)) {
-			SemanticErrors.addError(astFunctionReturn.getReturnExpr().getToken(),
-					"Function " + functionName + " must return a result of Type " + type1);
-		}
-
-		astFunctionReturn.getReturnExpr().setType(type2);
-		symbolFunction = null;
-		return null;
-	}
+//	@Override
+//	public ASTType visit(ASTFunctionReturn astFunctionReturn)
+//	{
+//		String functionName = astFunctionReturn.getFunctionName().getId();
+//
+//		if (hsymbolFunction.contains(functionName)) {
+//			return astFunctionReturn.getReturnType();
+//		}
+//
+//		hsymbolFunction.add(functionName);
+//		symbolFunction = (SymbolFunction) astFunctionReturn.getFunctionName().getB();
+//
+//		for (ASTArgument astArgument : astFunctionReturn.getArgumentList()) {
+//			astArgument.accept(this);;
+//		}
+//
+//		astFunctionReturn.getBody().accept(this);
+//
+//		ASTType type1 = astFunctionReturn.getReturnType();
+//		ASTType type2 = astFunctionReturn.getReturnExpr().accept(this);
+//
+//		if (!symbolProgram.compareTypes(type1, type2)) {
+//			SemanticErrors.addError(astFunctionReturn.getReturnExpr().getToken(),
+//					"Function " + functionName + " must return a result of Type " + type1);
+//		}
+//
+//		astFunctionReturn.getReturnExpr().setType(type2);
+//		symbolFunction = null;
+//		return null;
+//	}
 
 	@Override
 	public ASTType visit(ASTProgram astProgram)
@@ -903,6 +855,12 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTParameterizedType astParameterizedType)
 	{
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTInterface astInterface)
+	{
 		return null;
 	}
 }

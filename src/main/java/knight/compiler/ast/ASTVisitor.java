@@ -68,8 +68,6 @@ public interface ASTVisitor<R>
 
 	public R visit(ASTCallFunctionStat astCallFunctionStat);
 
-	public R visit(ASTFunctionReturn astFunctionReturn);
-
 	public R visit(ASTReturnStatement astReturnStatement);
 
 	public R visit(ASTFunctionType astFunctionType);
@@ -115,4 +113,6 @@ public interface ASTVisitor<R>
 	public R visit(ASTImport astImport);
 
 	public R visit(ASTParameterizedType astParameterizedType);
+
+	public R visit(ASTInterface astInterface);
 }

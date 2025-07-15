@@ -7,12 +7,16 @@ public class ASTProperty extends AST
 {
 	private ASTType type;
 	private ASTIdentifier identifier;
+	private ASTExpression expression;
+	private boolean isStatic;
 
-	public ASTProperty(Token token, ASTType type, ASTIdentifier identifier)
+	public ASTProperty(Token token, ASTType type, ASTIdentifier identifier, ASTExpression expression, boolean isStatic)
 	{
 		super(token);
 		this.type = type;
 		this.identifier = identifier;
+		this.expression = expression;
+		this.isStatic = isStatic;
 	}
 
 	public ASTType getType()
@@ -33,6 +37,21 @@ public class ASTProperty extends AST
 	public void setId(ASTIdentifier identifier)
 	{
 		this.identifier = identifier;
+	}
+
+	public void setExpression(ASTExpression expression)
+	{
+		this.expression = expression;
+	}
+
+	public ASTExpression getExpression()
+	{
+		return expression;
+	}
+
+	public boolean isStatic()
+	{
+		return isStatic;
 	}
 
 	@Override

@@ -2,52 +2,7 @@ package knight.compiler.parser;
 
 import java.util.*;
 
-import knight.compiler.ast.AST;
-import knight.compiler.ast.ASTAnd;
-import knight.compiler.ast.ASTArgument;
-import knight.compiler.ast.ASTArrayAssign;
-import knight.compiler.ast.ASTArrayIndexExpr;
-import knight.compiler.ast.ASTArrayLiteral;
-import knight.compiler.ast.ASTAssign;
-import knight.compiler.ast.ASTBody;
-import knight.compiler.ast.ASTCallFunctionExpr;
-import knight.compiler.ast.ASTCallFunctionStat;
-import knight.compiler.ast.ASTClass;
-import knight.compiler.ast.ASTConditionalBranch;
-import knight.compiler.ast.ASTDivision;
-import knight.compiler.ast.ASTEquals;
-import knight.compiler.ast.ASTExpression;
-import knight.compiler.ast.ASTFalse;
-import knight.compiler.ast.ASTForeach;
-import knight.compiler.ast.ASTFunction;
-import knight.compiler.ast.ASTFunctionReturn;
-import knight.compiler.ast.ASTGreaterThan;
-import knight.compiler.ast.ASTGreaterThanOrEqual;
-import knight.compiler.ast.ASTIdentifier;
-import knight.compiler.ast.ASTIdentifierExpr;
-import knight.compiler.ast.ASTIfChain;
-import knight.compiler.ast.ASTImport;
-import knight.compiler.ast.ASTIntLiteral;
-import knight.compiler.ast.ASTLambda;
-import knight.compiler.ast.ASTLessThan;
-import knight.compiler.ast.ASTLessThanOrEqual;
-import knight.compiler.ast.ASTMinus;
-import knight.compiler.ast.ASTModulus;
-import knight.compiler.ast.ASTNewArray;
-import knight.compiler.ast.ASTNewInstance;
-import knight.compiler.ast.ASTNotEquals;
-import knight.compiler.ast.ASTOr;
-import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTProgram;
-import knight.compiler.ast.ASTProperty;
-import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTStatement;
-import knight.compiler.ast.ASTStringLiteral;
-import knight.compiler.ast.ASTTimes;
-import knight.compiler.ast.ASTTrue;
-import knight.compiler.ast.ASTVariable;
-import knight.compiler.ast.ASTVariableInit;
-import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.*;
 import knight.compiler.ast.types.ASTBooleanType;
 import knight.compiler.ast.types.ASTIdentifierType;
 import knight.compiler.ast.types.ASTIntArrayType;
@@ -85,6 +40,9 @@ public class Parser
 			token = lexer.nextToken();
 
 			do {
+				boolean isAbstract = matchAndConsume(Tokens.ABSTRACT);
+				boolean isStatic = matchAndConsume(Tokens.STATIC);
+
 				switch (token.getToken())
 				{
 					case IMPORT: {
@@ -93,12 +51,17 @@ public class Parser
 					break;
 
 					case CLASS: {
-						nodeList.add(parseClass());
+						nodeList.add(parseClass(isAbstract, isStatic));
+					}
+					break;
+
+					case INTERFACE: {
+						nodeList.add(parseInterface());
 					}
 					break;
 
 					case FUNCTION: {
-						nodeList.add(parseFunction());
+						nodeList.add(parseFunction(isAbstract, isStatic));
 					}
 					break;
 
@@ -106,7 +69,7 @@ public class Parser
 					case STRING:
 					case BOOLEAN:
 					case IDENTIFIER: {
-						nodeList.add(parseVariable());
+						nodeList.add(parseVariable(isStatic));
 					}
 					break;
 
@@ -137,28 +100,85 @@ public class Parser
 		return importList;
 	}
 
-	public ASTClass parseClass() throws ParseException
+	public ASTInterface parseInterface() throws ParseException
+	{
+		eat(Tokens.INTERFACE);
+		ASTIdentifier name = parseIdentifier();
+
+		List<ASTIdentifier> extendsInterfaces = new ArrayList<>();
+		if (token.getToken() == Tokens.EXTENDS) {
+			eat(Tokens.EXTENDS);
+			extendsInterfaces.add(parseIdentifier());
+			while (token.getToken() == Tokens.COMMA) {
+				eat(Tokens.COMMA);
+				extendsInterfaces.add(parseIdentifier());
+			}
+		}
+
+		eat(Tokens.LEFTBRACE);
+
+		List<ASTFunction> methods = new ArrayList<>();
+		while (token.getToken() != Tokens.RIGHTBRACE) {
+			methods.add(parseInterfaceMethod());
+		}
+
+		eat(Tokens.RIGHTBRACE);
+		return new ASTInterface(token, name, methods, extendsInterfaces);
+	}
+
+	private ASTFunction parseInterfaceMethod() throws ParseException
+	{
+		eat(Tokens.FUNCTION);
+		ASTIdentifier name = parseIdentifier();
+		List<ASTArgument> params = parseArguments();
+		eat(Tokens.COLON);
+		ASTType returnType = parseType();
+
+		ASTBody body = null;
+		eat(Tokens.SEMICOLON);
+
+		return new ASTFunction(token, returnType, name, params, body, false, false);
+	}
+
+	public ASTClass parseClass(boolean isAbstract, boolean isStatic) throws ParseException
 	{
 		List<ASTProperty> propertyList = new ArrayList<>();
 		List<ASTFunction> functionList = new ArrayList<>();
+		ASTIdentifier extendsClass = null;
+		List<ASTIdentifier> implementsInterfaces = new ArrayList<>();
 
 		eat(Tokens.CLASS);
 		ASTIdentifier className = parseIdentifier();
+
+		if (matchAndConsume(Tokens.EXTENDS)) {
+			extendsClass = parseIdentifier();
+		}
+
+		if (matchAndConsume(Tokens.IMPLEMENTS)) {
+			do {
+				implementsInterfaces.add(parseIdentifier());
+			} while (matchAndConsume(Tokens.COMMA));
+		}
+
 		eat(Tokens.LEFTBRACE);
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
+			boolean memberAbstract = matchAndConsume(Tokens.ABSTRACT);
+			boolean memberStatic = matchAndConsume(Tokens.STATIC);
+
 			if (token.getToken() == Tokens.FUNCTION) {
-				functionList.add(parseFunction());
+				functionList.add(parseFunction(memberAbstract, memberStatic));
 			} else {
-				propertyList.add(parseProperty());
+				propertyList.add(parseProperty(memberStatic));
 			}
 		}
 		eat(Tokens.RIGHTBRACE);
 
-		return new ASTClass(className.getToken(), className, propertyList, functionList);
+		return new ASTClass(className.getToken(), className, propertyList, functionList, extendsClass,
+				implementsInterfaces, isAbstract, isStatic);
 	}
 
-	public ASTFunction parseFunction() throws ParseException
+	public ASTFunction parseFunction(boolean isAbstract, boolean isStatic) throws ParseException
 	{
 		eat(Tokens.FUNCTION);
 		ASTIdentifier id = parseIdentifier();
@@ -169,20 +189,9 @@ public class Parser
 
 		ASTBody body = this.parseBody();
 
-		// ASTExpression returnExpr = null;
-		// if (token.getToken() == Tokens.RETURN) {
-		// eat(Tokens.RETURN);
-		// returnExpr = parseExpression();
-		// }
 		eat(Tokens.RIGHTBRACE);
 
-		// if (returnExpr != null) {
-		// return new ASTFunctionReturn(token, returnType, id, argumentList, body,
-		// returnExpr);
-		// }
-		return new ASTFunctionReturn(token, returnType, id, argumentList, body);
-
-		// return new ASTFunction(token, returnType, id, argumentList, body);
+		return new ASTFunction(token, returnType, id, argumentList, body, isAbstract, isStatic);
 	}
 
 	private ASTBody parseBody() throws ParseException
@@ -191,6 +200,8 @@ public class Parser
 		List<AST> nodes = new ArrayList<>();
 
 		while (token.getToken() != Tokens.RIGHTBRACE) {
+			boolean isStatic = matchAndConsume(Tokens.STATIC);
+			boolean isAbstract = matchAndConsume(Tokens.ABSTRACT);
 
 			switch (token.getToken())
 			{
@@ -205,14 +216,19 @@ public class Parser
 				case INTEGER:
 				case STRING:
 				case BOOLEAN: {
-					nodes.add(parseVariable());
+					nodes.add(parseVariable(isStatic));
+				}
+				break;
+
+				case FUNCTION: {
+					nodes.add(parseFunction(isAbstract, isStatic));
 				}
 				break;
 
 				case IDENTIFIER: {
 					if (peek().getToken() != Tokens.ASSIGN && peek().getToken() != Tokens.LEFTPAREN
 							&& peek().getToken() != Tokens.DOT) {
-						nodes.add(parseVariable());
+						nodes.add(parseVariable(isStatic));
 					} else {
 						nodes.add(parseStatement());
 					}
@@ -228,29 +244,36 @@ public class Parser
 		return new ASTBody(tok, nodes);
 	}
 
-	public ASTProperty parseProperty() throws ParseException
+	public ASTProperty parseProperty(boolean isStatic) throws ParseException
 	{
 		ASTType type = parseType();
 		ASTIdentifier identifier = parseIdentifier();
+
+		ASTExpression expression = null;
+		if (token.getToken() == Tokens.ASSIGN) {
+			eat(Tokens.ASSIGN);
+			expression = parseExpression();
+		}
+
 		eat(Tokens.SEMICOLON);
-		return new ASTProperty(token, type, identifier);
+		return new ASTProperty(token, type, identifier, expression, isStatic);
 	}
 
-	public ASTVariable parseVariable() throws ParseException
+	public ASTVariable parseVariable(boolean isStatic) throws ParseException
 	{
 		ASTType type = parseType();
 		ASTIdentifier id = parseIdentifier();
 		ASTVariable variable = null;
 
 		if (checkNotNull(token).getToken() == Tokens.SEMICOLON) {
-			variable = new ASTVariable(token, type, id);
+			variable = new ASTVariable(token, type, id, isStatic);
 			eat(Tokens.SEMICOLON);
 		} else if (checkNotNull(token).getToken() == Tokens.ASSIGN) {
 			eat(Tokens.ASSIGN);
 			ASTExpression expr = parseExpression();
-			variable = new ASTVariableInit(token, type, id, expr);
+			variable = new ASTVariableInit(token, type, id, expr, isStatic);
 		} else {
-			variable = new ASTVariable(token, type, id);
+			variable = new ASTVariable(token, type, id, isStatic);
 		}
 
 		return variable;
@@ -358,7 +381,7 @@ public class Parser
 				Token tok = token;
 				eat(Tokens.FOR);
 				eat(Tokens.LEFTPAREN);
-				ASTVariable variable = this.parseVariable();
+				ASTVariable variable = this.parseVariable(false);
 				eat(Tokens.COLON);
 				ASTExpression iterable = this.parseExpression();
 				eat(Tokens.RIGHTPAREN);
@@ -661,11 +684,18 @@ public class Parser
 					break;
 
 					case IDENTIFIER: {
+						// ASTExpression expr = stOperand.pop();
+						// ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
+						//
+						// List<ASTArgument> arguments = this.parseArguments();
+						//
+						// ASTNewInstance instance = new ASTNewInstance(tok, idExpr, arguments);
+						// stOperand.push(instance);
+
 						ASTIdentifierExpr idExpr = new ASTIdentifierExpr(token, token.getSymbol());
 						eat(Tokens.IDENTIFIER);
-						eat(Tokens.LEFTPAREN);
-						eat(Tokens.RIGHTPAREN);
-						stOperand.push(idExpr);
+						List<ASTArgument> arguments = this.parseArguments();
+						stOperand.push(new ASTNewInstance(token, idExpr, arguments));
 					}
 					break;
 
@@ -716,7 +746,7 @@ public class Parser
 		return new ASTCallFunctionExpr(tok, instance, function, exprList);
 	}
 
-	public void pushOperator(Token current)
+	public void pushOperator(Token current) throws ParseException
 	{
 		Token top = stOperator.peek();
 
@@ -728,7 +758,7 @@ public class Parser
 		stOperator.push(current);
 	}
 
-	public void popOperator()
+	public void popOperator() throws ParseException
 	{
 		Token top = stOperator.pop();
 
@@ -739,16 +769,19 @@ public class Parser
 		}
 	}
 
-	public void parseUnary(Token tok)
+	public void parseUnary(Token tok) throws ParseException
 	{
-		if (Objects.requireNonNull(tok.getToken()) == Tokens.NEW) {
-			ASTExpression expr = stOperand.pop();
-			ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
-			ASTNewInstance instance = new ASTNewInstance(tok, idExpr);
-			stOperand.push(instance);
-		} else {
-			System.err.println("parseUnary(): Error in parsing " + token.getToken() + " " + token.getRow());
-		}
+//		if (Objects.requireNonNull(tok.getToken()) == Tokens.NEW) {
+//			ASTExpression expr = stOperand.pop();
+//			ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
+//
+//			List<ASTArgument> arguments = this.parseArguments();
+//
+//			ASTNewInstance instance = new ASTNewInstance(tok, idExpr, arguments);
+//			stOperand.push(instance);
+//		} else {
+//			System.err.println("parseUnary(): Error in parsing " + token.getToken() + " " + token.getRow());
+//		}
 	}
 
 	public void parseBinary(Token tok)
@@ -1152,6 +1185,15 @@ public class Parser
 		} else {
 			error(checkNotNull(token).getToken(), tok);
 		}
+	}
+
+	private boolean matchAndConsume(Tokens expected)
+	{
+		if (token.getToken() == expected) {
+			advance();
+			return true;
+		}
+		return false;
 	}
 
 	private void error(Tokens found, Tokens expected) throws ParseException

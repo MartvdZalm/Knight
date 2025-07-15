@@ -11,9 +11,11 @@ public class ASTFunction extends AST
 	private ASTIdentifier functionName;
 	private ASTList<ASTArgument> argumentList;
 	private ASTBody body;
+	private boolean isAbstract;
+	private boolean isStatic;
 
 	public ASTFunction(Token token, ASTType returnType, ASTIdentifier functionName, List<ASTArgument> argumentList,
-			ASTBody body)
+			ASTBody body, boolean isAbstract, boolean isStatic)
 	{
 		super(token);
 
@@ -21,6 +23,8 @@ public class ASTFunction extends AST
 		this.functionName = functionName;
 		this.argumentList = new ASTList<>(argumentList);
 		this.body = body;
+		this.isAbstract = isAbstract;
+		this.isStatic = isStatic;
 	}
 
 	public ASTType getReturnType()
@@ -51,6 +55,16 @@ public class ASTFunction extends AST
 	public ASTBody getBody()
 	{
 		return body;
+	}
+
+	public boolean isAbstract()
+	{
+		return isAbstract;
+	}
+
+	public boolean isStatic()
+	{
+		return isStatic;
 	}
 
 	@Override

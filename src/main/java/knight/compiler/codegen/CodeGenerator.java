@@ -2,54 +2,10 @@ package knight.compiler.codegen;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.Set;
 
-import knight.compiler.ast.AST;
-import knight.compiler.ast.ASTAnd;
-import knight.compiler.ast.ASTArgument;
-import knight.compiler.ast.ASTArrayAssign;
-import knight.compiler.ast.ASTArrayIndexExpr;
-import knight.compiler.ast.ASTArrayLiteral;
-import knight.compiler.ast.ASTAssign;
-import knight.compiler.ast.ASTBody;
-import knight.compiler.ast.ASTCallFunctionExpr;
-import knight.compiler.ast.ASTCallFunctionStat;
-import knight.compiler.ast.ASTClass;
-import knight.compiler.ast.ASTConditionalBranch;
-import knight.compiler.ast.ASTDivision;
-import knight.compiler.ast.ASTEquals;
-import knight.compiler.ast.ASTExpression;
-import knight.compiler.ast.ASTFalse;
-import knight.compiler.ast.ASTForeach;
-import knight.compiler.ast.ASTFunction;
-import knight.compiler.ast.ASTFunctionReturn;
-import knight.compiler.ast.ASTGreaterThan;
-import knight.compiler.ast.ASTGreaterThanOrEqual;
-import knight.compiler.ast.ASTIdentifier;
-import knight.compiler.ast.ASTIdentifierExpr;
-import knight.compiler.ast.ASTIfChain;
-import knight.compiler.ast.ASTImport;
-import knight.compiler.ast.ASTIntLiteral;
-import knight.compiler.ast.ASTLambda;
-import knight.compiler.ast.ASTLessThan;
-import knight.compiler.ast.ASTLessThanOrEqual;
-import knight.compiler.ast.ASTMinus;
-import knight.compiler.ast.ASTModulus;
-import knight.compiler.ast.ASTNewArray;
-import knight.compiler.ast.ASTNewInstance;
-import knight.compiler.ast.ASTNotEquals;
-import knight.compiler.ast.ASTOr;
-import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTProgram;
-import knight.compiler.ast.ASTProperty;
-import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTStringLiteral;
-import knight.compiler.ast.ASTTimes;
-import knight.compiler.ast.ASTTrue;
-import knight.compiler.ast.ASTVariable;
-import knight.compiler.ast.ASTVariableInit;
-import knight.compiler.ast.ASTVisitor;
-import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.*;
 import knight.compiler.ast.types.ASTBooleanType;
 import knight.compiler.ast.types.ASTFunctionType;
 import knight.compiler.ast.types.ASTIdentifierType;
@@ -150,7 +106,19 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTNewInstance astNewInstance)
 	{
-		return null;
+		StringBuilder sb = new StringBuilder();
+		sb.append(astNewInstance.getClassName().accept(this)).append("(");
+
+		List<ASTArgument> args = astNewInstance.getArguments();
+		for (int i = 0; i < args.size(); i++) {
+			sb.append(args.get(i).accept(this));
+			if (i < args.size() - 1) {
+				sb.append(", ");
+			}
+		}
+
+		sb.append(")");
+		return sb.toString();
 	}
 
 	@Override
@@ -300,6 +268,49 @@ public class CodeGenerator implements ASTVisitor<String>
 	}
 
 	@Override
+	public String visit(ASTInterface astInterface)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("class ").append(astInterface.getName().accept(this));
+
+		if (!astInterface.getExtendedInterfaces().isEmpty()) {
+			sb.append(" : ");
+			for (int i = 0; i < astInterface.getExtendedInterfaces().size(); i++) {
+				if (i > 0) {
+					sb.append(", ");
+				}
+				sb.append("public ").append(astInterface.getExtendedInterfaces().get(i).accept(this));
+			}
+		}
+
+		sb.append(" {\n");
+		sb.append("public:\n");
+
+		for (ASTFunction method : astInterface.getMethodSignatures()) {
+			String returnType = method.getReturnType().accept(this);
+			String functionName = method.getFunctionName().toString();
+
+			sb.append("    virtual ").append(returnType).append(" ").append(functionName).append("(");
+
+			for (int i = 0; i < method.getArgumentListSize(); i++) {
+				if (i > 0) {
+					sb.append(", ");
+				}
+				sb.append(method.getArgumentAt(i).accept(this));
+			}
+
+			sb.append(") = 0;\n");
+		}
+
+		sb.append("    virtual ~").append(astInterface.getName().accept(this)).append("() {}\n");
+
+		sb.append("};\n\n");
+
+		return sb.toString();
+	}
+
+	@Override
 	public String visit(ASTIdentifier astIdentifier)
 	{
 		return astIdentifier.getId();
@@ -342,30 +353,21 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTFunction astFunction)
 	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTFunctionReturn astFunctionReturn)
-	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(astFunctionReturn.getReturnType().accept(this) + " " + astFunctionReturn.getFunctionName() + "(");
+		sb.append(astFunction.getReturnType().accept(this) + " " + astFunction.getFunctionName() + "(");
 
-		for (int i = 0; i < astFunctionReturn.getArgumentListSize(); i++) {
-			sb.append(astFunctionReturn.getArgumentAt(i).accept(this));
+		for (int i = 0; i < astFunction.getArgumentListSize(); i++) {
+			sb.append(astFunction.getArgumentAt(i).accept(this));
 
-			if (i != astFunctionReturn.getArgumentListSize() - 1) {
+			if (i != astFunction.getArgumentListSize() - 1) {
 				sb.append(", ");
 			}
 		}
 
 		sb.append(") { \n");
 
-		sb.append(astFunctionReturn.getBody().accept(this));
-
-		// sb.append("\treturn " + astFunctionReturn.getReturnExpr().accept(this) +
-		// ";\n");
+		sb.append(astFunction.getBody().accept(this));
 
 		sb.append("} \n");
 
@@ -377,7 +379,35 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("class " + astClass.getClassName().accept(this) + " {\n");
+		if (astClass.isStatic()) {
+			sb.append("static ");
+		}
+
+		sb.append("class ").append(astClass.getClassName().accept(this));
+
+		if (astClass.getExtendsClass() != null) {
+			sb.append(" : public ").append(astClass.getExtendsClass().accept(this));
+		}
+
+		if (!astClass.getImplementsInterfaces().isEmpty()) {
+			if (astClass.getExtendsClass() == null) {
+				sb.append(" : ");
+			} else {
+				sb.append(", ");
+			}
+
+			for (int i = 0; i < astClass.getImplementsInterfaces().size(); i++) {
+				if (i > 0) {
+					sb.append(", ");
+				}
+				sb.append("public ").append(astClass.getImplementsInterfaces().get(i).accept(this));
+			}
+		}
+
+		sb.append(" {\n");
+
+		String currentAccess = "public";
+		sb.append(currentAccess).append(":\n");
 
 		for (int i = 0; i < astClass.getPropertyListSize(); i++) {
 			sb.append(astClass.getPropertyDeclAt(i).accept(this) + "\n");
@@ -385,6 +415,11 @@ public class CodeGenerator implements ASTVisitor<String>
 
 		for (int i = 0; i < astClass.getFunctionListSize(); i++) {
 			sb.append(astClass.getFunctionDeclAt(i).accept(this) + "\n");
+		}
+
+		if (astClass.getExtendsClass() != null || !astClass.getImplementsInterfaces().isEmpty()) {
+			sb.append("public:\n").append("    virtual ~").append(astClass.getClassName().accept(this))
+					.append("() {}\n");
 		}
 
 		sb.append("};\n");
@@ -404,18 +439,6 @@ public class CodeGenerator implements ASTVisitor<String>
 		for (AST node : astProgram.getNodeList()) {
 			sb.append(node.accept(this));
 		}
-
-//		for (ASTVariable astVariable : astProgram.getVariableList()) {
-//			sb.append(astVariable.accept(this));
-//		}
-//
-//		for (ASTClass astClass : astProgram.getClassList()) {
-//			astClass.accept(this);
-//		}
-//
-//		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-//			astFunction.accept(this);
-//		}
 
 		write(sb.toString());
 

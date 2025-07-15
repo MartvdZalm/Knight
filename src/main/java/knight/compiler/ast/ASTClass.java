@@ -9,15 +9,24 @@ public class ASTClass extends AST
 	private ASTIdentifier className;
 	private ASTList<ASTFunction> functionList;
 	private ASTList<ASTProperty> propertyList;
+	private ASTIdentifier extendsClass; // Single class inheritance
+	private ASTList<ASTIdentifier> implementsInterfaces;
+	private boolean isAbstract;
+	private boolean isStatic;
 
 	public ASTClass(Token token, ASTIdentifier className, List<ASTProperty> propertyList,
-			List<ASTFunction> functionList)
+			List<ASTFunction> functionList, ASTIdentifier extendsClass, List<ASTIdentifier> implementsInterfaces,
+			boolean isAbstract, boolean isStatic)
 	{
 		super(token);
 
 		this.className = className;
 		this.functionList = new ASTList<>(functionList);
 		this.propertyList = new ASTList<>(propertyList);
+		this.extendsClass = extendsClass;
+		this.implementsInterfaces = new ASTList<>(implementsInterfaces);
+		this.isAbstract = isAbstract;
+		this.isStatic = isStatic;
 	}
 
 	public ASTClass setClassName(ASTIdentifier className)
@@ -71,6 +80,26 @@ public class ASTClass extends AST
 	public ASTProperty getPropertyDeclAt(int index)
 	{
 		return propertyList.getAt(index);
+	}
+
+	public ASTIdentifier getExtendsClass()
+	{
+		return extendsClass;
+	}
+
+	public List<ASTIdentifier> getImplementsInterfaces()
+	{
+		return implementsInterfaces.getList();
+	}
+
+	public boolean isAbstract()
+	{
+		return isAbstract;
+	}
+
+	public boolean isStatic()
+	{
+		return isStatic;
 	}
 
 	@Override

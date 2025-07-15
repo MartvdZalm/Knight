@@ -6,13 +6,15 @@ import knight.compiler.lexer.Token;
 public class ASTVariable extends AST
 {
 	private ASTType type;
-	private ASTIdentifier id;
+	private ASTIdentifier identifier;
+	private boolean isStatic;
 
-	public ASTVariable(Token token, ASTType type, ASTIdentifier id)
+	public ASTVariable(Token token, ASTType type, ASTIdentifier identifier, boolean isStatic)
 	{
 		super(token);
 		this.type = type;
-		this.id = id;
+		this.identifier = identifier;
+		this.isStatic = isStatic;
 	}
 
 	public ASTType getType()
@@ -27,12 +29,17 @@ public class ASTVariable extends AST
 
 	public ASTIdentifier getId()
 	{
-		return id;
+		return identifier;
 	}
 
-	public void setId(ASTIdentifier id)
+	public void setId(ASTIdentifier identifier)
 	{
-		this.id = id;
+		this.identifier = identifier;
+	}
+
+	public boolean isStatic()
+	{
+		return isStatic;
 	}
 
 	@Override

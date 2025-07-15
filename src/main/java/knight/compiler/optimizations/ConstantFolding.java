@@ -3,52 +3,7 @@ package knight.compiler.optimizations;
 import java.util.ArrayList;
 import java.util.List;
 
-import knight.compiler.ast.AST;
-import knight.compiler.ast.ASTAnd;
-import knight.compiler.ast.ASTArgument;
-import knight.compiler.ast.ASTArrayAssign;
-import knight.compiler.ast.ASTArrayIndexExpr;
-import knight.compiler.ast.ASTArrayLiteral;
-import knight.compiler.ast.ASTAssign;
-import knight.compiler.ast.ASTBody;
-import knight.compiler.ast.ASTCallFunctionExpr;
-import knight.compiler.ast.ASTCallFunctionStat;
-import knight.compiler.ast.ASTClass;
-import knight.compiler.ast.ASTConditionalBranch;
-import knight.compiler.ast.ASTDivision;
-import knight.compiler.ast.ASTEquals;
-import knight.compiler.ast.ASTExpression;
-import knight.compiler.ast.ASTFalse;
-import knight.compiler.ast.ASTForeach;
-import knight.compiler.ast.ASTFunction;
-import knight.compiler.ast.ASTFunctionReturn;
-import knight.compiler.ast.ASTGreaterThan;
-import knight.compiler.ast.ASTGreaterThanOrEqual;
-import knight.compiler.ast.ASTIdentifier;
-import knight.compiler.ast.ASTIdentifierExpr;
-import knight.compiler.ast.ASTIfChain;
-import knight.compiler.ast.ASTImport;
-import knight.compiler.ast.ASTIntLiteral;
-import knight.compiler.ast.ASTLambda;
-import knight.compiler.ast.ASTLessThan;
-import knight.compiler.ast.ASTLessThanOrEqual;
-import knight.compiler.ast.ASTMinus;
-import knight.compiler.ast.ASTModulus;
-import knight.compiler.ast.ASTNewArray;
-import knight.compiler.ast.ASTNewInstance;
-import knight.compiler.ast.ASTNotEquals;
-import knight.compiler.ast.ASTOr;
-import knight.compiler.ast.ASTPlus;
-import knight.compiler.ast.ASTProgram;
-import knight.compiler.ast.ASTProperty;
-import knight.compiler.ast.ASTReturnStatement;
-import knight.compiler.ast.ASTStringLiteral;
-import knight.compiler.ast.ASTTimes;
-import knight.compiler.ast.ASTTrue;
-import knight.compiler.ast.ASTVariable;
-import knight.compiler.ast.ASTVariableInit;
-import knight.compiler.ast.ASTVisitor;
-import knight.compiler.ast.ASTWhile;
+import knight.compiler.ast.*;
 import knight.compiler.ast.types.ASTBooleanType;
 import knight.compiler.ast.types.ASTFunctionType;
 import knight.compiler.ast.types.ASTIdentifierType;
@@ -508,13 +463,13 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 		return null;
 	}
 
-	@Override
-	public ASTExpression visit(ASTFunctionReturn astFunctionReturn)
-	{
-		astFunctionReturn.getBody().accept(this);
-		astFunctionReturn.setReturnExpr(astFunctionReturn.getReturnExpr().accept(this));
-		return null;
-	}
+//	@Override
+//	public ASTExpression visit(ASTFunctionReturn astFunctionReturn)
+//	{
+//		astFunctionReturn.getBody().accept(this);
+//		astFunctionReturn.setReturnExpr(astFunctionReturn.getReturnExpr().accept(this));
+//		return null;
+//	}
 
 	@Override
 	public ASTExpression visit(ASTProgram astProgram)
@@ -745,6 +700,12 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	public ASTExpression visit(ASTParameterizedType astParameterizedType)
 	{
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ASTExpression visit(ASTInterface astInterface)
+	{
 		return null;
 	}
 }

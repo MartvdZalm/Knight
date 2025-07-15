@@ -1,0 +1,58 @@
+import std
+
+interface Document
+{
+    fn open(): void;
+    fn save(): void;
+}
+
+class TextDocument implements Document
+{
+    fn open(): void { print("Opening text document"); }
+    fn save(): void { print("Saving as .txt"); }
+}
+
+class Spreadsheet implements Document
+{
+    fn open(): void { print("Opening spreadsheet"); }
+    fn save(): void { print("Saving as .csv"); }
+}
+
+abstract class Application
+{
+    abstract fn createDocument(): Document;
+
+    fn newDocument(): void
+    {
+        doc = this.createDocument();
+        doc.open();
+    }
+}
+
+class TextEditor extends Application
+{
+    fn createDocument(): Document
+    {
+        ret new TextDocument();
+    }
+}
+
+class SpreadsheetApp extends Application
+{
+    fn createDocument(): Document
+    {
+        ret new Spreadsheet();
+    }
+}
+
+fn main(): int
+{
+    app = new TextEditor();
+    app.newDocument();
+    
+    app = new SpreadsheetApp();
+    app.newDocument();
+    
+    ret 0;
+}
+
