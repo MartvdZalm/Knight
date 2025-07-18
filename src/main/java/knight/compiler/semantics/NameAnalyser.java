@@ -1,36 +1,22 @@
 package knight.compiler.semantics;
 
+import knight.compiler.ast.*;
+import knight.compiler.ast.types.*;
+import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.model.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import knight.compiler.ast.*;
-import knight.compiler.ast.types.ASTBooleanType;
-import knight.compiler.ast.types.ASTFunctionType;
-import knight.compiler.ast.types.ASTIdentifierType;
-import knight.compiler.ast.types.ASTIntArrayType;
-import knight.compiler.ast.types.ASTIntType;
-import knight.compiler.ast.types.ASTParameterizedType;
-import knight.compiler.ast.types.ASTStringArrayType;
-import knight.compiler.ast.types.ASTStringType;
-import knight.compiler.ast.types.ASTType;
-import knight.compiler.ast.types.ASTVoidType;
-import knight.compiler.semantics.diagnostics.SemanticErrors;
-import knight.compiler.semantics.model.Scope;
-import knight.compiler.semantics.model.SymbolClass;
-import knight.compiler.semantics.model.SymbolFunction;
-import knight.compiler.semantics.model.SymbolProgram;
-import knight.compiler.semantics.model.SymbolVariable;
-
 public class NameAnalyser implements ASTVisitor<ASTType>
 {
-	private SymbolProgram symbolProgram;
+	private final SymbolProgram symbolProgram;
 	private SymbolClass symbolClass;
 	private SymbolFunction symbolFunction;
-
-	private Set<String> hsymbolClass = new HashSet<>();
-	private Set<String> hsymbolFunction = new HashSet<>();
-
 	private Scope currentScope;
+
+	private Set<String> processedClasses = new HashSet<>();
+	private Set<String> processedFunctions = new HashSet<>();
 
 	public NameAnalyser(SymbolProgram symbolProgram)
 	{
@@ -42,6 +28,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		if (currentScope != null) {
 			return currentScope.getVariable(id);
 		}
+
 		return symbolProgram.getVariable(id, sClass, sFunction);
 	}
 
@@ -108,7 +95,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 		if (symbolClass == null) {
 			SemanticErrors.addError(astNewInstance.getClassName().getToken(),
-					"class " + identifier + " is not declared");
+					"Cannot instantiate undefined class '" + identifier + "'");
 		}
 
 		astNewInstance.getClassName().setB(symbolClass);
@@ -189,7 +176,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		String identifier = astIdentifierType.getId();
 		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 		if (symbolClass == null) {
-			SemanticErrors.addError(astIdentifierType.getToken(), "class " + identifier + " is not declared");
+			SemanticErrors.addError(astIdentifierType.getToken(), "Undefined class '" + identifier + "'");
 		}
 
 		astIdentifierType.setB(symbolClass);
@@ -202,97 +189,63 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		String identifier = astIdentifierExpr.getId();
 		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
 		if (symbolVariable == null) {
-			SemanticErrors.addError(astIdentifierExpr.getToken(), "variable " + identifier + " is not declared");
+			SemanticErrors.addError(astIdentifierExpr.getToken(), "Undefined variable '" + identifier + "'");
 		}
 
 		astIdentifierExpr.setB(symbolVariable);
 		return null;
 	}
 
-	public void checkVariable(ASTVariable astVariable)
-	{
-		astVariable.getType().accept(this);
-		astVariable.getId().accept(this);
-	}
-
 	@Override
 	public ASTType visit(ASTVariable astVariable)
 	{
-		checkVariable(astVariable);
+		astVariable.getType().accept(this);
+		astVariable.getId().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTVariableInit astVariableInit)
 	{
-		checkVariable(astVariableInit);
+		astVariableInit.getType().accept(this);
+		astVariableInit.getId().accept(this);
 		astVariableInit.getExpr().accept(this);
 		return null;
 	}
 
-	public void checkFunction(ASTFunction astFunction)
+	@Override
+	public ASTType visit(ASTFunction astFunction)
 	{
 		String functionName = astFunction.getFunctionName().getId();
 
-		if (hsymbolFunction.contains(functionName)) {
-			return;
-		} else {
-			hsymbolFunction.add(functionName);
+		if (processedFunctions.contains(functionName)) {
+			return null;
 		}
+		processedFunctions.add(functionName);
+
+		SymbolFunction previousFunction = symbolFunction;
+		symbolFunction = (symbolClass != null) ? symbolClass.getFunction(functionName)
+				: symbolProgram.getFunction(functionName);
+		astFunction.getFunctionName().setB(symbolFunction);
 
 		astFunction.getReturnType().accept(this);
-
-		if (symbolClass == null) {
-			symbolFunction = symbolProgram.getFunction(functionName);
-		} else {
-			symbolFunction = symbolClass.getFunction(functionName);
-		}
-
-		astFunction.getFunctionName().setB(symbolFunction);
 
 		for (ASTArgument astArgument : astFunction.getArgumentList()) {
 			astArgument.accept(this);
 		}
 
 		astFunction.getBody().accept(this);
-	}
 
-	@Override
-	public ASTType visit(ASTFunction astFunction)
-	{
-		checkFunction(astFunction);
-		symbolFunction = null;
+		symbolFunction = previousFunction;
 		return null;
 	}
-
-//	@Override
-//	public ASTType visit(ASTFunctionReturn astFunctionReturn)
-//	{
-//		checkFunction(astFunctionReturn);
-//		astFunctionReturn.getReturnExpr().accept(this);
-//		symbolFunction = null;
-//		return null;
-//	}
 
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-
 		for (AST node : astProgram.getNodeList()) {
 			node.accept(this);
 		}
-
-//		for (ASTClass astClass : astProgram.getClassList()) {
-//			astClass.accept(this);
-//		}
-//
-//		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-//			astFunction.accept(this);
-//		}
-//
-//		for (ASTVariable astVariable : astProgram.getVariableList()) {
-//			astVariable.accept(this);
-//		}
 
 		return null;
 	}
@@ -330,14 +283,15 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTClass astClass)
 	{
-		String identifier = astClass.getClassName().getId();
-		if (hsymbolClass.contains(identifier)) {
-			return null;
-		} else {
-			hsymbolClass.add(identifier);
-		}
+		String className = astClass.getClassName().getId();
 
-		symbolClass = symbolProgram.getClass(identifier);
+		if (processedClasses.contains(className)) {
+			return null;
+		}
+		processedClasses.add(className);
+
+		SymbolClass previousClass = symbolClass;
+		symbolClass = symbolProgram.getClass(className);
 		astClass.getClassName().setB(symbolClass);
 
 		for (ASTProperty astProperty : astClass.getPropertyList()) {
@@ -348,8 +302,8 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			astFunction.accept(this);
 		}
 
-		hsymbolFunction.clear();
-		symbolClass = null;
+		processedFunctions.clear();
+		symbolClass = previousClass;
 		return null;
 	}
 
@@ -497,47 +451,54 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTStringArrayType astStringArrayType)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTArrayLiteral astArrayLiteral)
 	{
-		// TODO Auto-generated method stub
+		for (ASTExpression astExpression : astArrayLiteral.getExpressionList()) {
+			astExpression.accept(this);
+		}
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTForeach astForeach)
 	{
+		astForeach.getIterable().accept(this);
+		astForeach.getVariable().accept(this);
+		astForeach.getBody().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLambda astLambda)
 	{
-		// TODO Auto-generated method stub
+		astLambda.getArgumentList().forEach(arg -> arg.accept(this));
+		astLambda.getReturnType().accept(this);
+		astLambda.getBody().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTImport astImport)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTParameterizedType astParameterizedType)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTInterface astInterface)
 	{
+		String interfaceName = astInterface.getName().getId();
+		SymbolInterface si = symbolProgram.getInterface(interfaceName);
+		astInterface.getName().setB(si);
 		return null;
 	}
 }

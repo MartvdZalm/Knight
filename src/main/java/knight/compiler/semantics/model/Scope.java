@@ -2,6 +2,7 @@ package knight.compiler.semantics.model;
 
 import knight.compiler.ast.types.ASTType;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,5 +43,15 @@ public class Scope
 	public Scope getParent()
 	{
 		return parent;
+	}
+
+	public Map<String, SymbolVariable> getAllVariables()
+	{
+		return Collections.unmodifiableMap(variables);
+	}
+
+	public int size()
+	{
+		return variables.size();
 	}
 }

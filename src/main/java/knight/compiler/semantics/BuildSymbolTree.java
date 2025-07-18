@@ -1,26 +1,14 @@
 package knight.compiler.semantics;
 
-import java.util.Optional;
-
 import knight.compiler.ast.*;
-import knight.compiler.ast.types.ASTBooleanType;
-import knight.compiler.ast.types.ASTFunctionType;
-import knight.compiler.ast.types.ASTIdentifierType;
-import knight.compiler.ast.types.ASTIntArrayType;
-import knight.compiler.ast.types.ASTIntType;
-import knight.compiler.ast.types.ASTParameterizedType;
-import knight.compiler.ast.types.ASTStringArrayType;
-import knight.compiler.ast.types.ASTStringType;
-import knight.compiler.ast.types.ASTType;
-import knight.compiler.ast.types.ASTVoidType;
+import knight.compiler.ast.types.*;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.diagnostics.SemanticErrors;
-import knight.compiler.semantics.model.Scope;
-import knight.compiler.semantics.model.SymbolClass;
-import knight.compiler.semantics.model.SymbolFunction;
-import knight.compiler.semantics.model.SymbolProgram;
+import knight.compiler.semantics.model.*;
 import knight.lib.Library;
 import knight.lib.LibraryManager;
+
+import java.util.Optional;
 
 public class BuildSymbolTree implements ASTVisitor<ASTType>
 {
@@ -31,12 +19,27 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 
 	public BuildSymbolTree()
 	{
-		symbolProgram = new SymbolProgram();
+		this.symbolProgram = new SymbolProgram();
 	}
 
 	public SymbolProgram getSymbolProgram()
 	{
 		return symbolProgram;
+	}
+
+	public void setSymbolProgram(SymbolProgram symbolProgram)
+	{
+		this.symbolProgram = symbolProgram;
+	}
+
+	public void setSymbolClass(SymbolClass symbolClass)
+	{
+		this.symbolClass = symbolClass;
+	}
+
+	public void setSymbolFunction(SymbolFunction symbolFunction)
+	{
+		this.symbolFunction = symbolFunction;
 	}
 
 	@Override
@@ -85,13 +88,13 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			return null;
 		}
 
-		ASTType type = astProperty.getType().accept(this);
-		String identifier = astProperty.getId().getId();
+		ASTType astType = astProperty.getType().accept(this);
+		String astIdentifier = astProperty.getId().getId();
 
-		if (!symbolClass.addVariable(identifier, type)) {
+		if (!symbolClass.addVariable(astIdentifier, astType)) {
 			Token token = astProperty.getId().getToken();
 			SemanticErrors.addError(token,
-					"Property " + identifier + " already defined in class " + symbolClass.getId());
+					"Property " + astIdentifier + " already defined in class " + symbolClass.getId());
 		}
 
 		return null;
@@ -99,17 +102,17 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 
 	private void checkFunction(ASTFunction astFunction)
 	{
-		ASTType type = astFunction.getReturnType().accept(this);
+		ASTType astType = astFunction.getReturnType().accept(this);
 		String identifier = astFunction.getFunctionName().getId();
 
 		if (symbolClass == null) {
-			if (!symbolProgram.addFunction(identifier, type)) {
+			if (!symbolProgram.addFunction(identifier, astType)) {
 				SemanticErrors.addError(astFunction.getToken(), "Function " + identifier + " already defined");
 			} else {
 				symbolFunction = symbolProgram.getFunction(identifier);
 			}
 		} else {
-			if (!symbolClass.addFunction(identifier, type)) {
+			if (!symbolClass.addFunction(identifier, astType)) {
 				SemanticErrors.addError(astFunction.getToken(),
 						"Function " + identifier + " already defined in class " + symbolClass.getId());
 			} else {
@@ -132,18 +135,11 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		return null;
 	}
 
-//	@Override
-//	public ASTType visit(ASTFunctionReturn astFunctionReturn)
-//	{
-//		checkFunction(astFunctionReturn);
-//		// astFunctionReturn.getReturnExpr().accept(this);
-//		symbolFunction = null;
-//		return null;
-//	}
-
 	@Override
 	public ASTType visit(ASTAssign astAssign)
 	{
+		astAssign.getIdentifier().accept(this);
+		astAssign.getExpr().accept(this);
 		return null;
 	}
 
@@ -190,18 +186,35 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIdentifierExpr astIdentifierExpr)
 	{
+		String astIdentifier = astIdentifierExpr.getId();
+
+		SymbolVariable symbolVariable = symbolProgram.getVariable(astIdentifier, symbolClass, symbolFunction);
+		if (symbolVariable == null) {
+			SemanticErrors.addError(astIdentifierExpr.getToken(), "Variable " + astIdentifier + " not declared");
+		}
+
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTNewArray astNewArray)
 	{
+		astNewArray.getArrayLength().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTNewInstance astNewInstance)
 	{
+		String className = astNewInstance.getClassName().getId();
+		if (!symbolProgram.containsClass(className)) {
+			SemanticErrors.addError(astNewInstance.getClassName().getToken(), "Class " + className + " not found");
+		}
+
+		for (ASTArgument astArgument : astNewInstance.getArguments()) {
+			astArgument.accept(this);
+		}
+
 		return null;
 	}
 
@@ -322,14 +335,19 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTArrayIndexExpr astIndexArray)
+	public ASTType visit(ASTArrayIndexExpr astArrayIndexExpr)
 	{
+		astArrayIndexExpr.getArray().accept(this);
+		astArrayIndexExpr.getIndex().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTArrayAssign astArrayAssign)
 	{
+		astArrayAssign.getId().accept(this);
+		astArrayAssign.getExpression1().accept(this);
+		astArrayAssign.getExpression2().accept(this);
 		return null;
 	}
 
@@ -494,18 +512,37 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTArrayLiteral astArrayLiteral)
 	{
+		for (ASTExpression element : astArrayLiteral.getExpressionList()) {
+			element.accept(this);
+		}
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTForeach astForeach)
 	{
+		ASTType iterableType = astForeach.getIterable().accept(this);
+		if (iterableType != null && !(iterableType instanceof ASTIntArrayType)
+				&& !(iterableType instanceof ASTStringArrayType)) {
+			SemanticErrors.addError(astForeach.getIterable().getToken(), "Foreach loop requires array type");
+		}
+
+		astForeach.getVariable().accept(this);
+		astForeach.getBody().accept(this);
+
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLambda astLambda)
 	{
+		for (ASTArgument arg : astLambda.getArgumentList()) {
+			arg.accept(this);
+		}
+
+		astLambda.getReturnType().accept(this);
+		astLambda.getBody().accept(this);
+
 		return null;
 	}
 
@@ -529,6 +566,23 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTInterface astInterface)
 	{
+		String interfaceName = astInterface.getName().getId();
+
+		if (!symbolProgram.addInterface(interfaceName)) {
+			SemanticErrors.addError(astInterface.getToken(), "Interface " + interfaceName + " already defined");
+		}
+
+		SymbolInterface symbolInterface = symbolProgram.getInterface(interfaceName);
+
+		for (ASTIdentifier extended : astInterface.getExtendedInterfaces()) {
+			symbolInterface.addExtendedInterface(extended.getId());
+		}
+
+		for (ASTFunction method : astInterface.getMethodSignatures()) {
+			ASTType returnType = method.getReturnType().accept(this);
+			symbolInterface.addFunction(method.getFunctionName().toString(), returnType);
+		}
+
 		return null;
 	}
 }

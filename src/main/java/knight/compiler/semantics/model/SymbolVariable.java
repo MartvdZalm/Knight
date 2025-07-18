@@ -4,18 +4,18 @@ import knight.compiler.ast.types.ASTType;
 
 public class SymbolVariable extends Binding
 {
-	private String id;
+	private final String name;
 	private int lvIndex = -1;
 
-	public SymbolVariable(String id, ASTType type)
+	public SymbolVariable(String name, ASTType type)
 	{
 		super(type);
-		this.id = id;
+		this.name = name;
 	}
 
 	public String getId()
 	{
-		return id;
+		return name;
 	}
 
 	public int getLvIndex()

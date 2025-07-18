@@ -624,55 +624,12 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		return null;
 	}
 
-//	@Override
-//	public ASTType visit(ASTFunctionReturn astFunctionReturn)
-//	{
-//		String functionName = astFunctionReturn.getFunctionName().getId();
-//
-//		if (hsymbolFunction.contains(functionName)) {
-//			return astFunctionReturn.getReturnType();
-//		}
-//
-//		hsymbolFunction.add(functionName);
-//		symbolFunction = (SymbolFunction) astFunctionReturn.getFunctionName().getB();
-//
-//		for (ASTArgument astArgument : astFunctionReturn.getArgumentList()) {
-//			astArgument.accept(this);;
-//		}
-//
-//		astFunctionReturn.getBody().accept(this);
-//
-//		ASTType type1 = astFunctionReturn.getReturnType();
-//		ASTType type2 = astFunctionReturn.getReturnExpr().accept(this);
-//
-//		if (!symbolProgram.compareTypes(type1, type2)) {
-//			SemanticErrors.addError(astFunctionReturn.getReturnExpr().getToken(),
-//					"Function " + functionName + " must return a result of Type " + type1);
-//		}
-//
-//		astFunctionReturn.getReturnExpr().setType(type2);
-//		symbolFunction = null;
-//		return null;
-//	}
-
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
 		for (AST node : astProgram.getNodeList()) {
 			node.accept(this);
 		}
-
-//		for (ASTClass astClass : astProgram.getClassList()) {
-//			astClass.accept(this);
-//		}
-//
-//		for (ASTFunction astFunction : astProgram.getFunctionList()) {
-//			astFunction.accept(this);
-//		}
-//
-//		for (ASTVariable astVariable : astProgram.getVariableList()) {
-//			astVariable.accept(this);
-//		}
 
 		return null;
 	}

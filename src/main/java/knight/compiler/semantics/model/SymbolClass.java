@@ -3,29 +3,32 @@ package knight.compiler.semantics.model;
 import knight.compiler.ast.types.ASTIdentifierType;
 import knight.compiler.ast.types.ASTType;
 
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SymbolClass extends Binding
 {
-	private String id;
-	private Hashtable<String, SymbolFunction> functions;
-	private Hashtable<String, SymbolVariable> variables;
-	private String parent;
+	private final String name;
+	private final Map<String, SymbolFunction> functions;
+	private final Map<String, SymbolVariable> variables;
+	private final String parent;
+	private final Map<String, String> implementedInterfaces;
 
-	public SymbolClass(String id, String p)
+	public SymbolClass(String name, String parent)
 	{
-		super(new ASTIdentifierType(null, id));
-		this.id = id;
-		parent = p;
-
-		functions = new Hashtable<>();
-		variables = new Hashtable<>();
+		super(new ASTIdentifierType(null, name));
+		this.name = name;
+		this.parent = parent;
+		this.functions = new HashMap<>();
+		this.variables = new HashMap<>();
+		this.implementedInterfaces = new HashMap<>();
 	}
 
 	public String getId()
 	{
-		return id;
+		return name;
 	}
 
 	public ASTType type()
@@ -43,9 +46,9 @@ public class SymbolClass extends Binding
 		}
 	}
 
-	public Enumeration<String> getFunctions()
+	public Map<String, SymbolFunction> getFunctions()
 	{
-		return functions.keys();
+		return Collections.unmodifiableMap(functions);
 	}
 
 	public SymbolFunction getFunction(String id)
@@ -89,5 +92,29 @@ public class SymbolClass extends Binding
 	public String parent()
 	{
 		return parent;
+	}
+
+	public boolean addImplementedInterface(String interfaceName)
+	{
+		if (implementedInterfaces.containsKey(interfaceName)) {
+			return false;
+		}
+		implementedInterfaces.put(interfaceName, interfaceName);
+		return true;
+	}
+
+	public boolean implementsInterface(String interfaceName)
+	{
+		return implementedInterfaces.containsKey(interfaceName);
+	}
+
+	public boolean implementsAnyInterface()
+	{
+		return !implementedInterfaces.isEmpty();
+	}
+
+	public Map<String, String> getImplementedInterfaces()
+	{
+		return Collections.unmodifiableMap(implementedInterfaces);
 	}
 }

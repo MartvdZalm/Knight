@@ -8,12 +8,22 @@ import knight.compiler.lexer.Token;
 
 public class SemanticErrors
 {
-	public static List<NameError> errorList = new ArrayList<>();
+	private static List<NameError> errorList = new ArrayList<>();
 
-	public static void addError(int line, int col, String errorText)
+//	public static void addError(int line, int col, String errorText)
+//	{
+//		NameError error = new NameError(line, col, errorText);
+//		errorList.add(error);
+//	}
+
+	public static boolean hasErrors()
 	{
-		NameError error = new NameError(line, col, errorText);
-		errorList.add(error);
+		return !errorList.isEmpty();
+	}
+
+	public static List<NameError> getErrorList()
+	{
+		return Collections.unmodifiableList(errorList);
 	}
 
 	public static void addError(Token token, String errorText)
@@ -25,5 +35,10 @@ public class SemanticErrors
 	public static void sort()
 	{
 		Collections.sort(errorList);
+	}
+
+	public static void clearErrors()
+	{
+		errorList.clear();
 	}
 }

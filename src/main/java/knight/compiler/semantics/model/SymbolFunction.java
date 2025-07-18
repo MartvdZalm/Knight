@@ -1,26 +1,27 @@
 package knight.compiler.semantics.model;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import knight.compiler.ast.types.ASTType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SymbolFunction extends Binding
 {
-	private String id;
-	private Vector<SymbolVariable> params;
+	private final String name;
+	private final List<SymbolVariable> params;
 
-	public SymbolFunction(String id, ASTType type)
+	public SymbolFunction(String name, ASTType type)
 	{
 		super(type);
 
-		this.id = id;
-		params = new Vector<>();
+		this.name = name;
+		this.params = new ArrayList<>();
 	}
 
 	public String getId()
 	{
-		return id;
+		return name;
 	}
 
 	public boolean addParam(String id, ASTType type)
@@ -28,29 +29,28 @@ public class SymbolFunction extends Binding
 		if (containsParam(id)) {
 			return false;
 		} else {
-			params.addElement(new SymbolVariable(id, type));
+			params.add(new SymbolVariable(id, type));
 			return true;
 		}
 	}
 
-	public Enumeration<SymbolVariable> getParams()
+	public List<SymbolVariable> getAllParams()
 	{
-		return params.elements();
+		return Collections.unmodifiableList(params);
 	}
 
 	public SymbolVariable getParamAt(int i)
 	{
-		if (i < params.size()) {
-			return params.elementAt(i);
-		} else {
-			return null;
+		if (i < 0 || i >= params.size()) {
+			throw new IndexOutOfBoundsException("Invalid parameter index: " + i);
 		}
+		return params.get(i);
 	}
 
 	public boolean containsParam(String id)
 	{
-		for (int i = 0; i < params.size(); i++) {
-			if (params.elementAt(i).getId().equals(id)) {
+		for (SymbolVariable param : params) {
+			if (param.getId().equals(id)) {
 				return true;
 			}
 		}
@@ -59,9 +59,9 @@ public class SymbolFunction extends Binding
 
 	public SymbolVariable getParam(String id)
 	{
-		for (int i = 0; i < params.size(); i++) {
-			if (params.elementAt(i).getId().equals(id)) {
-				return (params.elementAt(i));
+		for (SymbolVariable param : params) {
+			if (param.getId().equals(id)) {
+				return param;
 			}
 		}
 

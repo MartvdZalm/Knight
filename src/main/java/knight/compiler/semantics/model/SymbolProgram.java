@@ -1,29 +1,33 @@
 package knight.compiler.semantics.model;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Hashtable;
+import knight.compiler.ast.types.*;
 
-import knight.compiler.ast.types.ASTBooleanType;
-import knight.compiler.ast.types.ASTIdentifierType;
-import knight.compiler.ast.types.ASTIntArrayType;
-import knight.compiler.ast.types.ASTIntType;
-import knight.compiler.ast.types.ASTStringType;
-import knight.compiler.ast.types.ASTType;
+import java.util.*;
 
 public class SymbolProgram
 {
-	private Hashtable<String, SymbolClass> classes;
-	private Hashtable<String, SymbolFunction> functions;
-	private Hashtable<String, SymbolVariable> variables;
+	private final Map<String, SymbolClass> classes;
+	private final Map<String, SymbolFunction> functions;
+	private final Map<String, SymbolVariable> variables;
+	private final Map<String, SymbolInterface> interfaces;
 
-	private Deque<String> rstack = new ArrayDeque<String>();
+	private final Deque<String> rstack = new ArrayDeque<>();
 
 	public SymbolProgram()
 	{
-		classes = new Hashtable<>();
-		functions = new Hashtable<>();
-		variables = new Hashtable<>();
+		this.classes = new HashMap<>();
+		this.functions = new HashMap<>();
+		this.variables = new HashMap<>();
+		this.interfaces = new HashMap<>();
+	}
+
+	public void clear()
+	{
+		classes.clear();
+		functions.clear();
+		variables.clear();
+		interfaces.clear();
+		rstack.clear();
 	}
 
 	public boolean addClass(String id, String parent)
@@ -36,6 +40,38 @@ public class SymbolProgram
 		return true;
 	}
 
+	public SymbolClass getClass(String id)
+	{
+		if (containsClass(id)) {
+			return classes.get(id);
+		}
+		return null;
+	}
+
+	public Map<String, SymbolClass> getAllClasses()
+	{
+		return Collections.unmodifiableMap(classes);
+	}
+
+	public boolean addInterface(String name)
+	{
+		if (interfaces.containsKey(name)) {
+			return false;
+		}
+		interfaces.put(name, new SymbolInterface(name));
+		return true;
+	}
+
+	public SymbolInterface getInterface(String name)
+	{
+		return interfaces.get(name);
+	}
+
+	public boolean interfaceExists(String name)
+	{
+		return interfaces.containsKey(name);
+	}
+
 	public boolean addFunction(String id, ASTType type)
 	{
 		if (containsFunction(id)) {
@@ -44,24 +80,6 @@ public class SymbolProgram
 
 		functions.put(id, new SymbolFunction(id, type));
 		return true;
-	}
-
-	public boolean addVariable(String id, ASTType type)
-	{
-		if (containsVariable(id)) {
-			return false;
-		}
-
-		variables.put(id, new SymbolVariable(id, type));
-		return true;
-	}
-
-	public SymbolClass getClass(String id)
-	{
-		if (containsClass(id)) {
-			return classes.get(id);
-		}
-		return null;
 	}
 
 	public SymbolFunction getFunction(String id)
@@ -96,9 +114,9 @@ public class SymbolProgram
 		return null;
 	}
 
-	public Hashtable<String, SymbolFunction> getFunctions()
+	public Map<String, SymbolFunction> getFunctions()
 	{
-		return functions;
+		return Collections.unmodifiableMap(this.functions);
 	}
 
 	public ASTType getFunctionType(String id, String classScope)
@@ -110,6 +128,16 @@ public class SymbolProgram
 		return m.getType();
 	}
 
+	public boolean addVariable(String id, ASTType type)
+	{
+		if (containsVariable(id)) {
+			return false;
+		}
+
+		variables.put(id, new SymbolVariable(id, type));
+		return true;
+	}
+
 	public SymbolVariable getVariable(String id)
 	{
 		return variables.get(id);
@@ -118,9 +146,6 @@ public class SymbolProgram
 	public SymbolVariable getVariable(String id, SymbolClass sClass, SymbolFunction sFunction)
 	{
 		if (sFunction != null) {
-			// if (sFunction.getVariable(id) != null) {
-			// return sFunction.getVariable(id);
-			// }
 			if (sFunction.getParam(id) != null) {
 				return sFunction.getParam(id);
 			}
@@ -171,10 +196,7 @@ public class SymbolProgram
 	public boolean containsVariable(String id)
 	{
 		SymbolVariable var = getVariable(id);
-		if (var != null) {
-			return true;
-		}
-		return false;
+		return var != null;
 	}
 
 	public boolean compareTypes(ASTType t1, ASTType t2)
@@ -199,6 +221,10 @@ public class SymbolProgram
 			ASTIdentifierType i1 = (ASTIdentifierType) t1;
 			ASTIdentifierType i2 = (ASTIdentifierType) t2;
 
+			if (interfaceExists(i1.getId()) || interfaceExists(i2.getId())) {
+				return i1.getId().equals(i2.getId());
+			}
+
 			SymbolClass c = getClass(i2.getId());
 			while (c != null && !rstack.contains(c.getId())) {
 				rstack.push(c.getId());
@@ -218,26 +244,8 @@ public class SymbolProgram
 		return false;
 	}
 
-	public boolean absCompTypes(ASTType t1, ASTType t2)
+	public Map<String, SymbolInterface> getInterfaces()
 	{
-		if (t1 == null || t2 == null) {
-			return false;
-		}
-
-		if (t1 instanceof ASTIntType && t2 instanceof ASTIntType) {
-			return true;
-		}
-		if (t1 instanceof ASTIntArrayType && t2 instanceof ASTIntArrayType) {
-			return true;
-		}
-		if (t1 instanceof ASTIdentifierType && t2 instanceof ASTIdentifierType) {
-			ASTIdentifierType i1 = (ASTIdentifierType) t1;
-			ASTIdentifierType i2 = (ASTIdentifierType) t2;
-			if (i1.getId().equals(i2.getId())) {
-				return true;
-			}
-		}
-
-		return false;
+		return Collections.unmodifiableMap(this.interfaces);
 	}
 }

@@ -7,8 +7,10 @@ import knight.compiler.codegen.CodeGenerator;
 import knight.compiler.lexer.Lexer;
 import knight.compiler.parser.Parser;
 import knight.compiler.semantics.BuildSymbolTree;
+import knight.compiler.semantics.NameAnalyser;
 import knight.compiler.semantics.diagnostics.NameError;
 import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.model.SymbolProgram;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -51,15 +53,15 @@ public class Main
 				BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
 				buildSymbolTree.visit((ASTProgram) tree);
 
-				// SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
+				SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
 
-				// NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
-				// nameAnalyser.visit((ASTProgram) tree);
+				NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
+				nameAnalyser.visit((ASTProgram) tree);
 
 				// TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
 				// typeAnalyser.visit((ASTProgram) tree);
 
-				if (SemanticErrors.errorList.isEmpty()) {
+				if (!SemanticErrors.hasErrors()) {
 					String path = getFileDirPath(filename);
 					// ConstantFolding.optimize(tree);
 
@@ -73,9 +75,9 @@ public class Main
 			e.printStackTrace();
 			System.exit(1);
 		} finally {
-			if (!SemanticErrors.errorList.isEmpty()) {
+			if (SemanticErrors.hasErrors()) {
 				SemanticErrors.sort();
-				for (NameError e : SemanticErrors.errorList) {
+				for (NameError e : SemanticErrors.getErrorList()) {
 					System.err.println(e);
 				}
 			}

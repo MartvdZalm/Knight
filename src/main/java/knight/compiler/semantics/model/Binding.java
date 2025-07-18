@@ -5,14 +5,14 @@ import knight.compiler.semantics.utils.Counter;
 
 public abstract class Binding
 {
-	private Counter counter = Counter.getInstance();
-	protected ASTType type;
-	private int count;
+	protected final ASTType type;
+	private final int count;
 
-	public Binding(ASTType t)
+	public Binding(ASTType type)
 	{
-		count = counter.getCount();
-		type = t;
+		Counter counter = Counter.getInstance();
+		this.count = counter.getCount();
+		this.type = type;
 	}
 
 	public ASTType getType()
