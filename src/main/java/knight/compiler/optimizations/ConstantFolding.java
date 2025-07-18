@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import knight.compiler.ast.*;
+import knight.compiler.ast.controlflow.ASTConditionalBranch;
+import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTIfChain;
+import knight.compiler.ast.controlflow.ASTWhile;
+import knight.compiler.ast.expressions.*;
+import knight.compiler.ast.program.*;
+import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.ASTBooleanType;
 import knight.compiler.ast.types.ASTFunctionType;
 import knight.compiler.ast.types.ASTIdentifierType;

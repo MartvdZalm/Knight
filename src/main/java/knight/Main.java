@@ -2,7 +2,7 @@ package knight;
 
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTPrinter;
-import knight.compiler.ast.ASTProgram;
+import knight.compiler.ast.program.ASTProgram;
 import knight.compiler.codegen.CodeGenerator;
 import knight.compiler.lexer.Lexer;
 import knight.compiler.parser.Parser;

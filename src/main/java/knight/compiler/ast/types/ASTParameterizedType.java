@@ -1,6 +1,6 @@
 package knight.compiler.ast.types;
 
-import knight.compiler.ast.ASTList;
+import knight.compiler.ast.utils.ASTList;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 

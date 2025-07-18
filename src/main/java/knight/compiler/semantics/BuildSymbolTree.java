@@ -1,6 +1,13 @@
 package knight.compiler.semantics;
 
 import knight.compiler.ast.*;
+import knight.compiler.ast.controlflow.ASTConditionalBranch;
+import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTIfChain;
+import knight.compiler.ast.controlflow.ASTWhile;
+import knight.compiler.ast.expressions.*;
+import knight.compiler.ast.program.*;
+import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.diagnostics.SemanticErrors;

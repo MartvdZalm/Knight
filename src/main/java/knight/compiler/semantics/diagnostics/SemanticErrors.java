@@ -8,13 +8,7 @@ import knight.compiler.lexer.Token;
 
 public class SemanticErrors
 {
-	private static List<NameError> errorList = new ArrayList<>();
-
-//	public static void addError(int line, int col, String errorText)
-//	{
-//		NameError error = new NameError(line, col, errorText);
-//		errorList.add(error);
-//	}
+	private static final List<NameError> errorList = new ArrayList<>();
 
 	public static boolean hasErrors()
 	{

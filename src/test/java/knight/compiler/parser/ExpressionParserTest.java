@@ -1,6 +1,6 @@
 package knight.compiler.parser;
 
-import knight.compiler.ast.*;
+import knight.compiler.ast.expressions.*;
 import knight.compiler.lexer.Tokens;
 import org.junit.jupiter.api.Test;
 
