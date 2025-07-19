@@ -1,8 +1,8 @@
-package knight.lib.std;
+package knight.compiler.codegen.lib.std;
 
 import knight.compiler.lexer.Tokens;
-import knight.lib.Library;
-import knight.lib.signatures.FunctionSignature;
+import knight.compiler.codegen.lib.Library;
+import knight.compiler.codegen.lib.signatures.FunctionSignature;
 
 import java.util.ArrayList;
 import java.util.List;

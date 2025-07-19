@@ -12,10 +12,6 @@ import knight.compiler.ast.types.*;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.*;
-import knight.lib.Library;
-import knight.lib.LibraryManager;
-
-import java.util.Optional;
 
 public class BuildSymbolTree implements ASTVisitor<ASTType>
 {

@@ -1,4 +1,4 @@
-package knight.lib;
+package knight.compiler.codegen.lib;
 
 import knight.compiler.ast.types.ASTIntType;
 import knight.compiler.ast.types.ASTStringType;
@@ -6,7 +6,7 @@ import knight.compiler.ast.types.ASTType;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
 import knight.compiler.lexer.Tokens;
-import knight.lib.signatures.FunctionSignature;
+import knight.compiler.codegen.lib.signatures.FunctionSignature;
 
 import java.util.List;
 

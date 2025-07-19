@@ -12,8 +12,6 @@ import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.*;
-import knight.lib.LibraryManager;
-import knight.lib.signatures.FunctionSignature;
 
 import java.util.*;
 

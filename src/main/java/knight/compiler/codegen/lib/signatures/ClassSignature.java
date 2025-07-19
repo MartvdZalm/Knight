@@ -1,4 +1,4 @@
-package knight.lib.signatures;
+package knight.compiler.codegen.lib.signatures;
 
 import java.util.List;
 

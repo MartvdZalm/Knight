@@ -1,11 +1,11 @@
-package knight.lib;
+package knight.compiler.codegen.lib;
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
 
-import knight.lib.signatures.FunctionSignature;
-import knight.lib.std.StdLib;
+import knight.compiler.codegen.lib.signatures.FunctionSignature;
+import knight.compiler.codegen.lib.std.StdLib;
 
 public class LibraryManager
 {

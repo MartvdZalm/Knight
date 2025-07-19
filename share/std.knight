@@ -1,5 +1,17 @@
 
 
-fn print(string message): void {
+static class Out
+{
+    static fn write(string input);
+}
 
+fn print(string input): void
+{
+    Out.write(input);
+}
+
+fn println(string input): void
+{
+    Out.write(input);
+    Out.write("\n");
 }
