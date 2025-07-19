@@ -9,7 +9,7 @@ import knight.compiler.ast.program.*;
 import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
 import knight.compiler.lexer.Token;
-import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.SymbolClass;
 import knight.compiler.semantics.model.SymbolFunction;
 import knight.compiler.semantics.model.SymbolProgram;
@@ -33,7 +33,7 @@ class BuildSymbolTreeTest
 	@BeforeEach
 	public void setUp()
 	{
-		SemanticErrors.clearErrors();
+		DiagnosticReporter.clear();
 		this.symbolTree = new BuildSymbolTree();
 		this.token = new Token(null, 0, 0);
 	}
@@ -73,7 +73,7 @@ class BuildSymbolTreeTest
 		symbolTree.visit(astClass);
 		symbolTree.visit(astClass);
 
-		assertTrue(SemanticErrors.hasErrors());
+		assertTrue(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
@@ -105,7 +105,7 @@ class BuildSymbolTreeTest
 		when(property.getId()).thenReturn(new ASTIdentifier(mock(Token.class), "prop"));
 
 		symbolTree.visit(property);
-		assertTrue(SemanticErrors.hasErrors());
+		assertTrue(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
@@ -114,7 +114,7 @@ class BuildSymbolTreeTest
 		ASTProperty astProperty = mock(ASTProperty.class);
 		when(astProperty.getToken()).thenReturn(token);
 		assertNull(symbolTree.visit(astProperty));
-		assertTrue(SemanticErrors.hasErrors());
+		assertTrue(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
@@ -208,7 +208,7 @@ class BuildSymbolTreeTest
 		when(identifierExpr.getToken()).thenReturn(mock(Token.class));
 
 		assertNull(symbolTree.visit(identifierExpr));
-		assertTrue(SemanticErrors.hasErrors());
+		assertTrue(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
@@ -238,7 +238,7 @@ class BuildSymbolTreeTest
 		when(newInstance.getArguments()).thenReturn(Collections.emptyList());
 
 		assertNull(symbolTree.visit(newInstance));
-		assertTrue(SemanticErrors.hasErrors());
+		assertTrue(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
@@ -603,7 +603,7 @@ class BuildSymbolTreeTest
 		}
 
 		assertNull(symbolTree.visit(astImport));
-		assertTrue(SemanticErrors.hasErrors());
+		assertTrue(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
@@ -638,6 +638,6 @@ class BuildSymbolTreeTest
 		when(astInterface.getToken()).thenReturn(token);
 
 		symbolTree.visit(astInterface);
-		assertTrue(SemanticErrors.hasErrors());
+		assertTrue(DiagnosticReporter.hasErrors());
 	}
 }

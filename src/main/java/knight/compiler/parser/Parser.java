@@ -691,14 +691,6 @@ public class Parser
 					break;
 
 					case IDENTIFIER: {
-						// ASTExpression expr = stOperand.pop();
-						// ASTIdentifierExpr idExpr = (ASTIdentifierExpr) expr;
-						//
-						// List<ASTArgument> arguments = this.parseArguments();
-						//
-						// ASTNewInstance instance = new ASTNewInstance(tok, idExpr, arguments);
-						// stOperand.push(instance);
-
 						ASTIdentifierExpr idExpr = new ASTIdentifierExpr(token, token.getSymbol());
 						eat(Tokens.IDENTIFIER);
 						List<ASTArgument> arguments = this.parseArguments();
@@ -903,7 +895,6 @@ public class Parser
 				ASTExpression rhs = stOperand.pop();
 				ASTExpression lhs = stOperand.pop();
 				ASTCallFunctionExpr cm = (ASTCallFunctionExpr) rhs;
-				// cm.setInstanceName(lhs);
 				stOperand.push(cm);
 			}
 			break;
@@ -1145,9 +1136,7 @@ public class Parser
 			case SEMICOLON:
 			case COMMA:
 			case RIGHTBRACKET:
-			case RIGHTBRACE: {
-				// Epsilon expected
-			}
+			case RIGHTBRACE:
 			break;
 
 			default: {

@@ -1,41 +1,8 @@
 import std
 
-interface Document
-{
-    fn open(): void;
-    fn save(): void;
-}
-
-class TextDocument implements Document
-{
-    fn open(): void { print("Opening text document"); }
-    fn save(): void { print("Saving as .txt"); }
-}
-
-class Spreadsheet implements Document
-{
-    fn open(): void { print("Opening spreadsheet"); }
-    fn save(): void { print("Saving as .csv"); }
-}
-
-class SubSpreadsheet extends Spreadsheet
-{
-
-}
-
 fn main(): int
 {
-	TextDocument something = new TextDocument();
-	something.open();
-	something.save();
-
-    Spreadsheet idk = new Spreadsheet();
-
-    idk.save();
-    
-
-    SubSpreadsheet dsd = new SubSpreadsheet();
-    dsd.open();
+    print("Hello World");
 
 	ret 0;
 }

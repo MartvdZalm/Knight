@@ -5,16 +5,18 @@ import knight.compiler.ast.ASTPrinter;
 import knight.compiler.ast.program.ASTProgram;
 import knight.compiler.codegen.CodeGenerator;
 import knight.compiler.lexer.Lexer;
+import knight.compiler.optimizations.ConstantFolding;
 import knight.compiler.parser.Parser;
 import knight.compiler.semantics.BuildSymbolTree;
 import knight.compiler.semantics.NameAnalyser;
-import knight.compiler.semantics.diagnostics.NameError;
-import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.TypeAnalyser;
+import knight.compiler.semantics.diagnostics.Diagnostic;
+import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.SymbolProgram;
+import knight.preprocessor.PreProcessor;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 
 public class Main
 {
@@ -26,10 +28,10 @@ public class Main
 		}
 
 		Main main = new Main();
-		main.codeGen(args);
+		main.compile(args);
 	}
 
-	public void codeGen(String[] args)
+	public void compile(String[] args)
 	{
 		String filename = args[0];
 
@@ -38,7 +40,8 @@ public class Main
 				return;
 			}
 
-			BufferedReader bufferedReader = new BufferedReader(new FileReader(filename));
+			PreProcessor preProcessor = new PreProcessor();
+			BufferedReader bufferedReader = preProcessor.process(filename);
 			Lexer lexer = new Lexer(bufferedReader);
 			Parser parser = new Parser(lexer);
 			AST tree = parser.parse();
@@ -58,12 +61,18 @@ public class Main
 				NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
 				nameAnalyser.visit((ASTProgram) tree);
 
-				// TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
-				// typeAnalyser.visit((ASTProgram) tree);
+				TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
+				typeAnalyser.visit((ASTProgram) tree);
 
-				if (!SemanticErrors.hasErrors()) {
+				if (!DiagnosticReporter.hasErrors()) {
+
+					DiagnosticReporter.sort();
+					for (Diagnostic diagnostic : DiagnosticReporter.getDiagnostics()) {
+						System.err.println(diagnostic);
+					}
+
 					String path = getFileDirPath(filename);
-					// ConstantFolding.optimize(tree);
+					ConstantFolding.optimize(tree);
 
 					CodeGenerator cg = new CodeGenerator(path, filename);
 					cg.visit((ASTProgram) tree);
@@ -75,10 +84,10 @@ public class Main
 			e.printStackTrace();
 			System.exit(1);
 		} finally {
-			if (SemanticErrors.hasErrors()) {
-				SemanticErrors.sort();
-				for (NameError e : SemanticErrors.getErrorList()) {
-					System.err.println(e);
+			if (DiagnosticReporter.hasErrors()) {
+				DiagnosticReporter.sort();
+				for (Diagnostic diagnostic : DiagnosticReporter.getDiagnostics()) {
+					System.err.println(diagnostic);
 				}
 			}
 		}

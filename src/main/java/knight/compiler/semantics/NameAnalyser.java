@@ -9,7 +9,7 @@ import knight.compiler.ast.expressions.*;
 import knight.compiler.ast.program.*;
 import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
-import knight.compiler.semantics.diagnostics.SemanticErrors;
+import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.*;
 
 import java.util.HashSet;
@@ -17,17 +17,31 @@ import java.util.Set;
 
 public class NameAnalyser implements ASTVisitor<ASTType>
 {
-	private final SymbolProgram symbolProgram;
+	private SymbolProgram symbolProgram;
 	private SymbolClass symbolClass;
 	private SymbolFunction symbolFunction;
 	private Scope currentScope;
-
-	private Set<String> processedClasses = new HashSet<>();
-	private Set<String> processedFunctions = new HashSet<>();
+	private final Set<String> processedClasses = new HashSet<>();
+	private final Set<String> processedFunctions = new HashSet<>();
 
 	public NameAnalyser(SymbolProgram symbolProgram)
 	{
 		this.symbolProgram = symbolProgram;
+	}
+
+	public void setSymbolProgram(SymbolProgram symbolProgram)
+	{
+		this.symbolProgram = symbolProgram;
+	}
+
+	public void setSymbolClass(SymbolClass symbolClass)
+	{
+		this.symbolClass = symbolClass;
+	}
+
+	public void setSymbolFunction(SymbolFunction symbolFunction)
+	{
+		this.symbolFunction = symbolFunction;
 	}
 
 	private SymbolVariable getVariable(String id, SymbolClass sClass, SymbolFunction sFunction)
@@ -101,7 +115,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		String identifier = astNewInstance.getClassName().getId();
 		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 		if (symbolClass == null) {
-			SemanticErrors.addError(astNewInstance.getClassName().getToken(),
+			DiagnosticReporter.error(astNewInstance.getClassName().getToken(),
 					"Cannot instantiate undefined class '" + identifier + "'");
 		}
 
@@ -115,6 +129,14 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		for (ASTExpression astExpression : astCallFunctionExpr.getArgumentList()) {
 			astExpression.accept(this);
 		}
+
+		String functionName = astCallFunctionExpr.getFunctionName().getId();
+		SymbolFunction symbolFunction = symbolProgram.getFunction(functionName);
+		if (symbolFunction == null) {
+			DiagnosticReporter.error(astCallFunctionExpr.getToken(), "Undefined function '" + functionName + "'");
+		}
+
+		astCallFunctionExpr.getFunctionName().setB(symbolFunction);
 		return null;
 	}
 
@@ -170,7 +192,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
 
 		if (symbolVariable == null) {
-			SemanticErrors.addError(astIdentifier.getToken(), "variable " + identifier + " is not declared");
+			DiagnosticReporter.error(astIdentifier.getToken(), "variable " + identifier + " is not declared");
 		}
 
 		astIdentifier.setB(symbolVariable);
@@ -183,7 +205,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		String identifier = astIdentifierType.getId();
 		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 		if (symbolClass == null) {
-			SemanticErrors.addError(astIdentifierType.getToken(), "Undefined class '" + identifier + "'");
+			DiagnosticReporter.error(astIdentifierType.getToken(), "Undefined class '" + identifier + "'");
 		}
 
 		astIdentifierType.setB(symbolClass);
@@ -196,7 +218,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		String identifier = astIdentifierExpr.getId();
 		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
 		if (symbolVariable == null) {
-			SemanticErrors.addError(astIdentifierExpr.getToken(), "Undefined variable '" + identifier + "'");
+			DiagnosticReporter.error(astIdentifierExpr.getToken(), "Undefined variable '" + identifier + "'");
 		}
 
 		astIdentifierExpr.setB(symbolVariable);
