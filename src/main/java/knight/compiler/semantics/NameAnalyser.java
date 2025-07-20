@@ -131,7 +131,15 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		}
 
 		String functionName = astCallFunctionExpr.getFunctionName().getId();
-		SymbolFunction symbolFunction = symbolProgram.getFunction(functionName);
+		String instanceName = astCallFunctionExpr.getInstance().getId();
+
+		SymbolFunction symbolFunction = null;
+		if (instanceName != null) {
+			symbolFunction = symbolProgram.getFunction(functionName, instanceName);
+		} else {
+			symbolFunction = symbolProgram.getFunction(functionName);
+		}
+
 		if (symbolFunction == null) {
 			DiagnosticReporter.error(astCallFunctionExpr.getToken(), "Undefined function '" + functionName + "'");
 		}
@@ -192,6 +200,8 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
 
 		if (symbolVariable == null) {
+			System.out.println("NameAnalyser");
+
 			DiagnosticReporter.error(astIdentifier.getToken(), "variable " + identifier + " is not declared");
 		}
 
@@ -245,6 +255,10 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTFunction astFunction)
 	{
+		Scope bodyScope = astFunction.getScope();
+		Scope savedScope = currentScope;
+		currentScope = bodyScope;
+
 		String functionName = astFunction.getFunctionName().getId();
 
 		if (processedFunctions.contains(functionName)) {
@@ -265,6 +279,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 
 		astFunction.getBody().accept(this);
 
+		currentScope = savedScope;
 		symbolFunction = previousFunction;
 		return null;
 	}

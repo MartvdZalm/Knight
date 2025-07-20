@@ -2,7 +2,7 @@ import std
 
 fn main(): int
 {
-    print("Hello World");
+    println("Hello World");
 
 	ret 0;
 }

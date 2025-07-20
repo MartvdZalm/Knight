@@ -10,7 +10,6 @@ import knight.compiler.ast.expressions.*;
 import knight.compiler.ast.program.*;
 import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
-import knight.compiler.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	private int changes;
 	private boolean debug = false;
 
-	public static void optimize(AST program) throws ParseException
+	public static void optimize(AST program)
 	{
 		ConstantFolding optimizer = new ConstantFolding();
 		optimizer.setDebug(true);

@@ -103,8 +103,11 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		return null;
 	}
 
-	private void checkFunction(ASTFunction astFunction)
+	@Override
+	public ASTType visit(ASTFunction astFunction)
 	{
+		currentScope = new Scope(currentScope);
+
 		ASTType astType = astFunction.getReturnType().accept(this);
 		String identifier = astFunction.getFunctionName().getId();
 
@@ -128,12 +131,10 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		}
 
 		astFunction.getBody().accept(this);
-	}
 
-	@Override
-	public ASTType visit(ASTFunction astFunction)
-	{
-		checkFunction(astFunction);
+		astFunction.setScope(currentScope);
+		currentScope = currentScope.getParent();
+
 		symbolFunction = null;
 		return null;
 	}
@@ -191,7 +192,14 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	{
 		String astIdentifier = astIdentifierExpr.getId();
 
-		SymbolVariable symbolVariable = symbolProgram.getVariable(astIdentifier, symbolClass, symbolFunction);
+		SymbolVariable symbolVariable = null;
+
+		if (symbolFunction != null) {
+			symbolVariable = currentScope.getVariable(astIdentifier);
+		} else {
+			symbolVariable = symbolProgram.getVariable(astIdentifier, symbolClass, symbolFunction);
+		}
+
 		if (symbolVariable == null) {
 			DiagnosticReporter.error(astIdentifierExpr.getToken(), "Variable " + astIdentifier + " not declared");
 		}
@@ -389,6 +397,12 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		String identifier = astArgument.getIdentifier().getId();
 
 		if (symbolFunction != null) {
+			if (!currentScope.addVariable(identifier, type)) {
+				Token token = astArgument.getIdentifier().getToken();
+				DiagnosticReporter.error(token,
+						"Argument " + identifier + " already defined in function " + symbolFunction.getId());
+			}
+
 			if (!symbolFunction.addParam(identifier, type)) {
 				Token token = astArgument.getIdentifier().getToken();
 				String classId = symbolClass != null ? symbolClass.getId() : "global";

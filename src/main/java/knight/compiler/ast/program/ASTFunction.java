@@ -7,6 +7,7 @@ import knight.compiler.ast.statements.ASTBody;
 import knight.compiler.ast.types.ASTType;
 import knight.compiler.ast.utils.ASTList;
 import knight.compiler.lexer.Token;
+import knight.compiler.semantics.model.Scope;
 
 public class ASTFunction extends AST
 {
@@ -16,6 +17,7 @@ public class ASTFunction extends AST
 	private ASTBody body;
 	private boolean isAbstract;
 	private boolean isStatic;
+	private Scope scope;
 
 	public ASTFunction(Token token, ASTType returnType, ASTIdentifier functionName, List<ASTArgument> argumentList,
 			ASTBody body, boolean isAbstract, boolean isStatic)
@@ -68,6 +70,16 @@ public class ASTFunction extends AST
 	public boolean isStatic()
 	{
 		return isStatic;
+	}
+
+	public void setScope(Scope scope)
+	{
+		this.scope = scope;
+	}
+
+	public Scope getScope()
+	{
+		return scope;
 	}
 
 	@Override

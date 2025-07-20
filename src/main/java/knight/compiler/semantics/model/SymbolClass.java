@@ -4,7 +4,6 @@ import knight.compiler.ast.types.ASTIdentifierType;
 import knight.compiler.ast.types.ASTType;
 
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 

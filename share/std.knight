@@ -1,8 +1,7 @@
 
-
 static class Out
 {
-    static fn write(string input);
+    static fn write(string input): void {}
 }
 
 fn print(string input): void

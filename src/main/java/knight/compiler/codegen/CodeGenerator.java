@@ -1,11 +1,7 @@
 package knight.compiler.codegen;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Set;
-
-import knight.compiler.ast.*;
+import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
 import knight.compiler.ast.controlflow.ASTForeach;
 import knight.compiler.ast.controlflow.ASTIfChain;
@@ -13,36 +9,52 @@ import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
 import knight.compiler.ast.program.*;
 import knight.compiler.ast.statements.*;
-import knight.compiler.ast.types.ASTBooleanType;
-import knight.compiler.ast.types.ASTFunctionType;
-import knight.compiler.ast.types.ASTIdentifierType;
-import knight.compiler.ast.types.ASTIntArrayType;
-import knight.compiler.ast.types.ASTIntType;
-import knight.compiler.ast.types.ASTParameterizedType;
-import knight.compiler.ast.types.ASTStringArrayType;
-import knight.compiler.ast.types.ASTStringType;
-import knight.compiler.ast.types.ASTVoidType;
+import knight.compiler.ast.types.*;
+import knight.compiler.codegen.intrinsics.IntrinsicRegistry;
 import knight.compiler.semantics.model.SymbolClass;
 import knight.compiler.semantics.model.SymbolFunction;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class CodeGenerator implements ASTVisitor<String>
 {
 	private SymbolClass currentClass;
 	private SymbolFunction currentFunction;
-
-	private final String PATH;
-	private final String FILENAME;
-
-	Set<String> builtInFunctions = Set.of("print", "to_upper", "to_lower", "trim", "split", "read", "now", "random",
-			"to_int", "to_string", "read_line", "join", "filter", "sort");
+	private Set<String> requiredHeaders = new HashSet<>();
+	private StringBuilder generatedCode = new StringBuilder();
 
 	public CodeGenerator(String progPath, String filename)
 	{
 		File file = new File(filename);
 		String name = file.getName();
 
-		FILENAME = name.substring(0, name.lastIndexOf("."));
-		PATH = progPath;
+		requiredHeaders.add("iostream");
+		requiredHeaders.add("string");
+		requiredHeaders.add("vector");
+	}
+
+	public StringBuilder getGeneratedCode()
+	{
+		return generatedCode;
+	}
+
+	private Optional<String> handleIntrinsicCall(String className)
+	{
+		if (className == null) {
+			return Optional.empty();
+		}
+
+		Optional<String> intrinsicCode = IntrinsicRegistry.generateIntrinsic(className);
+
+		if (intrinsicCode.isPresent()) {
+			requiredHeaders.addAll(IntrinsicRegistry.getRequiredHeaders(className));
+		}
+
+		return intrinsicCode;
 	}
 
 	@Override
@@ -131,30 +143,26 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
-		StringBuilder sb = new StringBuilder();
 		String funcName = astCallFunctionExpr.getFunctionName().getId();
+		// String className = null;
 
-		if (builtInFunctions.contains(funcName)) {
-			sb.append("knight::" + funcName + "(");
-			for (int i = 0; i < astCallFunctionExpr.getArgumentListSize(); i++) {
-				ASTExpression astArgument = astCallFunctionExpr.getArgumentAt(i);
-				sb.append(astArgument.accept(this));
+		// if (astCallFunctionExpr.getInstance() != null) {
+		// if (astCallFunctionExpr.getInstance() instanceof ASTIdentifierExpr) {
+		// className = ((ASTIdentifierExpr) astCallFunctionExpr.getInstance()).getId();
+		// }
+		// }
+		//
+		// if (className != null) {
+		// List<ASTExpression> arguments = astCallFunctionExpr.getArgumentList();
+		// Optional<String> intrinsicCode = handleIntrinsicCall(className, funcName,
+		// arguments);
+		//
+		// if (intrinsicCode.isPresent()) {
+		// return intrinsicCode.get();
+		// }
+		// }
 
-				if (i < astCallFunctionExpr.getArgumentListSize() - 1) {
-					boolean currentIsString = astArgument.getType() instanceof ASTStringType;
-					boolean nextIsString = astCallFunctionExpr.getArgumentAt(i + 1).getType() instanceof ASTStringType;
-
-					if (currentIsString && nextIsString) {
-						sb.append(" + ");
-					} else {
-						sb.append(", ");
-					}
-				}
-			}
-
-			sb.append(")");
-			return sb.toString();
-		}
+		StringBuilder sb = new StringBuilder();
 
 		if (astCallFunctionExpr.getInstance() != null) {
 			sb.append(astCallFunctionExpr.getInstance().accept(this) + ".");
@@ -183,30 +191,25 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		StringBuilder sb = new StringBuilder();
 		String funcName = astCallFunctionStat.getFunctionName().getId();
+		// String className = null;
+		//
+		// if (astCallFunctionStat.getInstance() != null) {
+		// className = astCallFunctionStat.getInstance().toString();
+		//
+		// }
+		//
+		// if (className != null) {
+		// List<ASTExpression> arguments = astCallFunctionStat.getArgumentList();
+		// Optional<String> intrinsicCode = handleIntrinsicCall(className, funcName,
+		// arguments);
+		//
+		// if (intrinsicCode.isPresent()) {
+		// return intrinsicCode.get();
+		// }
+		// }
 
-		if (builtInFunctions.contains(funcName) && astCallFunctionStat.getInstance() == null) {
-			sb.append("knight::" + funcName + "(");
-			for (int i = 0; i < astCallFunctionStat.getArgumentListSize(); i++) {
-				ASTExpression astArgument = astCallFunctionStat.getArgumentAt(i);
-				sb.append(astArgument.accept(this));
-
-				if (i < astCallFunctionStat.getArgumentListSize() - 1) {
-					boolean currentIsString = astArgument.getType() instanceof ASTStringType;
-					boolean nextIsString = astCallFunctionStat.getArgumentAt(i + 1).getType() instanceof ASTStringType;
-
-					if (currentIsString && nextIsString) {
-						sb.append(" + ");
-					} else {
-						sb.append(", ");
-					}
-				}
-			}
-
-			sb.append(")");
-			return sb.toString();
-		}
+		StringBuilder sb = new StringBuilder();
 
 		if (astCallFunctionStat.getInstance() != null) {
 			sb.append(astCallFunctionStat.getInstance() + ".");
@@ -386,11 +389,18 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		if (astClass.isStatic()) {
-			sb.append("static ");
+		// if (astClass.isStatic()) {
+		// sb.append("static ");
+		// }
+
+		String className = astClass.getClassName().getId();
+
+		Optional<String> intrinsicCode = handleIntrinsicCall(className);
+		if (intrinsicCode.isPresent()) {
+			return intrinsicCode.get();
 		}
 
-		sb.append("class ").append(astClass.getClassName().accept(this));
+		sb.append("class ").append(className).append(" {\n");
 
 		if (astClass.getExtendsClass() != null) {
 			sb.append(" : public ").append(astClass.getExtendsClass().accept(this));
@@ -434,35 +444,34 @@ public class CodeGenerator implements ASTVisitor<String>
 		return sb.toString();
 	}
 
+	public StringBuilder generateHeaders()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		for (String header : requiredHeaders) {
+			sb.append("#include <").append(header).append(">\n");
+		}
+
+		sb.append("\n");
+		return sb;
+	}
+
 	@Override
 	public String visit(ASTProgram astProgram)
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (ASTImport astImport : astProgram.getImportList()) {
-			sb.append(astImport.accept(this));
-		}
+		// for (ASTImport astImport : astProgram.getImportList()) {
+		// sb.append(astImport.accept(this));
+		// }
 
 		for (AST node : astProgram.getNodeList()) {
 			sb.append(node.accept(this));
 		}
 
-		write(sb.toString());
+		generatedCode.append(sb);
 
-		return null;
-	}
-
-	private File write(String code)
-	{
-		try {
-			File f = new File(PATH + FILENAME + ".cpp");
-			PrintWriter writer = new PrintWriter(f, "UTF-8");
-			writer.println(code);
-			writer.close();
-			return f;
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
+		// write(generateHeaders().append(sb).toString());
 
 		return null;
 	}

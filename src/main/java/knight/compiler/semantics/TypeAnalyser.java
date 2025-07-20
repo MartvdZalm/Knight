@@ -411,12 +411,6 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	{
 		ASTIdentifierExpr functionName = astCallFunctionExpr.getFunctionName();
 
-//		Optional<FunctionSignature> functionSignature = LibraryManager.findFunction(functionName.toString());
-//
-//		if (functionSignature.isPresent()) {
-//			return functionSignature.get().getReturnType();
-//		}
-
 		SymbolFunction symbolFunction = null;
 		if (symbolClass == null) {
 			symbolFunction = symbolProgram.getFunction(functionName.toString());

@@ -1,22 +1,16 @@
 package knight;
 
-import knight.compiler.ast.AST;
-import knight.compiler.ast.ASTPrinter;
+import knight.compiler.Compiler;
 import knight.compiler.ast.program.ASTProgram;
 import knight.compiler.codegen.CodeGenerator;
-import knight.compiler.lexer.Lexer;
 import knight.compiler.optimizations.ConstantFolding;
-import knight.compiler.parser.Parser;
-import knight.compiler.semantics.BuildSymbolTree;
-import knight.compiler.semantics.NameAnalyser;
-import knight.compiler.semantics.TypeAnalyser;
+import knight.compiler.preprocessor.PreProcessor;
 import knight.compiler.semantics.diagnostics.Diagnostic;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.SymbolProgram;
-import knight.preprocessor.PreProcessor;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.util.List;
 
 public class Main
 {
@@ -36,33 +30,19 @@ public class Main
 		String filename = args[0];
 
 		try {
-			if (!isFileValid(filename)) {
+			if (!FileHelper.isFileValid(filename)) {
 				return;
 			}
 
 			PreProcessor preProcessor = new PreProcessor();
-			BufferedReader bufferedReader = preProcessor.process(filename);
-			Lexer lexer = new Lexer(bufferedReader);
-			Parser parser = new Parser(lexer);
-			AST tree = parser.parse();
+			List<File> sourceFiles = preProcessor.process(filename);
 
-			if (containsFlag(args, "-ast")) {
-				ASTPrinter printer = new ASTPrinter();
-				System.out.println(printer.visit((ASTProgram) tree));
-				System.exit(0);
-			}
+			Compiler compiler = new Compiler();
+			List<ASTProgram> astPrograms = compiler.parseFiles(sourceFiles);
 
-			if (tree != null) {
-				BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
-				buildSymbolTree.visit((ASTProgram) tree);
-
-				SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
-
-				NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
-				nameAnalyser.visit((ASTProgram) tree);
-
-				TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
-				typeAnalyser.visit((ASTProgram) tree);
+			if (!astPrograms.isEmpty()) {
+				SymbolProgram symbolProgram = compiler.buildSymbolProgram(astPrograms);
+				compiler.semantics(astPrograms, symbolProgram);
 
 				if (!DiagnosticReporter.hasErrors()) {
 
@@ -71,15 +51,61 @@ public class Main
 						System.err.println(diagnostic);
 					}
 
-					String path = getFileDirPath(filename);
-					ConstantFolding.optimize(tree);
+					String path = FileHelper.getFileDirPath(filename);
+					CodeGenerator codeGenerator = new CodeGenerator(path, filename);
 
-					CodeGenerator cg = new CodeGenerator(path, filename);
-					cg.visit((ASTProgram) tree);
+					for (ASTProgram astProgram : astPrograms) {
+						ConstantFolding.optimize(astProgram);
+						codeGenerator.visit(astProgram);
+					}
 
-					this.compileCPPFile(args, path, filename);
+					String code = String
+							.valueOf(codeGenerator.generateHeaders().append(codeGenerator.getGeneratedCode()));
+					FileHelper.write(code, path, filename);
+//					 this.compileCPPFile(args, path, filename);
 				}
 			}
+
+			// PreProcessor preProcessor = new PreProcessor();
+			// BufferedReader bufferedReader = preProcessor.process(filename);
+			// Lexer lexer = new Lexer(bufferedReader);
+			// Parser parser = new Parser(lexer);
+			// AST tree = parser.parse();
+			//
+			// if (containsFlag(args, "-ast")) {
+			// ASTPrinter printer = new ASTPrinter();
+			// System.out.println(printer.visit((ASTProgram) tree));
+			// System.exit(0);
+			// }
+			//
+			// if (tree != null) {
+			// BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
+			// buildSymbolTree.visit((ASTProgram) tree);
+			//
+			// SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
+			//
+			// NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
+			// nameAnalyser.visit((ASTProgram) tree);
+			//
+			// TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
+			// typeAnalyser.visit((ASTProgram) tree);
+			//
+			// if (!DiagnosticReporter.hasErrors()) {
+			//
+			// DiagnosticReporter.sort();
+			// for (Diagnostic diagnostic : DiagnosticReporter.getDiagnostics()) {
+			// System.err.println(diagnostic);
+			// }
+			//
+			// String path = getFileDirPath(filename);
+			// ConstantFolding.optimize(tree);
+			//
+			// CodeGenerator cg = new CodeGenerator(path, filename);
+			// cg.visit((ASTProgram) tree);
+			//
+			// this.compileCPPFile(args, path, filename);
+			// }
+			// }
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -93,93 +119,42 @@ public class Main
 		}
 	}
 
-	private boolean containsFlag(String[] args, String flag)
-	{
-		for (String arg : args) {
-			if (arg.equals(flag)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void compileCPPFile(String[] args, String path, String fileName)
-	{
-		String filename = removeFileExtension(fileName);
-
-		try {
-			ProcessBuilder compileProcessBuilder;
-			if (containsFlag(args, "-debug")) {
-				compileProcessBuilder = new ProcessBuilder("g++", "-g", "-o", path + filename,
-						path + filename + ".cpp");
-			} else {
-				compileProcessBuilder = new ProcessBuilder("g++", "-o", path + filename, path + filename + ".cpp");
-			}
-
-			Process compileProcess = compileProcessBuilder.start();
-			int compileExitCode = compileProcess.waitFor();
-
-			if (compileExitCode != 0) {
-				System.err.println("Compilation failed.");
-				System.exit(1);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-	}
-
-	private boolean isFileValid(String filename)
-	{
-		File f = new File(filename);
-
-		if (!f.exists()) {
-			System.err.println(filename + ": No such file!");
-			return false;
-		}
-
-		String fileExtension = getFileExtension(f);
-		if (!"knight".equals(fileExtension)) {
-			System.err.println(filename + ": Invalid file extension!");
-			return false;
-		}
-
-		return true;
-	}
-
-	private String getFileExtension(File file)
-	{
-		String name = file.getName();
-		try {
-			return name.substring(name.lastIndexOf(".") + 1);
-		} catch (Exception e) {
-			return "";
-		}
-	}
-
-	private String removeFileExtension(String fileName)
-	{
-		int lastIndex = fileName.lastIndexOf(".");
-
-		if (lastIndex != -1) {
-			return fileName.substring(0, lastIndex);
-		}
-
-		return fileName;
-	}
-
-	private String getFileDirPath(String filename)
-	{
-		try {
-			File f = new File(filename);
-			String path = f.getParent();
-			if (path == null) {
-				return "";
-			}
-			return path + File.separator;
-		} catch (Exception e) {
-			return "";
-		}
-	}
+	// private boolean containsFlag(String[] args, String flag)
+	// {
+	// for (String arg : args) {
+	// if (arg.equals(flag)) {
+	// return true;
+	// }
+	// }
+	// return false;
+	// }
+	//
+	// private void compileCPPFile(String[] args, String path, String fileName)
+	// {
+	// String filename = FileHelper.removeFileExtension(fileName);
+	//
+	// try {
+	// ProcessBuilder compileProcessBuilder;
+	// if (containsFlag(args, "-debug")) {
+	// compileProcessBuilder = new ProcessBuilder("g++", "-g", "-o", path +
+	// filename,
+	// path + filename + ".cpp");
+	// } else {
+	// compileProcessBuilder = new ProcessBuilder("g++", "-o", path + filename, path
+	// + filename + ".cpp");
+	// }
+	//
+	// Process compileProcess = compileProcessBuilder.start();
+	// int compileExitCode = compileProcess.waitFor();
+	//
+	// if (compileExitCode != 0) {
+	// System.err.println("Compilation failed.");
+	// System.exit(1);
+	// }
+	//
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// System.exit(1);
+	// }
+	// }
 }

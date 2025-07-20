@@ -13,14 +13,10 @@ import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.SymbolClass;
 import knight.compiler.semantics.model.SymbolFunction;
 import knight.compiler.semantics.model.SymbolProgram;
-import knight.compiler.codegen.lib.Library;
-import knight.compiler.codegen.lib.LibraryManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -576,35 +572,6 @@ class BuildSymbolTreeTest
 
 		assertNull(symbolTree.visit(lambda));
 	}
-
-	@Test
-	public void visitASTImport_withValidLibrary()
-	{
-		ASTImport astImport = mock(ASTImport.class);
-		when(astImport.getLibrary()).thenReturn(mock(ASTIdentifier.class));
-		Library mockLibrary = mock(Library.class);
-
-		try (MockedStatic<LibraryManager> mocked = mockStatic(LibraryManager.class)) {
-			mocked.when(() -> LibraryManager.findLibrary(anyString())).thenReturn(Optional.of(mockLibrary));
-
-			assertNull(symbolTree.visit(astImport));
-		}
-	}
-
-//	@Test
-//	public void visitASTImport_withInvalidLibrary()
-//	{
-//		ASTImport astImport = mock(ASTImport.class);
-//		when(astImport.getLibrary()).thenReturn(mock(ASTIdentifier.class));
-//		when(astImport.getToken()).thenReturn(mock(Token.class));
-//
-//		try (MockedStatic<LibraryManager> mocked = mockStatic(LibraryManager.class)) {
-//			mocked.when(() -> LibraryManager.findLibrary(anyString())).thenReturn(Optional.empty());
-//		}
-//
-//		assertNull(symbolTree.visit(astImport));
-//		assertTrue(DiagnosticReporter.hasErrors());
-//	}
 
 	@Test
 	public void visitASTParameterizedType_withValidType()
