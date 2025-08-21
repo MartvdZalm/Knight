@@ -101,7 +101,12 @@ public class Parser
 		while (token.getToken() == Tokens.IMPORT) {
 			Token tok = token;
 			eat(Tokens.IMPORT);
-			importList.add(new ASTImport(tok, this.parseIdentifier()));
+
+			if (token.getToken() == Tokens.IDENTIFIER) {
+				importList.add(new ASTImport(tok, this.parseIdentifier()));
+			} else {
+				eat(Tokens.STRING);
+			}
 		}
 
 		return importList;

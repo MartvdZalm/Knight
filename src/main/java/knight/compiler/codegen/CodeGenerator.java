@@ -10,7 +10,6 @@ import knight.compiler.ast.expressions.*;
 import knight.compiler.ast.program.*;
 import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
-import knight.compiler.codegen.intrinsics.IntrinsicRegistry;
 import knight.compiler.semantics.model.SymbolClass;
 import knight.compiler.semantics.model.SymbolFunction;
 
@@ -42,19 +41,19 @@ public class CodeGenerator implements ASTVisitor<String>
 		return generatedCode;
 	}
 
-	private Optional<String> handleIntrinsicCall(String className)
+	private Optional<String> handleLibraryCall(String className)
 	{
 		if (className == null) {
 			return Optional.empty();
 		}
 
-		Optional<String> intrinsicCode = IntrinsicRegistry.generateIntrinsic(className);
-
-		if (intrinsicCode.isPresent()) {
-			requiredHeaders.addAll(IntrinsicRegistry.getRequiredHeaders(className));
+		// Check if this is a standard library class
+		if ("Out".equals(className) || "In".equals(className)) {
+			requiredHeaders.add("iostream");
+			return Optional.of(""); // Library code will be generated separately
 		}
 
-		return intrinsicCode;
+		return Optional.empty();
 	}
 
 	@Override
@@ -297,7 +296,7 @@ public class CodeGenerator implements ASTVisitor<String>
 		sb.append(" {\n");
 		sb.append("public:\n");
 
-		for (ASTFunction method : astInterface.getMethodSignatures()) {
+		for (ASTFunction method : astInterface.getFunctionSignatures()) {
 			String returnType = method.getReturnType().accept(this);
 			String functionName = method.getFunctionName().toString();
 
@@ -395,9 +394,9 @@ public class CodeGenerator implements ASTVisitor<String>
 
 		String className = astClass.getClassName().getId();
 
-		Optional<String> intrinsicCode = handleIntrinsicCall(className);
-		if (intrinsicCode.isPresent()) {
-			return intrinsicCode.get();
+		Optional<String> libraryCode = handleLibraryCall(className);
+		if (libraryCode.isPresent()) {
+			return libraryCode.get();
 		}
 
 		sb.append("class ").append(className).append(" {\n");
@@ -453,6 +452,14 @@ public class CodeGenerator implements ASTVisitor<String>
 		}
 
 		sb.append("\n");
+
+		// Generate standard library code
+		if (requiredHeaders.contains("iostream")) {
+			sb.append("// Standard Library Implementation\n");
+			sb.append(knight.compiler.library.LibraryCodeGenerator.generateStandardLibrary());
+			sb.append("\n");
+		}
+
 		return sb;
 	}
 

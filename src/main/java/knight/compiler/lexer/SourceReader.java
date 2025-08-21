@@ -9,8 +9,11 @@ public class SourceReader implements AutoCloseable
 
 	private final BufferedReader source;
 	private SourceReaderProperties props;
-	private SourceReaderProperties savedProps;
+	// private SourceReaderProperties savedProps;
 	private boolean closed = false;
+
+	private boolean hasPeeked = false;
+	private char peekedChar;
 
 	public SourceReader(BufferedReader bufferedReader)
 	{
@@ -22,45 +25,48 @@ public class SourceReader implements AutoCloseable
 		this.props = new SourceReaderProperties(source);
 	}
 
-	public void mark(int readAheadLimit) throws IOException
-	{
-		checkNotClosed();
-		if (readAheadLimit < 0) {
-			throw new IllegalArgumentException("Read ahead limit must not be negative");
-		}
+	// public void mark(int readAheadLimit) throws IOException
+	// {
+	// checkNotClosed();
+	// if (readAheadLimit < 0) {
+	// throw new IllegalArgumentException("Read ahead limit must not be negative");
+	// }
 
-		if (!source.markSupported()) {
-			throw new UnsupportedOperationException("Mark operation is not supported by the underlying reader");
-		}
+	// if (!source.markSupported()) {
+	// throw new UnsupportedOperationException("Mark operation is not supported by
+	// the underlying reader");
+	// }
 
-		source.mark(readAheadLimit);
-		this.savedProps = new SourceReaderProperties(props);
-	}
+	// source.mark(readAheadLimit);
+	// this.savedProps = new SourceReaderProperties(props);
+	// }
 
-	public void reset() throws IOException
-	{
-		checkNotClosed();
-		if (!source.markSupported()) {
-			throw new UnsupportedOperationException("Reset operation is not supported by the underlying reader");
-		}
+	// public void reset() throws IOException
+	// {
+	// checkNotClosed();
+	// if (!source.markSupported()) {
+	// throw new UnsupportedOperationException("Reset operation is not supported by
+	// the underlying reader");
+	// }
 
-		if (savedProps == null) {
-			throw new IllegalStateException("No mark position set");
-		}
+	// if (savedProps == null) {
+	// throw new IllegalStateException("No mark position set");
+	// }
 
-		source.reset();
-		this.props = new SourceReaderProperties(this.savedProps);
-	}
+	// source.reset();
+	// this.props = new SourceReaderProperties(this.savedProps);
+	// }
 
 	public char read() throws IOException
 	{
 		checkNotClosed();
 
-		if (props.line == null) {
-			return EOF;
+		if (hasPeeked) {
+			hasPeeked = false;
+			return peekedChar;
 		}
 
-		if (props.isPriorEndLine) {
+		if (props.isPriorEndLine || props.line == null) {
 			props.row++;
 			props.col = 0;
 			props.line = source.readLine();
@@ -69,21 +75,37 @@ public class SourceReader implements AutoCloseable
 			if (props.line == null) {
 				return EOF;
 			}
+
+			if (props.line.isEmpty()) {
+				props.isPriorEndLine = true;
+				return ' ';
+			}
 		}
 
-		if (props.line.isEmpty()) {
+		if (props.col >= props.line.length()) {
 			props.isPriorEndLine = true;
 			return ' ';
 		}
 
 		char c = props.line.charAt(props.col);
-
 		props.col++;
+
 		if (props.col >= props.line.length()) {
 			props.isPriorEndLine = true;
 		}
 
+		// System.out.println(props + ", char: " + c);
+
 		return c;
+	}
+
+	public char peek() throws IOException
+	{
+		if (!hasPeeked) {
+			peekedChar = read();
+			hasPeeked = true;
+		}
+		return peekedChar;
 	}
 
 	public int getCol()
@@ -94,6 +116,19 @@ public class SourceReader implements AutoCloseable
 	public int getRow()
 	{
 		return props.row;
+	}
+
+	public SourceReaderProperties snapshot()
+	{
+		return new SourceReaderProperties(this.props);
+	}
+
+	public void restore(SourceReaderProperties saved)
+	{
+		if (saved == null) {
+			throw new IllegalArgumentException("Saved state cannot be null");
+		}
+		this.props = new SourceReaderProperties(saved);
 	}
 
 	public void close()

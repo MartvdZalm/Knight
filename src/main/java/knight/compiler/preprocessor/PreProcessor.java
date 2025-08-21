@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class PreProcessor
 {
-	private static final String STD_LIB_PATH = "/usr/local/include/knight/";
+	private static final String STD_LIB_PATH = "share/";
 	private final Set<String> processedImports = new HashSet<>();
 
 	public List<File> process(String filename) throws IOException

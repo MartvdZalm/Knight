@@ -29,6 +29,28 @@ public class LexerTest
 		assertEquals("identifier", actual.getSymbol());
 	}
 
+	@Test
+	public void peekNext_should_not_consume_characters()
+	{
+		BufferedReader bufferedReader = new BufferedReader(new StringReader("123 identifier hello"));
+		Lexer lexer = new Lexer(bufferedReader);
+
+		Token firstToken = lexer.nextToken();
+		assertEquals("123", firstToken.getSymbol());
+
+		char peeked1 = lexer.peekNext();
+		assertEquals('i', peeked1);
+
+		Token actual1 = lexer.nextToken();
+		assertEquals("identifier", actual1.getSymbol());
+
+		char peeked2 = lexer.peekNext();
+		assertEquals('h', peeked2);
+
+		Token actual2 = lexer.nextToken();
+		assertEquals("hello", actual2.getSymbol());
+	}
+
 	@ParameterizedTest
 	@CsvSource({ "123, INTEGER", "identifier, IDENTIFIER", "\"string\", STRING", "+, PLUS", "==, EQUALS", "||, OR" })
 	public void nextToken_should_return_correct_token_type(String input, Tokens expectedType)
@@ -94,5 +116,114 @@ public class LexerTest
 
 		assertEquals("変数", token.getSymbol());
 		assertEquals(Tokens.IDENTIFIER, token.getToken());
+	}
+
+	@Test
+	public void comments_should_not_interfere_with_operators()
+	{
+		String input = "/ + * /";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+
+		Token first = lexer.nextToken();
+		assertEquals("/", first.getSymbol());
+
+		Token third = lexer.nextToken();
+		assertEquals("+", third.getSymbol());
+
+		Token second = lexer.nextToken();
+		assertEquals("*", second.getSymbol());
+
+		Token fourth = lexer.nextToken();
+		assertEquals("/", fourth.getSymbol());
+	}
+
+	@Test
+	public void mixed_comments_should_work_together()
+	{
+		String input = """
+				123 // line comment
+				/* block comment */ 456
+				// another line comment
+				/* another
+				block comment */
+				789
+				""";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+
+		Token first = lexer.nextToken();
+		assertEquals("123", first.getSymbol());
+		assertEquals(Tokens.INTEGER, first.getToken());
+
+		Token second = lexer.nextToken();
+		assertEquals("456", second.getSymbol());
+		assertEquals(Tokens.INTEGER, second.getToken());
+
+		Token third = lexer.nextToken();
+		assertEquals("789", third.getSymbol());
+		assertEquals(Tokens.INTEGER, third.getToken());
+	}
+
+	@Test
+	public void comments_should_not_affect_strings()
+	{
+		String input = "\"string with // comment syntax inside\"";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+
+		Token token = lexer.nextToken();
+		assertEquals("\"string with // comment syntax inside\"", token.getSymbol());
+		assertEquals(Tokens.STRING, token.getToken());
+	}
+
+	@Test
+	public void peekToken_should_work_with_comments()
+	{
+		String input = """
+				123 /* comment */ 456
+				""";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+
+		Token first = lexer.nextToken();
+		assertEquals("123", first.getSymbol());
+
+		Token peeked = lexer.peekToken();
+		assertEquals("456", peeked.getSymbol());
+
+		Token actual = lexer.nextToken();
+		assertEquals("456", actual.getSymbol());
+	}
+
+	// @Test
+	// public void empty_line_comment_should_work()
+	// {
+	// String input = """
+	// 123 //
+	// 456
+	// """;
+	// BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+	// Lexer lexer = new Lexer(bufferedReader);
+
+	// Token first = lexer.nextToken();
+	// assertEquals("123", first.getSymbol());
+
+	// Token second = lexer.nextToken();
+	// assertEquals("456", second.getSymbol());
+	// }
+
+	@Test
+	public void empty_block_comment_should_work()
+	{
+		String input = "123 /**/ 456";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+
+		Token first = lexer.nextToken();
+		assertEquals("123", first.getSymbol());
+
+		Token second = lexer.nextToken();
+		assertEquals("456", second.getSymbol());
 	}
 }

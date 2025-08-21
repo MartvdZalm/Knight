@@ -25,6 +25,11 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		this.symbolProgram = new SymbolProgram();
 	}
 
+	public BuildSymbolTree(SymbolProgram symbolProgram)
+	{
+		this.symbolProgram = symbolProgram;
+	}
+
 	public SymbolProgram getSymbolProgram()
 	{
 		return symbolProgram;
@@ -595,7 +600,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			symbolInterface.addExtendedInterface(extended.getId());
 		}
 
-		for (ASTFunction method : astInterface.getMethodSignatures()) {
+		for (ASTFunction method : astInterface.getFunctionSignatures()) {
 			ASTType returnType = method.getReturnType().accept(this);
 			symbolInterface.addFunction(method.getFunctionName().toString(), returnType);
 		}

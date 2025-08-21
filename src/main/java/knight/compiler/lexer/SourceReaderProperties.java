@@ -26,4 +26,10 @@ class SourceReaderProperties
 		this.isPriorEndLine = other.isPriorEndLine;
 		this.line = other.line;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "row: " + row + ", col: " + col + ", isPriorEndLine: " + isPriorEndLine + ", line: " + line;
+	}
 }

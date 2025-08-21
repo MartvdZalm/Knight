@@ -10,15 +10,15 @@ import knight.compiler.lexer.Token;
 public class ASTInterface extends AST
 {
 	private ASTIdentifier interfaceName;
-	private ASTList<ASTFunction> methodSignatures;
+	private ASTList<ASTFunction> functionSignatures;
 	private ASTList<ASTIdentifier> extendsInterfaces;
 
-	public ASTInterface(Token token, ASTIdentifier interfaceName, List<ASTFunction> methodSignatures,
+	public ASTInterface(Token token, ASTIdentifier interfaceName, List<ASTFunction> functionSignatures,
 			List<ASTIdentifier> extendsInterfaces)
 	{
 		super(token);
 		this.interfaceName = interfaceName;
-		this.methodSignatures = new ASTList<>(methodSignatures);
+		this.functionSignatures = new ASTList<>(functionSignatures);
 		this.extendsInterfaces = new ASTList<>(extendsInterfaces);
 	}
 
@@ -27,9 +27,9 @@ public class ASTInterface extends AST
 		return interfaceName;
 	}
 
-	public List<ASTFunction> getMethodSignatures()
+	public List<ASTFunction> getFunctionSignatures()
 	{
-		return methodSignatures.getList();
+		return functionSignatures.getList();
 	}
 
 	public List<ASTIdentifier> getExtendedInterfaces()

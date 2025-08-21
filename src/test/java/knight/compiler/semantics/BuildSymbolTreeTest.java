@@ -586,7 +586,7 @@ class BuildSymbolTreeTest
 		ASTInterface astInterface = mock(ASTInterface.class);
 		when(astInterface.getName()).thenReturn(new ASTIdentifier(mock(Token.class), "TestInterface"));
 		when(astInterface.getExtendedInterfaces()).thenReturn(Collections.emptyList());
-		when(astInterface.getMethodSignatures()).thenReturn(Collections.emptyList());
+		when(astInterface.getFunctionSignatures()).thenReturn(Collections.emptyList());
 
 		assertNull(symbolTree.visit(astInterface));
 	}
@@ -601,7 +601,7 @@ class BuildSymbolTreeTest
 		ASTInterface astInterface = mock(ASTInterface.class);
 		when(astInterface.getName()).thenReturn(new ASTIdentifier(mock(Token.class), "TestInterface"));
 		when(astInterface.getExtendedInterfaces()).thenReturn(Collections.emptyList());
-		when(astInterface.getMethodSignatures()).thenReturn(Collections.emptyList());
+		when(astInterface.getFunctionSignatures()).thenReturn(Collections.emptyList());
 		when(astInterface.getToken()).thenReturn(token);
 
 		symbolTree.visit(astInterface);

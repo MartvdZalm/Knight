@@ -34,83 +34,80 @@ public class Main
 				return;
 			}
 
+			System.out.println("Compiling: " + filename);
+
+			// Step 1: Preprocess and collect all source files (including libraries)
 			PreProcessor preProcessor = new PreProcessor();
 			List<File> sourceFiles = preProcessor.process(filename);
 
+			System.out.println("Found " + sourceFiles.size() + " source files:");
+			for (File file : sourceFiles) {
+				System.out.println("  - " + file.getPath());
+			}
+
+			// Step 2: Parse all files into ASTs
 			Compiler compiler = new Compiler();
 			List<ASTProgram> astPrograms = compiler.parseFiles(sourceFiles);
 
-			if (!astPrograms.isEmpty()) {
-				SymbolProgram symbolProgram = compiler.buildSymbolProgram(astPrograms);
-				compiler.semantics(astPrograms, symbolProgram);
+			if (astPrograms.isEmpty()) {
+				System.err.println("No valid ASTs generated from source files");
+				return;
+			}
 
-				if (!DiagnosticReporter.hasErrors()) {
+			System.out.println("Successfully parsed " + astPrograms.size() + " files");
 
+			// Step 3: Build unified symbol program (including libraries)
+			SymbolProgram symbolProgram = compiler.buildSymbolProgram(astPrograms);
+			System.out.println("Built unified symbol program");
+
+			// Step 4: Run semantics analysis on all programs
+			compiler.semantics(astPrograms, symbolProgram);
+
+			// Step 5: Report any diagnostics
+			if (DiagnosticReporter.hasErrors()) {
+				System.err.println("\nCompilation failed with errors:");
+				DiagnosticReporter.sort();
+				for (Diagnostic diagnostic : DiagnosticReporter.getDiagnostics()) {
+					System.err.println(diagnostic);
+				}
+				System.exit(1);
+			} else {
+				System.out.println("Semantics analysis completed successfully");
+
+				// Show warnings if any
+				List<Diagnostic> diagnostics = DiagnosticReporter.getDiagnostics();
+				if (!diagnostics.isEmpty()) {
+					System.out.println("\nWarnings:");
 					DiagnosticReporter.sort();
-					for (Diagnostic diagnostic : DiagnosticReporter.getDiagnostics()) {
-						System.err.println(diagnostic);
+					for (Diagnostic diagnostic : diagnostics) {
+						System.out.println(diagnostic);
 					}
-
-					String path = FileHelper.getFileDirPath(filename);
-					CodeGenerator codeGenerator = new CodeGenerator(path, filename);
-
-					for (ASTProgram astProgram : astPrograms) {
-						ConstantFolding.optimize(astProgram);
-						codeGenerator.visit(astProgram);
-					}
-
-					String code = String
-							.valueOf(codeGenerator.generateHeaders().append(codeGenerator.getGeneratedCode()));
-					FileHelper.write(code, path, filename);
-//					 this.compileCPPFile(args, path, filename);
 				}
 			}
 
-			// PreProcessor preProcessor = new PreProcessor();
-			// BufferedReader bufferedReader = preProcessor.process(filename);
-			// Lexer lexer = new Lexer(bufferedReader);
-			// Parser parser = new Parser(lexer);
-			// AST tree = parser.parse();
-			//
-			// if (containsFlag(args, "-ast")) {
-			// ASTPrinter printer = new ASTPrinter();
-			// System.out.println(printer.visit((ASTProgram) tree));
-			// System.exit(0);
-			// }
-			//
-			// if (tree != null) {
-			// BuildSymbolTree buildSymbolTree = new BuildSymbolTree();
-			// buildSymbolTree.visit((ASTProgram) tree);
-			//
-			// SymbolProgram symbolProgram = buildSymbolTree.getSymbolProgram();
-			//
-			// NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
-			// nameAnalyser.visit((ASTProgram) tree);
-			//
-			// TypeAnalyser typeAnalyser = new TypeAnalyser(symbolProgram);
-			// typeAnalyser.visit((ASTProgram) tree);
-			//
-			// if (!DiagnosticReporter.hasErrors()) {
-			//
-			// DiagnosticReporter.sort();
-			// for (Diagnostic diagnostic : DiagnosticReporter.getDiagnostics()) {
-			// System.err.println(diagnostic);
-			// }
-			//
-			// String path = getFileDirPath(filename);
-			// ConstantFolding.optimize(tree);
-			//
-			// CodeGenerator cg = new CodeGenerator(path, filename);
-			// cg.visit((ASTProgram) tree);
-			//
-			// this.compileCPPFile(args, path, filename);
-			// }
-			// }
+			// Step 6: Generate code
+			String path = FileHelper.getFileDirPath(filename);
+			CodeGenerator codeGenerator = new CodeGenerator(path, filename);
+
+			for (ASTProgram astProgram : astPrograms) {
+				ConstantFolding.optimize(astProgram);
+				codeGenerator.visit(astProgram);
+			}
+
+			String code = String.valueOf(codeGenerator.generateHeaders().append(codeGenerator.getGeneratedCode()));
+			FileHelper.write(code, path, filename);
+
+			System.out.println("Code generation completed successfully");
+			System.out.println("Output written to: " + path + "/" + FileHelper.removeFileExtension(filename) + ".cpp");
+
 		} catch (Exception e) {
+			System.err.println("Compilation failed with exception: " + e.getMessage());
 			e.printStackTrace();
 			System.exit(1);
 		} finally {
+			// Always report any diagnostics that might have been generated
 			if (DiagnosticReporter.hasErrors()) {
+				System.err.println("\nCompilation failed with errors:");
 				DiagnosticReporter.sort();
 				for (Diagnostic diagnostic : DiagnosticReporter.getDiagnostics()) {
 					System.err.println(diagnostic);
@@ -118,43 +115,4 @@ public class Main
 			}
 		}
 	}
-
-	// private boolean containsFlag(String[] args, String flag)
-	// {
-	// for (String arg : args) {
-	// if (arg.equals(flag)) {
-	// return true;
-	// }
-	// }
-	// return false;
-	// }
-	//
-	// private void compileCPPFile(String[] args, String path, String fileName)
-	// {
-	// String filename = FileHelper.removeFileExtension(fileName);
-	//
-	// try {
-	// ProcessBuilder compileProcessBuilder;
-	// if (containsFlag(args, "-debug")) {
-	// compileProcessBuilder = new ProcessBuilder("g++", "-g", "-o", path +
-	// filename,
-	// path + filename + ".cpp");
-	// } else {
-	// compileProcessBuilder = new ProcessBuilder("g++", "-o", path + filename, path
-	// + filename + ".cpp");
-	// }
-	//
-	// Process compileProcess = compileProcessBuilder.start();
-	// int compileExitCode = compileProcess.waitFor();
-	//
-	// if (compileExitCode != 0) {
-	// System.err.println("Compilation failed.");
-	// System.exit(1);
-	// }
-	//
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// System.exit(1);
-	// }
-	// }
 }

@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class Lexer
 {
-	private static final int PEEK_BUFFER_SIZE = 1024;
+	// private static final int PEEK_BUFFER_SIZE = 1024;
 	private final SourceReader source;
 	private char currentChar;
 	private boolean exceptionOccurred = false;
@@ -23,21 +23,6 @@ public class Lexer
 		}
 	}
 
-	public Token peekToken()
-	{
-		try {
-			char tempChar = currentChar;
-			source.mark(PEEK_BUFFER_SIZE);
-			Token token = nextToken();
-			source.reset();
-			currentChar = tempChar;
-			return token;
-		} catch (IOException e) {
-			exceptionOccurred = true;
-			throw new LexerException("Failed to peek token", e);
-		}
-	}
-
 	public Token nextToken()
 	{
 		if (exceptionOccurred) {
@@ -45,12 +30,26 @@ public class Lexer
 		}
 
 		try {
-			if (currentChar == SourceReader.EOF) {
-				return new Token(Symbol.symbol("EOF", Tokens.EOF), source.getRow(), source.getCol());
-			}
+			while (true) {
+				while (Character.isWhitespace(currentChar)) {
+					currentChar = source.read();
+				}
 
-			while (Character.isWhitespace(currentChar)) {
-				currentChar = source.read();
+				if (currentChar == SourceReader.EOF) {
+					return new Token(Symbol.symbol("EOF", Tokens.EOF), source.getRow(), source.getCol());
+				}
+
+				if (currentChar == '/' && peekNext() == '/') {
+					skipLineComment();
+					continue;
+				}
+
+				if (currentChar == '/' && peekNext() == '*') {
+					skipBlockComment();
+					continue;
+				}
+
+				break;
 			}
 
 			if (Character.isJavaIdentifierStart(currentChar)) {
@@ -69,6 +68,62 @@ public class Lexer
 		} catch (IOException e) {
 			exceptionOccurred = true;
 			throw new LexerException("Failed to read next token", e);
+		}
+	}
+
+	public Token peekToken()
+	{
+		SourceReaderProperties snapshot = source.snapshot();
+		char savedChar = currentChar;
+
+		Token token = nextToken();
+
+		source.restore(snapshot);
+		currentChar = savedChar;
+
+		return token;
+	}
+
+	public char peekNext()
+	{
+		try {
+			return source.peek();
+		} catch (IOException e) {
+			exceptionOccurred = true;
+			throw new LexerException("Failed to peek next", e);
+		}
+	}
+
+	private void skipLineComment() throws IOException
+	{
+		currentChar = source.read(); // '/'
+		currentChar = source.read(); // second '/'
+
+		int savedRow = source.getRow();
+
+		while (source.getRow() == savedRow && currentChar != SourceReader.EOF) {
+			currentChar = source.read();
+		}
+	}
+
+	private void skipBlockComment() throws IOException
+	{
+		currentChar = source.read(); // '/'
+		currentChar = source.read(); // '*'
+
+		while (true) {
+			if (currentChar == SourceReader.EOF) {
+				exceptionOccurred = true;
+				throw new LexerException("Unterminated block comment");
+			}
+
+			if (currentChar == '*' && peekNext() == '/') {
+				currentChar = source.read(); // '*'
+				currentChar = source.read(); // '/'
+				break;
+			}
+
+			currentChar = source.read();
 		}
 	}
 

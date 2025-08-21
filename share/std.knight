@@ -1,9 +1,22 @@
+// Standard library for Knight language
+// This file contains the standard library functions and classes
 
 static class Out
 {
-    static fn write(string input): void {}
+    static fn write(string input): void 
+    {
+        // Implementation will be generated during compilation
+        // This is a placeholder - the actual C++ code will be generated
+    }
+    
+    static fn writeln(string input): void 
+    {
+        // Implementation will be generated during compilation
+        // This is a placeholder - the actual C++ code will be generated
+    }
 }
 
+// Global convenience functions
 fn print(string input): void
 {
     Out.write(input);
@@ -11,6 +24,18 @@ fn print(string input): void
 
 fn println(string input): void
 {
-    Out.write(input);
-    Out.write("\n");
+    Out.writeln(input);
+}
+
+// Input functions
+fn read(): string
+{
+    // Will be implemented during compilation
+    return "";
+}
+
+fn readInt(): int
+{
+    // Will be implemented during compilation
+    return 0;
 }

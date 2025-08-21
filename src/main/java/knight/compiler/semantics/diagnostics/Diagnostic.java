@@ -6,6 +6,7 @@ public class Diagnostic
 	private final int column;
 	private final String message;
 	private final DiagnosticSeverity severity;
+	private final String sourceFile;
 
 	public Diagnostic(int line, int column, String message, DiagnosticSeverity severity)
 	{
@@ -13,6 +14,16 @@ public class Diagnostic
 		this.column = column;
 		this.message = message;
 		this.severity = severity;
+		this.sourceFile = null;
+	}
+
+	public Diagnostic(int line, int column, String message, DiagnosticSeverity severity, String sourceFile)
+	{
+		this.line = line;
+		this.column = column;
+		this.message = message;
+		this.severity = severity;
+		this.sourceFile = sourceFile;
 	}
 
 	public int getLine()
@@ -35,9 +46,18 @@ public class Diagnostic
 		return this.severity;
 	}
 
+	public String getSourceFile()
+	{
+		return this.sourceFile;
+	}
+
 	@Override
 	public String toString()
 	{
-		return String.format("%s:%d:%d: %s: %s", severity.toString().toLowerCase(), line, column, severity, message);
+		if (sourceFile != null) {
+			return String.format("%s:%d:%d: %s: %s", sourceFile, line, column, severity, message);
+		} else {
+			return String.format("%d:%d: %s: %s", line, column, severity, message);
+		}
 	}
 }

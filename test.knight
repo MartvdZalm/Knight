@@ -1,8 +1,9 @@
-import std
+import "program.knight"
 
 fn main(): int
 {
-    println("Hello World");
+	print("Hello World: ");
+	print(10 + 10);
 
 	ret 0;
 }
