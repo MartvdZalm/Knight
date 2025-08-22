@@ -12,14 +12,14 @@ import knight.compiler.lexer.Token;
 public class ASTLambda extends ASTExpression
 {
 	private ASTType returnType;
-	private ASTList<ASTArgument> argumentList;
+	private ASTList<ASTArgument> arguments;
 	private ASTBody body;
 
-	public ASTLambda(Token token, ASTType returnType, List<ASTArgument> argumentList, ASTBody body)
+	public ASTLambda(Token token, ASTType returnType, List<ASTArgument> arguments, ASTBody body)
 	{
 		super(token);
 		this.returnType = returnType;
-		this.argumentList = new ASTList<>(argumentList);
+		this.arguments = new ASTList<>(arguments);
 		this.body = body;
 	}
 
@@ -33,19 +33,19 @@ public class ASTLambda extends ASTExpression
 		this.returnType = returnType;
 	}
 
-	public List<ASTArgument> getArgumentList()
+	public List<ASTArgument> getArguments()
 	{
-		return argumentList.getList();
+		return arguments.getList();
 	}
 
-	public int getArgumentListSize()
+	public int getArgumentCount()
 	{
-		return argumentList.getSize();
+		return arguments.getSize();
 	}
 
-	public ASTArgument getArgumentAt(int index)
+	public ASTArgument getArgument(int index)
 	{
-		return argumentList.getAt(index);
+		return arguments.getAt(index);
 	}
 
 	public ASTBody getBody()
@@ -59,8 +59,8 @@ public class ASTLambda extends ASTExpression
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

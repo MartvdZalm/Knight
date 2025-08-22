@@ -6,22 +6,22 @@ import knight.compiler.lexer.Token;
 
 public class ASTImport extends AST
 {
-	private ASTIdentifier library;
+	private ASTIdentifier identifier;
 
-	public ASTImport(Token token, ASTIdentifier library)
+	public ASTImport(Token token, ASTIdentifier identifier)
 	{
 		super(token);
-		this.library = library;
+		this.identifier = identifier;
 	}
 
-	public ASTIdentifier getLibrary()
+	public ASTIdentifier getIdentifier()
 	{
-		return library;
+		return identifier;
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

@@ -3,41 +3,16 @@ package knight.compiler.ast.expressions;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
-public class ASTLessThan extends ASTExpression
+public class ASTLessThan extends ASTBinaryExpression
 {
-	private ASTExpression leftSide;
-	private ASTExpression rightSide;
-
-	public ASTLessThan(Token token, ASTExpression leftSide, ASTExpression rightSide)
+	public ASTLessThan(Token token, ASTExpression left, ASTExpression right)
 	{
-		super(token);
-		this.leftSide = leftSide;
-		this.rightSide = rightSide;
-	}
-
-	public ASTExpression getLeftSide()
-	{
-		return leftSide;
-	}
-
-	public void setLeftSide(ASTExpression leftSide)
-	{
-		this.leftSide = leftSide;
-	}
-
-	public ASTExpression getRightSide()
-	{
-		return rightSide;
-	}
-
-	public void setRightSide(ASTExpression rightSide)
-	{
-		this.rightSide = rightSide;
+		super(token, left, right);
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

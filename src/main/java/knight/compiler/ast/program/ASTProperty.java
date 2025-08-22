@@ -32,24 +32,24 @@ public class ASTProperty extends AST
 		this.type = type;
 	}
 
-	public ASTIdentifier getId()
+	public ASTIdentifier getIdentifier()
 	{
 		return identifier;
 	}
 
-	public void setId(ASTIdentifier identifier)
+	public void setIdentifier(ASTIdentifier identifier)
 	{
 		this.identifier = identifier;
-	}
-
-	public void setExpression(ASTExpression expression)
-	{
-		this.expression = expression;
 	}
 
 	public ASTExpression getExpression()
 	{
 		return expression;
+	}
+
+	public void setExpression(ASTExpression expression)
+	{
+		this.expression = expression;
 	}
 
 	public boolean isStatic()
@@ -58,8 +58,8 @@ public class ASTProperty extends AST
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

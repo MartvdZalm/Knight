@@ -1,4 +1,4 @@
-package knight;
+package knight.utils;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -8,14 +8,14 @@ public class FileHelper
 {
 	public static boolean isFileValid(String filename)
 	{
-		File f = new File(filename);
+		File file = new File(filename);
 
-		if (!f.exists()) {
+		if (!file.exists()) {
 			System.err.println(filename + ": No such file!");
 			return false;
 		}
 
-		String fileExtension = FileHelper.getFileExtension(f);
+		String fileExtension = FileHelper.getFileExtension(file);
 		if (!"knight".equals(fileExtension)) {
 			System.err.println(filename + ": Invalid file extension!");
 			return false;
@@ -27,11 +27,12 @@ public class FileHelper
 	public static String getFileExtension(File file)
 	{
 		String name = file.getName();
-		try {
-			return name.substring(name.lastIndexOf(".") + 1);
-		} catch (Exception e) {
+		int lastIndex = name.lastIndexOf(".");
+		if (lastIndex == -1 || lastIndex == name.length() - 1) {
 			return "";
 		}
+
+		return name.substring(lastIndex + 1);
 	}
 
 	public static String removeFileExtension(String fileName)
@@ -48,8 +49,8 @@ public class FileHelper
 	public static String getFileDirPath(String filename)
 	{
 		try {
-			File f = new File(filename);
-			String path = f.getParent();
+			File file = new File(filename);
+			String path = file.getParent();
 			if (path == null) {
 				return "";
 			}
@@ -63,11 +64,11 @@ public class FileHelper
 	{
 		String updatedFilename = filename.substring(0, filename.lastIndexOf("."));
 		try {
-			File f = new File(path + updatedFilename + ".cpp");
-			PrintWriter writer = new PrintWriter(f, StandardCharsets.UTF_8);
+			File file = new File(path + updatedFilename + ".cpp");
+			PrintWriter writer = new PrintWriter(file, StandardCharsets.UTF_8);
 			writer.println(code);
 			writer.close();
-			return f;
+			return file;
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}

@@ -8,18 +8,18 @@ import knight.compiler.lexer.Token;
 public class ASTArrayAssign extends ASTStatement
 {
 	private ASTIdentifier identifier;
-	private ASTExpression expression1;
-	private ASTExpression expression2;
+	private ASTExpression array;
+	private ASTExpression value;
 
-	public ASTArrayAssign(Token token, ASTIdentifier identifier, ASTExpression expression1, ASTExpression expression2)
+	public ASTArrayAssign(Token token, ASTIdentifier identifier, ASTExpression array, ASTExpression value)
 	{
 		super(token);
 		this.identifier = identifier;
-		this.expression1 = expression1;
-		this.expression2 = expression2;
+		this.array = array;
+		this.value = value;
 	}
 
-	public ASTIdentifier getId()
+	public ASTIdentifier getIdentifier()
 	{
 		return identifier;
 	}
@@ -29,29 +29,29 @@ public class ASTArrayAssign extends ASTStatement
 		this.identifier = identifier;
 	}
 
-	public ASTExpression getExpression1()
+	public ASTExpression getArray()
 	{
-		return expression1;
+		return array;
 	}
 
-	public void setE1(ASTExpression expression1)
+	public void setArray(ASTExpression array)
 	{
-		this.expression1 = expression1;
+		this.array = array;
 	}
 
-	public ASTExpression getExpression2()
+	public ASTExpression getValue()
 	{
-		return expression2;
+		return value;
 	}
 
-	public void setE2(ASTExpression expression2)
+	public void setValue(ASTExpression value)
 	{
-		this.expression2 = expression2;
+		this.value = value;
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

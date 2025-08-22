@@ -17,10 +17,9 @@ public class ASTArgument extends AST
 		this.identifier = identifier;
 	}
 
-	public ASTArgument setType(ASTType type)
+	public void setType(ASTType type)
 	{
 		this.type = type;
-		return this;
 	}
 
 	public ASTType getType()
@@ -28,10 +27,9 @@ public class ASTArgument extends AST
 		return type;
 	}
 
-	public ASTArgument setIdentifier(ASTIdentifier identifier)
+	public void setIdentifier(ASTIdentifier identifier)
 	{
 		this.identifier = identifier;
-		return this;
 	}
 
 	public ASTIdentifier getIdentifier()
@@ -39,8 +37,8 @@ public class ASTArgument extends AST
 		return identifier;
 	}
 
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

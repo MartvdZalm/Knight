@@ -8,80 +8,76 @@ import knight.compiler.lexer.Token;
 
 public class ASTClass extends AST
 {
-	private ASTIdentifier className;
-	private ASTList<ASTFunction> functionList;
-	private ASTList<ASTProperty> propertyList;
-	private ASTIdentifier extendsClass; // Single class inheritance
+	private ASTIdentifier identifier;
+	private ASTList<ASTFunction> functions;
+	private ASTList<ASTProperty> properties;
+	private ASTIdentifier extendsClass;
 	private ASTList<ASTIdentifier> implementsInterfaces;
 	private boolean isAbstract;
 	private boolean isStatic;
 
-	public ASTClass(Token token, ASTIdentifier className, List<ASTProperty> propertyList,
-			List<ASTFunction> functionList, ASTIdentifier extendsClass, List<ASTIdentifier> implementsInterfaces,
-			boolean isAbstract, boolean isStatic)
+	public ASTClass(Token token, ASTIdentifier identifier, List<ASTProperty> properties, List<ASTFunction> functions,
+			ASTIdentifier extendsClass, List<ASTIdentifier> implementsInterfaces, boolean isAbstract, boolean isStatic)
 	{
 		super(token);
 
-		this.className = className;
-		this.functionList = new ASTList<>(functionList);
-		this.propertyList = new ASTList<>(propertyList);
+		this.identifier = identifier;
+		this.functions = new ASTList<>(functions);
+		this.properties = new ASTList<>(properties);
 		this.extendsClass = extendsClass;
 		this.implementsInterfaces = new ASTList<>(implementsInterfaces);
 		this.isAbstract = isAbstract;
 		this.isStatic = isStatic;
 	}
 
-	public ASTClass setClassName(ASTIdentifier className)
+	public ASTIdentifier getIdentifier()
 	{
-		this.className = className;
-		return this;
+		return identifier;
 	}
 
-	public ASTIdentifier getClassName()
+	public void setIdentifier(ASTIdentifier identifier)
 	{
-		return className;
+		this.identifier = identifier;
 	}
 
-	public ASTClass setFunctionList(List<ASTFunction> functionList)
+	public List<ASTFunction> getFunctions()
 	{
-		this.functionList.setList(functionList);
-		return this;
+		return functions.getList();
 	}
 
-	public List<ASTFunction> getFunctionList()
+	public int getFunctionCount()
 	{
-		return functionList.getList();
+		return functions.getSize();
 	}
 
-	public int getFunctionListSize()
+	public ASTFunction getFunction(int index)
 	{
-		return functionList.getSize();
+		return functions.getAt(index);
 	}
 
-	public ASTFunction getFunctionDeclAt(int index)
+	public void setFunctions(List<ASTFunction> functions)
 	{
-		return functionList.getAt(index);
+		this.functions.setList(functions);
 	}
 
-	public ASTClass setPropertyList(List<ASTProperty> propertyList)
+	public List<ASTProperty> getProperties()
 	{
-		this.propertyList.setList(propertyList);
-		return this;
+		return properties.getList();
 	}
 
-	public List<ASTProperty> getPropertyList()
+	public int getPropertyCount()
 	{
-		return propertyList.getList();
+		return properties.getSize();
 	}
 
-	public int getPropertyListSize()
+	public ASTProperty getProperty(int index)
 	{
-		return propertyList.getSize();
+		return properties.getAt(index);
 	}
 
-	public ASTProperty getPropertyDeclAt(int index)
+	public void setProperties(List<ASTProperty> properties)
 	{
-		return propertyList.getAt(index);
+		this.properties.setList(properties);
 	}
 
 	public ASTIdentifier getExtendsClass()
@@ -92,6 +88,16 @@ public class ASTClass extends AST
 	public List<ASTIdentifier> getImplementsInterfaces()
 	{
 		return implementsInterfaces.getList();
+	}
+
+	public ASTIdentifier getImplementedInterface(int index)
+	{
+		return implementsInterfaces.getAt(index);
+	}
+
+	public int getImplementedInterfaceCount()
+	{
+		return implementsInterfaces.getSize();
 	}
 
 	public boolean isAbstract()
@@ -105,8 +111,8 @@ public class ASTClass extends AST
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

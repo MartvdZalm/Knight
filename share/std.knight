@@ -31,11 +31,11 @@ fn println(string input): void
 fn read(): string
 {
     // Will be implemented during compilation
-    return "";
+    ret "";
 }
 
 fn readInt(): int
 {
     // Will be implemented during compilation
-    return 0;
+    ret 0;
 }

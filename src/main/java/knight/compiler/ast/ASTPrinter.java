@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
@@ -48,7 +48,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTAssign assign)
 	{
-		return printInc() + "(EQSIGN " + assign.getIdentifier().accept(this) + " " + assign.getExpr().accept(this)
+		return printInc() + "(EQSIGN " + assign.getIdentifier().accept(this) + " " + assign.getExpression().accept(this)
 				+ ")";
 	}
 
@@ -57,7 +57,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (AST node : body.getNodesList()) {
+		for (AST node : body.getNodes()) {
 			sb.append(node.accept(this) + "\n");
 		}
 
@@ -97,9 +97,9 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTIdentifierExpr identifier)
+	public String visit(ASTIdentifierExpr astIdentifierExpr)
 	{
-		return "(" + identifier.getId() + ")";
+		return "(" + astIdentifierExpr.getName() + ")";
 	}
 
 	@Override
@@ -119,7 +119,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("(FUN-CALL").append(callFunctionExpr.getFunctionName().accept(this));
-		for (ASTExpression expr : callFunctionExpr.getArgumentList()) {
+		for (ASTExpression expr : callFunctionExpr.getArguments()) {
 			sb.append(expr.accept(this));
 		}
 		sb.append("))");
@@ -132,7 +132,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("(FUN-CALL ").append(callFunctionStat.getFunctionName().accept(this));
-		for (ASTExpression expr : callFunctionStat.getArgumentList()) {
+		for (ASTExpression expr : callFunctionStat.getArguments()) {
 			sb.append(expr.accept(this));
 		}
 		sb.append("))");
@@ -186,14 +186,15 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTVariable varDeclaration)
 	{
 		return printInc() + "(VARIABLE) " + varDeclaration.getType().accept(this) + " "
-				+ varDeclaration.getId().accept(this);
+				+ varDeclaration.getIdentifier().accept(this);
 	}
 
 	@Override
 	public String visit(ASTVariableInit varDeclarationInit)
 	{
 		return printInc() + "(VARIABLE) " + varDeclarationInit.getType().accept(this) + " "
-				+ varDeclarationInit.getId().accept(this) + " = " + varDeclarationInit.getExpr().accept(this);
+				+ varDeclarationInit.getIdentifier().accept(this) + " = "
+				+ varDeclarationInit.getExpression().accept(this);
 	}
 
 	@Override
@@ -231,7 +232,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (AST node : astProgram.getNodeList()) {
+		for (AST node : astProgram.getNodes()) {
 			sb.append(node.accept(this));
 		}
 
@@ -251,22 +252,23 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTIdentifier identifier)
+	public String visit(ASTIdentifier astIdentifier)
 	{
-		return "(" + identifier.getId() + ")";
+		return "(" + astIdentifier.getName() + ")";
 	}
 
 	@Override
-	public String visit(ASTArrayIndexExpr arrayIndexExpr)
+	public String visit(ASTArrayIndexExpr astArrayIndexExpr)
 	{
-		return "(ARRAY-LOOKUP " + arrayIndexExpr.getArray().accept(this) + arrayIndexExpr.getIndex().accept(this) + ")";
+		return "(ARRAY-LOOKUP " + astArrayIndexExpr.getArray().accept(this) + astArrayIndexExpr.getIndex().accept(this)
+				+ ")";
 	}
 
 	@Override
 	public String visit(ASTArrayAssign arrayAssign)
 	{
-		return printInc() + "(EQSIGN " + "(ARRAY-ASSIGN " + arrayAssign.getId().accept(this)
-				+ arrayAssign.getExpression1().accept(this) + ") " + arrayAssign.getExpression2().accept(this) + ")";
+		return printInc() + "(EQSIGN " + "(ARRAY-ASSIGN " + arrayAssign.getIdentifier().accept(this)
+				+ arrayAssign.getArray().accept(this) + ") " + arrayAssign.getValue().accept(this) + ")";
 	}
 
 	@Override
@@ -283,11 +285,11 @@ public class ASTPrinter implements ASTVisitor<String>
 
 		incLevel();
 
-		for (ASTProperty property : classDecl.getPropertyList()) {
+		for (ASTProperty property : classDecl.getProperties()) {
 			sb.append(property.accept(this)).append("\n");
 		}
 
-		for (ASTFunction function : classDecl.getFunctionList()) {
+		for (ASTFunction function : classDecl.getFunctions()) {
 			sb.append(function.accept(this)).append("\n");
 		}
 
@@ -367,14 +369,13 @@ public class ASTPrinter implements ASTVisitor<String>
 	@Override
 	public String visit(ASTNotEquals astNotEquals)
 	{
-		return "(NOT-EQUALS " + astNotEquals.getLeftSide().accept(this) + " " + astNotEquals.getRightSide().accept(this)
-				+ ")";
+		return "(NOT-EQUALS " + astNotEquals.getLeft().accept(this) + " " + astNotEquals.getRight().accept(this) + ")";
 	}
 
 	@Override
 	public String visit(ASTPlus astPlus)
 	{
-		return "(PLUS " + astPlus.getLeftSide().accept(this) + " " + astPlus.getRightSide().accept(this) + ")";
+		return "(PLUS " + astPlus.getLeft().accept(this) + " " + astPlus.getRight().accept(this) + ")";
 	}
 
 	@Override
@@ -402,9 +403,9 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTLessThan astLessThan)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astLessThan.getLeftSide().accept(this));
+		sb.append(astLessThan.getLeft().accept(this));
 		sb.append("<");
-		sb.append(astLessThan.getRightSide().accept(this));
+		sb.append(astLessThan.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -419,9 +420,9 @@ public class ASTPrinter implements ASTVisitor<String>
 	public String visit(ASTGreaterThan astGreaterThan)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astGreaterThan.getLeftSide().accept(this));
+		sb.append(astGreaterThan.getLeft().accept(this));
 		sb.append(">");
-		sb.append(astGreaterThan.getRightSide().accept(this));
+		sb.append(astGreaterThan.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -475,7 +476,7 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTForeach astForeach)
+	public String visit(ASTForEach astForEach)
 	{
 		// TODO Auto-generated method stub
 		return null;

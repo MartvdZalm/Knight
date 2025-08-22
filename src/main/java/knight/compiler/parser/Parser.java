@@ -4,7 +4,7 @@ import java.util.*;
 
 import knight.compiler.ast.*;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
@@ -400,7 +400,7 @@ public class Parser
 				eat(Tokens.LEFTBRACE);
 				ASTBody body = this.parseBody();
 				eat(Tokens.RIGHTBRACE);
-				return new ASTForeach(tok, variable, iterable, body);
+				return new ASTForEach(tok, variable, iterable, body);
 			}
 
 			case WHILE: {
@@ -448,7 +448,7 @@ public class Parser
 					}
 
 					case LEFTPAREN: {
-						ASTIdentifierExpr idExpr = new ASTIdentifierExpr(id.getToken(), id.getId());
+						ASTIdentifierExpr idExpr = new ASTIdentifierExpr(id.getToken(), id.getName());
 						Token tok = token;
 						List<ASTExpression> exprList = new ArrayList<ASTExpression>();
 
@@ -471,7 +471,7 @@ public class Parser
 					case DOT: {
 						Token tok = token;
 
-						ASTIdentifierExpr instance = new ASTIdentifierExpr(id.getToken(), id.getId());
+						ASTIdentifierExpr instance = new ASTIdentifierExpr(id.getToken(), id.getName());
 						eat(Tokens.DOT);
 						ASTIdentifierExpr functionName = new ASTIdentifierExpr(token, checkNotNull(token).getSymbol());
 						eat(Tokens.IDENTIFIER);

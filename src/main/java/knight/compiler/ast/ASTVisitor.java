@@ -1,7 +1,7 @@
 package knight.compiler.ast;
 
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
@@ -113,7 +113,7 @@ public interface ASTVisitor<R>
 
 	public R visit(ASTArrayLiteral astArrayLiteral);
 
-	public R visit(ASTForeach astForeach);
+	public R visit(ASTForEach astForEach);
 
 	public R visit(ASTLambda astLambda);
 

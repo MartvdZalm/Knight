@@ -2,7 +2,7 @@ package knight.compiler.semantics;
 
 import knight.compiler.ast.*;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
@@ -53,11 +53,11 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-		for (ASTImport astImport : astProgram.getImportList()) {
+		for (ASTImport astImport : astProgram.getImports()) {
 			astImport.accept(this);
 		}
 
-		for (AST node : astProgram.getNodeList()) {
+		for (AST node : astProgram.getNodes()) {
 			node.accept(this);
 		}
 
@@ -67,7 +67,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTClass astClass)
 	{
-		String className = astClass.getClassName().getId();
+		String className = astClass.getIdentifier().getName();
 
 		if (!symbolProgram.addClass(className, null)) {
 			DiagnosticReporter.error(astClass.getToken(), "Class " + className + " is already defined!");
@@ -76,11 +76,11 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			symbolClass = symbolProgram.getClass(className);
 		}
 
-		for (ASTProperty astProperty : astClass.getPropertyList()) {
+		for (ASTProperty astProperty : astClass.getProperties()) {
 			astProperty.accept(this);
 		}
 
-		for (ASTFunction astFunction : astClass.getFunctionList()) {
+		for (ASTFunction astFunction : astClass.getFunctions()) {
 			astFunction.accept(this);
 		}
 
@@ -97,10 +97,10 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		}
 
 		ASTType astType = astProperty.getType().accept(this);
-		String astIdentifier = astProperty.getId().getId();
+		String astIdentifier = astProperty.getIdentifier().getName();
 
 		if (!symbolClass.addVariable(astIdentifier, astType)) {
-			Token token = astProperty.getId().getToken();
+			Token token = astProperty.getIdentifier().getToken();
 			DiagnosticReporter.error(token,
 					"Property " + astIdentifier + " already defined in class " + symbolClass.getId());
 		}
@@ -114,7 +114,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		currentScope = new Scope(currentScope);
 
 		ASTType astType = astFunction.getReturnType().accept(this);
-		String identifier = astFunction.getFunctionName().getId();
+		String identifier = astFunction.getIdentifier().getName();
 
 		if (symbolClass == null) {
 			if (!symbolProgram.addFunction(identifier, astType)) {
@@ -131,8 +131,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 			}
 		}
 
-		for (int i = 0; i < astFunction.getArgumentListSize(); i++) {
-			astFunction.getArgumentAt(i).accept(this);
+		for (int i = 0; i < astFunction.getArgumentCount(); i++) {
+			astFunction.getArgument(i).accept(this);
 		}
 
 		astFunction.getBody().accept(this);
@@ -148,7 +148,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTAssign astAssign)
 	{
 		astAssign.getIdentifier().accept(this);
-		astAssign.getExpr().accept(this);
+		astAssign.getExpression().accept(this);
 		return null;
 	}
 
@@ -157,7 +157,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	{
 		currentScope = new Scope(currentScope);
 
-		for (AST node : astBody.getNodesList()) {
+		for (AST node : astBody.getNodes()) {
 			node.accept(this);
 		}
 
@@ -195,7 +195,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIdentifierExpr astIdentifierExpr)
 	{
-		String astIdentifier = astIdentifierExpr.getId();
+		String astIdentifier = astIdentifierExpr.getName();
 
 		SymbolVariable symbolVariable = null;
 
@@ -222,7 +222,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTNewInstance astNewInstance)
 	{
-		String className = astNewInstance.getClassName().getId();
+		String className = astNewInstance.getClassName().getName();
 		if (!symbolProgram.containsClass(className)) {
 			DiagnosticReporter.error(astNewInstance.getClassName().getToken(), "Class " + className + " not found");
 		}
@@ -237,7 +237,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
-		for (ASTExpression astExpression : astCallFunctionExpr.getArgumentList()) {
+		for (ASTExpression astExpression : astCallFunctionExpr.getArguments()) {
 			astExpression.accept(this);
 		}
 		return null;
@@ -246,7 +246,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		for (ASTExpression astExpression : astCallFunctionStat.getArgumentList()) {
+		for (ASTExpression astExpression : astCallFunctionStat.getArguments()) {
 			astExpression.accept(this);
 		}
 		return null;
@@ -255,8 +255,8 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTReturnStatement astReturnStatement)
 	{
-		if (astReturnStatement.getReturnExpr() != null) {
-			astReturnStatement.getReturnExpr().accept(this);
+		if (astReturnStatement.getExpression() != null) {
+			astReturnStatement.getExpression().accept(this);
 		}
 		return null;
 	}
@@ -306,23 +306,23 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	private void checkIfVariableExist(ASTVariable astVariable)
 	{
 		ASTType type = astVariable.getType().accept(this);
-		String identifier = astVariable.getId().getId();
+		String identifier = astVariable.getIdentifier().getName();
 
 		if (symbolFunction != null) {
 			if (!currentScope.addVariable(identifier, type)) {
-				Token token = astVariable.getId().getToken();
+				Token token = astVariable.getIdentifier().getToken();
 				DiagnosticReporter.error(token,
 						"Variable " + identifier + " already defined in function " + symbolFunction.getId());
 			}
 		} else if (symbolClass != null) {
 			if (!symbolClass.addVariable(identifier, type)) {
-				Token token = astVariable.getId().getToken();
+				Token token = astVariable.getIdentifier().getToken();
 				DiagnosticReporter.error(token,
 						"Variable " + identifier + " already defined in class " + symbolClass.getId());
 			}
 		} else {
 			if (!symbolProgram.addVariable(identifier, type)) {
-				Token token = astVariable.getId().getToken();
+				Token token = astVariable.getIdentifier().getToken();
 				DiagnosticReporter.error(token, "Variable " + identifier + " already defined");
 			}
 		}
@@ -332,7 +332,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTVariable astVariable)
 	{
 		checkIfVariableExist(astVariable);
-		astVariable.getId().accept(this);
+		astVariable.getIdentifier().accept(this);
 		return null;
 	}
 
@@ -340,7 +340,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTVariableInit astVariableInit)
 	{
 		checkIfVariableExist(astVariableInit);
-		astVariableInit.getId().accept(this);
+		astVariableInit.getIdentifier().accept(this);
 		return null;
 	}
 
@@ -361,9 +361,9 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTArrayAssign astArrayAssign)
 	{
-		astArrayAssign.getId().accept(this);
-		astArrayAssign.getExpression1().accept(this);
-		astArrayAssign.getExpression2().accept(this);
+		astArrayAssign.getIdentifier().accept(this);
+		astArrayAssign.getArray().accept(this);
+		astArrayAssign.getValue().accept(this);
 		return null;
 	}
 
@@ -399,7 +399,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	public ASTType visit(ASTArgument astArgument)
 	{
 		ASTType type = astArgument.getType().accept(this);
-		String identifier = astArgument.getIdentifier().getId();
+		String identifier = astArgument.getIdentifier().getName();
 
 		if (symbolFunction != null) {
 			if (!currentScope.addVariable(identifier, type)) {
@@ -424,104 +424,104 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTNotEquals astNotEquals)
 	{
-		astNotEquals.getLeftSide().accept(this);
-		astNotEquals.getRightSide().accept(this);
+		astNotEquals.getLeft().accept(this);
+		astNotEquals.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTPlus astPlus)
 	{
-		astPlus.getLeftSide().accept(this);
-		astPlus.getRightSide().accept(this);
+		astPlus.getLeft().accept(this);
+		astPlus.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTOr astOr)
 	{
-		astOr.getLeftSide().accept(this);
-		astOr.getRightSide().accept(this);
+		astOr.getLeft().accept(this);
+		astOr.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTAnd astAnd)
 	{
-		astAnd.getLeftSide().accept(this);
-		astAnd.getRightSide().accept(this);
+		astAnd.getLeft().accept(this);
+		astAnd.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTEquals astEquals)
 	{
-		astEquals.getLeftSide().accept(this);
-		astEquals.getRightSide().accept(this);
+		astEquals.getLeft().accept(this);
+		astEquals.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLessThan astLessThan)
 	{
-		astLessThan.getLeftSide().accept(this);
-		astLessThan.getRightSide().accept(this);
+		astLessThan.getLeft().accept(this);
+		astLessThan.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
-		astLessThanOrEqual.getLeftSide().accept(this);
-		astLessThanOrEqual.getRightSide().accept(this);
+		astLessThanOrEqual.getLeft().accept(this);
+		astLessThanOrEqual.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTGreaterThan astGreaterThan)
 	{
-		astGreaterThan.getLeftSide().accept(this);
-		astGreaterThan.getRightSide().accept(this);
+		astGreaterThan.getLeft().accept(this);
+		astGreaterThan.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
-		astGreaterThanOrEqual.getLeftSide().accept(this);
-		astGreaterThanOrEqual.getRightSide().accept(this);
+		astGreaterThanOrEqual.getLeft().accept(this);
+		astGreaterThanOrEqual.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTMinus astMinus)
 	{
-		astMinus.getLeftSide().accept(this);
-		astMinus.getRightSide().accept(this);
+		astMinus.getLeft().accept(this);
+		astMinus.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTTimes astTimes)
 	{
-		astTimes.getLeftSide().accept(this);
-		astTimes.getRightSide().accept(this);
+		astTimes.getLeft().accept(this);
+		astTimes.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTDivision astDivision)
 	{
-		astDivision.getLeftSide().accept(this);
-		astDivision.getRightSide().accept(this);
+		astDivision.getLeft().accept(this);
+		astDivision.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTModulus astModulus)
 	{
-		astModulus.getLeftSide().accept(this);
-		astModulus.getRightSide().accept(this);
+		astModulus.getLeft().accept(this);
+		astModulus.getRight().accept(this);
 		return null;
 	}
 
@@ -534,23 +534,23 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTArrayLiteral astArrayLiteral)
 	{
-		for (ASTExpression element : astArrayLiteral.getExpressionList()) {
+		for (ASTExpression element : astArrayLiteral.getExpressions()) {
 			element.accept(this);
 		}
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTForeach astForeach)
+	public ASTType visit(ASTForEach astForEach)
 	{
-		ASTType iterableType = astForeach.getIterable().accept(this);
+		ASTType iterableType = astForEach.getIterable().accept(this);
 		if (iterableType != null && !(iterableType instanceof ASTIntArrayType)
 				&& !(iterableType instanceof ASTStringArrayType)) {
-			DiagnosticReporter.error(astForeach.getIterable().getToken(), "Foreach loop requires array type");
+			DiagnosticReporter.error(astForEach.getIterable().getToken(), "Foreach loop requires array type");
 		}
 
-		astForeach.getVariable().accept(this);
-		astForeach.getBody().accept(this);
+		astForEach.getVariable().accept(this);
+		astForEach.getBody().accept(this);
 
 		return null;
 	}
@@ -558,7 +558,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTLambda astLambda)
 	{
-		for (ASTArgument arg : astLambda.getArgumentList()) {
+		for (ASTArgument arg : astLambda.getArguments()) {
 			arg.accept(this);
 		}
 
@@ -588,7 +588,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTInterface astInterface)
 	{
-		String interfaceName = astInterface.getName().getId();
+		String interfaceName = astInterface.getIdentifier().getName();
 
 		if (!symbolProgram.addInterface(interfaceName)) {
 			DiagnosticReporter.error(astInterface.getToken(), "Interface " + interfaceName + " already defined");
@@ -597,12 +597,12 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 		SymbolInterface symbolInterface = symbolProgram.getInterface(interfaceName);
 
 		for (ASTIdentifier extended : astInterface.getExtendedInterfaces()) {
-			symbolInterface.addExtendedInterface(extended.getId());
+			symbolInterface.addExtendedInterface(extended.getName());
 		}
 
-		for (ASTFunction method : astInterface.getFunctionSignatures()) {
-			ASTType returnType = method.getReturnType().accept(this);
-			symbolInterface.addFunction(method.getFunctionName().toString(), returnType);
+		for (ASTFunction astFunction : astInterface.getFunctions()) {
+			ASTType returnType = astFunction.getReturnType().accept(this);
+			symbolInterface.addFunction(astFunction.getIdentifier().toString(), returnType);
 		}
 
 		return null;

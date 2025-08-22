@@ -19,24 +19,19 @@ public class ASTBody extends ASTStatement
 		this.nodes = new ASTList<>(nodes);
 	}
 
-	public List<AST> getNodesList()
+	public List<AST> getNodes()
 	{
 		return nodes.getList();
 	}
 
-	public int getNodesListSize()
-	{
-		return nodes.getSize();
-	}
-
-	public AST getNodesAt(int index)
+	public AST getNode(int index)
 	{
 		return nodes.getAt(index);
 	}
 
-	public void setScope(Scope scope)
+	public int getNodeCount()
 	{
-		this.scope = scope;
+		return nodes.getSize();
 	}
 
 	public Scope getScope()
@@ -44,9 +39,14 @@ public class ASTBody extends ASTStatement
 		return scope;
 	}
 
-	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public void setScope(Scope scope)
 	{
-		return v.visit(this);
+		this.scope = scope;
+	}
+
+	@Override
+	public <R> R accept(ASTVisitor<R> visitor)
+	{
+		return visitor.visit(this);
 	}
 }

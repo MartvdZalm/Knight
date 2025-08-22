@@ -196,22 +196,22 @@ public class LexerTest
 		assertEquals("456", actual.getSymbol());
 	}
 
-	// @Test
-	// public void empty_line_comment_should_work()
-	// {
-	// String input = """
-	// 123 //
-	// 456
-	// """;
-	// BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
-	// Lexer lexer = new Lexer(bufferedReader);
+	@Test
+	public void empty_line_comment_should_work()
+	{
+		String input = """
+				123 //
+				456
+				""";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
 
-	// Token first = lexer.nextToken();
-	// assertEquals("123", first.getSymbol());
+		Token first = lexer.nextToken();
+		assertEquals("123", first.getSymbol());
 
-	// Token second = lexer.nextToken();
-	// assertEquals("456", second.getSymbol());
-	// }
+		Token second = lexer.nextToken();
+		assertEquals("456", second.getSymbol());
+	}
 
 	@Test
 	public void empty_block_comment_should_work()
@@ -225,5 +225,68 @@ public class LexerTest
 
 		Token second = lexer.nextToken();
 		assertEquals("456", second.getSymbol());
+	}
+
+	@Test
+	public void unterminated_block_comment_should_throw()
+	{
+		String input = "123 /* unterminated...";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+		lexer.nextToken();
+		assertThrows(LexerException.class, lexer::nextToken);
+	}
+
+	@Test
+	public void unterminated_string_should_throw()
+	{
+		String input = "\"unterminated string...";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+		assertThrows(LexerException.class, lexer::nextToken);
+	}
+
+	@Test
+	public void empty_input_should_return_EOF()
+	{
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(""));
+		Lexer lexer = new Lexer(bufferedReader);
+		Token token = lexer.nextToken();
+		assertEquals(Tokens.EOF, token.getToken());
+	}
+
+	@Test
+	public void multiple_whitespace_should_be_ignored()
+	{
+		String input = "123     456";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+
+		assertEquals("123", lexer.nextToken().getSymbol());
+		assertEquals("456", lexer.nextToken().getSymbol());
+	}
+
+	@Test
+	public void string_with_escape_sequences_should_work()
+	{
+		String input = "\"line1\\nline2\"";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+		Token token = lexer.nextToken();
+
+		assertEquals("\"line1\\nline2\"", token.getSymbol());
+		assertEquals(Tokens.STRING, token.getToken());
+	}
+
+	@Test
+	public void identifier_with_digits_should_work()
+	{
+		String input = "var123";
+		BufferedReader bufferedReader = new BufferedReader(new StringReader(input));
+		Lexer lexer = new Lexer(bufferedReader);
+		Token token = lexer.nextToken();
+
+		assertEquals("var123", token.getSymbol());
+		assertEquals(Tokens.IDENTIFIER, token.getToken());
 	}
 }

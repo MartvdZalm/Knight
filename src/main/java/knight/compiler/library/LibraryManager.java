@@ -26,8 +26,9 @@ public class LibraryManager
 
 	public static void loadAllLibraries(SymbolProgram symbolProgram)
 	{
-		if (librariesLoaded)
+		if (librariesLoaded) {
 			return;
+		}
 
 		// Load standard libraries
 		loadStandardLibrary("std", symbolProgram);
@@ -67,8 +68,9 @@ public class LibraryManager
 
 	private static void setSourceFileRecursively(AST ast, String sourceFile)
 	{
-		if (ast == null)
+		if (ast == null) {
 			return;
+		}
 
 		ASTSourceFileSetter setter = new ASTSourceFileSetter(sourceFile);
 		setter.setSourceFileRecursively(ast);

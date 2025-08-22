@@ -9,32 +9,57 @@ import knight.compiler.lexer.Token;
 
 public class ASTInterface extends AST
 {
-	private ASTIdentifier interfaceName;
-	private ASTList<ASTFunction> functionSignatures;
-	private ASTList<ASTIdentifier> extendsInterfaces;
+	private ASTIdentifier identifier;
+	private ASTList<ASTFunction> functions;
+	private ASTList<ASTIdentifier> extendedInterfaces;
 
-	public ASTInterface(Token token, ASTIdentifier interfaceName, List<ASTFunction> functionSignatures,
-			List<ASTIdentifier> extendsInterfaces)
+	public ASTInterface(Token token, ASTIdentifier identifier, List<ASTFunction> functions,
+			List<ASTIdentifier> extendedInterfaces)
 	{
 		super(token);
-		this.interfaceName = interfaceName;
-		this.functionSignatures = new ASTList<>(functionSignatures);
-		this.extendsInterfaces = new ASTList<>(extendsInterfaces);
+		this.identifier = identifier;
+		this.functions = new ASTList<>(functions);
+		this.extendedInterfaces = new ASTList<>(extendedInterfaces);
 	}
 
-	public ASTIdentifier getName()
+	public ASTIdentifier getIdentifier()
 	{
-		return interfaceName;
+		return identifier;
 	}
 
-	public List<ASTFunction> getFunctionSignatures()
+	public void setIdentifier(ASTIdentifier identifier)
 	{
-		return functionSignatures.getList();
+		this.identifier = identifier;
+	}
+
+	public List<ASTFunction> getFunctions()
+	{
+		return functions.getList();
+	}
+
+	public ASTFunction getFunction(int index)
+	{
+		return functions.getAt(index);
+	}
+
+	public int getFunctionCount()
+	{
+		return functions.getSize();
 	}
 
 	public List<ASTIdentifier> getExtendedInterfaces()
 	{
-		return extendsInterfaces.getList();
+		return extendedInterfaces.getList();
+	}
+
+	public ASTIdentifier getExtendedInterface(int index)
+	{
+		return extendedInterfaces.getAt(index);
+	}
+
+	public int getExtendedInterfaceCount()
+	{
+		return extendedInterfaces.getSize();
 	}
 
 	@Override

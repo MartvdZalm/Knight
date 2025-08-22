@@ -16,19 +16,19 @@ public class ASTVariableInit extends ASTVariable
 		this.expression = expression;
 	}
 
-	public void setExpr(ASTExpression expression)
+	public void setExpression(ASTExpression expression)
 	{
 		this.expression = expression;
 	}
 
-	public ASTExpression getExpr()
+	public ASTExpression getExpression()
 	{
 		return expression;
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

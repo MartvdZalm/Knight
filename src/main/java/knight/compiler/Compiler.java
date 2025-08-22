@@ -59,13 +59,11 @@ public class Compiler
 
 	public SymbolProgram buildSymbolProgram(List<ASTProgram> astPrograms)
 	{
-		// Create a single unified symbol program
 		SymbolProgram symbolProgram = new SymbolProgram();
 
 		// First, load all libraries into the symbol program
-		LibraryManager.loadAllLibraries(symbolProgram);
+		// LibraryManager.loadAllLibraries(symbolProgram);
 
-		// Then build symbols from all user files
 		BuildSymbolTree buildSymbolTree = new BuildSymbolTree(symbolProgram);
 		for (ASTProgram astProgram : astPrograms) {
 			buildSymbolTree.visit(astProgram);

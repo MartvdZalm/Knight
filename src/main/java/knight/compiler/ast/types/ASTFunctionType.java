@@ -11,14 +11,14 @@ public class ASTFunctionType extends ASTType
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String toString()
 	{
-		return "int";
+		return "<ASTFunctionType>";
 	}
 }

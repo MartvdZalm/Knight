@@ -7,25 +7,31 @@ import knight.compiler.ast.expressions.ASTExpression;
 import knight.compiler.ast.expressions.ASTIdentifierExpr;
 import knight.compiler.ast.utils.ASTList;
 import knight.compiler.lexer.Token;
+import knight.compiler.ast.contracts.IASTCallFunction;
 
-public class ASTCallFunctionStat extends ASTStatement
+public class ASTCallFunctionStat extends ASTStatement implements IASTCallFunction
 {
 	private ASTIdentifierExpr instance;
 	private ASTIdentifierExpr functionName;
-	private ASTList<ASTExpression> argumentList;
+	private ASTList<ASTExpression> arguments;
 
 	public ASTCallFunctionStat(Token token, ASTIdentifierExpr instance, ASTIdentifierExpr functionName,
-			List<ASTExpression> argumentList)
+			List<ASTExpression> arguments)
 	{
 		super(token);
 		this.instance = instance;
 		this.functionName = functionName;
-		this.argumentList = new ASTList<>(argumentList);
+		this.arguments = new ASTList<>(arguments);
 	}
 
 	public ASTIdentifierExpr getInstance()
 	{
 		return instance;
+	}
+
+	public void setInstance(ASTIdentifierExpr instance)
+	{
+		this.instance = instance;
 	}
 
 	public ASTIdentifierExpr getFunctionName()
@@ -38,29 +44,29 @@ public class ASTCallFunctionStat extends ASTStatement
 		this.functionName = functionName;
 	}
 
-	public void setArgumentList(List<ASTExpression> argumentList)
+	public List<ASTExpression> getArguments()
 	{
-		this.argumentList = new ASTList<>(argumentList);
+		return arguments.getList();
 	}
 
-	public List<ASTExpression> getArgumentList()
+	public void setArguments(List<ASTExpression> arguments)
 	{
-		return argumentList.getList();
+		this.arguments = new ASTList<>(arguments);
 	}
 
-	public int getArgumentListSize()
+	public int getArgumentCount()
 	{
-		return argumentList.getSize();
+		return arguments.getSize();
 	}
 
-	public ASTExpression getArgumentAt(int index)
+	public ASTExpression getArgument(int index)
 	{
-		return argumentList.getAt(index);
+		return arguments.getAt(index);
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

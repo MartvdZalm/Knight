@@ -8,13 +8,13 @@ import knight.compiler.lexer.Token;
 public class ASTAssign extends ASTStatement
 {
 	private ASTIdentifier identifier;
-	private ASTExpression expr;
+	private ASTExpression expression;
 
-	public ASTAssign(Token token, ASTIdentifier identifier, ASTExpression expr)
+	public ASTAssign(Token token, ASTIdentifier identifier, ASTExpression expression)
 	{
 		super(token);
 		this.identifier = identifier;
-		this.expr = expr;
+		this.expression = expression;
 	}
 
 	public ASTIdentifier getIdentifier()
@@ -27,19 +27,19 @@ public class ASTAssign extends ASTStatement
 		this.identifier = identifier;
 	}
 
-	public ASTExpression getExpr()
+	public ASTExpression getExpression()
 	{
-		return expr;
+		return expression;
 	}
 
-	public void setExpr(ASTExpression expr)
+	public void setExpression(ASTExpression expression)
 	{
-		this.expr = expr;
+		this.expression = expression;
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

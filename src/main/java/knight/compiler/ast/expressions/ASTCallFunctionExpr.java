@@ -5,25 +5,31 @@ import java.util.List;
 import knight.compiler.ast.utils.ASTList;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
+import knight.compiler.ast.contracts.IASTCallFunction;
 
-public class ASTCallFunctionExpr extends ASTExpression
+public class ASTCallFunctionExpr extends ASTExpression implements IASTCallFunction
 {
 	private ASTIdentifierExpr instance;
 	private ASTIdentifierExpr functionName;
-	private ASTList<ASTExpression> argumentList;
+	private ASTList<ASTExpression> arguments;
 
 	public ASTCallFunctionExpr(Token token, ASTIdentifierExpr instance, ASTIdentifierExpr functionName,
-			List<ASTExpression> argumentList)
+			List<ASTExpression> arguments)
 	{
 		super(token);
 		this.instance = instance;
 		this.functionName = functionName;
-		this.argumentList = new ASTList<>(argumentList);
+		this.arguments = new ASTList<>(arguments);
 	}
 
 	public ASTIdentifierExpr getInstance()
 	{
 		return instance;
+	}
+
+	public void setInstance(ASTIdentifierExpr instance)
+	{
+		this.instance = instance;
 	}
 
 	public ASTIdentifierExpr getFunctionName()
@@ -36,29 +42,29 @@ public class ASTCallFunctionExpr extends ASTExpression
 		this.functionName = functionName;
 	}
 
-	public void setArgumentList(List<ASTExpression> argumentList)
+	public void setArguments(List<ASTExpression> arguments)
 	{
-		this.argumentList = new ASTList<>(argumentList);
+		this.arguments = new ASTList<>(arguments);
 	}
 
-	public List<ASTExpression> getArgumentList()
+	public List<ASTExpression> getArguments()
 	{
-		return argumentList.getList();
+		return arguments.getList();
 	}
 
-	public int getArgumentListSize()
+	public int getArgumentCount()
 	{
-		return argumentList.getSize();
+		return arguments.getSize();
 	}
 
-	public ASTExpression getArgumentAt(int index)
+	public ASTExpression getArgument(int index)
 	{
-		return argumentList.getAt(index);
+		return arguments.getAt(index);
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

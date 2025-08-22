@@ -5,17 +5,18 @@ import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
 import java.util.List;
+import knight.compiler.ast.utils.ASTList;
 
 public class ASTNewInstance extends ASTExpression
 {
 	private ASTIdentifierExpr className;
-	private List<ASTArgument> arguments;
+	private ASTList<ASTArgument> arguments;
 
 	public ASTNewInstance(Token token, ASTIdentifierExpr className, List<ASTArgument> arguments)
 	{
 		super(token);
 		this.className = className;
-		this.arguments = arguments;
+		this.arguments = new ASTList<>(arguments);
 	}
 
 	public ASTIdentifierExpr getClassName()
@@ -30,12 +31,22 @@ public class ASTNewInstance extends ASTExpression
 
 	public List<ASTArgument> getArguments()
 	{
-		return arguments;
+		return arguments.getList();
+	}
+
+	public int getArgumentCount()
+	{
+		return arguments.getSize();
+	}
+
+	public ASTArgument getArgument(int index)
+	{
+		return arguments.getAt(index);
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

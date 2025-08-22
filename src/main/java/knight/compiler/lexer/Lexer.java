@@ -5,7 +5,6 @@ import java.io.IOException;
 
 public class Lexer
 {
-	// private static final int PEEK_BUFFER_SIZE = 1024;
 	private final SourceReader source;
 	private char currentChar;
 	private boolean exceptionOccurred = false;
@@ -96,12 +95,12 @@ public class Lexer
 
 	private void skipLineComment() throws IOException
 	{
+		int commentRow = source.getRow();
+
 		currentChar = source.read(); // '/'
-		currentChar = source.read(); // second '/'
+		currentChar = source.read(); // '/'
 
-		int savedRow = source.getRow();
-
-		while (source.getRow() == savedRow && currentChar != SourceReader.EOF) {
+		while (source.getRow() == commentRow && currentChar != SourceReader.EOF) {
 			currentChar = source.read();
 		}
 	}
@@ -173,17 +172,17 @@ public class Lexer
 		int endCol = source.getCol();
 
 		StringBuilder sb = new StringBuilder();
-		currentChar = source.read();
+		currentChar = source.read(); // skip opening quote
 		endCol++;
 
 		boolean escapeNext = false;
 
-		while (true) {
+		while (currentChar != SourceReader.EOF) {
 			if (currentChar == '\\' && !escapeNext) {
 				escapeNext = true;
 				sb.append('\\');
 			} else if (currentChar == '\"' && !escapeNext) {
-				break;
+				break; // closing quote found
 			} else {
 				sb.append(currentChar);
 				escapeNext = false;
@@ -193,7 +192,12 @@ public class Lexer
 			endCol++;
 		}
 
-		currentChar = source.read();
+		if (currentChar == SourceReader.EOF) {
+			exceptionOccurred = true;
+			throw new LexerException("Unterminated string literal");
+		}
+
+		currentChar = source.read(); // consume closing quote
 		endCol++;
 
 		return new Token(Symbol.symbol("\"" + sb.toString() + "\"", Tokens.STRING), startRow, endCol - 1);

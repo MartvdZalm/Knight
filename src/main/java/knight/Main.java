@@ -8,6 +8,7 @@ import knight.compiler.preprocessor.PreProcessor;
 import knight.compiler.semantics.diagnostics.Diagnostic;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.SymbolProgram;
+import knight.utils.FileHelper;
 
 import java.io.File;
 import java.util.List;
@@ -60,6 +61,10 @@ public class Main
 			SymbolProgram symbolProgram = compiler.buildSymbolProgram(astPrograms);
 			System.out.println("Built unified symbol program");
 
+			for (String funcName : symbolProgram.getFunctions().keySet()) {
+				System.out.println(funcName);
+			}
+
 			// Step 4: Run semantics analysis on all programs
 			compiler.semantics(astPrograms, symbolProgram);
 
@@ -94,7 +99,9 @@ public class Main
 				codeGenerator.visit(astProgram);
 			}
 
-			String code = String.valueOf(codeGenerator.generateHeaders().append(codeGenerator.getGeneratedCode()));
+			// String code =
+			// String.valueOf(codeGenerator.generateHeaders().append(codeGenerator.getGeneratedCode()));
+			String code = String.valueOf(codeGenerator.getGeneratedCode());
 			FileHelper.write(code, path, filename);
 
 			System.out.println("Code generation completed successfully");

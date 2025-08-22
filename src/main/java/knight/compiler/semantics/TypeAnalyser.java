@@ -3,13 +3,14 @@ package knight.compiler.semantics;
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
 import knight.compiler.ast.program.*;
 import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
+import knight.compiler.ast.contracts.*;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.*;
 
@@ -46,7 +47,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTAssign astAssign)
 	{
-		ASTType rightSide = astAssign.getExpr().accept(this);
+		ASTType rightSide = astAssign.getExpression().accept(this);
 		ASTType leftSide = astAssign.getIdentifier().accept(this);
 
 		if (!symbolProgram.compareTypes(leftSide, rightSide)) {
@@ -58,7 +59,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			}
 
 		} else {
-			astAssign.getExpr().setType(rightSide);
+			astAssign.getExpression().setType(rightSide);
 		}
 		return null;
 	}
@@ -66,7 +67,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTBody astBody)
 	{
-		for (AST node : astBody.getNodesList()) {
+		for (AST node : astBody.getNodes()) {
 			node.accept(this);
 		}
 		return null;
@@ -96,8 +97,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTPlus astPlus)
 	{
-		ASTType leftType = astPlus.getLeftSide().accept(this);
-		ASTType rightType = astPlus.getRightSide().accept(this);
+		ASTType leftType = astPlus.getLeft().accept(this);
+		ASTType rightType = astPlus.getRight().accept(this);
 
 		if (leftType == null || rightType == null) {
 			DiagnosticReporter.error(astPlus.getToken(), "Operands must have valid types for + operator");
@@ -128,8 +129,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTMinus astMinus)
 	{
-		ASTType leftSide = astMinus.getLeftSide().accept(this);
-		ASTType rightSide = astMinus.getRightSide().accept(this);
+		ASTType leftSide = astMinus.getLeft().accept(this);
+		ASTType rightSide = astMinus.getRight().accept(this);
 
 		if (leftSide == null || rightSide == null) {
 			DiagnosticReporter.error(astMinus.getToken(), "Improper Type used with - operator");
@@ -137,7 +138,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		}
 
 		if (!(leftSide instanceof ASTIntType) || !(rightSide instanceof ASTIntType)) {
-			DiagnosticReporter.error(astMinus.getLeftSide().getToken(),
+			DiagnosticReporter.error(astMinus.getLeft().getToken(),
 					"Operator - cannot be applied to " + leftSide + ", " + rightSide);
 		}
 
@@ -149,8 +150,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTTimes astTimes)
 	{
-		ASTType leftSide = astTimes.getLeftSide().accept(this);
-		ASTType rightSide = astTimes.getRightSide().accept(this);
+		ASTType leftSide = astTimes.getLeft().accept(this);
+		ASTType rightSide = astTimes.getRight().accept(this);
 
 		if (leftSide == null || rightSide == null) {
 			DiagnosticReporter.error(astTimes.getToken(), "Improper Type used with * operator");
@@ -158,7 +159,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		}
 
 		if (!(leftSide instanceof ASTIntType) || !(rightSide instanceof ASTIntType)) {
-			DiagnosticReporter.error(astTimes.getLeftSide().getToken(),
+			DiagnosticReporter.error(astTimes.getLeft().getToken(),
 					"Operator * cannot be applied to " + leftSide + ", " + rightSide);
 		}
 
@@ -170,8 +171,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTModulus astModulus)
 	{
-		ASTType leftSide = astModulus.getLeftSide().accept(this);
-		ASTType rightSide = astModulus.getRightSide().accept(this);
+		ASTType leftSide = astModulus.getLeft().accept(this);
+		ASTType rightSide = astModulus.getRight().accept(this);
 
 		if (leftSide == null || rightSide == null) {
 			DiagnosticReporter.error(astModulus.getToken(), "Improper Type used with % operator");
@@ -179,7 +180,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		}
 
 		if (!(leftSide instanceof ASTIntType) || !(rightSide instanceof ASTIntType)) {
-			DiagnosticReporter.error(astModulus.getLeftSide().getToken(),
+			DiagnosticReporter.error(astModulus.getLeft().getToken(),
 					"Operator % cannot be applied to " + leftSide + ", " + rightSide);
 		}
 
@@ -191,8 +192,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTDivision astDivision)
 	{
-		ASTType leftSide = astDivision.getLeftSide().accept(this);
-		ASTType rightSide = astDivision.getRightSide().accept(this);
+		ASTType leftSide = astDivision.getLeft().accept(this);
+		ASTType rightSide = astDivision.getRight().accept(this);
 
 		if (leftSide == null || rightSide == null) {
 			DiagnosticReporter.error(astDivision.getToken(), "Improper Type used with / operator");
@@ -200,7 +201,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 		}
 
 		if (!(leftSide instanceof ASTIntType) || !(rightSide instanceof ASTIntType)) {
-			DiagnosticReporter.error(astDivision.getLeftSide().getToken(),
+			DiagnosticReporter.error(astDivision.getLeft().getToken(),
 					"Operator / cannot be applied to " + leftSide + ", " + rightSide);
 		}
 		ASTType astType = new ASTIntType(astDivision.getToken());
@@ -211,8 +212,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTEquals astEquals)
 	{
-		ASTType typeLeftSide = astEquals.getLeftSide().accept(this);
-		ASTType typeRightSide = astEquals.getRightSide().accept(this);
+		ASTType typeLeftSide = astEquals.getLeft().accept(this);
+		ASTType typeRightSide = astEquals.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astEquals.getToken(), "Incorrect types used with == oprator");
@@ -232,8 +233,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTNotEquals astNotEquals)
 	{
-		ASTType typeLeftSide = astNotEquals.getLeftSide().accept(this);
-		ASTType typeRightSide = astNotEquals.getRightSide().accept(this);
+		ASTType typeLeftSide = astNotEquals.getLeft().accept(this);
+		ASTType typeRightSide = astNotEquals.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astNotEquals.getToken(), "Incorrect types used with == oprator");
@@ -253,8 +254,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTLessThan astLessThan)
 	{
-		ASTType typeLeftSide = astLessThan.getLeftSide().accept(this);
-		ASTType typeRightSide = astLessThan.getRightSide().accept(this);
+		ASTType typeLeftSide = astLessThan.getLeft().accept(this);
+		ASTType typeRightSide = astLessThan.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astLessThan.getToken(), "Incorrect types used with < oprator");
@@ -271,8 +272,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
-		ASTType typeLeftSide = astLessThanOrEqual.getLeftSide().accept(this);
-		ASTType typeRightSide = astLessThanOrEqual.getRightSide().accept(this);
+		ASTType typeLeftSide = astLessThanOrEqual.getLeft().accept(this);
+		ASTType typeRightSide = astLessThanOrEqual.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astLessThanOrEqual.getToken(), "Incorrect types used with <= oprator");
@@ -288,8 +289,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTGreaterThan astGreaterThan)
 	{
-		ASTType typeLeftSide = astGreaterThan.getLeftSide().accept(this);
-		ASTType typeRightSide = astGreaterThan.getRightSide().accept(this);
+		ASTType typeLeftSide = astGreaterThan.getLeft().accept(this);
+		ASTType typeRightSide = astGreaterThan.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astGreaterThan.getToken(), "Incorrect types used with > oprator");
@@ -305,8 +306,8 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
-		ASTType typeLeftSide = astGreaterThanOrEqual.getLeftSide().accept(this);
-		ASTType typeRightSide = astGreaterThanOrEqual.getRightSide().accept(this);
+		ASTType typeLeftSide = astGreaterThanOrEqual.getLeft().accept(this);
+		ASTType typeRightSide = astGreaterThanOrEqual.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astGreaterThanOrEqual.getToken(), "Incorrect types used with >= oprator");
@@ -322,13 +323,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTAnd astAnd)
 	{
-		ASTType typeLeftSide = astAnd.getLeftSide().accept(this);
-		ASTType typeRightSide = astAnd.getRightSide().accept(this);
+		ASTType typeLeftSide = astAnd.getLeft().accept(this);
+		ASTType typeRightSide = astAnd.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astAnd.getToken(), "Incorrect types used with && oprator");
 		} else if (!(typeLeftSide instanceof ASTBooleanType) || !(typeRightSide instanceof ASTBooleanType)) {
-			DiagnosticReporter.error(astAnd.getLeftSide().getToken(),
+			DiagnosticReporter.error(astAnd.getLeft().getToken(),
 					"Operator && cannot be applied to " + typeLeftSide + ", " + typeRightSide);
 		}
 		ASTType astType = new ASTBooleanType(astAnd.getToken());
@@ -339,13 +340,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTOr astOr)
 	{
-		ASTType typeLeftSide = astOr.getLeftSide().accept(this);
-		ASTType typeRightSide = astOr.getRightSide().accept(this);
+		ASTType typeLeftSide = astOr.getLeft().accept(this);
+		ASTType typeRightSide = astOr.getRight().accept(this);
 
 		if (typeLeftSide == null || typeRightSide == null) {
 			DiagnosticReporter.error(astOr.getToken(), "Incorrect types used with || oprator");
 		} else if (!(typeLeftSide instanceof ASTBooleanType) || !(typeRightSide instanceof ASTBooleanType)) {
-			DiagnosticReporter.error(astOr.getLeftSide().getToken(),
+			DiagnosticReporter.error(astOr.getLeft().getToken(),
 					"Operator || cannot be applied to " + typeLeftSide + ", " + typeRightSide);
 		}
 		ASTType astType = new ASTBooleanType(astOr.getToken());
@@ -372,7 +373,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIdentifierExpr astIdentifierExpr)
 	{
-		Binding binding = astIdentifierExpr.getB();
+		Binding binding = astIdentifierExpr.getBinding();
 		if (binding != null) {
 			ASTType astType = ((SymbolVariable) binding).getType();
 			astIdentifierExpr.setType(astType);
@@ -397,13 +398,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTNewInstance astNewInstance)
 	{
-		Binding binding = astNewInstance.getClassName().getB();
+		Binding binding = astNewInstance.getClassName().getBinding();
 		if (binding != null) {
 			SymbolClass symbolClass = (SymbolClass) binding;
 			astNewInstance.setType(symbolClass.type());
 			return symbolClass.type();
 		}
-		return new ASTIdentifierType(astNewInstance.getToken(), astNewInstance.getClassName().getId());
+		return new ASTIdentifierType(astNewInstance.getToken(), astNewInstance.getClassName().getName());
 	}
 
 	@Override
@@ -423,7 +424,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			return null;
 		}
 
-		astCallFunctionExpr.getFunctionName().setB(symbolFunction);
+		astCallFunctionExpr.getFunctionName().setBinding(symbolFunction);
 		checkCallArguments(astCallFunctionExpr, symbolFunction);
 		astCallFunctionExpr.setType(symbolFunction.getType());
 		return symbolFunction.getType();
@@ -432,22 +433,41 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		for (ASTExpression astExpression : astCallFunctionStat.getArgumentList()) {
-			astExpression.accept(this);
+		// for (ASTExpression astExpression : astCallFunctionStat.getArgumentList()) {
+		// astExpression.accept(this);
+		// }
+		// return null;
+
+		ASTIdentifierExpr functionName = astCallFunctionStat.getFunctionName();
+
+		SymbolFunction symbolFunction = null;
+		if (symbolClass == null) {
+			symbolFunction = symbolProgram.getFunction(functionName.toString());
+		} else {
+			symbolFunction = symbolProgram.getFunction(functionName.toString(), symbolClass.getId());
 		}
-		return null;
+
+		if (symbolFunction == null) {
+			DiagnosticReporter.error(functionName.getToken(), "Function " + functionName + " not declared");
+			return null;
+		}
+
+		astCallFunctionStat.getFunctionName().setBinding(symbolFunction);
+		checkCallArguments(astCallFunctionStat, symbolFunction);
+		// astCallFunctionStat.setType(symbolFunction.getType());
+		return symbolFunction.getType();
 	}
 
-	private void checkCallArguments(ASTCallFunctionExpr astCallFunctionExpr, SymbolFunction symbolFunction)
+	private void checkCallArguments(IASTCallFunction astCallFunctionExpr, SymbolFunction symbolFunction)
 	{
 		List<ASTType> argumentTypes = new ArrayList<>();
 
-		for (ASTExpression astExpression : astCallFunctionExpr.getArgumentList()) {
+		for (ASTExpression astExpression : astCallFunctionExpr.getArguments()) {
 			ASTType astType = astExpression.accept(this);
 			argumentTypes.add(astType);
 		}
 
-		if (astCallFunctionExpr.getArgumentListSize() != symbolFunction.getParamsSize()) {
+		if (astCallFunctionExpr.getArgumentCount() != symbolFunction.getParamsSize()) {
 			DiagnosticReporter.error(astCallFunctionExpr.getToken(), "The function " + symbolFunction.toString()
 					+ " is not applicable for the arguments (" + getArguments(argumentTypes) + ")");
 			return;
@@ -459,7 +479,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			ASTType type2 = argumentTypes.get(i);
 
 			if (!symbolProgram.compareTypes(type1, type2)) {
-				DiagnosticReporter.error(astCallFunctionExpr.getArgumentAt(i).getToken(),
+				DiagnosticReporter.error(astCallFunctionExpr.getArgument(i).getToken(),
 						"The function " + symbolFunction.toString() + " is not applicable for the arguments ("
 								+ getArguments(argumentTypes) + ")");
 				return;
@@ -535,11 +555,11 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTVariableInit astVariableInit)
 	{
-		ASTType typeRightSide = astVariableInit.getExpr().accept(this);
-		ASTType typeLeftSide = astVariableInit.getId().accept(this);
+		ASTType typeRightSide = astVariableInit.getExpression().accept(this);
+		ASTType typeLeftSide = astVariableInit.getIdentifier().accept(this);
 
-		if (astVariableInit.getExpr() instanceof ASTCallFunctionExpr) {
-			ASTCallFunctionExpr astCallFunctionExpr = (ASTCallFunctionExpr) astVariableInit.getExpr();
+		if (astVariableInit.getExpression() instanceof ASTCallFunctionExpr) {
+			ASTCallFunctionExpr astCallFunctionExpr = (ASTCallFunctionExpr) astVariableInit.getExpression();
 
 			SymbolFunction symbolFunction = null;
 			if (symbolClass != null) {
@@ -564,7 +584,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			}
 
 		} else {
-			astVariableInit.getExpr().setType(typeRightSide);
+			astVariableInit.getExpression().setType(typeRightSide);
 		}
 
 		return null;
@@ -573,16 +593,16 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTFunction astFunction)
 	{
-		String functionName = astFunction.getFunctionName().getId();
+		String functionName = astFunction.getIdentifier().getName();
 
 		if (processedFunctions.contains(functionName)) {
 			return astFunction.getReturnType();
 		}
 
 		processedFunctions.add(functionName);
-		symbolFunction = (SymbolFunction) astFunction.getFunctionName().getB();
+		symbolFunction = (SymbolFunction) astFunction.getIdentifier().getBinding();
 
-		for (ASTArgument astArgument : astFunction.getArgumentList()) {
+		for (ASTArgument astArgument : astFunction.getArguments()) {
 			astArgument.accept(this);;
 		}
 
@@ -594,7 +614,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-		for (AST node : astProgram.getNodeList()) {
+		for (AST node : astProgram.getNodes()) {
 			node.accept(this);
 		}
 
@@ -604,7 +624,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIdentifier astIdentifier)
 	{
-		Binding binding = astIdentifier.getB();
+		Binding binding = astIdentifier.getBinding();
 		if (binding != null) {
 			return ((SymbolVariable) binding).getType();
 		}
@@ -614,7 +634,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTReturnStatement astReturnStatement)
 	{
-		astReturnStatement.getReturnExpr().accept(this);
+		astReturnStatement.getExpression().accept(this);
 		return null;
 	}
 
@@ -645,23 +665,23 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTArrayAssign astArrayAssign)
 	{
-		ASTType typeArrayId = astArrayAssign.getId().accept(this);
+		ASTType typeArrayId = astArrayAssign.getIdentifier().accept(this);
 		if (typeArrayId == null || !(typeArrayId instanceof ASTIntArrayType)) {
-			DiagnosticReporter.error(astArrayAssign.getId().getToken(), "Identifier must be of Type int[]");
+			DiagnosticReporter.error(astArrayAssign.getIdentifier().getToken(), "Identifier must be of Type int[]");
 		}
 
-		ASTType typeArrayExpr1 = astArrayAssign.getExpression1().accept(this);
+		ASTType typeArrayExpr1 = astArrayAssign.getArray().accept(this);
 		if (typeArrayExpr1 == null || !(typeArrayExpr1 instanceof ASTIntType)) {
-			DiagnosticReporter.error(astArrayAssign.getExpression1().getToken(), "Expression must be of Type int");
+			DiagnosticReporter.error(astArrayAssign.getArray().getToken(), "Expression must be of Type int");
 		} else {
-			astArrayAssign.getExpression1().setType(typeArrayExpr1);
+			astArrayAssign.getArray().setType(typeArrayExpr1);
 		}
 
-		ASTType typeArrayExpr2 = astArrayAssign.getExpression2().accept(this);
+		ASTType typeArrayExpr2 = astArrayAssign.getValue().accept(this);
 		if (typeArrayExpr2 == null || !(typeArrayExpr2 instanceof ASTIntType)) {
-			DiagnosticReporter.error(astArrayAssign.getExpression2().getToken(), "Expression must be of Type int");
+			DiagnosticReporter.error(astArrayAssign.getValue().getToken(), "Expression must be of Type int");
 		} else {
-			astArrayAssign.getExpression2().setType(typeArrayExpr2);
+			astArrayAssign.getValue().setType(typeArrayExpr2);
 		}
 
 		return null;
@@ -678,21 +698,21 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTClass astClass)
 	{
-		String className = astClass.getClassName().getId();
+		String className = astClass.getIdentifier().getName();
 		if (processedClasses.contains(className)) {
 			return null;
 		}
 		processedClasses.add(className);
 
-		Binding binding = astClass.getClassName().getB();
+		Binding binding = astClass.getIdentifier().getBinding();
 		symbolClass = (SymbolClass) binding;
 		processedFunctions.clear();
 
-		for (ASTProperty astProperty : astClass.getPropertyList()) {
+		for (ASTProperty astProperty : astClass.getProperties()) {
 			astProperty.accept(this);
 		}
 
-		for (ASTFunction astFunction : astClass.getFunctionList()) {
+		for (ASTFunction astFunction : astClass.getFunctions()) {
 			astFunction.accept(this);
 		}
 
@@ -756,7 +776,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	}
 
 	@Override
-	public ASTType visit(ASTForeach astForeach)
+	public ASTType visit(ASTForEach astForEach)
 	{
 		return null;
 	}

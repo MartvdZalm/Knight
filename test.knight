@@ -2,8 +2,7 @@ import "program.knight"
 
 fn main(): int
 {
-	print("Hello World: ");
-	print(10 + 10);
+	calculate(10, 10);
 
 	ret 0;
 }

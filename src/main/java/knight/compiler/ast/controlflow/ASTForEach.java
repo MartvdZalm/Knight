@@ -7,13 +7,13 @@ import knight.compiler.ast.statements.ASTBody;
 import knight.compiler.ast.statements.ASTStatement;
 import knight.compiler.lexer.Token;
 
-public class ASTForeach extends ASTStatement
+public class ASTForEach extends ASTStatement
 {
 	private ASTVariable variable;
 	private ASTExpression iterable;
 	private ASTBody body;
 
-	public ASTForeach(Token token, ASTVariable variable, ASTExpression iterable, ASTBody body)
+	public ASTForEach(Token token, ASTVariable variable, ASTExpression iterable, ASTBody body)
 	{
 		super(token);
 		this.variable = variable;
@@ -52,8 +52,8 @@ public class ASTForeach extends ASTStatement
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

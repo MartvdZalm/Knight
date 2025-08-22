@@ -2,7 +2,7 @@ package knight.compiler.semantics;
 
 import knight.compiler.ast.*;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
@@ -57,7 +57,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTAssign astAssign)
 	{
 		astAssign.getIdentifier().accept(this);
-		astAssign.getExpr().accept(this);
+		astAssign.getExpression().accept(this);
 		return null;
 	}
 
@@ -68,7 +68,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		Scope savedScope = currentScope;
 		currentScope = bodyScope;
 
-		for (AST node : astBody.getNodesList()) {
+		for (AST node : astBody.getNodes()) {
 			node.accept(this);
 		}
 
@@ -112,26 +112,26 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTNewInstance astNewInstance)
 	{
-		String identifier = astNewInstance.getClassName().getId();
+		String identifier = astNewInstance.getClassName().getName();
 		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 		if (symbolClass == null) {
 			DiagnosticReporter.error(astNewInstance.getClassName().getToken(),
 					"Cannot instantiate undefined class '" + identifier + "'");
 		}
 
-		astNewInstance.getClassName().setB(symbolClass);
+		astNewInstance.getClassName().setBinding(symbolClass);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
-		for (ASTExpression astExpression : astCallFunctionExpr.getArgumentList()) {
+		for (ASTExpression astExpression : astCallFunctionExpr.getArguments()) {
 			astExpression.accept(this);
 		}
 
-		String functionName = astCallFunctionExpr.getFunctionName().getId();
-		String instanceName = astCallFunctionExpr.getInstance().getId();
+		String functionName = astCallFunctionExpr.getFunctionName().getName();
+		String instanceName = astCallFunctionExpr.getInstance().getName();
 
 		SymbolFunction symbolFunction = null;
 		if (instanceName != null) {
@@ -144,14 +144,14 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			DiagnosticReporter.error(astCallFunctionExpr.getToken(), "Undefined function '" + functionName + "'");
 		}
 
-		astCallFunctionExpr.getFunctionName().setB(symbolFunction);
+		astCallFunctionExpr.getFunctionName().setBinding(symbolFunction);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		for (ASTExpression astExpression : astCallFunctionStat.getArgumentList()) {
+		for (ASTExpression astExpression : astCallFunctionStat.getArguments()) {
 			astExpression.accept(this);
 		}
 		return null;
@@ -196,7 +196,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIdentifier astIdentifier)
 	{
-		String identifier = astIdentifier.getId();
+		String identifier = astIdentifier.getName();
 		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
 
 		if (symbolVariable == null) {
@@ -205,33 +205,33 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			DiagnosticReporter.error(astIdentifier.getToken(), "variable " + identifier + " is not declared");
 		}
 
-		astIdentifier.setB(symbolVariable);
+		astIdentifier.setBinding(symbolVariable);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTIdentifierType astIdentifierType)
 	{
-		String identifier = astIdentifierType.getId();
+		String identifier = astIdentifierType.getName();
 		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 		if (symbolClass == null) {
 			DiagnosticReporter.error(astIdentifierType.getToken(), "Undefined class '" + identifier + "'");
 		}
 
-		astIdentifierType.setB(symbolClass);
+		astIdentifierType.setBinding(symbolClass);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTIdentifierExpr astIdentifierExpr)
 	{
-		String identifier = astIdentifierExpr.getId();
+		String identifier = astIdentifierExpr.getName();
 		SymbolVariable symbolVariable = this.getVariable(identifier, symbolClass, symbolFunction);
 		if (symbolVariable == null) {
 			DiagnosticReporter.error(astIdentifierExpr.getToken(), "Undefined variable '" + identifier + "'");
 		}
 
-		astIdentifierExpr.setB(symbolVariable);
+		astIdentifierExpr.setBinding(symbolVariable);
 		return null;
 	}
 
@@ -239,7 +239,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTVariable astVariable)
 	{
 		astVariable.getType().accept(this);
-		astVariable.getId().accept(this);
+		astVariable.getIdentifier().accept(this);
 		return null;
 	}
 
@@ -247,8 +247,8 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTVariableInit astVariableInit)
 	{
 		astVariableInit.getType().accept(this);
-		astVariableInit.getId().accept(this);
-		astVariableInit.getExpr().accept(this);
+		astVariableInit.getIdentifier().accept(this);
+		astVariableInit.getExpression().accept(this);
 		return null;
 	}
 
@@ -259,7 +259,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		Scope savedScope = currentScope;
 		currentScope = bodyScope;
 
-		String functionName = astFunction.getFunctionName().getId();
+		String functionName = astFunction.getIdentifier().getName();
 
 		if (processedFunctions.contains(functionName)) {
 			return null;
@@ -269,11 +269,11 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		SymbolFunction previousFunction = symbolFunction;
 		symbolFunction = (symbolClass != null) ? symbolClass.getFunction(functionName)
 				: symbolProgram.getFunction(functionName);
-		astFunction.getFunctionName().setB(symbolFunction);
+		astFunction.getIdentifier().setBinding(symbolFunction);
 
 		astFunction.getReturnType().accept(this);
 
-		for (ASTArgument astArgument : astFunction.getArgumentList()) {
+		for (ASTArgument astArgument : astFunction.getArguments()) {
 			astArgument.accept(this);
 		}
 
@@ -287,7 +287,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProgram astProgram)
 	{
-		for (AST node : astProgram.getNodeList()) {
+		for (AST node : astProgram.getNodes()) {
 			node.accept(this);
 		}
 
@@ -297,7 +297,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTReturnStatement astReturnStatement)
 	{
-		astReturnStatement.getReturnExpr().accept(this);
+		astReturnStatement.getExpression().accept(this);
 		return null;
 	}
 
@@ -312,9 +312,9 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTArrayAssign astArrayAssign)
 	{
-		astArrayAssign.getId().accept(this);
-		astArrayAssign.getExpression1().accept(this);
-		astArrayAssign.getExpression2().accept(this);
+		astArrayAssign.getIdentifier().accept(this);
+		astArrayAssign.getArray().accept(this);
+		astArrayAssign.getValue().accept(this);
 		return null;
 	}
 
@@ -327,7 +327,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTClass astClass)
 	{
-		String className = astClass.getClassName().getId();
+		String className = astClass.getIdentifier().getName();
 
 		if (processedClasses.contains(className)) {
 			return null;
@@ -336,13 +336,13 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 
 		SymbolClass previousClass = symbolClass;
 		symbolClass = symbolProgram.getClass(className);
-		astClass.getClassName().setB(symbolClass);
+		astClass.getIdentifier().setBinding(symbolClass);
 
-		for (ASTProperty astProperty : astClass.getPropertyList()) {
+		for (ASTProperty astProperty : astClass.getProperties()) {
 			astProperty.accept(this);
 		}
 
-		for (ASTFunction astFunction : astClass.getFunctionList()) {
+		for (ASTFunction astFunction : astClass.getFunctions()) {
 			astFunction.accept(this);
 		}
 
@@ -354,7 +354,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTProperty astProperty)
 	{
-		astProperty.getId().accept(this);
+		astProperty.getIdentifier().accept(this);
 		return null;
 	}
 
@@ -391,104 +391,104 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTNotEquals astNotEquals)
 	{
-		astNotEquals.getLeftSide().accept(this);
-		astNotEquals.getRightSide().accept(this);
+		astNotEquals.getLeft().accept(this);
+		astNotEquals.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTPlus astPlus)
 	{
-		astPlus.getLeftSide().accept(this);
-		astPlus.getRightSide().accept(this);
+		astPlus.getLeft().accept(this);
+		astPlus.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTOr astOr)
 	{
-		astOr.getLeftSide().accept(this);
-		astOr.getRightSide().accept(this);
+		astOr.getLeft().accept(this);
+		astOr.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTAnd astAnd)
 	{
-		astAnd.getLeftSide().accept(this);
-		astAnd.getRightSide().accept(this);
+		astAnd.getLeft().accept(this);
+		astAnd.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTEquals astEquals)
 	{
-		astEquals.getLeftSide().accept(this);
-		astEquals.getRightSide().accept(this);
+		astEquals.getLeft().accept(this);
+		astEquals.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLessThan astLessThan)
 	{
-		astLessThan.getLeftSide().accept(this);
-		astLessThan.getRightSide().accept(this);
+		astLessThan.getLeft().accept(this);
+		astLessThan.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
-		astLessThanOrEqual.getLeftSide().accept(this);
-		astLessThanOrEqual.getRightSide().accept(this);
+		astLessThanOrEqual.getLeft().accept(this);
+		astLessThanOrEqual.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTGreaterThan astGreaterThan)
 	{
-		astGreaterThan.getLeftSide().accept(this);
-		astGreaterThan.getRightSide().accept(this);
+		astGreaterThan.getLeft().accept(this);
+		astGreaterThan.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
-		astGreaterThanOrEqual.getLeftSide().accept(this);
-		astGreaterThanOrEqual.getRightSide().accept(this);
+		astGreaterThanOrEqual.getLeft().accept(this);
+		astGreaterThanOrEqual.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTMinus astMinus)
 	{
-		astMinus.getLeftSide().accept(this);
-		astMinus.getRightSide().accept(this);
+		astMinus.getLeft().accept(this);
+		astMinus.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTTimes astTimes)
 	{
-		astTimes.getLeftSide().accept(this);
-		astTimes.getRightSide().accept(this);
+		astTimes.getLeft().accept(this);
+		astTimes.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTDivision astDivision)
 	{
-		astDivision.getLeftSide().accept(this);
-		astDivision.getRightSide().accept(this);
+		astDivision.getLeft().accept(this);
+		astDivision.getRight().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTModulus astModulus)
 	{
-		astModulus.getLeftSide().accept(this);
-		astModulus.getRightSide().accept(this);
+		astModulus.getLeft().accept(this);
+		astModulus.getRight().accept(this);
 		return null;
 	}
 
@@ -501,25 +501,25 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTArrayLiteral astArrayLiteral)
 	{
-		for (ASTExpression astExpression : astArrayLiteral.getExpressionList()) {
+		for (ASTExpression astExpression : astArrayLiteral.getExpressions()) {
 			astExpression.accept(this);
 		}
 		return null;
 	}
 
 	@Override
-	public ASTType visit(ASTForeach astForeach)
+	public ASTType visit(ASTForEach astForEach)
 	{
-		astForeach.getIterable().accept(this);
-		astForeach.getVariable().accept(this);
-		astForeach.getBody().accept(this);
+		astForEach.getIterable().accept(this);
+		astForEach.getVariable().accept(this);
+		astForEach.getBody().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTType visit(ASTLambda astLambda)
 	{
-		astLambda.getArgumentList().forEach(arg -> arg.accept(this));
+		astLambda.getArguments().forEach(arg -> arg.accept(this));
 		astLambda.getReturnType().accept(this);
 		astLambda.getBody().accept(this);
 		return null;
@@ -540,9 +540,9 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTInterface astInterface)
 	{
-		String interfaceName = astInterface.getName().getId();
+		String interfaceName = astInterface.getIdentifier().getName();
 		SymbolInterface si = symbolProgram.getInterface(interfaceName);
-		astInterface.getName().setB(si);
+		astInterface.getIdentifier().setBinding(si);
 		return null;
 	}
 }

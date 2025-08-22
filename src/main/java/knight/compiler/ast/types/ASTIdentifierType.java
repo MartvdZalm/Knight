@@ -6,44 +6,44 @@ import knight.compiler.semantics.model.Binding;
 
 public class ASTIdentifierType extends ASTType
 {
-	private String id;
-	private Binding b;
+	private String name;
+	private Binding binding;
 
-	public ASTIdentifierType(Token token, String id)
+	public ASTIdentifierType(Token token, String name)
 	{
 		super(token);
-		this.id = id;
+		this.name = name;
 	}
 
-	public String getId()
+	public String getName()
 	{
-		return id;
+		return name;
 	}
 
-	public void setId(String id)
+	public void setName(String name)
 	{
-		this.id = id;
+		this.name = name;
 	}
 
-	public Binding getB()
+	public Binding getBinding()
 	{
-		return b;
+		return binding;
 	}
 
-	public void setB(Binding b)
+	public void setBinding(Binding binding)
 	{
-		this.b = b;
+		this.binding = binding;
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 
 	@Override
 	public String toString()
 	{
-		return id;
+		return name;
 	}
 }

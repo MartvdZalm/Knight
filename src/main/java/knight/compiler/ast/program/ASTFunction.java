@@ -12,21 +12,21 @@ import knight.compiler.semantics.model.Scope;
 public class ASTFunction extends AST
 {
 	private ASTType returnType;
-	private ASTIdentifier functionName;
-	private ASTList<ASTArgument> argumentList;
+	private ASTIdentifier identifier;
+	private ASTList<ASTArgument> arguments;
 	private ASTBody body;
 	private boolean isAbstract;
 	private boolean isStatic;
 	private Scope scope;
 
-	public ASTFunction(Token token, ASTType returnType, ASTIdentifier functionName, List<ASTArgument> argumentList,
+	public ASTFunction(Token token, ASTType returnType, ASTIdentifier identifier, List<ASTArgument> arguments,
 			ASTBody body, boolean isAbstract, boolean isStatic)
 	{
 		super(token);
 
 		this.returnType = returnType;
-		this.functionName = functionName;
-		this.argumentList = new ASTList<>(argumentList);
+		this.identifier = identifier;
+		this.arguments = new ASTList<>(arguments);
 		this.body = body;
 		this.isAbstract = isAbstract;
 		this.isStatic = isStatic;
@@ -37,24 +37,29 @@ public class ASTFunction extends AST
 		return returnType;
 	}
 
-	public ASTIdentifier getFunctionName()
+	public ASTIdentifier getIdentifier()
 	{
-		return functionName;
+		return identifier;
 	}
 
-	public List<ASTArgument> getArgumentList()
+	public void setIdentifier(ASTIdentifier identifier)
 	{
-		return argumentList.getList();
+		this.identifier = identifier;
 	}
 
-	public int getArgumentListSize()
+	public List<ASTArgument> getArguments()
 	{
-		return argumentList.getSize();
+		return arguments.getList();
 	}
 
-	public ASTArgument getArgumentAt(int index)
+	public int getArgumentCount()
 	{
-		return argumentList.getAt(index);
+		return arguments.getSize();
+	}
+
+	public ASTArgument getArgument(int index)
+	{
+		return arguments.getAt(index);
 	}
 
 	public ASTBody getBody()
@@ -83,8 +88,8 @@ public class ASTFunction extends AST
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

@@ -5,7 +5,7 @@ import knight.compiler.lexer.Token;
 public abstract class AST
 {
 	private Token token;
-	private String sourceFile; // Track which file this AST came from
+	private String sourceFile;
 
 	public AST(Token token)
 	{
@@ -38,5 +38,5 @@ public abstract class AST
 		this.sourceFile = sourceFile;
 	}
 
-	public abstract <R> R accept(ASTVisitor<R> v);
+	public abstract <R> R accept(ASTVisitor<R> visitor);
 }

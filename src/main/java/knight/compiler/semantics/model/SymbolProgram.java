@@ -221,14 +221,14 @@ public class SymbolProgram
 			ASTIdentifierType i1 = (ASTIdentifierType) t1;
 			ASTIdentifierType i2 = (ASTIdentifierType) t2;
 
-			if (interfaceExists(i1.getId()) || interfaceExists(i2.getId())) {
-				return i1.getId().equals(i2.getId());
+			if (interfaceExists(i1.getName()) || interfaceExists(i2.getName())) {
+				return i1.getName().equals(i2.getName());
 			}
 
-			SymbolClass c = getClass(i2.getId());
+			SymbolClass c = getClass(i2.getName());
 			while (c != null && !rstack.contains(c.getId())) {
 				rstack.push(c.getId());
-				if (i1.getId().equals(c.getId())) {
+				if (i1.getName().equals(c.getId())) {
 					rstack.clear();
 					return true;
 				} else {

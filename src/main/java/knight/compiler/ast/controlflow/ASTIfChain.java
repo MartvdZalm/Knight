@@ -20,10 +20,9 @@ public class ASTIfChain extends ASTStatement
 		this.elseBody = elseBody;
 	}
 
-	public ASTIfChain setBranches(List<ASTConditionalBranch> branches)
+	public void setBranches(List<ASTConditionalBranch> branches)
 	{
 		this.branches = new ASTList<>(branches);
-		return this;
 	}
 
 	public List<ASTConditionalBranch> getBranches()
@@ -31,20 +30,19 @@ public class ASTIfChain extends ASTStatement
 		return branches.getList();
 	}
 
-	public ASTConditionalBranch getBranchAt(int index)
+	public ASTConditionalBranch getBranch(int index)
 	{
 		return branches.getAt(index);
 	}
 
-	public int getBranchListSize()
+	public int getBranchCount()
 	{
 		return branches.getSize();
 	}
 
-	public ASTIfChain setElseBody(ASTBody elseBody)
+	public void setElseBody(ASTBody elseBody)
 	{
 		this.elseBody = elseBody;
-		return this;
 	}
 
 	public ASTBody getElseBody()
@@ -53,8 +51,8 @@ public class ASTIfChain extends ASTStatement
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

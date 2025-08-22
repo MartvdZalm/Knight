@@ -16,24 +16,24 @@ public class ASTArrayLiteral extends ASTExpression
 		this.expressions = new ASTList<>(expressions);
 	}
 
-	public List<ASTExpression> getExpressionList()
+	public List<ASTExpression> getExpressions()
 	{
 		return expressions.getList();
 	}
 
-	public int getExpressionListSize()
+	public int getExpressionCount()
 	{
 		return expressions.getSize();
 	}
 
-	public ASTExpression getExpressionAt(int index)
+	public ASTExpression getExpression(int index)
 	{
 		return expressions.getAt(index);
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

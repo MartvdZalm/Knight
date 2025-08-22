@@ -18,14 +18,14 @@ public class ASTConditionalBranch extends ASTStatement
 		this.body = body;
 	}
 
-	public void setCondition(ASTExpression condition)
-	{
-		this.condition = condition;
-	}
-
 	public ASTExpression getCondition()
 	{
 		return condition;
+	}
+
+	public void setCondition(ASTExpression condition)
+	{
+		this.condition = condition;
 	}
 
 	public ASTBody getBody()
@@ -39,8 +39,8 @@ public class ASTConditionalBranch extends ASTStatement
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

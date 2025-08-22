@@ -6,27 +6,27 @@ import knight.compiler.lexer.Token;
 
 public class ASTReturnStatement extends ASTStatement
 {
-	private ASTExpression returnExpr;
+	private ASTExpression expression;
 
-	public ASTReturnStatement(Token token, ASTExpression returnExpr)
+	public ASTReturnStatement(Token token, ASTExpression expression)
 	{
 		super(token);
-		this.returnExpr = returnExpr;
+		this.expression = expression;
 	}
 
-	public ASTExpression getReturnExpr()
+	public ASTExpression getExpression()
 	{
-		return returnExpr;
+		return expression;
 	}
 
-	public void setReturnExpr(ASTExpression returnExpr)
+	public void setExpression(ASTExpression expression)
 	{
-		this.returnExpr = returnExpr;
+		this.expression = expression;
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

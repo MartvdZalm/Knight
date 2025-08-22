@@ -3,7 +3,7 @@ package knight.compiler.codegen;
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
@@ -62,7 +62,7 @@ public class CodeGenerator implements ASTVisitor<String>
 		StringBuilder sb = new StringBuilder();
 		sb.append(astAssign.getIdentifier().accept(this));
 		sb.append("=");
-		sb.append(astAssign.getExpr().accept(this));
+		sb.append(astAssign.getExpression().accept(this));
 		return sb.append(";\n").toString();
 	}
 
@@ -71,7 +71,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		for (AST node : astBody.getNodesList()) {
+		for (AST node : astBody.getNodes()) {
 			sb.append(node.accept(this) + ";\n");
 		}
 
@@ -112,7 +112,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIdentifierExpr astIdentifierExpr)
 	{
-		return astIdentifierExpr.getId();
+		return astIdentifierExpr.getName();
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTCallFunctionExpr astCallFunctionExpr)
 	{
-		String funcName = astCallFunctionExpr.getFunctionName().getId();
+		String funcName = astCallFunctionExpr.getFunctionName().getName();
 		// String className = null;
 
 		// if (astCallFunctionExpr.getInstance() != null) {
@@ -168,13 +168,13 @@ public class CodeGenerator implements ASTVisitor<String>
 		}
 
 		sb.append(funcName + "(");
-		for (int i = 0; i < astCallFunctionExpr.getArgumentListSize(); i++) {
-			ASTExpression astArgument = astCallFunctionExpr.getArgumentAt(i);
+		for (int i = 0; i < astCallFunctionExpr.getArgumentCount(); i++) {
+			ASTExpression astArgument = astCallFunctionExpr.getArgument(i);
 			sb.append(astArgument.accept(this));
 
-			if (i < astCallFunctionExpr.getArgumentListSize() - 1) {
+			if (i < astCallFunctionExpr.getArgumentCount() - 1) {
 				boolean currentIsString = astArgument.getType() instanceof ASTStringType;
-				boolean nextIsString = astCallFunctionExpr.getArgumentAt(i + 1).getType() instanceof ASTStringType;
+				boolean nextIsString = astCallFunctionExpr.getArgument(i + 1).getType() instanceof ASTStringType;
 
 				if (currentIsString && nextIsString) {
 					sb.append(" + ");
@@ -190,7 +190,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		String funcName = astCallFunctionStat.getFunctionName().getId();
+		String funcName = astCallFunctionStat.getFunctionName().getName();
 		// String className = null;
 		//
 		// if (astCallFunctionStat.getInstance() != null) {
@@ -215,13 +215,13 @@ public class CodeGenerator implements ASTVisitor<String>
 		}
 
 		sb.append(funcName + "(");
-		for (int i = 0; i < astCallFunctionStat.getArgumentListSize(); i++) {
-			ASTExpression astArgument = astCallFunctionStat.getArgumentAt(i);
+		for (int i = 0; i < astCallFunctionStat.getArgumentCount(); i++) {
+			ASTExpression astArgument = astCallFunctionStat.getArgument(i);
 			sb.append(astArgument.accept(this));
 
-			if (i < astCallFunctionStat.getArgumentListSize() - 1) {
+			if (i < astCallFunctionStat.getArgumentCount() - 1) {
 				boolean currentIsString = astArgument.getType() instanceof ASTStringType;
-				boolean nextIsString = astCallFunctionStat.getArgumentAt(i + 1).getType() instanceof ASTStringType;
+				boolean nextIsString = astCallFunctionStat.getArgument(i + 1).getType() instanceof ASTStringType;
 
 				if (currentIsString && nextIsString) {
 					sb.append(" + ");
@@ -267,7 +267,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIdentifierType astIdentifierType)
 	{
-		return astIdentifierType.getId();
+		return astIdentifierType.getName();
 	}
 
 	@Override
@@ -281,7 +281,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("class ").append(astInterface.getName().accept(this));
+		sb.append("class ").append(astInterface.getIdentifier().accept(this));
 
 		if (!astInterface.getExtendedInterfaces().isEmpty()) {
 			sb.append(" : ");
@@ -296,23 +296,23 @@ public class CodeGenerator implements ASTVisitor<String>
 		sb.append(" {\n");
 		sb.append("public:\n");
 
-		for (ASTFunction method : astInterface.getFunctionSignatures()) {
-			String returnType = method.getReturnType().accept(this);
-			String functionName = method.getFunctionName().toString();
+		for (ASTFunction astFunction : astInterface.getFunctions()) {
+			String returnType = astFunction.getReturnType().accept(this);
+			String functionName = astFunction.getIdentifier().toString();
 
 			sb.append("    virtual ").append(returnType).append(" ").append(functionName).append("(");
 
-			for (int i = 0; i < method.getArgumentListSize(); i++) {
+			for (int i = 0; i < astFunction.getArgumentCount(); i++) {
 				if (i > 0) {
 					sb.append(", ");
 				}
-				sb.append(method.getArgumentAt(i).accept(this));
+				sb.append(astFunction.getArgument(i).accept(this));
 			}
 
 			sb.append(") = 0;\n");
 		}
 
-		sb.append("    virtual ~").append(astInterface.getName().accept(this)).append("() {}\n");
+		sb.append("    virtual ~").append(astInterface.getIdentifier().accept(this)).append("() {}\n");
 
 		sb.append("};\n\n");
 
@@ -322,7 +322,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTIdentifier astIdentifier)
 	{
-		return astIdentifier.getId();
+		return astIdentifier.getName();
 	}
 
 	@Override
@@ -347,7 +347,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTVariable astVariable)
 	{
 		String type = astVariable.getType().accept(this);
-		String identifier = astVariable.getId().accept(this);
+		String identifier = astVariable.getIdentifier().accept(this);
 		return type + " " + identifier;
 	}
 
@@ -355,8 +355,8 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTVariableInit astVariableInit)
 	{
 		String type = astVariableInit.getType().accept(this);
-		String identifier = astVariableInit.getId().accept(this);
-		return type + " " + identifier + " = " + astVariableInit.getExpr().accept(this) + "; \n";
+		String identifier = astVariableInit.getIdentifier().accept(this);
+		return type + " " + identifier + " = " + astVariableInit.getExpression().accept(this) + "; \n";
 	}
 
 	@Override
@@ -364,12 +364,12 @@ public class CodeGenerator implements ASTVisitor<String>
 	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(astFunction.getReturnType().accept(this) + " " + astFunction.getFunctionName() + "(");
+		sb.append(astFunction.getReturnType().accept(this) + " " + astFunction.getIdentifier() + "(");
 
-		for (int i = 0; i < astFunction.getArgumentListSize(); i++) {
-			sb.append(astFunction.getArgumentAt(i).accept(this));
+		for (int i = 0; i < astFunction.getArgumentCount(); i++) {
+			sb.append(astFunction.getArgument(i).accept(this));
 
-			if (i != astFunction.getArgumentListSize() - 1) {
+			if (i != astFunction.getArgumentCount() - 1) {
 				sb.append(", ");
 			}
 		}
@@ -392,7 +392,7 @@ public class CodeGenerator implements ASTVisitor<String>
 		// sb.append("static ");
 		// }
 
-		String className = astClass.getClassName().getId();
+		String className = astClass.getIdentifier().getName();
 
 		Optional<String> libraryCode = handleLibraryCall(className);
 		if (libraryCode.isPresent()) {
@@ -425,16 +425,16 @@ public class CodeGenerator implements ASTVisitor<String>
 		String currentAccess = "public";
 		sb.append(currentAccess).append(":\n");
 
-		for (int i = 0; i < astClass.getPropertyListSize(); i++) {
-			sb.append(astClass.getPropertyDeclAt(i).accept(this) + "\n");
+		for (int i = 0; i < astClass.getPropertyCount(); i++) {
+			sb.append(astClass.getProperty(i).accept(this) + "\n");
 		}
 
-		for (int i = 0; i < astClass.getFunctionListSize(); i++) {
-			sb.append(astClass.getFunctionDeclAt(i).accept(this) + "\n");
+		for (int i = 0; i < astClass.getFunctionCount(); i++) {
+			sb.append(astClass.getFunction(i).accept(this) + "\n");
 		}
 
 		if (astClass.getExtendsClass() != null || !astClass.getImplementsInterfaces().isEmpty()) {
-			sb.append("public:\n").append("    virtual ~").append(astClass.getClassName().accept(this))
+			sb.append("public:\n").append("    virtual ~").append(astClass.getIdentifier().accept(this))
 					.append("() {}\n");
 		}
 
@@ -454,11 +454,11 @@ public class CodeGenerator implements ASTVisitor<String>
 		sb.append("\n");
 
 		// Generate standard library code
-		if (requiredHeaders.contains("iostream")) {
-			sb.append("// Standard Library Implementation\n");
-			sb.append(knight.compiler.library.LibraryCodeGenerator.generateStandardLibrary());
-			sb.append("\n");
-		}
+		// if (requiredHeaders.contains("iostream")) {
+		// sb.append("// Standard Library Implementation\n");
+		// sb.append(knight.compiler.library.LibraryCodeGenerator.generateStandardLibrary());
+		// sb.append("\n");
+		// }
 
 		return sb;
 	}
@@ -472,7 +472,7 @@ public class CodeGenerator implements ASTVisitor<String>
 		// sb.append(astImport.accept(this));
 		// }
 
-		for (AST node : astProgram.getNodeList()) {
+		for (AST node : astProgram.getNodes()) {
 			sb.append(node.accept(this));
 		}
 
@@ -486,7 +486,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTReturnStatement astReturnStatement)
 	{
-		return "return " + astReturnStatement.getReturnExpr().accept(this);
+		return "return " + astReturnStatement.getExpression().accept(this);
 	}
 
 	@Override
@@ -499,7 +499,7 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTProperty astProperty)
 	{
 		String type = astProperty.getType().accept(this);
-		String identifier = astProperty.getId().accept(this);
+		String identifier = astProperty.getIdentifier().accept(this);
 		return type + " " + identifier + ";";
 	}
 
@@ -563,9 +563,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTNotEquals astNotEquals)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astNotEquals.getLeftSide().accept(this));
+		sb.append(astNotEquals.getLeft().accept(this));
 		sb.append("!=");
-		sb.append(astNotEquals.getRightSide().accept(this));
+		sb.append(astNotEquals.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -573,9 +573,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTPlus astPlus)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astPlus.getLeftSide().accept(this));
+		sb.append(astPlus.getLeft().accept(this));
 		sb.append("+");
-		sb.append(astPlus.getRightSide().accept(this));
+		sb.append(astPlus.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -583,9 +583,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTOr astOr)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astOr.getLeftSide().accept(this));
+		sb.append(astOr.getLeft().accept(this));
 		sb.append("||");
-		sb.append(astOr.getRightSide().accept(this));
+		sb.append(astOr.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -593,9 +593,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTAnd astAnd)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astAnd.getLeftSide().accept(this));
+		sb.append(astAnd.getLeft().accept(this));
 		sb.append("&&");
-		sb.append(astAnd.getRightSide().accept(this));
+		sb.append(astAnd.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -603,9 +603,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTEquals astEquals)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astEquals.getLeftSide().accept(this));
+		sb.append(astEquals.getLeft().accept(this));
 		sb.append("==");
-		sb.append(astEquals.getRightSide().accept(this));
+		sb.append(astEquals.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -613,9 +613,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTLessThan astLessThan)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astLessThan.getLeftSide().accept(this));
+		sb.append(astLessThan.getLeft().accept(this));
 		sb.append("<");
-		sb.append(astLessThan.getRightSide().accept(this));
+		sb.append(astLessThan.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -623,9 +623,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astLessThanOrEqual.getLeftSide().accept(this));
+		sb.append(astLessThanOrEqual.getLeft().accept(this));
 		sb.append("<=");
-		sb.append(astLessThanOrEqual.getRightSide().accept(this));
+		sb.append(astLessThanOrEqual.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -633,9 +633,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTGreaterThan astGreaterThan)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astGreaterThan.getLeftSide().accept(this));
+		sb.append(astGreaterThan.getLeft().accept(this));
 		sb.append(">");
-		sb.append(astGreaterThan.getRightSide().accept(this));
+		sb.append(astGreaterThan.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -643,9 +643,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astGreaterThanOrEqual.getLeftSide().accept(this));
+		sb.append(astGreaterThanOrEqual.getLeft().accept(this));
 		sb.append(">=");
-		sb.append(astGreaterThanOrEqual.getRightSide().accept(this));
+		sb.append(astGreaterThanOrEqual.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -653,9 +653,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTMinus astMinus)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astMinus.getLeftSide().accept(this));
+		sb.append(astMinus.getLeft().accept(this));
 		sb.append("-");
-		sb.append(astMinus.getRightSide().accept(this));
+		sb.append(astMinus.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -663,9 +663,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTTimes astTimes)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astTimes.getLeftSide().accept(this));
+		sb.append(astTimes.getLeft().accept(this));
 		sb.append("*");
-		sb.append(astTimes.getRightSide().accept(this));
+		sb.append(astTimes.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -673,9 +673,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTDivision astDivision)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astDivision.getLeftSide().accept(this));
+		sb.append(astDivision.getLeft().accept(this));
 		sb.append("/");
-		sb.append(astDivision.getRightSide().accept(this));
+		sb.append(astDivision.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -683,9 +683,9 @@ public class CodeGenerator implements ASTVisitor<String>
 	public String visit(ASTModulus astModulus)
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(astModulus.getLeftSide().accept(this));
+		sb.append(astModulus.getLeft().accept(this));
 		sb.append("%");
-		sb.append(astModulus.getRightSide().accept(this));
+		sb.append(astModulus.getRight().accept(this));
 		return sb.toString();
 	}
 
@@ -702,13 +702,13 @@ public class CodeGenerator implements ASTVisitor<String>
 
 		sb.append("{");
 
-		for (int i = 0; i < astArrayLiteral.getExpressionListSize(); i++) {
-			ASTExpression astExpression = astArrayLiteral.getExpressionAt(i);
+		for (int i = 0; i < astArrayLiteral.getExpressionCount(); i++) {
+			ASTExpression astExpression = astArrayLiteral.getExpression(i);
 			sb.append(astExpression.accept(this));
 
-			if (i < astArrayLiteral.getExpressionListSize() - 1) {
+			if (i < astArrayLiteral.getExpressionCount() - 1) {
 				boolean currentIsString = astExpression.getType() instanceof ASTStringType;
-				boolean nextIsString = astArrayLiteral.getExpressionAt(i + 1).getType() instanceof ASTStringType;
+				boolean nextIsString = astArrayLiteral.getExpression(i + 1).getType() instanceof ASTStringType;
 
 				if (currentIsString && nextIsString) {
 					sb.append(" + ");
@@ -723,16 +723,16 @@ public class CodeGenerator implements ASTVisitor<String>
 	}
 
 	@Override
-	public String visit(ASTForeach astForeach)
+	public String visit(ASTForEach astForEach)
 	{
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("for (");
-		sb.append(astForeach.getVariable().accept(this));
+		sb.append(astForEach.getVariable().accept(this));
 		sb.append(" : ");
-		sb.append(astForeach.getIterable().accept(this));
+		sb.append(astForEach.getIterable().accept(this));
 		sb.append(") {");
-		sb.append(astForeach.getBody().accept(this));
+		sb.append(astForEach.getBody().accept(this));
 		sb.append("}");
 
 		return sb.toString();
@@ -745,10 +745,10 @@ public class CodeGenerator implements ASTVisitor<String>
 
 		sb.append("[](");
 
-		for (int i = 0; i < astLambda.getArgumentListSize(); i++) {
-			sb.append(astLambda.getArgumentAt(i).accept(this));
+		for (int i = 0; i < astLambda.getArgumentCount(); i++) {
+			sb.append(astLambda.getArgument(i).accept(this));
 
-			if (i != astLambda.getArgumentListSize() - 1) {
+			if (i != astLambda.getArgumentCount() - 1) {
 				sb.append(", ");
 			}
 		}
@@ -763,6 +763,6 @@ public class CodeGenerator implements ASTVisitor<String>
 	@Override
 	public String visit(ASTImport astImport)
 	{
-		return "#include <knight/" + astImport.getLibrary() + ".h>\n";
+		return "#include <knight/" + astImport.getIdentifier() + ".h>\n";
 	}
 }

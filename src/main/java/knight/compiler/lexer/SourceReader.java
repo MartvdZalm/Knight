@@ -9,7 +9,6 @@ public class SourceReader implements AutoCloseable
 
 	private final BufferedReader source;
 	private SourceReaderProperties props;
-	// private SourceReaderProperties savedProps;
 	private boolean closed = false;
 
 	private boolean hasPeeked = false;
@@ -24,38 +23,6 @@ public class SourceReader implements AutoCloseable
 		this.source = bufferedReader;
 		this.props = new SourceReaderProperties(source);
 	}
-
-	// public void mark(int readAheadLimit) throws IOException
-	// {
-	// checkNotClosed();
-	// if (readAheadLimit < 0) {
-	// throw new IllegalArgumentException("Read ahead limit must not be negative");
-	// }
-
-	// if (!source.markSupported()) {
-	// throw new UnsupportedOperationException("Mark operation is not supported by
-	// the underlying reader");
-	// }
-
-	// source.mark(readAheadLimit);
-	// this.savedProps = new SourceReaderProperties(props);
-	// }
-
-	// public void reset() throws IOException
-	// {
-	// checkNotClosed();
-	// if (!source.markSupported()) {
-	// throw new UnsupportedOperationException("Reset operation is not supported by
-	// the underlying reader");
-	// }
-
-	// if (savedProps == null) {
-	// throw new IllegalStateException("No mark position set");
-	// }
-
-	// source.reset();
-	// this.props = new SourceReaderProperties(this.savedProps);
-	// }
 
 	public char read() throws IOException
 	{
@@ -93,8 +60,6 @@ public class SourceReader implements AutoCloseable
 		if (props.col >= props.line.length()) {
 			props.isPriorEndLine = true;
 		}
-
-		// System.out.println(props + ", char: " + c);
 
 		return c;
 	}

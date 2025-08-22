@@ -9,60 +9,59 @@ import knight.compiler.lexer.Token;
 
 public class ASTProgram extends AST
 {
-	private ASTList<ASTImport> importList;
-	private ASTList<AST> nodeList;
+	private ASTList<ASTImport> imports;
+	private ASTList<AST> nodes;
 
-	public ASTProgram(Token token, List<ASTImport> importList, List<AST> nodeList)
+	public ASTProgram(Token token, List<ASTImport> imports, List<AST> nodes)
 	{
 		super(token);
-
-		this.importList = new ASTList<>(importList);
-		this.nodeList = new ASTList<>(nodeList);
+		this.imports = new ASTList<>(imports);
+		this.nodes = new ASTList<>(nodes);
 	}
 
-	public void setImportList(List<ASTImport> importList)
+	public void setImports(List<ASTImport> imports)
 	{
-		this.importList = new ASTList<>(importList);
+		this.imports = new ASTList<>(imports);
 	}
 
-	public List<ASTImport> getImportList()
+	public List<ASTImport> getImports()
 	{
-		return importList.getList();
+		return imports.getList();
 	}
 
-	public int getImportListSize()
+	public int getImportCount()
 	{
-		return importList.getSize();
+		return imports.getSize();
 	}
 
-	public AST getImportAt(int index)
+	public ASTImport getImport(int index)
 	{
-		return importList.getAt(index);
+		return imports.getAt(index);
 	}
 
-	public void setNodeList(List<AST> nodeList)
+	public void setNodes(List<AST> nodes)
 	{
-		this.nodeList = new ASTList<>(nodeList);
+		this.nodes = new ASTList<>(nodes);
 	}
 
-	public List<AST> getNodeList()
+	public List<AST> getNodes()
 	{
-		return nodeList.getList();
+		return nodes.getList();
 	}
 
-	public int getNodeListSize()
+	public int getNodeCount()
 	{
-		return nodeList.getSize();
+		return nodes.getSize();
 	}
 
-	public AST getNodeAt(int index)
+	public AST getNode(int index)
 	{
-		return nodeList.getAt(index);
+		return nodes.getAt(index);
 	}
 
 	@Override
-	public <R> R accept(ASTVisitor<R> v)
+	public <R> R accept(ASTVisitor<R> visitor)
 	{
-		return v.visit(this);
+		return visitor.visit(this);
 	}
 }

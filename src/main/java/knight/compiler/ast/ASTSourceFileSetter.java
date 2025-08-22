@@ -26,10 +26,10 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTProgram astProgram)
 	{
 		astProgram.setSourceFile(sourceFile);
-		for (ASTImport astImport : astProgram.getImportList()) {
+		for (ASTImport astImport : astProgram.getImports()) {
 			astImport.accept(this);
 		}
-		for (AST node : astProgram.getNodeList()) {
+		for (AST node : astProgram.getNodes()) {
 			node.accept(this);
 		}
 		return null;
@@ -46,17 +46,17 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTClass astClass)
 	{
 		astClass.setSourceFile(sourceFile);
-		astClass.getClassName().accept(this);
+		astClass.getIdentifier().accept(this);
 		if (astClass.getExtendsClass() != null) {
 			astClass.getExtendsClass().accept(this);
 		}
 		for (ASTIdentifier astInterface : astClass.getImplementsInterfaces()) {
 			astInterface.accept(this);
 		}
-		for (ASTProperty astProperty : astClass.getPropertyList()) {
+		for (ASTProperty astProperty : astClass.getProperties()) {
 			astProperty.accept(this);
 		}
-		for (ASTFunction astFunction : astClass.getFunctionList()) {
+		for (ASTFunction astFunction : astClass.getFunctions()) {
 			astFunction.accept(this);
 		}
 		return null;
@@ -66,8 +66,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTInterface astInterface)
 	{
 		astInterface.setSourceFile(sourceFile);
-		astInterface.getName().accept(this);
-		for (ASTFunction astFunction : astInterface.getFunctionSignatures()) {
+		astInterface.getIdentifier().accept(this);
+		for (ASTFunction astFunction : astInterface.getFunctions()) {
 			astFunction.accept(this);
 		}
 		return null;
@@ -77,9 +77,9 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTFunction astFunction)
 	{
 		astFunction.setSourceFile(sourceFile);
-		astFunction.getFunctionName().accept(this);
+		astFunction.getIdentifier().accept(this);
 		astFunction.getReturnType().accept(this);
-		for (ASTArgument astArgument : astFunction.getArgumentList()) {
+		for (ASTArgument astArgument : astFunction.getArguments()) {
 			astArgument.accept(this);
 		}
 		astFunction.getBody().accept(this);
@@ -91,7 +91,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	{
 		astVariable.setSourceFile(sourceFile);
 		astVariable.getType().accept(this);
-		astVariable.getId().accept(this);
+		astVariable.getIdentifier().accept(this);
 		return null;
 	}
 
@@ -100,8 +100,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	{
 		astVariableInit.setSourceFile(sourceFile);
 		astVariableInit.getType().accept(this);
-		astVariableInit.getId().accept(this);
-		astVariableInit.getExpr().accept(this);
+		astVariableInit.getIdentifier().accept(this);
+		astVariableInit.getExpression().accept(this);
 		return null;
 	}
 
@@ -119,7 +119,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	{
 		astProperty.setSourceFile(sourceFile);
 		astProperty.getType().accept(this);
-		astProperty.getId().accept(this);
+		astProperty.getIdentifier().accept(this);
 		return null;
 	}
 
@@ -127,7 +127,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTBody astBody)
 	{
 		astBody.setSourceFile(sourceFile);
-		for (AST node : astBody.getNodesList()) {
+		for (AST node : astBody.getNodes()) {
 			node.accept(this);
 		}
 		return null;
@@ -138,7 +138,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	{
 		astAssign.setSourceFile(sourceFile);
 		astAssign.getIdentifier().accept(this);
-		astAssign.getExpr().accept(this);
+		astAssign.getExpression().accept(this);
 		return null;
 	}
 
@@ -146,9 +146,9 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTArrayAssign astArrayAssign)
 	{
 		astArrayAssign.setSourceFile(sourceFile);
-		astArrayAssign.getId().accept(this);
-		astArrayAssign.getExpression1().accept(this);
-		astArrayAssign.getExpression2().accept(this);
+		astArrayAssign.getIdentifier().accept(this);
+		astArrayAssign.getArray().accept(this);
+		astArrayAssign.getValue().accept(this);
 		return null;
 	}
 
@@ -184,12 +184,12 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	}
 
 	@Override
-	public Void visit(ASTForeach astForeach)
+	public Void visit(ASTForEach astForEach)
 	{
-		astForeach.setSourceFile(sourceFile);
-		astForeach.getVariable().accept(this);
-		astForeach.getIterable().accept(this);
-		astForeach.getBody().accept(this);
+		astForEach.setSourceFile(sourceFile);
+		astForEach.getVariable().accept(this);
+		astForEach.getIterable().accept(this);
+		astForEach.getBody().accept(this);
 		return null;
 	}
 
@@ -197,8 +197,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTReturnStatement astReturnStatement)
 	{
 		astReturnStatement.setSourceFile(sourceFile);
-		if (astReturnStatement.getReturnExpr() != null) {
-			astReturnStatement.getReturnExpr().accept(this);
+		if (astReturnStatement.getExpression() != null) {
+			astReturnStatement.getExpression().accept(this);
 		}
 		return null;
 	}
@@ -211,7 +211,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 			astCallFunctionStat.getInstance().accept(this);
 		}
 		astCallFunctionStat.getFunctionName().accept(this);
-		for (ASTExpression arg : astCallFunctionStat.getArgumentList()) {
+		for (ASTExpression arg : astCallFunctionStat.getArguments()) {
 			arg.accept(this);
 		}
 		return null;
@@ -225,7 +225,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 			astCallFunctionExpr.getInstance().accept(this);
 		}
 		astCallFunctionExpr.getFunctionName().accept(this);
-		for (ASTExpression arg : astCallFunctionExpr.getArgumentList()) {
+		for (ASTExpression arg : astCallFunctionExpr.getArguments()) {
 			arg.accept(this);
 		}
 		return null;
@@ -254,7 +254,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTArrayLiteral astArrayLiteral)
 	{
 		astArrayLiteral.setSourceFile(sourceFile);
-		for (ASTExpression element : astArrayLiteral.getExpressionList()) {
+		for (ASTExpression element : astArrayLiteral.getExpressions()) {
 			element.accept(this);
 		}
 		return null;
@@ -264,7 +264,7 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTLambda astLambda)
 	{
 		astLambda.setSourceFile(sourceFile);
-		for (ASTArgument arg : astLambda.getArgumentList()) {
+		for (ASTArgument arg : astLambda.getArguments()) {
 			arg.accept(this);
 		}
 		astLambda.getReturnType().accept(this);
@@ -392,8 +392,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTPlus astPlus)
 	{
 		astPlus.setSourceFile(sourceFile);
-		astPlus.getLeftSide().accept(this);
-		astPlus.getRightSide().accept(this);
+		astPlus.getLeft().accept(this);
+		astPlus.getRight().accept(this);
 		return null;
 	}
 
@@ -401,8 +401,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTMinus astMinus)
 	{
 		astMinus.setSourceFile(sourceFile);
-		astMinus.getLeftSide().accept(this);
-		astMinus.getRightSide().accept(this);
+		astMinus.getLeft().accept(this);
+		astMinus.getRight().accept(this);
 		return null;
 	}
 
@@ -410,8 +410,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTTimes astTimes)
 	{
 		astTimes.setSourceFile(sourceFile);
-		astTimes.getLeftSide().accept(this);
-		astTimes.getRightSide().accept(this);
+		astTimes.getLeft().accept(this);
+		astTimes.getRight().accept(this);
 		return null;
 	}
 
@@ -419,8 +419,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTDivision astDiv)
 	{
 		astDiv.setSourceFile(sourceFile);
-		astDiv.getLeftSide().accept(this);
-		astDiv.getRightSide().accept(this);
+		astDiv.getLeft().accept(this);
+		astDiv.getRight().accept(this);
 		return null;
 	}
 
@@ -428,8 +428,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTModulus astModulus)
 	{
 		astModulus.setSourceFile(sourceFile);
-		astModulus.getLeftSide().accept(this);
-		astModulus.getRightSide().accept(this);
+		astModulus.getLeft().accept(this);
+		astModulus.getRight().accept(this);
 		return null;
 	}
 
@@ -437,8 +437,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTEquals astEquals)
 	{
 		astEquals.setSourceFile(sourceFile);
-		astEquals.getLeftSide().accept(this);
-		astEquals.getRightSide().accept(this);
+		astEquals.getLeft().accept(this);
+		astEquals.getRight().accept(this);
 		return null;
 	}
 
@@ -446,8 +446,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTNotEquals astNotEquals)
 	{
 		astNotEquals.setSourceFile(sourceFile);
-		astNotEquals.getLeftSide().accept(this);
-		astNotEquals.getRightSide().accept(this);
+		astNotEquals.getLeft().accept(this);
+		astNotEquals.getRight().accept(this);
 		return null;
 	}
 
@@ -455,8 +455,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTLessThan astLessThan)
 	{
 		astLessThan.setSourceFile(sourceFile);
-		astLessThan.getLeftSide().accept(this);
-		astLessThan.getRightSide().accept(this);
+		astLessThan.getLeft().accept(this);
+		astLessThan.getRight().accept(this);
 		return null;
 	}
 
@@ -464,8 +464,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
 		astLessThanOrEqual.setSourceFile(sourceFile);
-		astLessThanOrEqual.getLeftSide().accept(this);
-		astLessThanOrEqual.getRightSide().accept(this);
+		astLessThanOrEqual.getLeft().accept(this);
+		astLessThanOrEqual.getRight().accept(this);
 		return null;
 	}
 
@@ -473,8 +473,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTGreaterThan astGreaterThan)
 	{
 		astGreaterThan.setSourceFile(sourceFile);
-		astGreaterThan.getLeftSide().accept(this);
-		astGreaterThan.getRightSide().accept(this);
+		astGreaterThan.getLeft().accept(this);
+		astGreaterThan.getRight().accept(this);
 		return null;
 	}
 
@@ -482,8 +482,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
 		astGreaterThanOrEqual.setSourceFile(sourceFile);
-		astGreaterThanOrEqual.getLeftSide().accept(this);
-		astGreaterThanOrEqual.getRightSide().accept(this);
+		astGreaterThanOrEqual.getLeft().accept(this);
+		astGreaterThanOrEqual.getRight().accept(this);
 		return null;
 	}
 
@@ -491,8 +491,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTAnd astAnd)
 	{
 		astAnd.setSourceFile(sourceFile);
-		astAnd.getLeftSide().accept(this);
-		astAnd.getRightSide().accept(this);
+		astAnd.getLeft().accept(this);
+		astAnd.getRight().accept(this);
 		return null;
 	}
 
@@ -500,8 +500,8 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	public Void visit(ASTOr astOr)
 	{
 		astOr.setSourceFile(sourceFile);
-		astOr.getLeftSide().accept(this);
-		astOr.getRightSide().accept(this);
+		astOr.getLeft().accept(this);
+		astOr.getRight().accept(this);
 		return null;
 	}
 }

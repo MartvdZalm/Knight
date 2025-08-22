@@ -3,7 +3,7 @@ package knight.compiler.optimizations;
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
+import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
 import knight.compiler.ast.expressions.*;
@@ -91,9 +91,9 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTAssign astAssign)
 	{
-		ASTExpression newExpr = astAssign.getExpr().accept(this);
-		astAssign.setExpr(newExpr);
-		if (newExpr != astAssign.getExpr()) {
+		ASTExpression newExpr = astAssign.getExpression().accept(this);
+		astAssign.setExpression(newExpr);
+		if (newExpr != astAssign.getExpression()) {
 			logOptimization("Optimized assignment expression");
 		}
 		return null;
@@ -102,7 +102,7 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTBody astBody)
 	{
-		for (AST node : astBody.getNodesList()) {
+		for (AST node : astBody.getNodes()) {
 			node.accept(this);
 		}
 
@@ -117,7 +117,7 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 
 		if (condition instanceof ASTFalse) {
 			logOptimization("Removed while(false) loop");
-			astWhile.getBody().getNodesList().clear();
+			astWhile.getBody().getNodes().clear();
 		}
 
 		astWhile.getBody().accept(this);
@@ -133,29 +133,28 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTPlus astPlus)
 	{
-		astPlus.setLeftSide(astPlus.getLeftSide().accept(this));
-		astPlus.setRightSide(astPlus.getRightSide().accept(this));
+		astPlus.setLeft(astPlus.getLeft().accept(this));
+		astPlus.setRight(astPlus.getRight().accept(this));
 
 		if (astPlus.getType() instanceof ASTIntType) {
 
-			if (astPlus.getLeftSide()instanceof ASTIntLiteral left
-					&& astPlus.getRightSide()instanceof ASTIntLiteral right) {
+			if (astPlus.getLeft()instanceof ASTIntLiteral left && astPlus.getRight()instanceof ASTIntLiteral right) {
 				int result = left.getValue() + right.getValue();
 				logOptimization("Folded " + left.getValue() + " + " + right.getValue());
 				return createIntLiteral(astPlus, result);
 			}
 
 		} else {
-			if (astPlus.getLeftSide()instanceof ASTStringLiteral leftStr
-					&& astPlus.getRightSide()instanceof ASTStringLiteral rightStr) {
+			if (astPlus.getLeft()instanceof ASTStringLiteral leftStr
+					&& astPlus.getRight()instanceof ASTStringLiteral rightStr) {
 				String result = leftStr.getValue() + rightStr.getValue();
 				logOptimization("Folded string concatenation");
 				return createStringLiteral(astPlus, result);
-			} else if (isConstant(astPlus.getLeftSide()) && isConstant(astPlus.getRightSide())) {
-				String left = astPlus.getLeftSide()instanceof ASTStringLiteral sl ? sl.getValue()
-						: astPlus.getLeftSide()instanceof ASTIntLiteral il ? String.valueOf(il.getValue()) : "";
-				String right = astPlus.getRightSide()instanceof ASTStringLiteral sl ? sl.getValue()
-						: astPlus.getRightSide()instanceof ASTIntLiteral il ? String.valueOf(il.getValue()) : "";
+			} else if (isConstant(astPlus.getLeft()) && isConstant(astPlus.getRight())) {
+				String left = astPlus.getLeft()instanceof ASTStringLiteral sl ? sl.getValue()
+						: astPlus.getLeft()instanceof ASTIntLiteral il ? String.valueOf(il.getValue()) : "";
+				String right = astPlus.getRight()instanceof ASTStringLiteral sl ? sl.getValue()
+						: astPlus.getRight()instanceof ASTIntLiteral il ? String.valueOf(il.getValue()) : "";
 				logOptimization("Folded mixed concatenation");
 				return createStringLiteral(astPlus, left + right);
 			}
@@ -166,11 +165,10 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTMinus astMinus)
 	{
-		astMinus.setLeftSide(astMinus.getLeftSide().accept(this));
-		astMinus.setRightSide(astMinus.getRightSide().accept(this));
+		astMinus.setLeft(astMinus.getLeft().accept(this));
+		astMinus.setRight(astMinus.getRight().accept(this));
 
-		if (astMinus.getLeftSide()instanceof ASTIntLiteral left
-				&& astMinus.getRightSide()instanceof ASTIntLiteral right) {
+		if (astMinus.getLeft()instanceof ASTIntLiteral left && astMinus.getRight()instanceof ASTIntLiteral right) {
 			int result = left.getValue() - right.getValue();
 			logOptimization("Folded " + left.getValue() + " - " + right.getValue());
 			return createIntLiteral(astMinus, result);
@@ -181,26 +179,25 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTTimes astTimes)
 	{
-		astTimes.setLeftSide(astTimes.getLeftSide().accept(this));
-		astTimes.setRightSide(astTimes.getRightSide().accept(this));
+		astTimes.setLeft(astTimes.getLeft().accept(this));
+		astTimes.setRight(astTimes.getRight().accept(this));
 
-		if (astTimes.getLeftSide()instanceof ASTIntLiteral left
-				&& astTimes.getRightSide()instanceof ASTIntLiteral right) {
+		if (astTimes.getLeft()instanceof ASTIntLiteral left && astTimes.getRight()instanceof ASTIntLiteral right) {
 			int result = left.getValue() * right.getValue();
 			logOptimization("Folded " + left.getValue() + " * " + right.getValue());
 			return createIntLiteral(astTimes, result);
-		} else if (isIntLiteral(astTimes.getRightSide(), 2)) {
+		} else if (isIntLiteral(astTimes.getRight(), 2)) {
 			logOptimization("Strength reduction: multiplication by 2 to addition");
-			ASTPlus plus = new ASTPlus(astTimes.getToken(), astTimes.getLeftSide(), astTimes.getRightSide());
+			ASTPlus plus = new ASTPlus(astTimes.getToken(), astTimes.getLeft(), astTimes.getRight());
 			plus.setType(astTimes.getType());
 			return plus.accept(this);
-		} else if (isIntLiteral(astTimes.getRightSide(), 1)) {
+		} else if (isIntLiteral(astTimes.getRight(), 1)) {
 			logOptimization("Identity optimization: x * 1 = x");
-			return astTimes.getLeftSide();
-		} else if (isIntLiteral(astTimes.getLeftSide(), 1)) {
+			return astTimes.getLeft();
+		} else if (isIntLiteral(astTimes.getLeft(), 1)) {
 			logOptimization("Identity optimization: 1 * x = x");
-			return astTimes.getRightSide();
-		} else if (isIntLiteral(astTimes.getLeftSide(), 0) || isIntLiteral(astTimes.getRightSide(), 0)) {
+			return astTimes.getRight();
+		} else if (isIntLiteral(astTimes.getLeft(), 0) || isIntLiteral(astTimes.getRight(), 0)) {
 			logOptimization("Zero optimization: x * 0 = 0");
 			return createIntLiteral(astTimes, 0);
 		}
@@ -210,11 +207,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTDivision astDivision)
 	{
-		astDivision.setLeftSide(astDivision.getLeftSide().accept(this));
-		astDivision.setRightSide(astDivision.getRightSide().accept(this));
+		astDivision.setLeft(astDivision.getLeft().accept(this));
+		astDivision.setRight(astDivision.getRight().accept(this));
 
-		if (astDivision.getLeftSide()instanceof ASTIntLiteral left
-				&& astDivision.getRightSide()instanceof ASTIntLiteral right) {
+		if (astDivision.getLeft()instanceof ASTIntLiteral left
+				&& astDivision.getRight()instanceof ASTIntLiteral right) {
 			if (right.getValue() == 0) {
 				logOptimization("Division by zero left as-is for runtime error");
 				return astDivision;
@@ -229,11 +226,10 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTModulus astModulus)
 	{
-		astModulus.setLeftSide(astModulus.getLeftSide().accept(this));
-		astModulus.setRightSide(astModulus.getRightSide().accept(this));
+		astModulus.setLeft(astModulus.getLeft().accept(this));
+		astModulus.setRight(astModulus.getRight().accept(this));
 
-		if (astModulus.getLeftSide()instanceof ASTIntLiteral left
-				&& astModulus.getRightSide()instanceof ASTIntLiteral right) {
+		if (astModulus.getLeft()instanceof ASTIntLiteral left && astModulus.getRight()instanceof ASTIntLiteral right) {
 			if (right.getValue() == 0) {
 				logOptimization("Modulus by zero left as-is for runtime error");
 				return astModulus;
@@ -248,30 +244,30 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTEquals astEquals)
 	{
-		astEquals.setLeftSide(astEquals.getLeftSide().accept(this));
-		astEquals.setRightSide(astEquals.getRightSide().accept(this));
+		astEquals.setLeft(astEquals.getLeft().accept(this));
+		astEquals.setRight(astEquals.getRight().accept(this));
 
 		ASTType type = astEquals.getType();
 		if (type instanceof ASTIntType) {
-			if (astEquals.getLeftSide()instanceof ASTIntLiteral left
-					&& astEquals.getRightSide()instanceof ASTIntLiteral right) {
+			if (astEquals.getLeft()instanceof ASTIntLiteral left
+					&& astEquals.getRight()instanceof ASTIntLiteral right) {
 				boolean result = left.getValue() == right.getValue();
 				logOptimization("Folded int comparison");
 				return createBoolLiteral(astEquals, result);
 			}
 		} else if (type instanceof ASTBooleanType) {
-			if ((astEquals.getLeftSide() instanceof ASTTrue && astEquals.getRightSide() instanceof ASTTrue)
-					|| (astEquals.getLeftSide() instanceof ASTFalse && astEquals.getRightSide() instanceof ASTFalse)) {
+			if ((astEquals.getLeft() instanceof ASTTrue && astEquals.getRight() instanceof ASTTrue)
+					|| (astEquals.getLeft() instanceof ASTFalse && astEquals.getRight() instanceof ASTFalse)) {
 				logOptimization("Folded boolean equality (true)");
 				return createBoolLiteral(astEquals, true);
-			} else if ((astEquals.getLeftSide() instanceof ASTTrue && astEquals.getRightSide() instanceof ASTFalse)
-					|| (astEquals.getLeftSide() instanceof ASTFalse && astEquals.getRightSide() instanceof ASTTrue)) {
+			} else if ((astEquals.getLeft() instanceof ASTTrue && astEquals.getRight() instanceof ASTFalse)
+					|| (astEquals.getLeft() instanceof ASTFalse && astEquals.getRight() instanceof ASTTrue)) {
 				logOptimization("Folded boolean equality (false)");
 				return createBoolLiteral(astEquals, false);
 			}
 		} else if (type instanceof ASTStringType) {
-			if (astEquals.getLeftSide()instanceof ASTStringLiteral left
-					&& astEquals.getRightSide()instanceof ASTStringLiteral right) {
+			if (astEquals.getLeft()instanceof ASTStringLiteral left
+					&& astEquals.getRight()instanceof ASTStringLiteral right) {
 				boolean result = left.getValue().equals(right.getValue());
 				logOptimization("Folded string equality");
 				return createBoolLiteral(astEquals, result);
@@ -283,11 +279,10 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTNotEquals notEquals)
 	{
-		notEquals.setLeftSide(notEquals.getLeftSide().accept(this));
-		notEquals.setRightSide(notEquals.getRightSide().accept(this));
+		notEquals.setLeft(notEquals.getLeft().accept(this));
+		notEquals.setRight(notEquals.getRight().accept(this));
 
-		if (notEquals.getLeftSide()instanceof ASTIntLiteral left
-				&& notEquals.getRightSide()instanceof ASTIntLiteral right) {
+		if (notEquals.getLeft()instanceof ASTIntLiteral left && notEquals.getRight()instanceof ASTIntLiteral right) {
 			boolean result = left.getValue() != right.getValue();
 			logOptimization(String.format("Folded %d != %d to %b", left.getValue(), right.getValue(), result));
 			return createBoolLiteral(notEquals, result);
@@ -299,11 +294,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTLessThan astLessThan)
 	{
-		astLessThan.setLeftSide(astLessThan.getLeftSide().accept(this));
-		astLessThan.setRightSide(astLessThan.getRightSide().accept(this));
+		astLessThan.setLeft(astLessThan.getLeft().accept(this));
+		astLessThan.setRight(astLessThan.getRight().accept(this));
 
-		if (astLessThan.getLeftSide()instanceof ASTIntLiteral left
-				&& astLessThan.getRightSide()instanceof ASTIntLiteral right) {
+		if (astLessThan.getLeft()instanceof ASTIntLiteral left
+				&& astLessThan.getRight()instanceof ASTIntLiteral right) {
 			boolean result = left.getValue() < right.getValue();
 			logOptimization(String.format("Folded %d < %d to %b", left.getValue(), right.getValue(), result));
 			return createBoolLiteral(astLessThan, result);
@@ -315,11 +310,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTLessThanOrEqual astLessThanOrEqual)
 	{
-		astLessThanOrEqual.setLeftSide(astLessThanOrEqual.getLeftSide().accept(this));
-		astLessThanOrEqual.setRightSide(astLessThanOrEqual.getRightSide().accept(this));
+		astLessThanOrEqual.setLeft(astLessThanOrEqual.getLeft().accept(this));
+		astLessThanOrEqual.setRight(astLessThanOrEqual.getRight().accept(this));
 
-		if (astLessThanOrEqual.getLeftSide()instanceof ASTIntLiteral left
-				&& astLessThanOrEqual.getRightSide()instanceof ASTIntLiteral right) {
+		if (astLessThanOrEqual.getLeft()instanceof ASTIntLiteral left
+				&& astLessThanOrEqual.getRight()instanceof ASTIntLiteral right) {
 			boolean result = left.getValue() <= right.getValue();
 			logOptimization(String.format("Folded %d <= %d to %b", left.getValue(), right.getValue(), result));
 			return createBoolLiteral(astLessThanOrEqual, result);
@@ -331,11 +326,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTGreaterThan astGreaterThan)
 	{
-		astGreaterThan.setLeftSide(astGreaterThan.getLeftSide().accept(this));
-		astGreaterThan.setRightSide(astGreaterThan.getRightSide().accept(this));
+		astGreaterThan.setLeft(astGreaterThan.getLeft().accept(this));
+		astGreaterThan.setRight(astGreaterThan.getRight().accept(this));
 
-		if (astGreaterThan.getLeftSide()instanceof ASTIntLiteral left
-				&& astGreaterThan.getRightSide()instanceof ASTIntLiteral right) {
+		if (astGreaterThan.getLeft()instanceof ASTIntLiteral left
+				&& astGreaterThan.getRight()instanceof ASTIntLiteral right) {
 			boolean result = left.getValue() > right.getValue();
 			logOptimization(String.format("Folded %d > %d to %b", left.getValue(), right.getValue(), result));
 			return createBoolLiteral(astGreaterThan, result);
@@ -347,11 +342,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
 	{
-		astGreaterThanOrEqual.setLeftSide(astGreaterThanOrEqual.getLeftSide().accept(this));
-		astGreaterThanOrEqual.setRightSide(astGreaterThanOrEqual.getRightSide().accept(this));
+		astGreaterThanOrEqual.setLeft(astGreaterThanOrEqual.getLeft().accept(this));
+		astGreaterThanOrEqual.setRight(astGreaterThanOrEqual.getRight().accept(this));
 
-		if (astGreaterThanOrEqual.getLeftSide()instanceof ASTIntLiteral left
-				&& astGreaterThanOrEqual.getRightSide()instanceof ASTIntLiteral right) {
+		if (astGreaterThanOrEqual.getLeft()instanceof ASTIntLiteral left
+				&& astGreaterThanOrEqual.getRight()instanceof ASTIntLiteral right) {
 			boolean result = left.getValue() >= right.getValue();
 			logOptimization(String.format("Folded %d >= %d to %b", left.getValue(), right.getValue(), result));
 			return createBoolLiteral(astGreaterThanOrEqual, result);
@@ -363,20 +358,20 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTAnd astAnd)
 	{
-		astAnd.setLeftSide(astAnd.getLeftSide().accept(this));
-		astAnd.setRightSide(astAnd.getRightSide().accept(this));
+		astAnd.setLeft(astAnd.getLeft().accept(this));
+		astAnd.setRight(astAnd.getRight().accept(this));
 
-		if (astAnd.getLeftSide() instanceof ASTFalse) {
+		if (astAnd.getLeft() instanceof ASTFalse) {
 			logOptimization("Short-circuited AND (left false)");
 			return createBoolLiteral(astAnd, false);
 		}
 
-		if (astAnd.getRightSide() instanceof ASTFalse) {
+		if (astAnd.getRight() instanceof ASTFalse) {
 			logOptimization("Short-circuited AND (right false)");
 			return createBoolLiteral(astAnd, false);
 		}
 
-		if (astAnd.getLeftSide() instanceof ASTTrue && astAnd.getRightSide() instanceof ASTTrue) {
+		if (astAnd.getLeft() instanceof ASTTrue && astAnd.getRight() instanceof ASTTrue) {
 			logOptimization("Folded AND (true && true)");
 			return createBoolLiteral(astAnd, true);
 		}
@@ -387,20 +382,20 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTOr astOr)
 	{
-		astOr.setLeftSide(astOr.getLeftSide().accept(this));
-		astOr.setRightSide(astOr.getRightSide().accept(this));
+		astOr.setLeft(astOr.getLeft().accept(this));
+		astOr.setRight(astOr.getRight().accept(this));
 
-		if (astOr.getLeftSide() instanceof ASTTrue) {
+		if (astOr.getLeft() instanceof ASTTrue) {
 			logOptimization("Short-circuited OR (left true)");
 			return createBoolLiteral(astOr, true);
 		}
 
-		if (astOr.getRightSide() instanceof ASTTrue) {
+		if (astOr.getRight() instanceof ASTTrue) {
 			logOptimization("Short-circuited OR (right true)");
 			return createBoolLiteral(astOr, true);
 		}
 
-		if (astOr.getLeftSide() instanceof ASTFalse && astOr.getRightSide() instanceof ASTFalse) {
+		if (astOr.getLeft() instanceof ASTFalse && astOr.getRight() instanceof ASTFalse) {
 			logOptimization("Folded OR (false || false)");
 			return createBoolLiteral(astOr, false);
 		}
@@ -484,11 +479,11 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	{
 		List<ASTExpression> argumentList = new ArrayList<>();
 
-		for (int i = 0; i < astCallFunctionStat.getArgumentListSize(); i++) {
-			argumentList.add(astCallFunctionStat.getArgumentAt(i).accept(this));
+		for (int i = 0; i < astCallFunctionStat.getArgumentCount(); i++) {
+			argumentList.add(astCallFunctionStat.getArgument(i).accept(this));
 		}
 
-		astCallFunctionStat.setArgumentList(argumentList);
+		astCallFunctionStat.setArguments(argumentList);
 
 		return null;
 	}
@@ -544,7 +539,7 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTVariableInit astVariableInit)
 	{
-		astVariableInit.setExpr(astVariableInit.getExpr().accept(this));
+		astVariableInit.setExpression(astVariableInit.getExpression().accept(this));
 		return null;
 	}
 
@@ -558,7 +553,7 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTProgram astProgram)
 	{
-		for (AST node : astProgram.getNodeList()) {
+		for (AST node : astProgram.getNodes()) {
 			node.accept(this);
 		}
 		return null;
@@ -581,8 +576,8 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTArrayAssign astArrayAssign)
 	{
-		astArrayAssign.setE1(astArrayAssign.getExpression1().accept(this));
-		astArrayAssign.setE2(astArrayAssign.getExpression2().accept(this));
+		astArrayAssign.setArray(astArrayAssign.getArray().accept(this));
+		astArrayAssign.setValue(astArrayAssign.getValue().accept(this));
 		return null;
 	}
 
@@ -595,10 +590,10 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTClass astClass)
 	{
-		for (ASTProperty property : astClass.getPropertyList()) {
+		for (ASTProperty property : astClass.getProperties()) {
 			property.accept(this);
 		}
-		for (ASTFunction function : astClass.getFunctionList()) {
+		for (ASTFunction function : astClass.getFunctions()) {
 			function.accept(this);
 		}
 		return null;
@@ -643,18 +638,18 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	}
 
 	@Override
-	public ASTExpression visit(ASTForeach astForeach)
+	public ASTExpression visit(ASTForEach astForEach)
 	{
-		astForeach.getIterable().accept(this);
-		astForeach.getVariable().accept(this);
-		astForeach.getBody().accept(this);
+		astForEach.getIterable().accept(this);
+		astForEach.getVariable().accept(this);
+		astForEach.getBody().accept(this);
 		return null;
 	}
 
 	@Override
 	public ASTExpression visit(ASTLambda astLambda)
 	{
-		astLambda.getArgumentList().forEach(arg -> arg.accept(this));
+		astLambda.getArguments().forEach(arg -> arg.accept(this));
 		astLambda.getReturnType().accept(this);
 		astLambda.getBody().accept(this);
 		return null;
