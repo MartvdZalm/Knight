@@ -30,7 +30,6 @@ public class LibraryManager
 			return;
 		}
 
-		// Load standard libraries
 		loadStandardLibrary("std", symbolProgram);
 
 		librariesLoaded = true;
@@ -43,19 +42,16 @@ public class LibraryManager
 			File libraryFile = new File(libraryPath);
 
 			if (libraryFile.exists()) {
-				// Parse the library file and create Library object
 				BufferedReader reader = new BufferedReader(new FileReader(libraryFile));
 				Lexer lexer = new Lexer(reader);
 				Parser parser = new Parser(lexer);
 				ASTProgram ast = (ASTProgram) parser.parse();
 
-				// Set source file for library AST
 				setSourceFileRecursively(ast, libraryFile.getCanonicalPath());
 
 				Library library = new Library(name, ast);
 				libraries.put(name, library);
 
-				// Build symbols from library into the symbol program
 				BuildSymbolTree buildSymbolTree = new BuildSymbolTree(symbolProgram);
 				buildSymbolTree.visit(ast);
 

@@ -5,44 +5,50 @@ import knight.compiler.ast.types.ASTType;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 
 public class SymbolClass extends Binding
 {
 	private final String name;
+	private final String parentClassName;
 	private final Map<String, SymbolFunction> functions;
-	private final Map<String, SymbolVariable> variables;
-	private final String parent;
-	private final Map<String, String> implementedInterfaces;
+	private final Map<String, SymbolProperty> properties;
+	private final Set<String> implementedInterfaces;
 
-	public SymbolClass(String name, String parent)
+	public SymbolClass(String name, String parentClassName)
 	{
 		super(new ASTIdentifierType(null, name));
 		this.name = name;
-		this.parent = parent;
+		this.parentClassName = parentClassName;
 		this.functions = new HashMap<>();
-		this.variables = new HashMap<>();
-		this.implementedInterfaces = new HashMap<>();
+		this.properties = new HashMap<>();
+		this.implementedInterfaces = new HashSet<>();
 	}
 
-	public String getId()
+	public String getName()
 	{
 		return name;
 	}
 
-	public ASTType type()
+	public String getParentClassName()
 	{
-		return type;
+		return parentClassName;
 	}
 
-	public boolean addFunction(String id, ASTType type)
+	public boolean addFunction(String functionName, ASTType returnType)
 	{
-		if (containsFunction(id)) {
+		if (functions.containsKey(functionName)) {
 			return false;
-		} else {
-			functions.put(id, new SymbolFunction(id, type));
-			return true;
 		}
+		functions.put(functionName, new SymbolFunction(functionName, returnType));
+		return true;
+	}
+
+	public SymbolFunction getFunction(String functionName)
+	{
+		return functions.get(functionName);
 	}
 
 	public Map<String, SymbolFunction> getFunctions()
@@ -50,70 +56,60 @@ public class SymbolClass extends Binding
 		return Collections.unmodifiableMap(functions);
 	}
 
-	public SymbolFunction getFunction(String id)
+	public boolean hasFunction(String functionName)
 	{
-		if (containsFunction(id)) {
-			return functions.get(id);
-		} else {
-			return null;
-		}
+		return functions.containsKey(functionName);
 	}
 
-	public boolean addVariable(String id, ASTType type)
+	public boolean addProperty(String propertyName, ASTType type)
 	{
-		if (containsVariable(id)) {
+		if (properties.containsKey(propertyName)) {
 			return false;
-		} else {
-			variables.put(id, new SymbolVariable(id, type));
-			return true;
 		}
+		properties.put(propertyName, new SymbolProperty(propertyName, type));
+		return true;
 	}
 
-	public SymbolVariable getVariable(String id)
+	public SymbolProperty getProperty(String propertyName)
 	{
-		if (containsVariable(id)) {
-			return variables.get(id);
-		} else {
-			return null;
-		}
+		return properties.get(propertyName);
 	}
 
-	public boolean containsVariable(String id)
+	public Map<String, SymbolProperty> getProperties()
 	{
-		return variables.containsKey(id);
+		return Collections.unmodifiableMap(properties);
 	}
 
-	public boolean containsFunction(String id)
+	public boolean hasProperty(String propertyName)
 	{
-		return functions.containsKey(id);
-	}
-
-	public String parent()
-	{
-		return parent;
+		return properties.containsKey(propertyName);
 	}
 
 	public boolean addImplementedInterface(String interfaceName)
 	{
-		if (implementedInterfaces.containsKey(interfaceName)) {
-			return false;
-		}
-		implementedInterfaces.put(interfaceName, interfaceName);
-		return true;
+		return implementedInterfaces.add(interfaceName);
+	}
+
+	public Set<String> getImplementedInterfaces()
+	{
+		return Collections.unmodifiableSet(implementedInterfaces);
 	}
 
 	public boolean implementsInterface(String interfaceName)
 	{
-		return implementedInterfaces.containsKey(interfaceName);
+		return implementedInterfaces.contains(interfaceName);
 	}
 
-	public boolean implementsAnyInterface()
+	public boolean hasParentClass()
 	{
-		return !implementedInterfaces.isEmpty();
+		return parentClassName != null;
 	}
 
-	public Map<String, String> getImplementedInterfaces()
+	@Override
+	public String toString()
 	{
-		return Collections.unmodifiableMap(implementedInterfaces);
+		return String.format("Class(%s%s, properties=%s, functions=%s, interfaces=%s)", name,
+				parentClassName != null ? " extends " + parentClassName : "", properties.values(), functions.values(),
+				implementedInterfaces);
 	}
 }

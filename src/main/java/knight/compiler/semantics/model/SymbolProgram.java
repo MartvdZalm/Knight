@@ -7,50 +7,48 @@ import java.util.*;
 public class SymbolProgram
 {
 	private final Map<String, SymbolClass> classes;
-	private final Map<String, SymbolFunction> functions;
-	private final Map<String, SymbolVariable> variables;
 	private final Map<String, SymbolInterface> interfaces;
-
-	private final Deque<String> rstack = new ArrayDeque<>();
+	private final Map<String, SymbolFunction> globalFunctions;
+	private final Map<String, SymbolVariable> globalVariables;
 
 	public SymbolProgram()
 	{
 		this.classes = new HashMap<>();
-		this.functions = new HashMap<>();
-		this.variables = new HashMap<>();
 		this.interfaces = new HashMap<>();
+		this.globalFunctions = new HashMap<>();
+		this.globalVariables = new HashMap<>();
 	}
 
 	public void clear()
 	{
 		classes.clear();
-		functions.clear();
-		variables.clear();
 		interfaces.clear();
-		rstack.clear();
+		globalFunctions.clear();
+		globalVariables.clear();
 	}
 
-	public boolean addClass(String id, String parent)
+	public boolean addClass(String name, String parentClassName)
 	{
-		if (containsClass(id)) {
+		if (classes.containsKey(name)) {
 			return false;
 		}
-
-		classes.put(id, new SymbolClass(id, parent));
+		classes.put(name, new SymbolClass(name, parentClassName));
 		return true;
 	}
 
-	public SymbolClass getClass(String id)
+	public SymbolClass getClass(String name)
 	{
-		if (containsClass(id)) {
-			return classes.get(id);
-		}
-		return null;
+		return classes.get(name);
 	}
 
-	public Map<String, SymbolClass> getAllClasses()
+	public Map<String, SymbolClass> getClasses()
 	{
 		return Collections.unmodifiableMap(classes);
+	}
+
+	public boolean hasClass(String name)
+	{
+		return classes.containsKey(name);
 	}
 
 	public boolean addInterface(String name)
@@ -67,185 +65,68 @@ public class SymbolProgram
 		return interfaces.get(name);
 	}
 
-	public boolean interfaceExists(String name)
+	public Map<String, SymbolInterface> getInterfaces()
+	{
+		return Collections.unmodifiableMap(interfaces);
+	}
+
+	public boolean hasInterface(String name)
 	{
 		return interfaces.containsKey(name);
 	}
 
-	public boolean addFunction(String id, ASTType type)
+	public boolean addGlobalFunction(String name, ASTType returnType)
 	{
-		if (containsFunction(id)) {
+		if (globalFunctions.containsKey(name)) {
 			return false;
 		}
-
-		functions.put(id, new SymbolFunction(id, type));
+		globalFunctions.put(name, new SymbolFunction(name, returnType));
 		return true;
 	}
 
-	public SymbolFunction getFunction(String id)
+	public SymbolFunction getGlobalFunction(String name)
 	{
-		if (containsFunction(id)) {
-			return functions.get(id);
-		}
-		return null;
+		return globalFunctions.get(name);
 	}
 
-	public SymbolFunction getFunction(String id, String classScope)
+	public Map<String, SymbolFunction> getGlobalFunctions()
 	{
-		if (getClass(classScope) == null) {
-			return null;
-		}
-
-		SymbolClass c = getClass(classScope);
-		while (c != null && !rstack.contains(c.getId())) {
-			rstack.push(c.getId());
-			if (c.getFunction(id) != null) {
-				rstack.clear();
-				return c.getFunction(id);
-			} else {
-				if (c.parent() == null) {
-					c = null;
-				} else {
-					c = getClass(c.parent());
-				}
-			}
-		}
-		rstack.clear();
-		return null;
+		return Collections.unmodifiableMap(globalFunctions);
 	}
 
-	public Map<String, SymbolFunction> getFunctions()
+	public boolean hasGlobalFunction(String name)
 	{
-		return Collections.unmodifiableMap(this.functions);
+		return globalFunctions.containsKey(name);
 	}
 
-	public ASTType getFunctionType(String id, String classScope)
+	public boolean addGlobalVariable(String name, ASTType type)
 	{
-		SymbolFunction m = getFunction(id, classScope);
-		if (m == null) {
-			return null;
-		}
-		return m.getType();
-	}
-
-	public boolean addVariable(String id, ASTType type)
-	{
-		if (containsVariable(id)) {
+		if (globalVariables.containsKey(name)) {
 			return false;
 		}
-
-		variables.put(id, new SymbolVariable(id, type));
+		globalVariables.put(name, new SymbolVariable(name, type));
 		return true;
 	}
 
-	public SymbolVariable getVariable(String id)
+	public SymbolVariable getGlobalVariable(String name)
 	{
-		return variables.get(id);
+		return globalVariables.get(name);
 	}
 
-	public SymbolVariable getVariable(String id, SymbolClass sClass, SymbolFunction sFunction)
+	public Map<String, SymbolVariable> getGlobalVariables()
 	{
-		if (sFunction != null) {
-			if (sFunction.getParam(id) != null) {
-				return sFunction.getParam(id);
-			}
-		} else if (sClass != null) {
-
-			while (sClass != null && !rstack.contains(sClass.getId())) {
-				rstack.push(sClass.getId());
-				if (sClass.getVariable(id) != null) {
-					rstack.clear();
-					return sClass.getVariable(id);
-				} else {
-					if (sClass.parent() == null) {
-						sClass = null;
-					} else {
-						sClass = getClass(sClass.parent());
-					}
-				}
-			}
-			rstack.clear();
-			return null;
-		}
-
-		return getVariable(id);
+		return Collections.unmodifiableMap(globalVariables);
 	}
 
-	public ASTType getVariableType(String id)
+	public boolean hasGlobalVariable(String name)
 	{
-		SymbolVariable var = getVariable(id);
-		if (var != null) {
-			return var.getType();
-		}
-		return null;
+		return globalVariables.containsKey(name);
 	}
 
-	public boolean containsClass(String id)
+	@Override
+	public String toString()
 	{
-		if (id != null) {
-			return classes.containsKey(id);
-		}
-		return false;
-	}
-
-	public boolean containsFunction(String id)
-	{
-		return functions.containsKey(id);
-	}
-
-	public boolean containsVariable(String id)
-	{
-		SymbolVariable var = getVariable(id);
-		return var != null;
-	}
-
-	public boolean compareTypes(ASTType t1, ASTType t2)
-	{
-		if (t1 == null || t2 == null) {
-			return false;
-		}
-
-		if (t1 instanceof ASTIntType && t2 instanceof ASTIntType) {
-			return true;
-		}
-		if (t1 instanceof ASTBooleanType && t2 instanceof ASTBooleanType) {
-			return true;
-		}
-		if (t1 instanceof ASTIntArrayType && t2 instanceof ASTIntArrayType) {
-			return true;
-		}
-		if (t1 instanceof ASTStringType && t2 instanceof ASTStringType) {
-			return true;
-		}
-		if (t1 instanceof ASTIdentifierType && t2 instanceof ASTIdentifierType) {
-			ASTIdentifierType i1 = (ASTIdentifierType) t1;
-			ASTIdentifierType i2 = (ASTIdentifierType) t2;
-
-			if (interfaceExists(i1.getName()) || interfaceExists(i2.getName())) {
-				return i1.getName().equals(i2.getName());
-			}
-
-			SymbolClass c = getClass(i2.getName());
-			while (c != null && !rstack.contains(c.getId())) {
-				rstack.push(c.getId());
-				if (i1.getName().equals(c.getId())) {
-					rstack.clear();
-					return true;
-				} else {
-					if (c.parent() == null) {
-						rstack.clear();
-						return false;
-					}
-					c = getClass(c.parent());
-				}
-			}
-			rstack.clear();
-		}
-		return false;
-	}
-
-	public Map<String, SymbolInterface> getInterfaces()
-	{
-		return Collections.unmodifiableMap(this.interfaces);
+		return String.format("Program(\n  classes=%s,\n  interfaces=%s,\n  functions=%s,\n  globals=%s\n)",
+				classes.values(), interfaces.values(), globalFunctions.values(), globalVariables.values());
 	}
 }

@@ -122,4 +122,6 @@ public interface ASTVisitor<R>
 	public R visit(ASTParameterizedType astParameterizedType);
 
 	public R visit(ASTInterface astInterface);
+
+	public R visit(ASTFieldAssign astFieldAssign);
 }

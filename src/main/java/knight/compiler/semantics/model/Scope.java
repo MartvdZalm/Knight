@@ -8,17 +8,18 @@ import java.util.Map;
 
 public class Scope
 {
-	private final Scope parent;
-	private final Map<String, SymbolVariable> variables = new HashMap<>();
+	private final Scope parentScope;
+	private final Map<String, SymbolVariable> variables;
 
-	public Scope(Scope parent)
+	public Scope(Scope parentScope)
 	{
-		this.parent = parent;
+		this.parentScope = parentScope;
+		this.variables = new HashMap<>();
 	}
 
 	public boolean addVariable(String name, ASTType type)
 	{
-		if (contains(name)) {
+		if (variables.containsKey(name)) {
 			return false;
 		}
 		variables.put(name, new SymbolVariable(name, type));
@@ -27,30 +28,29 @@ public class Scope
 
 	public SymbolVariable getVariable(String name)
 	{
-		if (contains(name)) {
-			return variables.get(name);
-		} else if (parent != null) {
-			return parent.getVariable(name);
+		SymbolVariable variable = variables.get(name);
+		if (variable != null) {
+			return variable;
 		}
-		return null;
+		return parentScope != null ? parentScope.getVariable(name) : null;
 	}
 
-	public boolean contains(String name)
+	public boolean containsVariable(String name)
 	{
 		return variables.containsKey(name);
 	}
 
-	public Scope getParent()
+	public Scope getParentScope()
 	{
-		return parent;
+		return parentScope;
 	}
 
-	public Map<String, SymbolVariable> getAllVariables()
+	public Map<String, SymbolVariable> getVariables()
 	{
 		return Collections.unmodifiableMap(variables);
 	}
 
-	public int size()
+	public int getVariableCount()
 	{
 		return variables.size();
 	}

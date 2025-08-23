@@ -100,6 +100,12 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	}
 
 	@Override
+	public ASTExpression visit(ASTFieldAssign astFieldAssign)
+	{
+		return null;
+	}
+
+	@Override
 	public ASTExpression visit(ASTBody astBody)
 	{
 		for (AST node : astBody.getNodes()) {

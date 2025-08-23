@@ -1,9 +1,0 @@
-import std
-
-fn main(): int
-{
-    println("Testing library system");
-    print("This should work without intrinsics");
-    
-    ret 0;
-}

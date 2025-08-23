@@ -1,8 +1,13 @@
 import "program.knight"
+import std
 
 fn main(): int
 {
 	calculate(10, 10);
+
+	Person person = new Person();
+	person.age = 19;
+	person.name = "Mart van der Zalm";
 
 	ret 0;
 }

@@ -17,13 +17,6 @@ public class Library
 		this.ast = ast;
 		this.functions = new HashMap<>();
 		this.classes = new HashMap<>();
-		extractSymbols();
-	}
-
-	private void extractSymbols()
-	{
-		// Extract functions and classes from the AST
-		// This will be implemented to parse the AST and populate the maps
 	}
 
 	public String getName()

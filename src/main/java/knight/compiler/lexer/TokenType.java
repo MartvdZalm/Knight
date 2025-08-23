@@ -32,7 +32,6 @@ public class TokenType
 		Symbol.symbol("private", Tokens.PRIVATE);
 
 		Symbol.symbol("class", Tokens.CLASS);
-		// Symbol.symbol("//", Tokens.COMMENT);
 		Symbol.symbol("new", Tokens.NEW);
 		Symbol.symbol("import", Tokens.IMPORT);
 		Symbol.symbol("fn", Tokens.FUNCTION);

@@ -143,6 +143,16 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 	}
 
 	@Override
+	public Void visit(ASTFieldAssign astFieldAssign)
+	{
+		astFieldAssign.setSourceFile(sourceFile);
+		astFieldAssign.getInstance().accept(this);
+		astFieldAssign.getField().accept(this);
+		astFieldAssign.getValue().accept(this);
+		return null;
+	}
+
+	@Override
 	public Void visit(ASTArrayAssign astArrayAssign)
 	{
 		astArrayAssign.setSourceFile(sourceFile);
@@ -387,7 +397,6 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 		return null;
 	}
 
-	// Binary operations
 	@Override
 	public Void visit(ASTPlus astPlus)
 	{

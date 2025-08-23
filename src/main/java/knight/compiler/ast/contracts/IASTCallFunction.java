@@ -3,6 +3,7 @@ package knight.compiler.ast.contracts;
 import java.util.List;
 import knight.compiler.ast.expressions.ASTExpression;
 import knight.compiler.ast.expressions.ASTIdentifierExpr;
+import knight.compiler.ast.types.ASTType;
 
 public interface IASTCallFunction extends HasToken
 {

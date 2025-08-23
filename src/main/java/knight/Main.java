@@ -61,10 +61,6 @@ public class Main
 			SymbolProgram symbolProgram = compiler.buildSymbolProgram(astPrograms);
 			System.out.println("Built unified symbol program");
 
-			for (String funcName : symbolProgram.getFunctions().keySet()) {
-				System.out.println(funcName);
-			}
-
 			// Step 4: Run semantics analysis on all programs
 			compiler.semantics(astPrograms, symbolProgram);
 
@@ -78,8 +74,6 @@ public class Main
 				System.exit(1);
 			} else {
 				System.out.println("Semantics analysis completed successfully");
-
-				// Show warnings if any
 				List<Diagnostic> diagnostics = DiagnosticReporter.getDiagnostics();
 				if (!diagnostics.isEmpty()) {
 					System.out.println("\nWarnings:");
@@ -99,20 +93,16 @@ public class Main
 				codeGenerator.visit(astProgram);
 			}
 
-			// String code =
-			// String.valueOf(codeGenerator.generateHeaders().append(codeGenerator.getGeneratedCode()));
 			String code = String.valueOf(codeGenerator.getGeneratedCode());
 			FileHelper.write(code, path, filename);
 
 			System.out.println("Code generation completed successfully");
 			System.out.println("Output written to: " + path + "/" + FileHelper.removeFileExtension(filename) + ".cpp");
-
 		} catch (Exception e) {
 			System.err.println("Compilation failed with exception: " + e.getMessage());
 			e.printStackTrace();
 			System.exit(1);
 		} finally {
-			// Always report any diagnostics that might have been generated
 			if (DiagnosticReporter.hasErrors()) {
 				System.err.println("\nCompilation failed with errors:");
 				DiagnosticReporter.sort();

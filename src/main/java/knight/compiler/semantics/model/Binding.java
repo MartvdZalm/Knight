@@ -6,12 +6,11 @@ import knight.compiler.semantics.utils.Counter;
 public abstract class Binding
 {
 	protected final ASTType type;
-	private final int count;
+	private final int uniqueId;
 
 	public Binding(ASTType type)
 	{
-		Counter counter = Counter.getInstance();
-		this.count = counter.getCount();
+		this.uniqueId = Counter.getInstance().getCount();
 		this.type = type;
 	}
 
@@ -20,9 +19,14 @@ public abstract class Binding
 		return type;
 	}
 
+	public int getUniqueId()
+	{
+		return uniqueId;
+	}
+
 	@Override
 	public String toString()
 	{
-		return Integer.toString(count);
+		return Integer.toString(uniqueId);
 	}
 }

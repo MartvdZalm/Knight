@@ -1,5 +1,12 @@
 
-fn calculate(string a, int b): int
+fn calculate(int a, int b): int
 {
 	ret a * b;
+}
+
+
+class Person
+{
+	string name;
+	int age;
 }

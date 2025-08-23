@@ -53,6 +53,12 @@ public class ASTPrinter implements ASTVisitor<String>
 	}
 
 	@Override
+	public String visit(ASTFieldAssign astFieldAssign)
+	{
+		return null;
+	}
+
+	@Override
 	public String visit(ASTBody body)
 	{
 		StringBuilder sb = new StringBuilder();

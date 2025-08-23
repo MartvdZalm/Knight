@@ -33,7 +33,6 @@ public class Compiler
 
 				if (tree instanceof ASTProgram) {
 					ASTProgram astProgram = (ASTProgram) tree;
-					// Set the source file for the entire AST tree
 					setSourceFileRecursively(astProgram, file.getCanonicalPath());
 					astPrograms.add(astProgram);
 				}
@@ -61,9 +60,6 @@ public class Compiler
 	{
 		SymbolProgram symbolProgram = new SymbolProgram();
 
-		// First, load all libraries into the symbol program
-		// LibraryManager.loadAllLibraries(symbolProgram);
-
 		BuildSymbolTree buildSymbolTree = new BuildSymbolTree(symbolProgram);
 		for (ASTProgram astProgram : astPrograms) {
 			buildSymbolTree.visit(astProgram);
@@ -74,7 +70,6 @@ public class Compiler
 
 	public void semantics(List<ASTProgram> astPrograms, SymbolProgram symbolProgram)
 	{
-		// Run semantics analysis on all programs with the unified symbol program
 		for (ASTProgram astProgram : astPrograms) {
 			NameAnalyser nameAnalyser = new NameAnalyser(symbolProgram);
 			nameAnalyser.visit(astProgram);

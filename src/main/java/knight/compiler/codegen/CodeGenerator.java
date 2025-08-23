@@ -19,750 +19,628 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class CodeGenerator implements ASTVisitor<String>
+public class CodeGenerator implements ASTVisitor<Void>
 {
-	private SymbolClass currentClass;
-	private SymbolFunction currentFunction;
-	private Set<String> requiredHeaders = new HashSet<>();
-	private StringBuilder generatedCode = new StringBuilder();
+	private final CodeBuilder codeBuilder;
+	private final HeaderManager headerManager;
+	private final TypeConverter typeConverter;
 
 	public CodeGenerator(String progPath, String filename)
 	{
-		File file = new File(filename);
-		String name = file.getName();
+		this.codeBuilder = new CodeBuilder();
+		this.headerManager = new HeaderManager();
+		this.typeConverter = new TypeConverter(headerManager);
 
-		requiredHeaders.add("iostream");
-		requiredHeaders.add("string");
-		requiredHeaders.add("vector");
+		headerManager.addRequiredHeader("iostream");
+		headerManager.addRequiredHeader("string");
+		headerManager.addRequiredHeader("vector");
+		headerManager.addRequiredHeader("functional");
 	}
 
-	public StringBuilder getGeneratedCode()
+	public String getGeneratedCode()
 	{
-		return generatedCode;
-	}
-
-	private Optional<String> handleLibraryCall(String className)
-	{
-		if (className == null) {
-			return Optional.empty();
-		}
-
-		// Check if this is a standard library class
-		if ("Out".equals(className) || "In".equals(className)) {
-			requiredHeaders.add("iostream");
-			return Optional.of(""); // Library code will be generated separately
-		}
-
-		return Optional.empty();
+		return codeBuilder.buildCompleteCode(headerManager);
 	}
 
 	@Override
-	public String visit(ASTAssign astAssign)
+	public Void visit(ASTProgram astProgram)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astAssign.getIdentifier().accept(this));
-		sb.append("=");
-		sb.append(astAssign.getExpression().accept(this));
-		return sb.append(";\n").toString();
-	}
-
-	@Override
-	public String visit(ASTBody astBody)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		for (AST node : astBody.getNodes()) {
-			sb.append(node.accept(this) + ";\n");
-		}
-
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTWhile astWhile)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("while (");
-		sb.append(astWhile.getCondition().accept(this));
-		sb.append(") {\n");
-		sb.append(astWhile.getBody().accept(this));
-		sb.append("}");
-
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTIntLiteral astIntLiteral)
-	{
-		return String.valueOf(astIntLiteral.getValue());
-	}
-
-	@Override
-	public String visit(ASTTrue astTrue)
-	{
-		return "true";
-	}
-
-	@Override
-	public String visit(ASTFalse astFalse)
-	{
-		return "false";
-	}
-
-	@Override
-	public String visit(ASTIdentifierExpr astIdentifierExpr)
-	{
-		return astIdentifierExpr.getName();
-	}
-
-	@Override
-	public String visit(ASTNewArray astNewArray)
-	{
-		return "";
-	}
-
-	@Override
-	public String visit(ASTNewInstance astNewInstance)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astNewInstance.getClassName().accept(this)).append("(");
-
-		List<ASTArgument> args = astNewInstance.getArguments();
-		for (int i = 0; i < args.size(); i++) {
-			sb.append(args.get(i).accept(this));
-			if (i < args.size() - 1) {
-				sb.append(", ");
-			}
-		}
-
-		sb.append(")");
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTCallFunctionExpr astCallFunctionExpr)
-	{
-		String funcName = astCallFunctionExpr.getFunctionName().getName();
-		// String className = null;
-
-		// if (astCallFunctionExpr.getInstance() != null) {
-		// if (astCallFunctionExpr.getInstance() instanceof ASTIdentifierExpr) {
-		// className = ((ASTIdentifierExpr) astCallFunctionExpr.getInstance()).getId();
-		// }
-		// }
-		//
-		// if (className != null) {
-		// List<ASTExpression> arguments = astCallFunctionExpr.getArgumentList();
-		// Optional<String> intrinsicCode = handleIntrinsicCall(className, funcName,
-		// arguments);
-		//
-		// if (intrinsicCode.isPresent()) {
-		// return intrinsicCode.get();
-		// }
-		// }
-
-		StringBuilder sb = new StringBuilder();
-
-		if (astCallFunctionExpr.getInstance() != null) {
-			sb.append(astCallFunctionExpr.getInstance().accept(this) + ".");
-		}
-
-		sb.append(funcName + "(");
-		for (int i = 0; i < astCallFunctionExpr.getArgumentCount(); i++) {
-			ASTExpression astArgument = astCallFunctionExpr.getArgument(i);
-			sb.append(astArgument.accept(this));
-
-			if (i < astCallFunctionExpr.getArgumentCount() - 1) {
-				boolean currentIsString = astArgument.getType() instanceof ASTStringType;
-				boolean nextIsString = astCallFunctionExpr.getArgument(i + 1).getType() instanceof ASTStringType;
-
-				if (currentIsString && nextIsString) {
-					sb.append(" + ");
-				} else {
-					sb.append(", ");
-				}
-			}
-		}
-		sb.append(")");
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTCallFunctionStat astCallFunctionStat)
-	{
-		String funcName = astCallFunctionStat.getFunctionName().getName();
-		// String className = null;
-		//
-		// if (astCallFunctionStat.getInstance() != null) {
-		// className = astCallFunctionStat.getInstance().toString();
-		//
-		// }
-		//
-		// if (className != null) {
-		// List<ASTExpression> arguments = astCallFunctionStat.getArgumentList();
-		// Optional<String> intrinsicCode = handleIntrinsicCall(className, funcName,
-		// arguments);
-		//
-		// if (intrinsicCode.isPresent()) {
-		// return intrinsicCode.get();
-		// }
-		// }
-
-		StringBuilder sb = new StringBuilder();
-
-		if (astCallFunctionStat.getInstance() != null) {
-			sb.append(astCallFunctionStat.getInstance() + ".");
-		}
-
-		sb.append(funcName + "(");
-		for (int i = 0; i < astCallFunctionStat.getArgumentCount(); i++) {
-			ASTExpression astArgument = astCallFunctionStat.getArgument(i);
-			sb.append(astArgument.accept(this));
-
-			if (i < astCallFunctionStat.getArgumentCount() - 1) {
-				boolean currentIsString = astArgument.getType() instanceof ASTStringType;
-				boolean nextIsString = astCallFunctionStat.getArgument(i + 1).getType() instanceof ASTStringType;
-
-				if (currentIsString && nextIsString) {
-					sb.append(" + ");
-				} else {
-					sb.append(", ");
-				}
-			}
-		}
-		sb.append(")");
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTIntType astIntType)
-	{
-		return "int";
-	}
-
-	@Override
-	public String visit(ASTStringType astStringType)
-	{
-		return "std::string";
-	}
-
-	@Override
-	public String visit(ASTVoidType astVoidType)
-	{
-		return "void";
-	}
-
-	@Override
-	public String visit(ASTBooleanType astBooleanType)
-	{
-		return "bool";
-	}
-
-	@Override
-	public String visit(ASTIntArrayType astIntArrayType)
-	{
-		return "std::vector<int>";
-	}
-
-	@Override
-	public String visit(ASTIdentifierType astIdentifierType)
-	{
-		return astIdentifierType.getName();
-	}
-
-	@Override
-	public String visit(ASTParameterizedType astParameterizedType)
-	{
-		return "knight::" + astParameterizedType.toString();
-	}
-
-	@Override
-	public String visit(ASTInterface astInterface)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("class ").append(astInterface.getIdentifier().accept(this));
-
-		if (!astInterface.getExtendedInterfaces().isEmpty()) {
-			sb.append(" : ");
-			for (int i = 0; i < astInterface.getExtendedInterfaces().size(); i++) {
-				if (i > 0) {
-					sb.append(", ");
-				}
-				sb.append("public ").append(astInterface.getExtendedInterfaces().get(i).accept(this));
-			}
-		}
-
-		sb.append(" {\n");
-		sb.append("public:\n");
-
-		for (ASTFunction astFunction : astInterface.getFunctions()) {
-			String returnType = astFunction.getReturnType().accept(this);
-			String functionName = astFunction.getIdentifier().toString();
-
-			sb.append("    virtual ").append(returnType).append(" ").append(functionName).append("(");
-
-			for (int i = 0; i < astFunction.getArgumentCount(); i++) {
-				if (i > 0) {
-					sb.append(", ");
-				}
-				sb.append(astFunction.getArgument(i).accept(this));
-			}
-
-			sb.append(") = 0;\n");
-		}
-
-		sb.append("    virtual ~").append(astInterface.getIdentifier().accept(this)).append("() {}\n");
-
-		sb.append("};\n\n");
-
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTIdentifier astIdentifier)
-	{
-		return astIdentifier.getName();
-	}
-
-	@Override
-	public String visit(ASTArrayIndexExpr astArrayIndexExpr)
-	{
-		return astArrayIndexExpr.getArray().accept(this) + "[" + astArrayIndexExpr.getIndex().accept(this) + "]";
-	}
-
-	@Override
-	public String visit(ASTArrayAssign astArrayAssign)
-	{
+		generateDeclarations(astProgram);
+		generateImplementations(astProgram);
 		return null;
 	}
 
-	@Override
-	public String visit(ASTStringLiteral astStringLiteral)
+	private void generateDeclarations(ASTProgram astProgram)
 	{
-		return astStringLiteral.getValue();
-	}
+		codeBuilder.startDeclarationSection();
 
-	@Override
-	public String visit(ASTVariable astVariable)
-	{
-		String type = astVariable.getType().accept(this);
-		String identifier = astVariable.getIdentifier().accept(this);
-		return type + " " + identifier;
-	}
-
-	@Override
-	public String visit(ASTVariableInit astVariableInit)
-	{
-		String type = astVariableInit.getType().accept(this);
-		String identifier = astVariableInit.getIdentifier().accept(this);
-		return type + " " + identifier + " = " + astVariableInit.getExpression().accept(this) + "; \n";
-	}
-
-	@Override
-	public String visit(ASTFunction astFunction)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(astFunction.getReturnType().accept(this) + " " + astFunction.getIdentifier() + "(");
-
-		for (int i = 0; i < astFunction.getArgumentCount(); i++) {
-			sb.append(astFunction.getArgument(i).accept(this));
-
-			if (i != astFunction.getArgumentCount() - 1) {
-				sb.append(", ");
+		for (AST node : astProgram.getNodes()) {
+			if (node instanceof ASTClass || node instanceof ASTInterface) {
+				node.accept(this);
+			} else if (node instanceof ASTFunction) {
+				generateFunctionDeclaration((ASTFunction) node);
 			}
 		}
 
-		sb.append(") { \n");
+		codeBuilder.endDeclarationSection();
+	}
 
-		sb.append(astFunction.getBody().accept(this));
+	private void generateImplementations(ASTProgram astProgram)
+	{
+		codeBuilder.startImplementationSection();
 
-		sb.append("} \n");
+		for (AST node : astProgram.getNodes()) {
+			if (node instanceof ASTFunction) {
+				generateFunctionImplementation((ASTFunction) node, null);
+			} else if (node instanceof ASTClass) {
+				generateClassFunctions((ASTClass) node);
+			}
+		}
 
-		return sb.toString();
+		codeBuilder.endImplementationSection();
 	}
 
 	@Override
-	public String visit(ASTClass astClass)
+	public Void visit(ASTClass astClass)
 	{
-		StringBuilder sb = new StringBuilder();
+		codeBuilder.appendToDeclarations("class " + astClass.getIdentifier().getName());
 
-		// if (astClass.isStatic()) {
-		// sb.append("static ");
-		// }
+		if (astClass.getExtendsClass() != null || !astClass.getImplementsInterfaces().isEmpty()) {
+			codeBuilder.append(" : ");
+			boolean first = true;
 
-		String className = astClass.getIdentifier().getName();
-
-		Optional<String> libraryCode = handleLibraryCall(className);
-		if (libraryCode.isPresent()) {
-			return libraryCode.get();
-		}
-
-		sb.append("class ").append(className).append(" {\n");
-
-		if (astClass.getExtendsClass() != null) {
-			sb.append(" : public ").append(astClass.getExtendsClass().accept(this));
-		}
-
-		if (!astClass.getImplementsInterfaces().isEmpty()) {
-			if (astClass.getExtendsClass() == null) {
-				sb.append(" : ");
-			} else {
-				sb.append(", ");
+			if (astClass.getExtendsClass() != null) {
+				codeBuilder.append("public " + astClass.getExtendsClass().getName());
+				first = false;
 			}
 
-			for (int i = 0; i < astClass.getImplementsInterfaces().size(); i++) {
-				if (i > 0) {
-					sb.append(", ");
+			for (ASTIdentifier interfaceName : astClass.getImplementsInterfaces()) {
+				if (!first) {
+					codeBuilder.append(", ");
 				}
-				sb.append("public ").append(astClass.getImplementsInterfaces().get(i).accept(this));
+				codeBuilder.append("public " + interfaceName.getName());
+				first = false;
 			}
 		}
 
-		sb.append(" {\n");
-
-		String currentAccess = "public";
-		sb.append(currentAccess).append(":\n");
+		codeBuilder.appendLine(" {");
+		codeBuilder.appendLine("public:");
+		codeBuilder.increaseIndent();
 
 		for (int i = 0; i < astClass.getPropertyCount(); i++) {
-			sb.append(astClass.getProperty(i).accept(this) + "\n");
+			visit(astClass.getProperty(i));
 		}
 
 		for (int i = 0; i < astClass.getFunctionCount(); i++) {
-			sb.append(astClass.getFunction(i).accept(this) + "\n");
+			generateFunctionDeclaration(astClass.getFunction(i));
 		}
 
-		if (astClass.getExtendsClass() != null || !astClass.getImplementsInterfaces().isEmpty()) {
-			sb.append("public:\n").append("    virtual ~").append(astClass.getIdentifier().accept(this))
-					.append("() {}\n");
-		}
-
-		sb.append("};\n");
-
-		return sb.toString();
-	}
-
-	public StringBuilder generateHeaders()
-	{
-		StringBuilder sb = new StringBuilder();
-
-		for (String header : requiredHeaders) {
-			sb.append("#include <").append(header).append(">\n");
-		}
-
-		sb.append("\n");
-
-		// Generate standard library code
-		// if (requiredHeaders.contains("iostream")) {
-		// sb.append("// Standard Library Implementation\n");
-		// sb.append(knight.compiler.library.LibraryCodeGenerator.generateStandardLibrary());
-		// sb.append("\n");
-		// }
-
-		return sb;
-	}
-
-	@Override
-	public String visit(ASTProgram astProgram)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		// for (ASTImport astImport : astProgram.getImportList()) {
-		// sb.append(astImport.accept(this));
-		// }
-
-		for (AST node : astProgram.getNodes()) {
-			sb.append(node.accept(this));
-		}
-
-		generatedCode.append(sb);
-
-		// write(generateHeaders().append(sb).toString());
-
+		codeBuilder.decreaseIndent();
+		codeBuilder.appendLine("};");
 		return null;
 	}
 
 	@Override
-	public String visit(ASTReturnStatement astReturnStatement)
+	public Void visit(ASTInterface astInterface)
 	{
-		return "return " + astReturnStatement.getExpression().accept(this);
-	}
+		codeBuilder.appendToDeclarations("class " + astInterface.getIdentifier().getName());
 
-	@Override
-	public String visit(ASTFunctionType astFunctionType)
-	{
-		return null;
-	}
-
-	@Override
-	public String visit(ASTProperty astProperty)
-	{
-		String type = astProperty.getType().accept(this);
-		String identifier = astProperty.getIdentifier().accept(this);
-		return type + " " + identifier + ";";
-	}
-
-	@Override
-	public String visit(ASTIfChain astIfChain)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		boolean firstBranch = true;
-
-		for (ASTConditionalBranch branch : astIfChain.getBranches()) {
-			if (!firstBranch) {
-				sb.append(" else ");
+		if (!astInterface.getExtendedInterfaces().isEmpty()) {
+			codeBuilder.append(" : ");
+			for (int i = 0; i < astInterface.getExtendedInterfaces().size(); i++) {
+				if (i > 0)
+					codeBuilder.append(", ");
+				codeBuilder.append("public " + astInterface.getExtendedInterfaces().get(i).getName());
 			}
+		}
 
-			sb.append("if (");
-			sb.append(branch.getCondition().accept(this));
-			sb.append(") ");
+		codeBuilder.appendLine(" {");
+		codeBuilder.appendLine("public:");
+		codeBuilder.increaseIndent();
 
-			sb.append("{\n");
-			sb.append(branch.getBody().accept(this));
-			sb.append("\n}\n");
+		for (ASTFunction function : astInterface.getFunctions()) {
+			String returnType = typeConverter.convertType(function.getReturnType());
+			codeBuilder.append("virtual " + returnType + " " + function.getIdentifier().getName() + "(");
+			generateParameterList(function);
+			codeBuilder.appendLine(") = 0;");
+		}
 
-			firstBranch = false;
+		codeBuilder.appendLine("virtual ~" + astInterface.getIdentifier().getName() + "() {}");
+
+		codeBuilder.decreaseIndent();
+		codeBuilder.appendLine("};");
+		return null;
+	}
+
+	private void generateFunctionDeclaration(ASTFunction function)
+	{
+		String returnType = typeConverter.convertType(function.getReturnType());
+		codeBuilder.appendRawToDeclarations(returnType + " " + function.getIdentifier().getName() + "(");
+		generateParameterList(function);
+		codeBuilder.appendLine(");");
+	}
+
+	@Override
+	public Void visit(ASTProperty astProperty)
+	{
+		String type = typeConverter.convertType(astProperty.getType());
+		codeBuilder.appendToDeclarations(type + " " + astProperty.getIdentifier().getName() + ";");
+		return null;
+	}
+
+	private void generateClassFunctions(ASTClass astClass)
+	{
+		for (int i = 0; i < astClass.getFunctionCount(); i++) {
+			ASTFunction function = astClass.getFunction(i);
+			generateFunctionImplementation(function, astClass.getIdentifier().getName());
+		}
+	}
+
+	private void generateFunctionImplementation(ASTFunction function, String className)
+	{
+		String returnType = typeConverter.convertType(function.getReturnType());
+		String functionName = function.getIdentifier().getName();
+
+		if (className != null) {
+			codeBuilder.appendRawToImplementations(returnType + " " + className + "::" + functionName + "(");
+		} else {
+			codeBuilder.appendRawToImplementations(returnType + " " + functionName + "(");
+		}
+
+		generateParameterList(function);
+		codeBuilder.appendLine(") {");
+		codeBuilder.increaseIndent();
+
+		for (AST node : function.getBody().getNodes()) {
+			node.accept(this);
+		}
+
+		codeBuilder.decreaseIndent();
+		codeBuilder.appendLine("}\n");
+	}
+
+	private void generateParameterList(ASTFunction function)
+	{
+		for (int i = 0; i < function.getArgumentCount(); i++) {
+			ASTArgument arg = function.getArgument(i);
+			String paramType = typeConverter.convertType(arg.getType());
+			codeBuilder.append(paramType + " " + arg.getIdentifier().getName());
+			if (i < function.getArgumentCount() - 1) {
+				codeBuilder.append(", ");
+			}
+		}
+	}
+
+	@Override
+	public Void visit(ASTFunction astFunction)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTBody astBody)
+	{
+		codeBuilder.startBlock();
+		for (AST node : astBody.getNodes()) {
+			node.accept(this);
+		}
+		codeBuilder.endBlock();
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTAssign astAssign)
+	{
+		astAssign.getIdentifier().accept(this);
+		codeBuilder.append(" = ");
+		astAssign.getExpression().accept(this);
+		codeBuilder.appendLine(";");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTFieldAssign astFieldAssign)
+	{
+		astFieldAssign.getInstance().accept(this);
+		codeBuilder.append(".");
+		astFieldAssign.getField().accept(this);
+		codeBuilder.append(" = ");
+		astFieldAssign.getValue().accept(this);
+		codeBuilder.appendLine(";");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTVariable astVariable)
+	{
+		String type = typeConverter.convertType(astVariable.getType());
+		codeBuilder.appendLine(type + " " + astVariable.getIdentifier().getName() + ";");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTVariableInit astVariableInit)
+	{
+		String type = typeConverter.convertType(astVariableInit.getType());
+		codeBuilder.append(type + " " + astVariableInit.getIdentifier().getName() + " = ");
+		astVariableInit.getExpression().accept(this);
+		codeBuilder.appendLine(";");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTReturnStatement astReturnStatement)
+	{
+		codeBuilder.append("return ");
+		if (astReturnStatement.getExpression() != null) {
+			astReturnStatement.getExpression().accept(this);
+		}
+		codeBuilder.appendLine(";");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTWhile astWhile)
+	{
+		codeBuilder.append("while (");
+		astWhile.getCondition().accept(this);
+		codeBuilder.append(") ");
+		astWhile.getBody().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTIfChain astIfChain)
+	{
+		boolean first = true;
+		for (ASTConditionalBranch branch : astIfChain.getBranches()) {
+			if (first) {
+				codeBuilder.append("if (");
+				first = false;
+			} else {
+				codeBuilder.append(" else if (");
+			}
+			branch.getCondition().accept(this);
+			codeBuilder.append(") ");
+			branch.getBody().accept(this);
 		}
 
 		if (astIfChain.getElseBody() != null) {
-			sb.append("else ");
-			sb.append("{\n");
-			sb.append(astIfChain.getElseBody().accept(this));
-			sb.append("\n}\n");
+			codeBuilder.append(" else ");
+			astIfChain.getElseBody().accept(this);
 		}
 
-		return sb.toString();
+		return null;
 	}
 
 	@Override
-	public String visit(ASTConditionalBranch astConditionalBranch)
+	public Void visit(ASTForEach astForEach)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(astConditionalBranch.getCondition().accept(this));
-
-		sb.append(" {\n");
-		sb.append(astConditionalBranch.getBody().accept(this));
-		sb.append("\n}");
-
-		return sb.toString();
+		codeBuilder.append("for (");
+		codeBuilder.append(typeConverter.convertType(astForEach.getVariable().getType()));
+		codeBuilder.append(" ");
+		codeBuilder.append(astForEach.getVariable().getIdentifier().getName());
+		codeBuilder.append(" : ");
+		astForEach.getIterable().accept(this);
+		codeBuilder.append(") ");
+		astForEach.getBody().accept(this);
+		return null;
 	}
 
 	@Override
-	public String visit(ASTArgument astArgument)
+	public Void visit(ASTArrayAssign astArrayAssign)
 	{
-		String type = astArgument.getType().accept(this);
-		String identifier = astArgument.getIdentifier().accept(this);
-
-		return type + " " + identifier;
+		astArrayAssign.getIdentifier().accept(this);
+		codeBuilder.append("[");
+		astArrayAssign.getArray().accept(this);
+		codeBuilder.append("] = ");
+		astArrayAssign.getValue().accept(this);
+		codeBuilder.appendLine(";");
+		return null;
 	}
 
 	@Override
-	public String visit(ASTNotEquals astNotEquals)
+	public Void visit(ASTCallFunctionStat astCallFunctionStat)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astNotEquals.getLeft().accept(this));
-		sb.append("!=");
-		sb.append(astNotEquals.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTPlus astPlus)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astPlus.getLeft().accept(this));
-		sb.append("+");
-		sb.append(astPlus.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTOr astOr)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astOr.getLeft().accept(this));
-		sb.append("||");
-		sb.append(astOr.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTAnd astAnd)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astAnd.getLeft().accept(this));
-		sb.append("&&");
-		sb.append(astAnd.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTEquals astEquals)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astEquals.getLeft().accept(this));
-		sb.append("==");
-		sb.append(astEquals.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTLessThan astLessThan)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astLessThan.getLeft().accept(this));
-		sb.append("<");
-		sb.append(astLessThan.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTLessThanOrEqual astLessThanOrEqual)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astLessThanOrEqual.getLeft().accept(this));
-		sb.append("<=");
-		sb.append(astLessThanOrEqual.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTGreaterThan astGreaterThan)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astGreaterThan.getLeft().accept(this));
-		sb.append(">");
-		sb.append(astGreaterThan.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astGreaterThanOrEqual.getLeft().accept(this));
-		sb.append(">=");
-		sb.append(astGreaterThanOrEqual.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTMinus astMinus)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astMinus.getLeft().accept(this));
-		sb.append("-");
-		sb.append(astMinus.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTTimes astTimes)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astTimes.getLeft().accept(this));
-		sb.append("*");
-		sb.append(astTimes.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTDivision astDivision)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astDivision.getLeft().accept(this));
-		sb.append("/");
-		sb.append(astDivision.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTModulus astModulus)
-	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(astModulus.getLeft().accept(this));
-		sb.append("%");
-		sb.append(astModulus.getRight().accept(this));
-		return sb.toString();
-	}
-
-	@Override
-	public String visit(ASTStringArrayType astStringArrayType)
-	{
-		return "std::vector<std::string>";
-	}
-
-	@Override
-	public String visit(ASTArrayLiteral astArrayLiteral)
-	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("{");
-
-		for (int i = 0; i < astArrayLiteral.getExpressionCount(); i++) {
-			ASTExpression astExpression = astArrayLiteral.getExpression(i);
-			sb.append(astExpression.accept(this));
-
-			if (i < astArrayLiteral.getExpressionCount() - 1) {
-				boolean currentIsString = astExpression.getType() instanceof ASTStringType;
-				boolean nextIsString = astArrayLiteral.getExpression(i + 1).getType() instanceof ASTStringType;
-
-				if (currentIsString && nextIsString) {
-					sb.append(" + ");
-				} else {
-					sb.append(", ");
-				}
+		if (astCallFunctionStat.getInstance() != null) {
+			astCallFunctionStat.getInstance().accept(this);
+			codeBuilder.append(".");
+		}
+		codeBuilder.append(astCallFunctionStat.getFunctionName().getName() + "(");
+		for (int i = 0; i < astCallFunctionStat.getArgumentCount(); i++) {
+			astCallFunctionStat.getArgument(i).accept(this);
+			if (i < astCallFunctionStat.getArgumentCount() - 1) {
+				codeBuilder.append(", ");
 			}
 		}
-		sb.append("}");
-
-		return sb.toString();
+		codeBuilder.appendLine(");");
+		return null;
 	}
 
 	@Override
-	public String visit(ASTForEach astForEach)
+	public Void visit(ASTIntLiteral astIntLiteral)
 	{
-		StringBuilder sb = new StringBuilder();
-
-		sb.append("for (");
-		sb.append(astForEach.getVariable().accept(this));
-		sb.append(" : ");
-		sb.append(astForEach.getIterable().accept(this));
-		sb.append(") {");
-		sb.append(astForEach.getBody().accept(this));
-		sb.append("}");
-
-		return sb.toString();
+		codeBuilder.append(String.valueOf(astIntLiteral.getValue()));
+		return null;
 	}
 
 	@Override
-	public String visit(ASTLambda astLambda)
+	public Void visit(ASTStringLiteral astStringLiteral)
 	{
-		StringBuilder sb = new StringBuilder();
+		codeBuilder.append(astStringLiteral.getValue());
+		return null;
+	}
 
-		sb.append("[](");
+	@Override
+	public Void visit(ASTTrue astTrue)
+	{
+		codeBuilder.append("true");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTFalse astFalse)
+	{
+		codeBuilder.append("false");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTIdentifierExpr astIdentifierExpr)
+	{
+		codeBuilder.append(astIdentifierExpr.getName());
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTCallFunctionExpr astCallFunctionExpr)
+	{
+		if (astCallFunctionExpr.getInstance() != null) {
+			astCallFunctionExpr.getInstance().accept(this);
+			codeBuilder.append(".");
+		}
+		codeBuilder.append(astCallFunctionExpr.getFunctionName().getName() + "(");
+		for (int i = 0; i < astCallFunctionExpr.getArgumentCount(); i++) {
+			astCallFunctionExpr.getArgument(i).accept(this);
+			if (i < astCallFunctionExpr.getArgumentCount() - 1) {
+				codeBuilder.append(", ");
+			}
+		}
+		codeBuilder.append(")");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTNewInstance astNewInstance)
+	{
+		codeBuilder.append(astNewInstance.getClassName().getName() + "(");
+		for (int i = 0; i < astNewInstance.getArguments().size(); i++) {
+			astNewInstance.getArguments().get(i).accept(this);
+			if (i < astNewInstance.getArguments().size() - 1) {
+				codeBuilder.append(", ");
+			}
+		}
+		codeBuilder.append(")");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTNewArray astNewArray)
+	{
+		String elementType = typeConverter.convertType(astNewArray.getType());
+		codeBuilder.append("std::vector<" + elementType + ">(");
+		astNewArray.getArrayLength().accept(this);
+		codeBuilder.append(")");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTArrayIndexExpr astArrayIndexExpr)
+	{
+		astArrayIndexExpr.getArray().accept(this);
+		codeBuilder.append("[");
+		astArrayIndexExpr.getIndex().accept(this);
+		codeBuilder.append("]");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTArrayLiteral astArrayLiteral)
+	{
+		String elementType = typeConverter.convertType(astArrayLiteral.getType());
+		codeBuilder.append("std::vector<" + elementType + ">{");
+		for (int i = 0; i < astArrayLiteral.getExpressionCount(); i++) {
+			astArrayLiteral.getExpression(i).accept(this);
+			if (i < astArrayLiteral.getExpressionCount() - 1) {
+				codeBuilder.append(", ");
+			}
+		}
+		codeBuilder.append("}");
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTLambda astLambda)
+	{
+		codeBuilder.append("[");
+		// Capture list (empty for now)
+		codeBuilder.append("](");
 
 		for (int i = 0; i < astLambda.getArgumentCount(); i++) {
-			sb.append(astLambda.getArgument(i).accept(this));
-
-			if (i != astLambda.getArgumentCount() - 1) {
-				sb.append(", ");
+			ASTArgument arg = astLambda.getArgument(i);
+			String paramType = typeConverter.convertType(arg.getType());
+			codeBuilder.append(paramType + " " + arg.getIdentifier().getName());
+			if (i < astLambda.getArgumentCount() - 1) {
+				codeBuilder.append(", ");
 			}
 		}
-
-		sb.append(") -> " + astLambda.getReturnType().accept(this) + " { ");
-		sb.append(astLambda.getBody().accept(this));
-		sb.append("}");
-
-		return sb.toString();
+		codeBuilder.append(") -> " + typeConverter.convertType(astLambda.getReturnType()) + " ");
+		astLambda.getBody().accept(this);
+		return null;
 	}
 
 	@Override
-	public String visit(ASTImport astImport)
+	public Void visit(ASTPlus astPlus)
 	{
-		return "#include <knight/" + astImport.getIdentifier() + ".h>\n";
+		return visitBinaryOperator(astPlus, "+");
+	}
+
+	@Override
+	public Void visit(ASTMinus astMinus)
+	{
+		return visitBinaryOperator(astMinus, "-");
+	}
+
+	@Override
+	public Void visit(ASTTimes astTimes)
+	{
+		return visitBinaryOperator(astTimes, "*");
+	}
+
+	@Override
+	public Void visit(ASTDivision astDivision)
+	{
+		return visitBinaryOperator(astDivision, "/");
+	}
+
+	@Override
+	public Void visit(ASTModulus astModulus)
+	{
+		return visitBinaryOperator(astModulus, "%");
+	}
+
+	@Override
+	public Void visit(ASTEquals astEquals)
+	{
+		return visitBinaryOperator(astEquals, "==");
+	}
+
+	@Override
+	public Void visit(ASTNotEquals astNotEquals)
+	{
+		return visitBinaryOperator(astNotEquals, "!=");
+	}
+
+	@Override
+	public Void visit(ASTLessThan astLessThan)
+	{
+		return visitBinaryOperator(astLessThan, "<");
+	}
+
+	@Override
+	public Void visit(ASTLessThanOrEqual astLessThanOrEqual)
+	{
+		return visitBinaryOperator(astLessThanOrEqual, "<=");
+	}
+
+	@Override
+	public Void visit(ASTGreaterThan astGreaterThan)
+	{
+		return visitBinaryOperator(astGreaterThan, ">");
+	}
+
+	@Override
+	public Void visit(ASTGreaterThanOrEqual astGreaterThanOrEqual)
+	{
+		return visitBinaryOperator(astGreaterThanOrEqual, ">=");
+	}
+
+	@Override
+	public Void visit(ASTAnd astAnd)
+	{
+		return visitBinaryOperator(astAnd, "&&");
+	}
+
+	@Override
+	public Void visit(ASTOr astOr)
+	{
+		return visitBinaryOperator(astOr, "||");
+	}
+
+	private Void visitBinaryOperator(ASTBinaryExpression operator, String opSymbol)
+	{
+		operator.getLeft().accept(this);
+		codeBuilder.append(" " + opSymbol + " ");
+		operator.getRight().accept(this);
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTIntType astIntType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTStringType astStringType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTVoidType astVoidType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTBooleanType astBooleanType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTIntArrayType astIntArrayType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTStringArrayType astStringArrayType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTIdentifierType astIdentifierType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTParameterizedType astParameterizedType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTFunctionType astFunctionType)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTIdentifier astIdentifier)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTArgument astArgument)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTConditionalBranch astConditionalBranch)
+	{
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTImport astImport)
+	{
+		// headerManager.addRequiredHeader(astImport.getIdentifier().getName());
+		return null;
 	}
 }

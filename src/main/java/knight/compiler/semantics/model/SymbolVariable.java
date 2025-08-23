@@ -5,7 +5,7 @@ import knight.compiler.ast.types.ASTType;
 public class SymbolVariable extends Binding
 {
 	private final String name;
-	private int lvIndex = -1;
+	private int localVariableIndex = -1;
 
 	public SymbolVariable(String name, ASTType type)
 	{
@@ -13,18 +13,29 @@ public class SymbolVariable extends Binding
 		this.name = name;
 	}
 
-	public String getId()
+	public String getName()
 	{
 		return name;
 	}
 
-	public int getLvIndex()
+	public int getLocalVariableIndex()
 	{
-		return lvIndex;
+		return localVariableIndex;
 	}
 
-	public void setLvIndex(int lvIndex)
+	public void setLocalVariableIndex(int localVariableIndex)
 	{
-		this.lvIndex = lvIndex;
+		this.localVariableIndex = localVariableIndex;
+	}
+
+	public boolean isLocalVariable()
+	{
+		return localVariableIndex >= 0;
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format("Variable(%s : %s, index=%d)", name, type, localVariableIndex);
 	}
 }

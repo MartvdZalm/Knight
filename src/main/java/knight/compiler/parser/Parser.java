@@ -129,13 +129,13 @@ public class Parser
 
 		eat(Tokens.LEFTBRACE);
 
-		List<ASTFunction> methods = new ArrayList<>();
+		List<ASTFunction> functions = new ArrayList<>();
 		while (token.getToken() != Tokens.RIGHTBRACE) {
-			methods.add(parseInterfaceMethod());
+			functions.add(parseInterfaceMethod());
 		}
 
 		eat(Tokens.RIGHTBRACE);
-		return new ASTInterface(token, name, methods, extendsInterfaces);
+		return new ASTInterface(token, name, functions, extendsInterfaces);
 	}
 
 	private ASTFunction parseInterfaceMethod() throws ParseException
@@ -473,25 +473,50 @@ public class Parser
 
 						ASTIdentifierExpr instance = new ASTIdentifierExpr(id.getToken(), id.getName());
 						eat(Tokens.DOT);
-						ASTIdentifierExpr functionName = new ASTIdentifierExpr(token, checkNotNull(token).getSymbol());
+						ASTIdentifierExpr member = new ASTIdentifierExpr(token, checkNotNull(token).getSymbol());
 						eat(Tokens.IDENTIFIER);
 
-						List<ASTExpression> exprList = new ArrayList<ASTExpression>();
-
-						eat(Tokens.LEFTPAREN);
-						if (token.getToken() != Tokens.RIGHTPAREN) {
-							ASTExpression exprArg = parseExpression();
-							exprList.add(exprArg);
-							while (token.getToken() == Tokens.COMMA) {
-								eat(Tokens.COMMA);
-								exprArg = parseExpression();
+						if (token.getToken() == Tokens.ASSIGN) {
+							eat(Tokens.ASSIGN);
+							ASTExpression value = parseExpression();
+							return new ASTFieldAssign(tok, instance, member, value);
+						} else if (token.getToken() == Tokens.LEFTPAREN) {
+							List<ASTExpression> exprList = new ArrayList<>();
+							eat(Tokens.LEFTPAREN);
+							if (token.getToken() != Tokens.RIGHTPAREN) {
+								ASTExpression exprArg = parseExpression();
 								exprList.add(exprArg);
+								while (token.getToken() == Tokens.COMMA) {
+									eat(Tokens.COMMA);
+									exprArg = parseExpression();
+									exprList.add(exprArg);
+								}
 							}
+							eat(Tokens.RIGHTPAREN);
+							eat(Tokens.SEMICOLON);
+							return new ASTCallFunctionStat(tok, instance, member, exprList);
+						} else {
+							throw new ParseException(token.getRow(), token.getCol(),
+									"Invalid token :" + token.getToken() + " after field access");
 						}
-						eat(Tokens.RIGHTPAREN);
-						eat(Tokens.SEMICOLON);
-						ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, instance, functionName, exprList);
-						return callFunc;
+
+						// List<ASTExpression> exprList = new ArrayList<ASTExpression>();
+
+						// eat(Tokens.LEFTPAREN);
+						// if (token.getToken() != Tokens.RIGHTPAREN) {
+						// ASTExpression exprArg = parseExpression();
+						// exprList.add(exprArg);
+						// while (token.getToken() == Tokens.COMMA) {
+						// eat(Tokens.COMMA);
+						// exprArg = parseExpression();
+						// exprList.add(exprArg);
+						// }
+						// }
+						// eat(Tokens.RIGHTPAREN);
+						// eat(Tokens.SEMICOLON);
+						// ASTCallFunctionStat callFunc = new ASTCallFunctionStat(tok, instance,
+						// functionName, exprList);
+						// return callFunc;
 					}
 
 					default:

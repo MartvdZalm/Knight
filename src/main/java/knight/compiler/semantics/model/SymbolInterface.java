@@ -5,20 +5,22 @@ import knight.compiler.ast.types.ASTType;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class SymbolInterface extends Binding
 {
 	private final String name;
 	private final Map<String, SymbolFunction> functions;
-	private final Map<String, String> extendedInterfaces;
+	private final Set<String> extendedInterfaces;
 
 	public SymbolInterface(String name)
 	{
 		super(new ASTIdentifierType(null, name));
 		this.name = name;
 		this.functions = new HashMap<>();
-		this.extendedInterfaces = new HashMap<>();
+		this.extendedInterfaces = new HashSet<>();
 	}
 
 	public String getName()
@@ -26,41 +28,48 @@ public class SymbolInterface extends Binding
 		return name;
 	}
 
-	public boolean addFunction(String name, ASTType returnType)
+	public boolean addFunction(String functionName, ASTType returnType)
 	{
-		if (functions.containsKey(name)) {
+		if (functions.containsKey(functionName)) {
 			return false;
 		}
-		functions.put(name, new SymbolFunction(name, returnType));
+		functions.put(functionName, new SymbolFunction(functionName, returnType));
 		return true;
 	}
 
-	public boolean addExtendedInterface(String interfaceName)
+	public SymbolFunction getFunction(String functionName)
 	{
-		if (extendedInterfaces.containsKey(interfaceName)) {
-			return false;
-		}
-		extendedInterfaces.put(interfaceName, interfaceName);
-		return true;
-	}
-
-	public Map<String, String> getAllExtendedInterfaces()
-	{
-		return Collections.unmodifiableMap(extendedInterfaces);
-	}
-
-	public SymbolFunction getFunction(String name)
-	{
-		return functions.get(name);
+		return functions.get(functionName);
 	}
 
 	public Map<String, SymbolFunction> getFunctions()
 	{
-		return functions;
+		return Collections.unmodifiableMap(functions);
 	}
 
-	public boolean hasFunction(String name)
+	public boolean hasFunctions(String functionName)
 	{
-		return functions.containsKey(name);
+		return functions.containsKey(functionName);
+	}
+
+	public boolean addExtendedInterface(String interfaceName)
+	{
+		return extendedInterfaces.add(interfaceName);
+	}
+
+	public Set<String> getExtendedInterfaces()
+	{
+		return Collections.unmodifiableSet(extendedInterfaces);
+	}
+
+	public boolean extendsInterface(String interfaceName)
+	{
+		return extendedInterfaces.contains(interfaceName);
+	}
+
+	@Override
+	public String toString()
+	{
+		return String.format("Interface(%s, extends=%s, functions=%s)", name, extendedInterfaces, functions.values());
 	}
 }
