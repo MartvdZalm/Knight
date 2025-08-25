@@ -9,4 +9,9 @@ class Person
 {
 	string name;
 	int age;
+
+	fn getName(): string
+	{
+		ret name;
+	}
 }

@@ -7,83 +7,62 @@ import knight.compiler.parser.Parser;
 import knight.compiler.lexer.Lexer;
 import knight.compiler.semantics.BuildSymbolTree;
 import knight.compiler.semantics.model.SymbolProgram;
-import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Optional;
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
 
 public class LibraryManager
 {
-	private static final Map<String, Library> libraries = new HashMap<>();
-	private static final String LIBRARY_PATH = "share/";
-	private static boolean librariesLoaded = false;
+	private static final Map<String, LibraryFunction> builtinFunctions = new HashMap<>();
 
 	static {
-		// Libraries will be loaded when needed
+		registerBuiltIn("__builtin_print", "void", new String[] { "string" }, "std::cout << input << std::endl;");
+		registerBuiltIn("__builtin_input", "string", new String[] {},
+				"std::string input; std::getline(std::cin, input); return input;");
+		registerBuiltIn("__builtin_to_string", "string", new String[] { "int" }, "return std::to_string(input);");
+		registerBuiltIn("__builtin_to_int", "int", new String[] { "string" }, "return std::stoi(input);");
+		registerBuiltIn("__builtin_length", "int", new String[] { "string" }, "return input.length();");
 	}
 
-	public static void loadAllLibraries(SymbolProgram symbolProgram)
+	public static ASTProgram loadStandardLibrary()
 	{
-		if (librariesLoaded) {
-			return;
-		}
+		ASTProgram astProgram = null;
 
-		loadStandardLibrary("std", symbolProgram);
-
-		librariesLoaded = true;
-	}
-
-	public static void loadStandardLibrary(String name, SymbolProgram symbolProgram)
-	{
+		File file = new File("share/std.knight");
 		try {
-			String libraryPath = LIBRARY_PATH + name + ".knight";
-			File libraryFile = new File(libraryPath);
-
-			if (libraryFile.exists()) {
-				BufferedReader reader = new BufferedReader(new FileReader(libraryFile));
+			if (file.exists()) {
+				BufferedReader reader = new BufferedReader(new FileReader(file));
 				Lexer lexer = new Lexer(reader);
 				Parser parser = new Parser(lexer);
-				ASTProgram ast = (ASTProgram) parser.parse();
+				AST ast = parser.parse();
 
-				setSourceFileRecursively(ast, libraryFile.getCanonicalPath());
-
-				Library library = new Library(name, ast);
-				libraries.put(name, library);
-
-				BuildSymbolTree buildSymbolTree = new BuildSymbolTree(symbolProgram);
-				buildSymbolTree.visit(ast);
-
-				reader.close();
+				if (ast instanceof ASTProgram) {
+					astProgram = (ASTProgram) ast;
+				}
 			}
 		} catch (Exception e) {
-			System.err.println("Failed to load library: " + name + " - " + e.getMessage());
-		}
-	}
-
-	private static void setSourceFileRecursively(AST ast, String sourceFile)
-	{
-		if (ast == null) {
-			return;
+			System.err.println("Error parsing file: " + file.getPath() + " - " + e.getMessage());
+			e.printStackTrace();
 		}
 
-		ASTSourceFileSetter setter = new ASTSourceFileSetter(sourceFile);
-		setter.setSourceFileRecursively(ast);
+		return astProgram;
 	}
 
-	public static Optional<Library> getLibrary(String name)
+	private static void registerBuiltIn(String name, String returnType, String[] paramTypes, String impl)
 	{
-		return Optional.ofNullable(libraries.get(name));
+		builtinFunctions.put(name, new LibraryFunction(name, returnType, paramTypes, impl));
 	}
 
-	public static boolean hasLibrary(String name)
+	public static LibraryFunction getBuiltIn(String name)
 	{
-		return libraries.containsKey(name);
+		return builtinFunctions.get(name);
 	}
 
-	public static void registerLibrary(String name, Library library)
+	public static boolean isBuiltIn(String name)
 	{
-		libraries.put(name, library);
+		return builtinFunctions.containsKey(name);
 	}
 }

@@ -1,5 +1,4 @@
 import "program.knight"
-import std
 
 fn main(): int
 {

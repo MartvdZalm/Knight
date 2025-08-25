@@ -12,6 +12,7 @@ import knight.compiler.ast.types.*;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.*;
 import knight.compiler.semantics.utils.ScopeManager;
+import knight.compiler.library.LibraryManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -316,6 +317,10 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			instanceName = astCallFunctionExpr.getInstance().getName();
 		}
 
+		if (LibraryManager.isBuiltIn(functionName) && instanceName == null) {
+			return null;
+		}
+
 		SymbolFunction symbolFunction = resolveFunction(functionName, instanceName);
 
 		if (symbolFunction != null) {
@@ -339,6 +344,10 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 
 		if (astCallFunctionStat.getInstance() != null) {
 			instanceName = astCallFunctionStat.getInstance().getName();
+		}
+
+		if (LibraryManager.isBuiltIn(functionName) && instanceName == null) {
+			return null;
 		}
 
 		SymbolFunction symbolFunction = resolveFunction(functionName, instanceName);

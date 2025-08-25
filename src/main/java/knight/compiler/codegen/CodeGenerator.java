@@ -12,6 +12,7 @@ import knight.compiler.ast.statements.*;
 import knight.compiler.ast.types.*;
 import knight.compiler.semantics.model.SymbolClass;
 import knight.compiler.semantics.model.SymbolFunction;
+import knight.compiler.library.*;
 
 import java.io.File;
 import java.util.HashSet;
@@ -342,6 +343,14 @@ public class CodeGenerator implements ASTVisitor<Void>
 	@Override
 	public Void visit(ASTCallFunctionStat astCallFunctionStat)
 	{
+		String functionName = astCallFunctionStat.getFunctionName().getName();
+
+		if (LibraryManager.isBuiltIn(functionName) && astCallFunctionStat.getInstance() == null) {
+			LibraryFunction libFunction = LibraryManager.getBuiltIn(functionName);
+			codeBuilder.appendLine(libFunction.getImplementation());
+			return null;
+		}
+
 		if (astCallFunctionStat.getInstance() != null) {
 			astCallFunctionStat.getInstance().accept(this);
 			codeBuilder.append(".");

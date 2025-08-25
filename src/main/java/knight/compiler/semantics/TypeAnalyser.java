@@ -14,6 +14,7 @@ import knight.compiler.ast.contracts.*;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.*;
 import knight.compiler.semantics.utils.ScopeManager;
+import knight.compiler.library.LibraryManager;
 
 import java.util.*;
 
@@ -667,6 +668,11 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			List<ASTExpression> arguments)
 	{
 		SymbolFunction symbolFunction = (SymbolFunction) functionName.getBinding();
+
+		if (LibraryManager.isBuiltIn(functionName.getName())) {
+			// LibraryFunction libraryFunction = LibraryManager.getBuiltIn(functionName);
+			return null;
+		}
 
 		if (symbolFunction == null) {
 			DiagnosticReporter.error(functionName, "Function " + functionName + " not found");

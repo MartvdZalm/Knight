@@ -1,41 +1,66 @@
-// Standard library for Knight language
-// This file contains the standard library functions and classes
+// Standard Library for Knight Language
 
-static class Out
-{
-    static fn write(string input): void 
-    {
-        // Implementation will be generated during compilation
-        // This is a placeholder - the actual C++ code will be generated
-    }
-    
-    static fn writeln(string input): void 
-    {
-        // Implementation will be generated during compilation
-        // This is a placeholder - the actual C++ code will be generated
-    }
-}
-
-// Global convenience functions
 fn print(string input): void
 {
-    Out.write(input);
+    __builtin_print(input);
 }
 
-fn println(string input): void
-{
-    Out.writeln(input);
-}
+// fn println(string input): void
+// {
+//     __builtin_print(input);
+//     __builtin_print("\n");
+// }
 
-// Input functions
-fn read(): string
-{
-    // Will be implemented during compilation
-    ret "";
-}
+// fn print_int(int value): void
+// {
+//     __builtin_print(__builtin_to_string(value));
+// }
 
-fn readInt(): int
-{
-    // Will be implemented during compilation
-    ret 0;
-}
+// fn input(): string
+// {
+//     ret __builtin_input();
+// }
+
+// fn input_int(): int
+// {
+//     ret __builtin_to_int(input());
+// }
+
+// fn to_string(int value): string
+// {
+//     ret __builtin_to_string(value);
+// }
+
+// fn to_int(string value): int
+// {
+//     ret __builtin_to_int(value);
+// }
+
+// fn length(string str): int
+// {
+//     ret __builtin_length(str);
+// }
+
+// fn abs(int value): int
+// {
+//     if value < 0 {
+//         ret -value;
+//     }
+//     ret value;
+// }
+
+// fn max(int a, int b): int
+// {
+//     if a > b {
+//         ret a;
+//     }
+//     ret b;
+// }
+
+// fn min(int a, int b): int
+// {
+//     if a < b {
+//         ret a;
+//     }
+//     ret b;
+// }
