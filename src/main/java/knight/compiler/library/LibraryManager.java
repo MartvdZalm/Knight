@@ -19,12 +19,13 @@ public class LibraryManager
 	private static final Map<String, LibraryFunction> builtinFunctions = new HashMap<>();
 
 	static {
-		registerBuiltIn("__builtin_print", "void", new String[] { "string" }, "std::cout << input << std::endl;");
+		registerBuiltIn("__builtin_print", "void", new String[] { "string" }, "std::cout << %s;");
 		registerBuiltIn("__builtin_input", "string", new String[] {},
 				"std::string input; std::getline(std::cin, input); return input;");
-		registerBuiltIn("__builtin_to_string", "string", new String[] { "int" }, "return std::to_string(input);");
-		registerBuiltIn("__builtin_to_int", "int", new String[] { "string" }, "return std::stoi(input);");
-		registerBuiltIn("__builtin_length", "int", new String[] { "string" }, "return input.length();");
+		registerBuiltIn("__builtin_to_string", "string", new String[] { "int" }, "return std::to_string(%s);");
+		registerBuiltIn("__builtin_to_int", "int", new String[] { "string" }, "return std::stoi(%s);");
+		registerBuiltIn("__builtin_length", "int", new String[] { "string" }, "return %s.length();");
+
 	}
 
 	public static ASTProgram loadStandardLibrary()

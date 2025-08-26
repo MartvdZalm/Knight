@@ -347,6 +347,24 @@ public class CodeGenerator implements ASTVisitor<Void>
 
 		if (LibraryManager.isBuiltIn(functionName) && astCallFunctionStat.getInstance() == null) {
 			LibraryFunction libFunction = LibraryManager.getBuiltIn(functionName);
+
+			String[] argStrings = new String[astCallFunctionStat.getArgumentCount()];
+			for (int i = 0; i < astCallFunctionStat.getArgumentCount(); i++) {
+				final int index = i;
+				StringBuilder sb = new StringBuilder();
+				codeBuilder.captureTo(sb, () -> {
+					astCallFunctionStat.getArgument(index).accept(this);
+				});
+				argStrings[i] = sb.toString().trim();
+			}
+
+			String impl = String.format(libFunction.getImplementation(), (Object[]) argStrings);
+			codeBuilder.appendLine(impl);
+			return null;
+		}
+
+		if (LibraryManager.isBuiltIn(functionName) && astCallFunctionStat.getInstance() == null) {
+			LibraryFunction libFunction = LibraryManager.getBuiltIn(functionName);
 			codeBuilder.appendLine(libFunction.getImplementation());
 			return null;
 		}

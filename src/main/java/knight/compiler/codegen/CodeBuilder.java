@@ -89,6 +89,25 @@ public class CodeBuilder
 		indentLevel = Math.max(0, indentLevel - 1);
 	}
 
+	public void captureTo(StringBuilder output, Runnable generator)
+	{
+		StringBuilder originalBuffer = this.currentBuffer;
+		boolean originalNewLine = this.newLine;
+		int originalIndent = this.indentLevel;
+
+		this.currentBuffer = output;
+		this.newLine = true;
+		this.indentLevel = 0;
+
+		try {
+			generator.run();
+		} finally {
+			this.currentBuffer = originalBuffer;
+			this.newLine = originalNewLine;
+			this.indentLevel = originalIndent;
+		}
+	}
+
 	public String buildCompleteCode(HeaderManager headerManager)
 	{
 		StringBuilder completeCode = new StringBuilder();

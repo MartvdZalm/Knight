@@ -5,11 +5,11 @@ fn print(string input): void
     __builtin_print(input);
 }
 
-// fn println(string input): void
-// {
-//     __builtin_print(input);
-//     __builtin_print("\n");
-// }
+fn println(string input): void
+{
+    __builtin_print(input);
+    __builtin_print("\n");
+}
 
 // fn print_int(int value): void
 // {

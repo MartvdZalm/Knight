@@ -5,7 +5,7 @@ public class LibraryFunction
 	private final String name;
 	private final String returnType;
 	private final String[] parameterTypes;
-	private final String implementation; // Target language implementation
+	private final String implementation;
 
 	public LibraryFunction(String name, String returnType, String[] parameterTypes, String implementation)
 	{
