@@ -1,21 +1,76 @@
 package knight.compiler.semantics;
 
-import knight.compiler.ast.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
 import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.program.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.types.*;
-import knight.compiler.semantics.diagnostics.DiagnosticReporter;
-import knight.compiler.semantics.model.*;
-import knight.compiler.semantics.utils.ScopeManager;
+import knight.compiler.ast.expressions.ASTAnd;
+import knight.compiler.ast.expressions.ASTArrayIndexExpr;
+import knight.compiler.ast.expressions.ASTArrayLiteral;
+import knight.compiler.ast.expressions.ASTCallFunctionExpr;
+import knight.compiler.ast.expressions.ASTDivision;
+import knight.compiler.ast.expressions.ASTEquals;
+import knight.compiler.ast.expressions.ASTExpression;
+import knight.compiler.ast.expressions.ASTFalse;
+import knight.compiler.ast.expressions.ASTFieldAccessExpr;
+import knight.compiler.ast.expressions.ASTGreaterThan;
+import knight.compiler.ast.expressions.ASTGreaterThanOrEqual;
+import knight.compiler.ast.expressions.ASTIdentifierExpr;
+import knight.compiler.ast.expressions.ASTIntLiteral;
+import knight.compiler.ast.expressions.ASTLambda;
+import knight.compiler.ast.expressions.ASTLessThan;
+import knight.compiler.ast.expressions.ASTLessThanOrEqual;
+import knight.compiler.ast.expressions.ASTMinus;
+import knight.compiler.ast.expressions.ASTModulus;
+import knight.compiler.ast.expressions.ASTNewArray;
+import knight.compiler.ast.expressions.ASTNewInstance;
+import knight.compiler.ast.expressions.ASTNotEquals;
+import knight.compiler.ast.expressions.ASTOr;
+import knight.compiler.ast.expressions.ASTPlus;
+import knight.compiler.ast.expressions.ASTStringLiteral;
+import knight.compiler.ast.expressions.ASTTimes;
+import knight.compiler.ast.expressions.ASTTrue;
+import knight.compiler.ast.program.ASTArgument;
+import knight.compiler.ast.program.ASTClass;
+import knight.compiler.ast.program.ASTFunction;
+import knight.compiler.ast.program.ASTIdentifier;
+import knight.compiler.ast.program.ASTImport;
+import knight.compiler.ast.program.ASTInterface;
+import knight.compiler.ast.program.ASTProgram;
+import knight.compiler.ast.program.ASTProperty;
+import knight.compiler.ast.program.ASTVariable;
+import knight.compiler.ast.program.ASTVariableInit;
+import knight.compiler.ast.statements.ASTArrayAssign;
+import knight.compiler.ast.statements.ASTAssign;
+import knight.compiler.ast.statements.ASTBody;
+import knight.compiler.ast.statements.ASTCallFunctionStat;
+import knight.compiler.ast.statements.ASTFieldAssign;
+import knight.compiler.ast.statements.ASTReturnStatement;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTParameterizedType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.library.LibraryManager;
-
-import java.util.HashSet;
-import java.util.Set;
+import knight.compiler.semantics.diagnostics.DiagnosticReporter;
+import knight.compiler.semantics.model.Scope;
+import knight.compiler.semantics.model.SymbolClass;
+import knight.compiler.semantics.model.SymbolFunction;
+import knight.compiler.semantics.model.SymbolInterface;
+import knight.compiler.semantics.model.SymbolProgram;
+import knight.compiler.semantics.model.SymbolProperty;
+import knight.compiler.semantics.model.SymbolVariable;
+import knight.compiler.semantics.utils.ScopeManager;
 
 public class NameAnalyser implements ASTVisitor<ASTType>
 {
@@ -51,14 +106,34 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		return symbolProgram.getGlobalVariable(name);
 	}
 
-	private SymbolFunction resolveFunction(String functionName, String instanceName)
+	private SymbolFunction resolveFunction(String functionName, ASTIdentifierExpr instanceExpr)
 	{
-		if (instanceName != null) {
-			SymbolClass instanceClass = symbolProgram.getClass(instanceName);
-			if (instanceClass != null) {
-				return instanceClass.getFunction(functionName);
+		if (instanceExpr != null) {
+			String instanceName = instanceExpr.getName();
+			SymbolVariable symbolVariable = resolveVariable(instanceName);
+
+			if (symbolVariable == null) {
+				DiagnosticReporter.error(instanceExpr, "Variable '" + instanceName + "' not found in current scope.");
+				return null;
 			}
-		} else if (scopeManager.isInClass()) {
+
+			ASTType varType = symbolVariable.getType();
+			if (!(varType instanceof ASTIdentifierType)) {
+				DiagnosticReporter.error(instanceExpr, "Variable '" + instanceName + "' is not a class instance.");
+				return null;
+			}
+
+			String className = ((ASTIdentifierType) varType).getName();
+			SymbolClass symbolClass = symbolProgram.getClass(className);
+			if (symbolClass == null) {
+				DiagnosticReporter.error(instanceExpr, "Class '" + className + "' not found in symbol table.");
+				return null;
+			}
+
+			return symbolClass.getFunction(functionName);
+		}
+
+		if (scopeManager.isInClass()) {
 			SymbolFunction function = scopeManager.getCurrentClass().getFunction(functionName);
 			if (function != null) {
 				return function;
@@ -321,7 +396,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			return null;
 		}
 
-		SymbolFunction symbolFunction = resolveFunction(functionName, instanceName);
+		SymbolFunction symbolFunction = resolveFunction(functionName, astCallFunctionExpr.getInstance());
 
 		if (symbolFunction != null) {
 			astCallFunctionExpr.getFunctionName().setBinding(symbolFunction);
@@ -350,7 +425,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			return null;
 		}
 
-		SymbolFunction symbolFunction = resolveFunction(functionName, instanceName);
+		SymbolFunction symbolFunction = resolveFunction(functionName, astCallFunctionStat.getInstance());
 
 		if (symbolFunction != null) {
 			astCallFunctionStat.getFunctionName().setBinding(symbolFunction);
@@ -682,5 +757,43 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTImport astImport)
 	{
 		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTFieldAccessExpr astFieldAccessExpr)
+	{
+		String instanceName = astFieldAccessExpr.getInstance().getName();
+		String fieldName = astFieldAccessExpr.getField().getName();
+
+		SymbolVariable symbolVariable = resolveVariable(instanceName);
+		if (symbolVariable == null) {
+			DiagnosticReporter.error(astFieldAccessExpr, "Variable " + instanceName + " not found in current scope.");
+			return null;
+		}
+
+		ASTType varType = symbolVariable.getType();
+		if (!(varType instanceof ASTIdentifierType)) {
+			DiagnosticReporter.error(astFieldAccessExpr, "Variable " + instanceName + " is not a class instance.");
+			return null;
+		}
+
+		String className = ((ASTIdentifierType) varType).getName();
+		SymbolClass symbolClass = symbolProgram.getClass(className);
+		if (symbolClass == null) {
+			DiagnosticReporter.error(astFieldAccessExpr, "Class " + className + " not found in symbol table.");
+			return null;
+		}
+
+		astFieldAccessExpr.getInstance().setBinding(symbolClass);
+
+		SymbolProperty symbolProperty = symbolClass.getProperty(fieldName);
+		if (symbolProperty == null) {
+			DiagnosticReporter.error(astFieldAccessExpr, "Property " + fieldName + " not found in class " + className);
+			return null;
+		}
+
+		astFieldAccessExpr.getField().setBinding(symbolProperty);
+
+		return symbolProperty.getType();
 	}
 }

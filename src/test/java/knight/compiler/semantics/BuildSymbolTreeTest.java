@@ -1,610 +1,456 @@
 package knight.compiler.semantics;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Arrays;
+import java.util.Collections;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
-import knight.compiler.ast.controlflow.ASTForeach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.program.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.types.*;
+import knight.compiler.ast.expressions.ASTArrayIndexExpr;
+import knight.compiler.ast.expressions.ASTArrayLiteral;
+import knight.compiler.ast.expressions.ASTIdentifierExpr;
+import knight.compiler.ast.expressions.ASTIntLiteral;
+import knight.compiler.ast.expressions.ASTLambda;
+import knight.compiler.ast.expressions.ASTPlus;
+import knight.compiler.ast.expressions.ASTTimes;
+import knight.compiler.ast.program.ASTArgument;
+import knight.compiler.ast.program.ASTClass;
+import knight.compiler.ast.program.ASTFunction;
+import knight.compiler.ast.program.ASTIdentifier;
+import knight.compiler.ast.program.ASTInterface;
+import knight.compiler.ast.program.ASTProgram;
+import knight.compiler.ast.program.ASTProperty;
+import knight.compiler.ast.program.ASTVariable;
+import knight.compiler.ast.program.ASTVariableInit;
+import knight.compiler.ast.statements.ASTBody;
+import knight.compiler.ast.statements.ASTCallFunctionStat;
+import knight.compiler.ast.statements.ASTFieldAssign;
+import knight.compiler.ast.statements.ASTReturnStatement;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.lexer.Token;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.SymbolClass;
 import knight.compiler.semantics.model.SymbolFunction;
 import knight.compiler.semantics.model.SymbolProgram;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-class BuildSymbolTreeTest
+public class BuildSymbolTreeTest
 {
 	private BuildSymbolTree symbolTree;
-	private Token token;
+	private Token dummyToken;
 
 	@BeforeEach
 	public void setUp()
 	{
 		DiagnosticReporter.clear();
-		this.symbolTree = new BuildSymbolTree();
-		this.token = new Token(null, 0, 0);
+		symbolTree = new BuildSymbolTree();
+		dummyToken = new Token(null, 0, 0);
+	}
+
+	private ASTIdentifier createIdentifier(String name)
+	{
+		return new ASTIdentifier(dummyToken, name);
+	}
+
+	private ASTIdentifierExpr createIdentifierExpr(String name)
+	{
+		return new ASTIdentifierExpr(dummyToken, name);
+	}
+
+	private ASTIntLiteral createIntLiteral(int value)
+	{
+		return new ASTIntLiteral(dummyToken, value);
 	}
 
 	@Test
-	public void visitASTProgram_withEmptyProgram()
+	public void visit_program_with_global_function_should_add_to_symbol_table()
 	{
-		ASTProgram program = mock(ASTProgram.class);
-		when(program.getImportList()).thenReturn(Collections.emptyList());
-		when(program.getNodeList()).thenReturn(Collections.emptyList());
+		ASTFunction function = new ASTFunction(dummyToken, new ASTIntType(dummyToken), createIdentifier("testFunc"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.emptyList()), false, false);
 
-		assertNull(symbolTree.visit(program));
-		verify(program).getImportList();
-		verify(program).getNodeList();
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+
+		SymbolProgram symbolProgram = symbolTree.getSymbolProgram();
+		assertNotNull(symbolProgram.getGlobalFunction("testFunc"));
+		assertEquals("int", symbolProgram.getGlobalFunction("testFunc").getReturnType().toString());
 	}
 
 	@Test
-	public void visitASTClass_withNewClass()
+	public void visit_class_with_properties_and_methods_should_build_correct_symbols()
 	{
-		ASTClass astClass = mock(ASTClass.class);
-		when(astClass.getClassName()).thenReturn(new ASTIdentifier(mock(Token.class), "TestClass"));
-		when(astClass.getPropertyList()).thenReturn(Collections.emptyList());
-		when(astClass.getFunctionList()).thenReturn(Collections.emptyList());
+		ASTProperty property = new ASTProperty(dummyToken, new ASTIntType(dummyToken), createIdentifier("count"), null,
+				false);
 
-		assertNull(symbolTree.visit(astClass));
+		ASTFunction method = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("increment"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.emptyList()), false, false);
+
+		ASTClass astClass = new ASTClass(dummyToken, createIdentifier("Counter"), Collections.singletonList(property),
+				Collections.singletonList(method), null, Collections.emptyList(), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(astClass));
+
+		symbolTree.visit(program);
+
+		SymbolProgram symbolProgram = symbolTree.getSymbolProgram();
+		SymbolClass counterClass = symbolProgram.getClass("Counter");
+
+		assertNotNull(counterClass);
+		assertNotNull(counterClass.getProperty("count"));
+		assertNotNull(counterClass.getFunction("increment"));
 	}
 
 	@Test
-	public void visitASTClass_withDuplicateClass()
+	public void visit_duplicate_variables_in_same_scope_should_report_error()
 	{
-		ASTClass astClass = mock(ASTClass.class);
-		when(astClass.getClassName()).thenReturn(new ASTIdentifier(token, "TestClass"));
-		when(astClass.getPropertyList()).thenReturn(Collections.emptyList());
-		when(astClass.getFunctionList()).thenReturn(Collections.emptyList());
-		when(astClass.getToken()).thenReturn(token);
+		ASTVariable var1 = new ASTVariable(dummyToken, new ASTIntType(dummyToken), createIdentifier("x"), false);
+		ASTVariable var2 = new ASTVariable(dummyToken, new ASTIntType(dummyToken), createIdentifier("x"), false);
 
-		symbolTree.visit(astClass);
-		symbolTree.visit(astClass);
+		ASTBody functionBody = new ASTBody(dummyToken, Arrays.asList(var1, var2));
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testScope"),
+				Collections.emptyList(), functionBody, false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+		symbolTree.visit(program);
 
 		assertTrue(DiagnosticReporter.hasErrors());
+		assertEquals("0:0: ERROR: Variable x already declared in this scope",
+				DiagnosticReporter.getDiagnostics().get(0).toString());
 	}
 
 	@Test
-	public void visitASTProperty_withValidProperty()
+	public void visit_variable_in_nested_scopes_should_detect_duplicate_declarations()
 	{
-		SymbolClass mockSymbolClass = mock(SymbolClass.class);
-		when(mockSymbolClass.getId()).thenReturn("TestClass");
-		when(mockSymbolClass.addVariable(anyString(), any())).thenReturn(true);
-		symbolTree.setSymbolClass(mockSymbolClass);
+		ASTVariable outerVar = new ASTVariable(dummyToken, new ASTIntType(dummyToken), createIdentifier("x"), false);
+		ASTVariable innerVar = new ASTVariable(dummyToken, new ASTIntType(dummyToken), createIdentifier("x"), false);
+		ASTBody innerBody = new ASTBody(dummyToken, Collections.singletonList(innerVar));
+		ASTBody outerBody = new ASTBody(dummyToken, Arrays.asList(outerVar, innerBody));
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testScope"),
+				Collections.emptyList(), outerBody, false, false);
 
-		ASTProperty property = mock(ASTProperty.class);
-		when(property.getType()).thenReturn(new ASTIntType(mock(Token.class)));
-		when(property.getId()).thenReturn(new ASTIdentifier(mock(Token.class), "prop"));
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+		symbolTree.visit(program);
 
-		assertNull(symbolTree.visit(property));
-		verify(mockSymbolClass).addVariable(anyString(), any());
-	}
-
-	@Test
-	public void visitASTProperty_withDuplicateProperty()
-	{
-		SymbolClass mockSymbolClass = mock(SymbolClass.class);
-		when(mockSymbolClass.getId()).thenReturn("TestClass");
-		when(mockSymbolClass.addVariable(anyString(), any())).thenReturn(false);
-		symbolTree.setSymbolClass(mockSymbolClass);
-
-		ASTProperty property = mock(ASTProperty.class);
-		when(property.getType()).thenReturn(new ASTIntType(mock(Token.class)));
-		when(property.getId()).thenReturn(new ASTIdentifier(mock(Token.class), "prop"));
-
-		symbolTree.visit(property);
 		assertTrue(DiagnosticReporter.hasErrors());
+		assertEquals("0:0: ERROR: Variable x already declared in this scope",
+				DiagnosticReporter.getDiagnostics().get(0).toString());
 	}
 
 	@Test
-	public void visitASTProperty_withPropertyOutsideClass()
+	public void visit_function_with_parameters_should_register_parameters()
 	{
-		ASTProperty astProperty = mock(ASTProperty.class);
-		when(astProperty.getToken()).thenReturn(token);
-		assertNull(symbolTree.visit(astProperty));
+		ASTArgument param = new ASTArgument(dummyToken, new ASTIntType(dummyToken), createIdentifier("value"));
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testParams"),
+				Collections.singletonList(param), new ASTBody(dummyToken, Collections.emptyList()), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+
+		SymbolFunction symbolFunction = symbolTree.getSymbolProgram().getGlobalFunction("testParams");
+		assertNotNull(symbolFunction);
+		assertEquals(1, symbolFunction.getParameters().size());
+		assertEquals("value", symbolFunction.getParameters().get(0).getName());
+	}
+
+	@Test
+	public void visit_class_with_inheritance_should_set_parent_class_reference()
+	{
+		ASTClass parentClass = new ASTClass(dummyToken, createIdentifier("Parent"),
+				Collections.singletonList(new ASTProperty(dummyToken, new ASTIntType(dummyToken),
+						createIdentifier("parentField"), null, false)),
+				Collections.emptyList(), null, Collections.emptyList(), false, false);
+
+		ASTClass childClass = new ASTClass(dummyToken, createIdentifier("Child"), Collections.emptyList(),
+				Collections.emptyList(), createIdentifier("Parent"), Collections.emptyList(), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(),
+				Arrays.asList(parentClass, childClass));
+
+		symbolTree.visit(program);
+
+		SymbolProgram symbolProgram = symbolTree.getSymbolProgram();
+		SymbolClass child = symbolProgram.getClass("Child");
+		SymbolClass parent = symbolProgram.getClass("Parent");
+
+		assertNotNull(child);
+		assertNotNull(parent);
+		assertEquals("Parent", child.getParentClassName());
+	}
+
+	@Test
+	public void visit_class_implementing_interface_should_record_interface_name()
+	{
+		ASTInterface interfaceAst = new ASTInterface(dummyToken, createIdentifier("Runnable"),
+				Collections.singletonList(new ASTFunction(dummyToken, new ASTVoidType(dummyToken),
+						createIdentifier("run"), Collections.emptyList(), null, false, false)),
+				Collections.emptyList());
+
+		ASTClass classAst = new ASTClass(dummyToken, createIdentifier("Task"), Collections.emptyList(),
+				Collections.singletonList(new ASTFunction(dummyToken, new ASTVoidType(dummyToken),
+						createIdentifier("run"), Collections.emptyList(),
+						new ASTBody(dummyToken, Collections.emptyList()), false, false)),
+				null, Collections.singletonList(createIdentifier("Runnable")), false, false);
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Arrays.asList(interfaceAst, classAst));
+
+		symbolTree.visit(program);
+
+		SymbolProgram symbolProgram = symbolTree.getSymbolProgram();
+		SymbolClass taskClass = symbolProgram.getClass("Task");
+
+		assertNotNull(taskClass);
+		assertTrue(taskClass.getImplementedInterfaces().contains("Runnable"));
+	}
+
+	@Test
+	public void visit_duplicate_class_declaration_should_report_error()
+	{
+		ASTClass class1 = new ASTClass(dummyToken, createIdentifier("Duplicate"), Collections.emptyList(),
+				Collections.emptyList(), null, Collections.emptyList(), false, false);
+		ASTClass class2 = new ASTClass(dummyToken, createIdentifier("Duplicate"), Collections.emptyList(),
+				Collections.emptyList(), null, Collections.emptyList(), false, false);
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Arrays.asList(class1, class2));
+
+		symbolTree.visit(program);
 		assertTrue(DiagnosticReporter.hasErrors());
+		assertEquals("0:0: ERROR: Class Duplicate is already defined!",
+				DiagnosticReporter.getDiagnostics().get(0).toString());
 	}
 
 	@Test
-	public void visitASTFunction_withGlobalFunction()
+	public void visit_property_outside_class_should_report_error()
 	{
-		ASTFunction globalFunc = mock(ASTFunction.class);
-		when(globalFunc.getReturnType()).thenReturn(new ASTVoidType(mock(Token.class)));
-		when(globalFunc.getFunctionName()).thenReturn(new ASTIdentifier(mock(Token.class), "globalFunc"));
-		when(globalFunc.getArgumentListSize()).thenReturn(0);
-		when(globalFunc.getBody()).thenReturn(mock(ASTBody.class));
+		ASTProperty property = new ASTProperty(dummyToken, new ASTIntType(dummyToken), createIdentifier("invalid"),
+				null, false);
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(property));
 
-		assertNull(symbolTree.visit(globalFunc));
-	}
-
-	@Test
-	public void visitASTFunction_withClassMethod()
-	{
-		ASTClass astClass = mock(ASTClass.class);
-		when(astClass.getClassName()).thenReturn(new ASTIdentifier(mock(Token.class), "TestClass"));
-		when(astClass.getPropertyList()).thenReturn(Collections.emptyList());
-		when(astClass.getFunctionList()).thenReturn(Collections.emptyList());
-		symbolTree.visit(astClass);
-
-		ASTFunction method = mock(ASTFunction.class);
-		when(method.getReturnType()).thenReturn(new ASTIntType(mock(Token.class)));
-		when(method.getFunctionName()).thenReturn(new ASTIdentifier(mock(Token.class), "method"));
-		when(method.getArgumentListSize()).thenReturn(0);
-		when(method.getBody()).thenReturn(mock(ASTBody.class));
-
-		assertNull(symbolTree.visit(method));
-	}
-
-	@Test
-	public void visitASTAssign_withValidAssignment()
-	{
-		ASTAssign assign = mock(ASTAssign.class);
-		when(assign.getIdentifier()).thenReturn(mock(ASTIdentifier.class));
-		when(assign.getExpr()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(assign));
-	}
-
-	@Test
-	public void visitASTBody_withEmptyBody()
-	{
-		ASTBody body = mock(ASTBody.class);
-		when(body.getNodesList()).thenReturn(Collections.emptyList());
-
-		assertNull(symbolTree.visit(body));
-	}
-
-	@Test
-	public void visitASTWhile_withValidWhileLoop()
-	{
-		ASTWhile whileLoop = mock(ASTWhile.class);
-		when(whileLoop.getCondition()).thenReturn(mock(ASTExpression.class));
-		when(whileLoop.getBody()).thenReturn(mock(ASTBody.class));
-
-		assertNull(symbolTree.visit(whileLoop));
-	}
-
-	@Test
-	public void visitASTIntLiteral_withValidLiteral()
-	{
-		assertNull(symbolTree.visit(mock(ASTIntLiteral.class)));
-	}
-
-	@Test
-	public void visitASTTrue_withValidLiteral()
-	{
-		assertNull(symbolTree.visit(mock(ASTTrue.class)));
-	}
-
-	@Test
-	public void visitASTFalse_withValidLiteral()
-	{
-		assertNull(symbolTree.visit(mock(ASTFalse.class)));
-	}
-
-	@Test
-	public void visitASTStringLiteral_withValidLiteral()
-	{
-		assertNull(symbolTree.visit(mock(ASTStringLiteral.class)));
-	}
-
-	@Test
-	public void visitASTIdentifierExpr_withUndeclaredVariable()
-	{
-		ASTIdentifierExpr identifierExpr = mock(ASTIdentifierExpr.class);
-		when(identifierExpr.getId()).thenReturn("undeclared");
-		when(identifierExpr.getToken()).thenReturn(mock(Token.class));
-
-		assertNull(symbolTree.visit(identifierExpr));
+		symbolTree.visit(program);
 		assertTrue(DiagnosticReporter.hasErrors());
+		assertEquals("0:0: ERROR: Property declared outside of class",
+				DiagnosticReporter.getDiagnostics().get(0).toString());
 	}
 
 	@Test
-	public void visitASTNewArray_withValidArray()
+	public void visit_nested_scopes_should_handle_variable_resolution_correctly()
 	{
-		ASTNewArray newArray = mock(ASTNewArray.class);
-		when(newArray.getArrayLength()).thenReturn(mock(ASTExpression.class));
+		ASTVariable globalVar = new ASTVariable(dummyToken, new ASTIntType(dummyToken), createIdentifier("global"),
+				false);
+		ASTArgument param = new ASTArgument(dummyToken, new ASTIntType(dummyToken), createIdentifier("param"));
+		ASTVariable localVar = new ASTVariable(dummyToken, new ASTIntType(dummyToken), createIdentifier("local"),
+				false);
+		ASTBody innerBody = new ASTBody(dummyToken, Collections.singletonList(
+				new ASTVariable(dummyToken, new ASTIntType(dummyToken), createIdentifier("inner"), false)));
+		ASTBody functionBody = new ASTBody(dummyToken, Arrays.asList(localVar, innerBody));
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testNested"),
+				Collections.singletonList(param), functionBody, false, false);
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Arrays.asList(globalVar, function));
 
-		assertNull(symbolTree.visit(newArray));
+		symbolTree.visit(program);
+
+		SymbolProgram symbolProgram = symbolTree.getSymbolProgram();
+		assertNotNull(symbolProgram.getGlobalVariable("global"));
+		assertNotNull(symbolProgram.getGlobalFunction("testNested"));
+
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTNewInstance_withValidInstance()
+	public void visit_expression_in_variable_init_should_traverse_all_children()
 	{
-		ASTNewInstance newInstance = mock(ASTNewInstance.class);
-		when(newInstance.getClassName()).thenReturn(new ASTIdentifierExpr(mock(Token.class), "TestClass"));
-		when(newInstance.getArguments()).thenReturn(Collections.emptyList());
+		ASTPlus addition = new ASTPlus(dummyToken, createIntLiteral(5), createIntLiteral(3));
 
-		assertNull(symbolTree.visit(newInstance));
+		ASTVariableInit variable = new ASTVariableInit(dummyToken, new ASTIntType(dummyToken),
+				createIdentifier("result"), addition, false);
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testExpr"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.singletonList(variable)), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+
+		assertFalse(DiagnosticReporter.hasErrors());
+		assertNotNull(symbolTree.getSymbolProgram().getGlobalFunction("testExpr"));
 	}
 
 	@Test
-	public void visitASTNewInstance_withUnknownClass()
+	public void visit_variable_init_should_register_variable_and_visit_expression()
 	{
-		ASTNewInstance newInstance = mock(ASTNewInstance.class);
-		when(newInstance.getClassName()).thenReturn(new ASTIdentifierExpr(mock(Token.class), "UnknownClass"));
-		when(newInstance.getArguments()).thenReturn(Collections.emptyList());
+		ASTIntLiteral initialValue = createIntLiteral(42);
+		ASTVariableInit variableInit = new ASTVariableInit(dummyToken, new ASTIntType(dummyToken),
+				createIdentifier("initializedVar"), initialValue, false);
 
-		assertNull(symbolTree.visit(newInstance));
-		assertTrue(DiagnosticReporter.hasErrors());
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testInit"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.singletonList(variableInit)), false,
+				false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+
+		SymbolProgram symbolProgram = symbolTree.getSymbolProgram();
+		assertNotNull(symbolProgram.getGlobalFunction("testInit"));
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTCallFunctionExpr_withValidCall()
+	public void visit_field_assign_should_visit_instance_field_and_value()
 	{
-		ASTCallFunctionExpr call = mock(ASTCallFunctionExpr.class);
-		when(call.getArgumentList()).thenReturn(Collections.emptyList());
+		ASTIdentifierExpr instance = createIdentifierExpr("obj");
+		ASTIdentifierExpr field = createIdentifierExpr("field");
+		ASTIntLiteral value = createIntLiteral(10);
 
-		assertNull(symbolTree.visit(call));
+		ASTFieldAssign fieldAssign = new ASTFieldAssign(dummyToken, instance, field, value);
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken),
+				createIdentifier("testFieldAssign"), Collections.emptyList(),
+				new ASTBody(dummyToken, Collections.singletonList(fieldAssign)), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTCallFunctionStat_withValidCall()
+	public void visit_array_operations_should_visit_array_and_index()
 	{
-		ASTCallFunctionStat call = mock(ASTCallFunctionStat.class);
-		when(call.getArgumentList()).thenReturn(Collections.emptyList());
+		ASTIdentifierExpr arrayVar = createIdentifierExpr("arr");
+		ASTIntLiteral index = createIntLiteral(0);
 
-		assertNull(symbolTree.visit(call));
+		ASTArrayIndexExpr arrayIndex = new ASTArrayIndexExpr(dummyToken, arrayVar, index);
+
+		ASTVariableInit init = new ASTVariableInit(dummyToken, new ASTIntType(dummyToken), createIdentifier("element"),
+				arrayIndex, false);
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testArray"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.singletonList(init)), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTReturnStatement_withExpression()
+	public void visit_control_flow_statements_should_visit_condition_and_body()
 	{
-		ASTReturnStatement returnStmt = mock(ASTReturnStatement.class);
-		when(returnStmt.getReturnExpr()).thenReturn(mock(ASTExpression.class));
+		ASTIntLiteral condition = createIntLiteral(1);
+		ASTBody body = new ASTBody(dummyToken, Collections.emptyList());
 
-		assertNull(symbolTree.visit(returnStmt));
+		ASTWhile whileLoop = new ASTWhile(dummyToken, condition, body);
+		ASTIfChain ifChain = new ASTIfChain(dummyToken,
+				Collections.singletonList(new ASTConditionalBranch(dummyToken, condition, body)), null);
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken),
+				createIdentifier("testControlFlow"), Collections.emptyList(),
+				new ASTBody(dummyToken, Arrays.asList(whileLoop, ifChain)), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTReturnStatement_withoutExpression()
+	public void visit_function_call_should_visit_all_arguments()
 	{
-		ASTReturnStatement returnStmt = mock(ASTReturnStatement.class);
-		when(returnStmt.getReturnExpr()).thenReturn(null);
+		ASTCallFunctionStat functionCall = new ASTCallFunctionStat(dummyToken, createIdentifierExpr("print"), null,
+				Arrays.asList(createIntLiteral(1), createIntLiteral(2)));
 
-		assertNull(symbolTree.visit(returnStmt));
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testCalls"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.singletonList(functionCall)), false,
+				false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTFunctionType_withValidType()
+	public void visit_lambda_should_create_function_scope()
 	{
-		ASTFunctionType funcType = mock(ASTFunctionType.class);
-		assertEquals(funcType, symbolTree.visit(funcType));
+		ASTArgument lambdaArg = new ASTArgument(dummyToken, new ASTIntType(dummyToken), createIdentifier("x"));
+
+		ASTLambda lambda = new ASTLambda(dummyToken, new ASTIntType(dummyToken), Collections.singletonList(lambdaArg),
+				new ASTBody(dummyToken, Collections.emptyList()));
+
+		ASTVariableInit init = new ASTVariableInit(dummyToken, new ASTFunctionType(dummyToken),
+				createIdentifier("func"), lambda, false);
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken), createIdentifier("testLambda"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.singletonList(init)), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTIntType_withValidType()
+	public void visit_array_literal_should_visit_all_elements()
 	{
-		ASTIntType intType = mock(ASTIntType.class);
-		assertEquals(intType, symbolTree.visit(intType));
+		ASTArrayLiteral arrayLiteral = new ASTArrayLiteral(dummyToken,
+				Arrays.asList(createIntLiteral(1), createIntLiteral(2), createIntLiteral(3)));
+
+		ASTVariableInit init = new ASTVariableInit(dummyToken, new ASTIntArrayType(dummyToken),
+				createIdentifier("numbers"), arrayLiteral, false);
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken),
+				createIdentifier("testArrayLiteral"), Collections.emptyList(),
+				new ASTBody(dummyToken, Collections.singletonList(init)), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTStringType_withValidType()
+	public void visit_binary_operations_should_visit_both_operands()
 	{
-		ASTStringType stringType = mock(ASTStringType.class);
-		assertEquals(stringType, symbolTree.visit(stringType));
+		ASTPlus addition = new ASTPlus(dummyToken, createIntLiteral(5), createIntLiteral(3));
+
+		ASTTimes multiplication = new ASTTimes(dummyToken, addition, createIntLiteral(2));
+
+		ASTVariableInit init = new ASTVariableInit(dummyToken, new ASTIntType(dummyToken), createIdentifier("result"),
+				multiplication, false);
+
+		ASTFunction function = new ASTFunction(dummyToken, new ASTVoidType(dummyToken),
+				createIdentifier("testBinaryOps"), Collections.emptyList(),
+				new ASTBody(dummyToken, Collections.singletonList(init)), false, false);
+
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
+
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 
 	@Test
-	public void visitASTVoidType_withValidType()
+	public void visit_return_statement_with_expression_should_visit_expression()
 	{
-		ASTVoidType voidType = mock(ASTVoidType.class);
-		assertEquals(voidType, symbolTree.visit(voidType));
-	}
+		ASTReturnStatement returnStmt = new ASTReturnStatement(dummyToken, createIntLiteral(42));
 
-	@Test
-	public void visitASTBooleanType_withValidType()
-	{
-		ASTBooleanType boolType = mock(ASTBooleanType.class);
-		assertEquals(boolType, symbolTree.visit(boolType));
-	}
+		ASTFunction function = new ASTFunction(dummyToken, new ASTIntType(dummyToken), createIdentifier("testReturn"),
+				Collections.emptyList(), new ASTBody(dummyToken, Collections.singletonList(returnStmt)), false, false);
 
-	@Test
-	public void visitASTIntArrayType_withValidType()
-	{
-		ASTIntArrayType arrayType = mock(ASTIntArrayType.class);
-		assertEquals(arrayType, symbolTree.visit(arrayType));
-	}
+		ASTProgram program = new ASTProgram(dummyToken, Collections.emptyList(), Collections.singletonList(function));
 
-	@Test
-	public void visitASTIdentifierType_withValidType()
-	{
-		ASTIdentifierType idType = mock(ASTIdentifierType.class);
-		assertEquals(idType, symbolTree.visit(idType));
-	}
-
-	@Test
-	public void visitASTVariable_withGlobalVariable()
-	{
-		ASTVariable variable = mock(ASTVariable.class);
-		when(variable.getType()).thenReturn(new ASTIntType(mock(Token.class)));
-		when(variable.getId()).thenReturn(new ASTIdentifier(mock(Token.class), "var"));
-
-		assertNull(symbolTree.visit(variable));
-	}
-
-	@Test
-	public void visitASTVariableInit_withInitialization()
-	{
-		ASTVariableInit variable = mock(ASTVariableInit.class);
-		when(variable.getType()).thenReturn(new ASTIntType(mock(Token.class)));
-		when(variable.getId()).thenReturn(new ASTIdentifier(mock(Token.class), "var"));
-
-		assertNull(symbolTree.visit(variable));
-	}
-
-	@Test
-	public void visitASTIdentifier_withValidIdentifier()
-	{
-		ASTIdentifier identifier = mock(ASTIdentifier.class);
-		assertNull(symbolTree.visit(identifier));
-	}
-
-	@Test
-	public void visitASTArrayIndexExpr_withValidExpression()
-	{
-		ASTArrayIndexExpr arrayExpr = mock(ASTArrayIndexExpr.class);
-		when(arrayExpr.getArray()).thenReturn(mock(ASTExpression.class));
-		when(arrayExpr.getIndex()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(arrayExpr));
-	}
-
-	@Test
-	public void visitASTArrayAssign_withValidAssignment()
-	{
-		ASTArrayAssign arrayAssign = mock(ASTArrayAssign.class);
-		when(arrayAssign.getId()).thenReturn(mock(ASTIdentifier.class));
-		when(arrayAssign.getExpression1()).thenReturn(mock(ASTExpression.class));
-		when(arrayAssign.getExpression2()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(arrayAssign));
-	}
-
-	@Test
-	public void visitASTIfChain_withValidChain()
-	{
-		ASTIfChain ifChain = mock(ASTIfChain.class);
-		when(ifChain.getBranches()).thenReturn(Collections.emptyList());
-		when(ifChain.getElseBody()).thenReturn(null);
-
-		assertNull(symbolTree.visit(ifChain));
-	}
-
-	@Test
-	public void visitASTConditionalBranch_withValidBranch()
-	{
-		ASTConditionalBranch branch = mock(ASTConditionalBranch.class);
-		when(branch.getCondition()).thenReturn(mock(ASTExpression.class));
-		when(branch.getBody()).thenReturn(mock(ASTBody.class));
-
-		assertNull(symbolTree.visit(branch));
-	}
-
-	@Test
-	public void visitASTArgument_withValidArgument()
-	{
-		SymbolFunction mockSymbolFunction = mock(SymbolFunction.class);
-		when(mockSymbolFunction.getId()).thenReturn("testFunction");
-		when(mockSymbolFunction.addParam(anyString(), any())).thenReturn(true);
-		symbolTree.setSymbolFunction(mockSymbolFunction);
-
-		ASTArgument arg = mock(ASTArgument.class);
-		when(arg.getType()).thenReturn(new ASTIntType(mock(Token.class)));
-		when(arg.getIdentifier()).thenReturn(new ASTIdentifier(mock(Token.class), "arg"));
-
-		assertNull(symbolTree.visit(arg));
-	}
-
-	@Test
-	public void visitASTNotEquals_withValidExpression()
-	{
-		ASTNotEquals expr = mock(ASTNotEquals.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTPlus_withValidExpression()
-	{
-		ASTPlus expr = mock(ASTPlus.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTOr_withValidExpression()
-	{
-		ASTOr expr = mock(ASTOr.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTAnd_withValidExpression()
-	{
-		ASTAnd expr = mock(ASTAnd.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTEquals_withValidExpression()
-	{
-		ASTEquals expr = mock(ASTEquals.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTLessThan_withValidExpression()
-	{
-		ASTLessThan expr = mock(ASTLessThan.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTLessThanOrEqual_withValidExpression()
-	{
-		ASTLessThanOrEqual expr = mock(ASTLessThanOrEqual.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTGreaterThan_withValidExpression()
-	{
-		ASTGreaterThan expr = mock(ASTGreaterThan.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTGreaterThanOrEqual_withValidExpression()
-	{
-		ASTGreaterThanOrEqual expr = mock(ASTGreaterThanOrEqual.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTMinus_withValidExpression()
-	{
-		ASTMinus expr = mock(ASTMinus.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTTimes_withValidExpression()
-	{
-		ASTTimes expr = mock(ASTTimes.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTDivision_withValidExpression()
-	{
-		ASTDivision expr = mock(ASTDivision.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTModulus_withValidExpression()
-	{
-		ASTModulus expr = mock(ASTModulus.class);
-		when(expr.getLeftSide()).thenReturn(mock(ASTExpression.class));
-		when(expr.getRightSide()).thenReturn(mock(ASTExpression.class));
-
-		assertNull(symbolTree.visit(expr));
-	}
-
-	@Test
-	public void visitASTStringArrayType_withValidType()
-	{
-		ASTStringArrayType type = mock(ASTStringArrayType.class);
-		assertEquals(type, symbolTree.visit(type));
-	}
-
-	@Test
-	public void visitASTArrayLiteral_withValidLiteral()
-	{
-		ASTArrayLiteral array = mock(ASTArrayLiteral.class);
-		when(array.getExpressionList()).thenReturn(Collections.emptyList());
-
-		assertNull(symbolTree.visit(array));
-	}
-
-	@Test
-	public void visitASTForeach_withValidLoop()
-	{
-		ASTForeach loop = mock(ASTForeach.class);
-		when(loop.getIterable()).thenReturn(mock(ASTExpression.class));
-		when(loop.getVariable()).thenReturn(mock(ASTVariable.class));
-		when(loop.getBody()).thenReturn(mock(ASTBody.class));
-
-		assertNull(symbolTree.visit(loop));
-	}
-
-	@Test
-	public void visitASTLambda_withValidLambda()
-	{
-		ASTLambda lambda = mock(ASTLambda.class);
-		when(lambda.getArgumentList()).thenReturn(Collections.emptyList());
-		when(lambda.getReturnType()).thenReturn(mock(ASTType.class));
-		when(lambda.getBody()).thenReturn(mock(ASTBody.class));
-
-		assertNull(symbolTree.visit(lambda));
-	}
-
-	@Test
-	public void visitASTParameterizedType_withValidType()
-	{
-		ASTParameterizedType type = mock(ASTParameterizedType.class);
-		assertEquals(type, symbolTree.visit(type));
-	}
-
-	@Test
-	public void visitASTInterface_withValidInterface()
-	{
-		ASTInterface astInterface = mock(ASTInterface.class);
-		when(astInterface.getName()).thenReturn(new ASTIdentifier(mock(Token.class), "TestInterface"));
-		when(astInterface.getExtendedInterfaces()).thenReturn(Collections.emptyList());
-		when(astInterface.getFunctionSignatures()).thenReturn(Collections.emptyList());
-
-		assertNull(symbolTree.visit(astInterface));
-	}
-
-	@Test
-	public void visitASTInterface_withDuplicateInterface()
-	{
-		SymbolProgram mockSymbolProgram = mock(SymbolProgram.class);
-		when(mockSymbolProgram.addInterface(anyString())).thenReturn(false);
-		symbolTree.setSymbolProgram(mockSymbolProgram);
-
-		ASTInterface astInterface = mock(ASTInterface.class);
-		when(astInterface.getName()).thenReturn(new ASTIdentifier(mock(Token.class), "TestInterface"));
-		when(astInterface.getExtendedInterfaces()).thenReturn(Collections.emptyList());
-		when(astInterface.getFunctionSignatures()).thenReturn(Collections.emptyList());
-		when(astInterface.getToken()).thenReturn(token);
-
-		symbolTree.visit(astInterface);
-		assertTrue(DiagnosticReporter.hasErrors());
+		symbolTree.visit(program);
+		assertFalse(DiagnosticReporter.hasErrors());
 	}
 }

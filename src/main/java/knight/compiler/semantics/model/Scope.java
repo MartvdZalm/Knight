@@ -1,10 +1,10 @@
 package knight.compiler.semantics.model;
 
-import knight.compiler.ast.types.ASTType;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import knight.compiler.ast.types.ASTType;
 
 public class Scope
 {
@@ -22,6 +22,15 @@ public class Scope
 		if (variables.containsKey(name)) {
 			return false;
 		}
+
+		Scope currentScope = this;
+		while (currentScope != null) {
+			if (currentScope.variables.containsKey(name)) {
+				return false;
+			}
+			currentScope = currentScope.parentScope;
+		}
+
 		variables.put(name, new SymbolVariable(name, type));
 		return true;
 	}

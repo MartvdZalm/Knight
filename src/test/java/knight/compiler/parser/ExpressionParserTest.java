@@ -1,12 +1,37 @@
 package knight.compiler.parser;
 
-import knight.compiler.ast.expressions.*;
-import knight.compiler.lexer.Tokens;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.Test;
+
+import knight.compiler.ast.expressions.ASTAnd;
+import knight.compiler.ast.expressions.ASTArrayIndexExpr;
+import knight.compiler.ast.expressions.ASTArrayLiteral;
+import knight.compiler.ast.expressions.ASTCallFunctionExpr;
+import knight.compiler.ast.expressions.ASTDivision;
+import knight.compiler.ast.expressions.ASTEquals;
+import knight.compiler.ast.expressions.ASTExpression;
+import knight.compiler.ast.expressions.ASTFalse;
+import knight.compiler.ast.expressions.ASTGreaterThan;
+import knight.compiler.ast.expressions.ASTGreaterThanOrEqual;
+import knight.compiler.ast.expressions.ASTIdentifierExpr;
+import knight.compiler.ast.expressions.ASTIntLiteral;
+import knight.compiler.ast.expressions.ASTLambda;
+import knight.compiler.ast.expressions.ASTLessThan;
+import knight.compiler.ast.expressions.ASTLessThanOrEqual;
+import knight.compiler.ast.expressions.ASTMinus;
+import knight.compiler.ast.expressions.ASTModulus;
+import knight.compiler.ast.expressions.ASTNewArray;
+import knight.compiler.ast.expressions.ASTNewInstance;
+import knight.compiler.ast.expressions.ASTNotEquals;
+import knight.compiler.ast.expressions.ASTOr;
+import knight.compiler.ast.expressions.ASTPlus;
+import knight.compiler.ast.expressions.ASTStringLiteral;
+import knight.compiler.ast.expressions.ASTTimes;
+import knight.compiler.ast.expressions.ASTTrue;
+import knight.compiler.lexer.Tokens;
 
 public class ExpressionParserTest extends ParserTest
 {
@@ -120,7 +145,7 @@ public class ExpressionParserTest extends ParserTest
 
 		ASTNewInstance astNewInstance = assertInstanceOf(ASTNewInstance.class, parser.parseExpression());
 		ASTIdentifierExpr astIdentifierExpr = assertInstanceOf(ASTIdentifierExpr.class, astNewInstance.getClassName());
-		assertEquals("ClassName", astIdentifierExpr.getId());
+		assertEquals("ClassName", astIdentifierExpr.getName());
 	}
 
 	@Test

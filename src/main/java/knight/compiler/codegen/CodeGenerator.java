@@ -6,19 +6,60 @@ import knight.compiler.ast.controlflow.ASTConditionalBranch;
 import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.program.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.types.*;
-import knight.compiler.semantics.model.SymbolClass;
-import knight.compiler.semantics.model.SymbolFunction;
-import knight.compiler.library.*;
-
-import java.io.File;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import knight.compiler.ast.expressions.ASTAnd;
+import knight.compiler.ast.expressions.ASTArrayIndexExpr;
+import knight.compiler.ast.expressions.ASTArrayLiteral;
+import knight.compiler.ast.expressions.ASTBinaryExpression;
+import knight.compiler.ast.expressions.ASTCallFunctionExpr;
+import knight.compiler.ast.expressions.ASTDivision;
+import knight.compiler.ast.expressions.ASTEquals;
+import knight.compiler.ast.expressions.ASTExpression;
+import knight.compiler.ast.expressions.ASTFalse;
+import knight.compiler.ast.expressions.ASTFieldAccessExpr;
+import knight.compiler.ast.expressions.ASTGreaterThan;
+import knight.compiler.ast.expressions.ASTGreaterThanOrEqual;
+import knight.compiler.ast.expressions.ASTIdentifierExpr;
+import knight.compiler.ast.expressions.ASTIntLiteral;
+import knight.compiler.ast.expressions.ASTLambda;
+import knight.compiler.ast.expressions.ASTLessThan;
+import knight.compiler.ast.expressions.ASTLessThanOrEqual;
+import knight.compiler.ast.expressions.ASTMinus;
+import knight.compiler.ast.expressions.ASTModulus;
+import knight.compiler.ast.expressions.ASTNewArray;
+import knight.compiler.ast.expressions.ASTNewInstance;
+import knight.compiler.ast.expressions.ASTNotEquals;
+import knight.compiler.ast.expressions.ASTOr;
+import knight.compiler.ast.expressions.ASTPlus;
+import knight.compiler.ast.expressions.ASTStringLiteral;
+import knight.compiler.ast.expressions.ASTTimes;
+import knight.compiler.ast.expressions.ASTTrue;
+import knight.compiler.ast.program.ASTArgument;
+import knight.compiler.ast.program.ASTClass;
+import knight.compiler.ast.program.ASTFunction;
+import knight.compiler.ast.program.ASTIdentifier;
+import knight.compiler.ast.program.ASTImport;
+import knight.compiler.ast.program.ASTInterface;
+import knight.compiler.ast.program.ASTProgram;
+import knight.compiler.ast.program.ASTProperty;
+import knight.compiler.ast.program.ASTVariable;
+import knight.compiler.ast.program.ASTVariableInit;
+import knight.compiler.ast.statements.ASTArrayAssign;
+import knight.compiler.ast.statements.ASTAssign;
+import knight.compiler.ast.statements.ASTBody;
+import knight.compiler.ast.statements.ASTCallFunctionStat;
+import knight.compiler.ast.statements.ASTFieldAssign;
+import knight.compiler.ast.statements.ASTReturnStatement;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTParameterizedType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTVoidType;
+import knight.compiler.library.LibraryFunction;
+import knight.compiler.library.LibraryManager;
 
 public class CodeGenerator implements ASTVisitor<Void>
 {
@@ -586,9 +627,34 @@ public class CodeGenerator implements ASTVisitor<Void>
 
 	private Void visitBinaryOperator(ASTBinaryExpression operator, String opSymbol)
 	{
-		operator.getLeft().accept(this);
+		ASTExpression left = operator.getLeft();
+		ASTExpression right = operator.getRight();
+
+		boolean leftIsString = left.getType() instanceof ASTStringType;
+		boolean rightIsString = right.getType() instanceof ASTStringType;
+		boolean leftIsNumeric = left.getType() instanceof ASTIntType;
+		boolean rightIsNumeric = right.getType() instanceof ASTIntType;
+
+		boolean wrapLeft = false;
+		if (opSymbol.equals("+") && rightIsString && leftIsNumeric) {
+			wrapLeft = true;
+			codeBuilder.append("std::to_string(");
+		}
+		left.accept(this);
+		if (wrapLeft)
+			codeBuilder.append(")");
+
 		codeBuilder.append(" " + opSymbol + " ");
-		operator.getRight().accept(this);
+
+		boolean wrapRight = false;
+		if (opSymbol.equals("+") && leftIsString && rightIsNumeric) {
+			wrapRight = true;
+			codeBuilder.append("std::to_string(");
+		}
+		right.accept(this);
+		if (wrapRight)
+			codeBuilder.append(")");
+
 		return null;
 	}
 
@@ -668,6 +734,15 @@ public class CodeGenerator implements ASTVisitor<Void>
 	public Void visit(ASTImport astImport)
 	{
 		// headerManager.addRequiredHeader(astImport.getIdentifier().getName());
+		return null;
+	}
+
+	@Override
+	public Void visit(ASTFieldAccessExpr astFieldAccessExpr)
+	{
+		astFieldAccessExpr.getInstance().accept(this);
+		codeBuilder.append(".");
+		astFieldAccessExpr.getField().accept(this);
 		return null;
 	}
 }

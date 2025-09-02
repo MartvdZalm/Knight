@@ -1,17 +1,69 @@
 package knight.compiler.semantics;
 
-import knight.compiler.ast.*;
+import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
 import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.program.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.types.*;
-import knight.compiler.lexer.Token;
+import knight.compiler.ast.expressions.ASTAnd;
+import knight.compiler.ast.expressions.ASTArrayIndexExpr;
+import knight.compiler.ast.expressions.ASTArrayLiteral;
+import knight.compiler.ast.expressions.ASTCallFunctionExpr;
+import knight.compiler.ast.expressions.ASTDivision;
+import knight.compiler.ast.expressions.ASTEquals;
+import knight.compiler.ast.expressions.ASTExpression;
+import knight.compiler.ast.expressions.ASTFalse;
+import knight.compiler.ast.expressions.ASTFieldAccessExpr;
+import knight.compiler.ast.expressions.ASTGreaterThan;
+import knight.compiler.ast.expressions.ASTGreaterThanOrEqual;
+import knight.compiler.ast.expressions.ASTIdentifierExpr;
+import knight.compiler.ast.expressions.ASTIntLiteral;
+import knight.compiler.ast.expressions.ASTLambda;
+import knight.compiler.ast.expressions.ASTLessThan;
+import knight.compiler.ast.expressions.ASTLessThanOrEqual;
+import knight.compiler.ast.expressions.ASTMinus;
+import knight.compiler.ast.expressions.ASTModulus;
+import knight.compiler.ast.expressions.ASTNewArray;
+import knight.compiler.ast.expressions.ASTNewInstance;
+import knight.compiler.ast.expressions.ASTNotEquals;
+import knight.compiler.ast.expressions.ASTOr;
+import knight.compiler.ast.expressions.ASTPlus;
+import knight.compiler.ast.expressions.ASTStringLiteral;
+import knight.compiler.ast.expressions.ASTTimes;
+import knight.compiler.ast.expressions.ASTTrue;
+import knight.compiler.ast.program.ASTArgument;
+import knight.compiler.ast.program.ASTClass;
+import knight.compiler.ast.program.ASTFunction;
+import knight.compiler.ast.program.ASTIdentifier;
+import knight.compiler.ast.program.ASTImport;
+import knight.compiler.ast.program.ASTInterface;
+import knight.compiler.ast.program.ASTProgram;
+import knight.compiler.ast.program.ASTProperty;
+import knight.compiler.ast.program.ASTVariable;
+import knight.compiler.ast.program.ASTVariableInit;
+import knight.compiler.ast.statements.ASTArrayAssign;
+import knight.compiler.ast.statements.ASTAssign;
+import knight.compiler.ast.statements.ASTBody;
+import knight.compiler.ast.statements.ASTCallFunctionStat;
+import knight.compiler.ast.statements.ASTFieldAssign;
+import knight.compiler.ast.statements.ASTReturnStatement;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTParameterizedType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
-import knight.compiler.semantics.model.*;
+import knight.compiler.semantics.model.Scope;
+import knight.compiler.semantics.model.SymbolClass;
+import knight.compiler.semantics.model.SymbolFunction;
+import knight.compiler.semantics.model.SymbolInterface;
+import knight.compiler.semantics.model.SymbolProgram;
 import knight.compiler.semantics.utils.ScopeManager;
 
 public class BuildSymbolTree implements ASTVisitor<ASTType>
@@ -320,15 +372,9 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTForEach astForEach)
 	{
-		ASTType iterableType = astForEach.getIterable().accept(this);
-		if (iterableType != null && !(iterableType instanceof ASTIntArrayType)
-				&& !(iterableType instanceof ASTStringArrayType)) {
-			DiagnosticReporter.error(astForEach, "Foreach loop requires array type");
-		}
-
+		astForEach.getIterable().accept(this);
 		astForEach.getVariable().accept(this);
 		astForEach.getBody().accept(this);
-
 		return null;
 	}
 
@@ -411,7 +457,7 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTIntLiteral astIntLiteral)
 	{
-		return null;
+		return astIntLiteral.getType();
 	}
 
 	@Override
@@ -597,6 +643,14 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTImport astImport)
 	{
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTFieldAccessExpr astFieldAccessExpr)
+	{
+		astFieldAccessExpr.getInstance().accept(this);
+		astFieldAccessExpr.getField().accept(this);
 		return null;
 	}
 }

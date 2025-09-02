@@ -1,8 +1,8 @@
 package knight.compiler.ast.controlflow;
 
-import knight.compiler.ast.program.ASTVariable;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.expressions.ASTExpression;
+import knight.compiler.ast.program.ASTVariable;
 import knight.compiler.ast.statements.ASTBody;
 import knight.compiler.ast.statements.ASTStatement;
 import knight.compiler.lexer.Token;

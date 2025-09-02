@@ -1,18 +1,15 @@
 package knight.compiler.library;
 
-import knight.compiler.ast.program.ASTProgram;
-import knight.compiler.ast.AST;
-import knight.compiler.ast.ASTSourceFileSetter;
-import knight.compiler.parser.Parser;
-import knight.compiler.lexer.Lexer;
-import knight.compiler.semantics.BuildSymbolTree;
-import knight.compiler.semantics.model.SymbolProgram;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.BufferedReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import knight.compiler.ast.AST;
+import knight.compiler.ast.program.ASTProgram;
+import knight.compiler.lexer.Lexer;
+import knight.compiler.parser.Parser;
 
 public class LibraryManager
 {

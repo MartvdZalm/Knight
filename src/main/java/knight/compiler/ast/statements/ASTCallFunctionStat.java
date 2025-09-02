@@ -2,12 +2,12 @@ package knight.compiler.ast.statements;
 
 import java.util.List;
 
-import knight.compiler.ast.*;
+import knight.compiler.ast.ASTVisitor;
+import knight.compiler.ast.contracts.IASTCallFunction;
 import knight.compiler.ast.expressions.ASTExpression;
 import knight.compiler.ast.expressions.ASTIdentifierExpr;
 import knight.compiler.ast.utils.ASTList;
 import knight.compiler.lexer.Token;
-import knight.compiler.ast.contracts.IASTCallFunction;
 
 public class ASTCallFunctionStat extends ASTStatement implements IASTCallFunction
 {

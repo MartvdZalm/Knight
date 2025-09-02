@@ -1,8 +1,9 @@
 package knight.compiler.library;
 
-import knight.compiler.ast.program.ASTProgram;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+
+import knight.compiler.ast.program.ASTProgram;
 
 public class Library
 {

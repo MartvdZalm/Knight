@@ -2,8 +2,8 @@ package knight.compiler.ast.expressions;
 
 import java.util.List;
 
-import knight.compiler.ast.utils.ASTList;
 import knight.compiler.ast.ASTVisitor;
+import knight.compiler.ast.utils.ASTList;
 import knight.compiler.lexer.Token;
 
 public class ASTArrayLiteral extends ASTExpression

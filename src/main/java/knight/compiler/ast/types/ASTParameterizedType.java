@@ -1,10 +1,10 @@
 package knight.compiler.ast.types;
 
-import knight.compiler.ast.utils.ASTList;
-import knight.compiler.ast.ASTVisitor;
-import knight.compiler.lexer.Token;
-
 import java.util.List;
+
+import knight.compiler.ast.ASTVisitor;
+import knight.compiler.ast.utils.ASTList;
+import knight.compiler.lexer.Token;
 
 public class ASTParameterizedType extends ASTType
 {

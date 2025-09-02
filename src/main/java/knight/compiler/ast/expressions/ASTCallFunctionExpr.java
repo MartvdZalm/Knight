@@ -2,10 +2,10 @@ package knight.compiler.ast.expressions;
 
 import java.util.List;
 
-import knight.compiler.ast.utils.ASTList;
 import knight.compiler.ast.ASTVisitor;
-import knight.compiler.lexer.Token;
 import knight.compiler.ast.contracts.IASTCallFunction;
+import knight.compiler.ast.utils.ASTList;
+import knight.compiler.lexer.Token;
 
 public class ASTCallFunctionExpr extends ASTExpression implements IASTCallFunction
 {

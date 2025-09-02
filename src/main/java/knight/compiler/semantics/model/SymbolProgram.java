@@ -1,8 +1,10 @@
 package knight.compiler.semantics.model;
 
-import knight.compiler.ast.types.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.*;
+import knight.compiler.ast.types.ASTType;
 
 public class SymbolProgram
 {

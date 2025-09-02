@@ -1,6 +1,14 @@
 package knight.compiler.codegen;
 
-import knight.compiler.ast.types.*;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.types.ASTVoidType;
 
 public class TypeConverter
 {

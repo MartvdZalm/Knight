@@ -14,4 +14,9 @@ class Person
 	{
 		ret name;
 	}
+
+	fn print(): void
+	{
+		println("Name=" + name + ", Age=" + age);
+	}
 }

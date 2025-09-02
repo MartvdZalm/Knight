@@ -1,22 +1,78 @@
 package knight.compiler.semantics;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTVisitor;
+import knight.compiler.ast.contracts.IASTCallFunction;
 import knight.compiler.ast.controlflow.ASTConditionalBranch;
 import knight.compiler.ast.controlflow.ASTForEach;
 import knight.compiler.ast.controlflow.ASTIfChain;
 import knight.compiler.ast.controlflow.ASTWhile;
-import knight.compiler.ast.expressions.*;
-import knight.compiler.ast.program.*;
-import knight.compiler.ast.statements.*;
-import knight.compiler.ast.types.*;
-import knight.compiler.ast.contracts.*;
-import knight.compiler.semantics.diagnostics.DiagnosticReporter;
-import knight.compiler.semantics.model.*;
-import knight.compiler.semantics.utils.ScopeManager;
+import knight.compiler.ast.expressions.ASTAnd;
+import knight.compiler.ast.expressions.ASTArrayIndexExpr;
+import knight.compiler.ast.expressions.ASTArrayLiteral;
+import knight.compiler.ast.expressions.ASTBinaryExpression;
+import knight.compiler.ast.expressions.ASTCallFunctionExpr;
+import knight.compiler.ast.expressions.ASTDivision;
+import knight.compiler.ast.expressions.ASTEquals;
+import knight.compiler.ast.expressions.ASTExpression;
+import knight.compiler.ast.expressions.ASTFalse;
+import knight.compiler.ast.expressions.ASTFieldAccessExpr;
+import knight.compiler.ast.expressions.ASTGreaterThan;
+import knight.compiler.ast.expressions.ASTGreaterThanOrEqual;
+import knight.compiler.ast.expressions.ASTIdentifierExpr;
+import knight.compiler.ast.expressions.ASTIntLiteral;
+import knight.compiler.ast.expressions.ASTLambda;
+import knight.compiler.ast.expressions.ASTLessThan;
+import knight.compiler.ast.expressions.ASTLessThanOrEqual;
+import knight.compiler.ast.expressions.ASTMinus;
+import knight.compiler.ast.expressions.ASTModulus;
+import knight.compiler.ast.expressions.ASTNewArray;
+import knight.compiler.ast.expressions.ASTNewInstance;
+import knight.compiler.ast.expressions.ASTNotEquals;
+import knight.compiler.ast.expressions.ASTOr;
+import knight.compiler.ast.expressions.ASTPlus;
+import knight.compiler.ast.expressions.ASTStringLiteral;
+import knight.compiler.ast.expressions.ASTTimes;
+import knight.compiler.ast.expressions.ASTTrue;
+import knight.compiler.ast.program.ASTArgument;
+import knight.compiler.ast.program.ASTClass;
+import knight.compiler.ast.program.ASTFunction;
+import knight.compiler.ast.program.ASTIdentifier;
+import knight.compiler.ast.program.ASTImport;
+import knight.compiler.ast.program.ASTInterface;
+import knight.compiler.ast.program.ASTProgram;
+import knight.compiler.ast.program.ASTProperty;
+import knight.compiler.ast.program.ASTVariable;
+import knight.compiler.ast.program.ASTVariableInit;
+import knight.compiler.ast.statements.ASTArrayAssign;
+import knight.compiler.ast.statements.ASTAssign;
+import knight.compiler.ast.statements.ASTBody;
+import knight.compiler.ast.statements.ASTCallFunctionStat;
+import knight.compiler.ast.statements.ASTFieldAssign;
+import knight.compiler.ast.statements.ASTReturnStatement;
+import knight.compiler.ast.types.ASTBooleanType;
+import knight.compiler.ast.types.ASTFunctionType;
+import knight.compiler.ast.types.ASTIdentifierType;
+import knight.compiler.ast.types.ASTIntArrayType;
+import knight.compiler.ast.types.ASTIntType;
+import knight.compiler.ast.types.ASTParameterizedType;
+import knight.compiler.ast.types.ASTStringArrayType;
+import knight.compiler.ast.types.ASTStringType;
+import knight.compiler.ast.types.ASTType;
+import knight.compiler.ast.types.ASTVoidType;
 import knight.compiler.library.LibraryManager;
-
-import java.util.*;
+import knight.compiler.semantics.diagnostics.DiagnosticReporter;
+import knight.compiler.semantics.model.Binding;
+import knight.compiler.semantics.model.SymbolClass;
+import knight.compiler.semantics.model.SymbolFunction;
+import knight.compiler.semantics.model.SymbolProgram;
+import knight.compiler.semantics.model.SymbolProperty;
+import knight.compiler.semantics.model.SymbolVariable;
+import knight.compiler.semantics.utils.ScopeManager;
 
 public class TypeAnalyser implements ASTVisitor<ASTType>
 {
@@ -327,10 +383,22 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	{
 		Binding binding = astIdentifierExpr.getBinding();
 		if (binding != null) {
-			ASTType astType = ((SymbolVariable) binding).getType();
-			astIdentifierExpr.setType(astType);
-			return astType;
+			if (binding instanceof SymbolVariable) {
+				ASTType astType = ((SymbolVariable) binding).getType();
+				astIdentifierExpr.setType(astType);
+				return astType;
+			}
+
+			if (binding instanceof SymbolClass) {
+				ASTType astType = ((SymbolClass) binding).getType();
+				astIdentifierExpr.setType(astType);
+				return astType;
+			}
+
+			DiagnosticReporter.error(astIdentifierExpr,
+					"Unexpected binding type: " + binding.getClass().getSimpleName());
 		}
+
 		return null;
 	}
 
@@ -339,7 +407,14 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	{
 		Binding binding = astIdentifier.getBinding();
 		if (binding != null) {
-			return ((SymbolVariable) binding).getType();
+			if (binding instanceof SymbolVariable) {
+				return ((SymbolVariable) binding).getType();
+			}
+			if (binding instanceof SymbolClass) {
+				return ((SymbolClass) binding).getType();
+			}
+
+			DiagnosticReporter.error(astIdentifier, "Unexpected binding type: " + binding.getClass().getSimpleName());
 		}
 		return null;
 	}
@@ -542,6 +617,13 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTForEach astForEach)
 	{
+		ASTType iterableType = astForEach.getIterable().accept(this);
+
+		if (iterableType != null && !(iterableType instanceof ASTIntArrayType)
+				&& !(iterableType instanceof ASTStringArrayType)) {
+			DiagnosticReporter.error(astForEach, "Foreach loop requires array type");
+		}
+
 		return null;
 	}
 
@@ -560,6 +642,37 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	@Override
 	public ASTType visit(ASTInterface astInterface)
 	{
+		return null;
+	}
+
+	@Override
+	public ASTType visit(ASTFieldAccessExpr astFieldAccessExpr)
+	{
+		ASTType instanceType = astFieldAccessExpr.getInstance().accept(this);
+		String fieldName = astFieldAccessExpr.getField().getName();
+
+		if (instanceType instanceof ASTIdentifierType) {
+			String className = ((ASTIdentifierType) instanceType).getName();
+			SymbolClass symbolClass = symbolProgram.getClass(className);
+
+			if (symbolClass != null) {
+				SymbolProperty property = symbolClass.getProperty(fieldName);
+
+				if (property != null) {
+					astFieldAccessExpr.getField().setType(property.getType());
+					return property.getType();
+				} else {
+					DiagnosticReporter.error(astFieldAccessExpr.getField(),
+							"Field '" + fieldName + "' not found in class '" + className + "'");
+				}
+			} else {
+				DiagnosticReporter.error(astFieldAccessExpr.getInstance(), "Unknown class '" + className + "'");
+			}
+		} else if (instanceType != null) {
+			DiagnosticReporter.error(astFieldAccessExpr.getInstance(),
+					"Field access requires class instance, found: " + instanceType);
+		}
+
 		return null;
 	}
 

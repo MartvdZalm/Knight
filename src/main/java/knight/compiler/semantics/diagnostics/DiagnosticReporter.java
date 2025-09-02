@@ -1,11 +1,11 @@
 package knight.compiler.semantics.diagnostics;
 
-import knight.compiler.lexer.Token;
-import knight.compiler.ast.AST;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import knight.compiler.ast.AST;
+import knight.compiler.lexer.Token;
 
 public final class DiagnosticReporter
 {

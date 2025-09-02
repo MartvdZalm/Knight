@@ -2,7 +2,8 @@ package knight.compiler.ast.program;
 
 import java.util.List;
 
-import knight.compiler.ast.*;
+import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.utils.ASTList;
 import knight.compiler.lexer.Token;
 

@@ -1,8 +1,8 @@
 package knight.compiler.ast.statements;
 
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.expressions.ASTExpression;
 import knight.compiler.ast.program.ASTIdentifier;
-import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
 public class ASTArrayAssign extends ASTStatement

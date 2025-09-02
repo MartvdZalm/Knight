@@ -1,20 +1,21 @@
 package knight.compiler;
 
-import knight.compiler.ast.AST;
-import knight.compiler.ast.program.ASTProgram;
-import knight.compiler.ast.ASTSourceFileSetter;
-import knight.compiler.lexer.Lexer;
-import knight.compiler.parser.Parser;
-import knight.compiler.semantics.BuildSymbolTree;
-import knight.compiler.semantics.NameAnalyser;
-import knight.compiler.semantics.TypeAnalyser;
-import knight.compiler.semantics.model.SymbolProgram;
-import knight.compiler.library.LibraryManager;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import knight.compiler.ast.AST;
+import knight.compiler.ast.ASTSourceFileSetter;
+import knight.compiler.ast.program.ASTProgram;
+import knight.compiler.lexer.Lexer;
+import knight.compiler.library.LibraryManager;
+import knight.compiler.parser.Parser;
+import knight.compiler.semantics.BuildSymbolTree;
+import knight.compiler.semantics.NameAnalyser;
+import knight.compiler.semantics.TypeAnalyser;
+import knight.compiler.semantics.model.SymbolProgram;
 
 public class Compiler
 {

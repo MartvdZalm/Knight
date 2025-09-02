@@ -2,10 +2,10 @@ package knight.compiler.ast.controlflow;
 
 import java.util.List;
 
-import knight.compiler.ast.utils.ASTList;
 import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.statements.ASTBody;
 import knight.compiler.ast.statements.ASTStatement;
+import knight.compiler.ast.utils.ASTList;
 import knight.compiler.lexer.Token;
 
 public class ASTIfChain extends ASTStatement

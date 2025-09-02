@@ -1,16 +1,17 @@
 package knight.compiler.parser;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.provider.Arguments;
+
 import knight.compiler.lexer.Lexer;
 import knight.compiler.lexer.Symbol;
 import knight.compiler.lexer.Token;
 import knight.compiler.lexer.Tokens;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.provider.Arguments;
-
-import java.util.stream.Stream;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ParserTest
 {

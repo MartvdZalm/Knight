@@ -1,8 +1,8 @@
 package knight.compiler.ast.statements;
 
+import knight.compiler.ast.ASTVisitor;
 import knight.compiler.ast.expressions.ASTExpression;
 import knight.compiler.ast.expressions.ASTIdentifierExpr;
-import knight.compiler.ast.ASTVisitor;
 import knight.compiler.lexer.Token;
 
 public class ASTFieldAssign extends ASTStatement

@@ -1,5 +1,8 @@
 package knight;
 
+import java.io.File;
+import java.util.List;
+
 import knight.compiler.Compiler;
 import knight.compiler.ast.program.ASTProgram;
 import knight.compiler.codegen.CodeGenerator;
@@ -9,9 +12,6 @@ import knight.compiler.semantics.diagnostics.Diagnostic;
 import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.model.SymbolProgram;
 import knight.utils.FileHelper;
-
-import java.io.File;
-import java.util.List;
 
 public class Main
 {
