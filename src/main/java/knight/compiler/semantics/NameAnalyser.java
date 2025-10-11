@@ -71,13 +71,14 @@ import knight.compiler.semantics.model.SymbolProgram;
 import knight.compiler.semantics.model.SymbolProperty;
 import knight.compiler.semantics.model.SymbolVariable;
 import knight.compiler.semantics.utils.ScopeManager;
+import knight.compiler.semantics.utils.SemanticUtils;
 
 public class NameAnalyser implements ASTVisitor<ASTType>
 {
 	private final SymbolProgram symbolProgram;
 	private final ScopeManager scopeManager;
-	private final Set<String> processedClasses = new HashSet<>();
-	private final Set<String> processedFunctions = new HashSet<>();
+	public final Set<String> processedClasses = new HashSet<>();
+	public final Set<String> processedFunctions = new HashSet<>();
 
 	public NameAnalyser(SymbolProgram symbolProgram)
 	{
@@ -85,62 +86,9 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		this.scopeManager = new ScopeManager();
 	}
 
-	private SymbolVariable resolveVariable(String name)
+	public ScopeManager getScopeManager()
 	{
-		if (scopeManager.getCurrentScope() != null) {
-			SymbolVariable variable = scopeManager.getCurrentScope().getVariable(name);
-			if (variable != null) {
-				return variable;
-			}
-		}
-
-		if (scopeManager.isInClass()) {
-			SymbolProperty property = scopeManager.getCurrentClass().getProperty(name);
-			if (property != null) {
-				// Convert property to variable for binding (properties are accessible like
-				// variables)
-				return new SymbolVariable(property.getName(), property.getType());
-			}
-		}
-
-		return symbolProgram.getGlobalVariable(name);
-	}
-
-	private SymbolFunction resolveFunction(String functionName, ASTIdentifierExpr instanceExpr)
-	{
-		if (instanceExpr != null) {
-			String instanceName = instanceExpr.getName();
-			SymbolVariable symbolVariable = resolveVariable(instanceName);
-
-			if (symbolVariable == null) {
-				DiagnosticReporter.error(instanceExpr, "Variable '" + instanceName + "' not found in current scope.");
-				return null;
-			}
-
-			ASTType varType = symbolVariable.getType();
-			if (!(varType instanceof ASTIdentifierType)) {
-				DiagnosticReporter.error(instanceExpr, "Variable '" + instanceName + "' is not a class instance.");
-				return null;
-			}
-
-			String className = ((ASTIdentifierType) varType).getName();
-			SymbolClass symbolClass = symbolProgram.getClass(className);
-			if (symbolClass == null) {
-				DiagnosticReporter.error(instanceExpr, "Class '" + className + "' not found in symbol table.");
-				return null;
-			}
-
-			return symbolClass.getFunction(functionName);
-		}
-
-		if (scopeManager.isInClass()) {
-			SymbolFunction function = scopeManager.getCurrentClass().getFunction(functionName);
-			if (function != null) {
-				return function;
-			}
-		}
-
-		return symbolProgram.getGlobalFunction(functionName);
+		return this.scopeManager;
 	}
 
 	@Override
@@ -289,7 +237,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		astVariable.getType().accept(this);
 
 		String varName = astVariable.getIdentifier().getName();
-		SymbolVariable variable = resolveVariable(varName);
+		SymbolVariable variable = SemanticUtils.resolveVariable(varName, scopeManager, symbolProgram);
 
 		if (variable != null) {
 			astVariable.getIdentifier().setBinding(variable);
@@ -306,7 +254,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		astVariableInit.getType().accept(this);
 
 		String varName = astVariableInit.getIdentifier().getName();
-		SymbolVariable variable = resolveVariable(varName);
+		SymbolVariable variable = SemanticUtils.resolveVariable(varName, scopeManager, symbolProgram);
 
 		if (variable != null) {
 			astVariableInit.getIdentifier().setBinding(variable);
@@ -325,7 +273,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTIdentifier astIdentifier)
 	{
 		String identifier = astIdentifier.getName();
-		SymbolVariable variable = resolveVariable(identifier);
+		SymbolVariable variable = SemanticUtils.resolveVariable(identifier, scopeManager, symbolProgram);
 
 		if (variable != null) {
 			astIdentifier.setBinding(variable);
@@ -340,7 +288,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTIdentifierExpr astIdentifierExpr)
 	{
 		String identifier = astIdentifierExpr.getName();
-		SymbolVariable variable = resolveVariable(identifier);
+		SymbolVariable variable = SemanticUtils.resolveVariable(identifier, scopeManager, symbolProgram);
 
 		if (variable != null) {
 			astIdentifierExpr.setBinding(variable);
@@ -396,7 +344,8 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			return null;
 		}
 
-		SymbolFunction symbolFunction = resolveFunction(functionName, astCallFunctionExpr.getInstance());
+		SymbolFunction symbolFunction = SemanticUtils.resolveFunction(functionName, astCallFunctionExpr.getInstance(),
+				scopeManager, symbolProgram);
 
 		if (symbolFunction != null) {
 			astCallFunctionExpr.getFunctionName().setBinding(symbolFunction);
@@ -425,7 +374,8 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			return null;
 		}
 
-		SymbolFunction symbolFunction = resolveFunction(functionName, astCallFunctionStat.getInstance());
+		SymbolFunction symbolFunction = SemanticUtils.resolveFunction(functionName, astCallFunctionStat.getInstance(),
+				scopeManager, symbolProgram);
 
 		if (symbolFunction != null) {
 			astCallFunctionStat.getFunctionName().setBinding(symbolFunction);
@@ -765,7 +715,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 		String instanceName = astFieldAccessExpr.getInstance().getName();
 		String fieldName = astFieldAccessExpr.getField().getName();
 
-		SymbolVariable symbolVariable = resolveVariable(instanceName);
+		SymbolVariable symbolVariable = SemanticUtils.resolveVariable(instanceName, scopeManager, symbolProgram);
 		if (symbolVariable == null) {
 			DiagnosticReporter.error(astFieldAccessExpr, "Variable " + instanceName + " not found in current scope.");
 			return null;

@@ -93,6 +93,11 @@ public final class DiagnosticReporter
 		return diagnostics.stream().anyMatch(d -> d.getSeverity() == DiagnosticSeverity.ERROR);
 	}
 
+	public static synchronized List<Diagnostic> getErrors()
+	{
+		return diagnostics.stream().filter(d -> d.getSeverity() == DiagnosticSeverity.ERROR).toList();
+	}
+
 	public static synchronized void clear()
 	{
 		diagnostics.clear();
