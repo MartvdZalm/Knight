@@ -600,7 +600,9 @@ public class ConstantFolding implements ASTVisitor<ASTExpression>
 	@Override
 	public ASTExpression visit(ASTFunction astFunction)
 	{
-		astFunction.getBody().accept(this);
+		if (astFunction.getBody() != null) {
+			astFunction.getBody().accept(this);
+		}
 		return null;
 	}
 

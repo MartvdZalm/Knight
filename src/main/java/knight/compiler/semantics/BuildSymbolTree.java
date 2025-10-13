@@ -186,8 +186,9 @@ public class BuildSymbolTree implements ASTVisitor<ASTType>
 				astArgument.accept(this);
 			}
 
-			astFunction.getBody().accept(this);
-
+			if (astFunction.getBody() != null) {
+				astFunction.getBody().accept(this);
+			}
 		} finally {
 			scopeManager.exitFunction();
 		}

@@ -49,14 +49,27 @@ public class SemanticUtils
 				return null;
 			}
 
-			String className = ((ASTIdentifierType) varType).getName();
-			SymbolClass symbolClass = symbolProgram.getClass(className);
-			if (symbolClass == null) {
-				DiagnosticReporter.error(instanceExpr, "Class '" + className + "' not found in symbol table.");
-				return null;
+			String typeName = ((ASTIdentifierType) varType).getName();
+
+			SymbolClass symbolClass = symbolProgram.getClass(typeName);
+			if (symbolClass != null) {
+				SymbolFunction func = symbolClass.getFunction(functionName);
+				if (func != null) {
+					return func;
+				}
 			}
 
-			return symbolClass.getFunction(functionName);
+			SymbolInterface symbolInterface = symbolProgram.getInterface(typeName);
+			if (symbolInterface != null) {
+				SymbolFunction func = symbolInterface.getFunction(functionName);
+				if (func != null) {
+					return func;
+				}
+			}
+
+			DiagnosticReporter.error(instanceExpr,
+					"Function '" + functionName + "' not found in type '" + typeName + "'.");
+			return null;
 		}
 
 		if (scopeManager.isInClass()) {

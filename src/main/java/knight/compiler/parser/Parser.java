@@ -174,14 +174,14 @@ public class Parser
 
 		List<ASTFunction> functions = new ArrayList<>();
 		while (token.getToken() != Tokens.RIGHTBRACE) {
-			functions.add(parseInterfaceMethod());
+			functions.add(parseInterfaceFunction());
 		}
 
 		eat(Tokens.RIGHTBRACE);
 		return new ASTInterface(token, name, functions, extendsInterfaces);
 	}
 
-	private ASTFunction parseInterfaceMethod() throws ParseException
+	private ASTFunction parseInterfaceFunction() throws ParseException
 	{
 		eat(Tokens.FUNCTION);
 		ASTIdentifier name = parseIdentifier();
@@ -240,6 +240,12 @@ public class Parser
 		List<ASTArgument> argumentList = parseArguments();
 		eat(Tokens.COLON);
 		ASTType returnType = parseType();
+
+		if (isAbstract) {
+			eat(Tokens.SEMICOLON);
+			return new ASTFunction(token, returnType, id, argumentList, null, isAbstract, isStatic);
+		}
+
 		eat(Tokens.LEFTBRACE);
 
 		ASTBody body = this.parseBody();

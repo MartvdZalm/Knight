@@ -77,6 +77,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 {
 	private final SymbolProgram symbolProgram;
 	private final ScopeManager scopeManager;
+	private final LibraryManager libraryManager = new LibraryManager();
 	public final Set<String> processedClasses = new HashSet<>();
 	public final Set<String> processedFunctions = new HashSet<>();
 
@@ -187,7 +188,9 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 				astFunction.getArgument(i).accept(this);
 			}
 
-			astFunction.getBody().accept(this);
+			if (astFunction.getBody() != null) {
+				astFunction.getBody().accept(this);
+			}
 		} finally {
 			scopeManager.exitFunction();
 		}
@@ -303,16 +306,41 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 	public ASTType visit(ASTIdentifierType astIdentifierType)
 	{
 		String identifier = astIdentifierType.getName();
-		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 
+		// First check for a class
+		SymbolClass symbolClass = symbolProgram.getClass(identifier);
 		if (symbolClass != null) {
 			astIdentifierType.setBinding(symbolClass);
-		} else {
-			DiagnosticReporter.error(astIdentifierType, "Class " + identifier + " not found");
+			return null;
 		}
 
+		// Then check for an interface
+		SymbolInterface symbolInterface = symbolProgram.getInterface(identifier);
+		if (symbolInterface != null) {
+			astIdentifierType.setBinding(symbolInterface);
+			return null;
+		}
+
+		// If not found in either
+		DiagnosticReporter.error(astIdentifierType, "Type " + identifier + " not found");
 		return null;
 	}
+
+	// @Override
+	// public ASTType visit(ASTIdentifierType astIdentifierType)
+	// {
+	// String identifier = astIdentifierType.getName();
+	// SymbolClass symbolClass = symbolProgram.getClass(identifier);
+
+	// if (symbolClass != null) {
+	// astIdentifierType.setBinding(symbolClass);
+	// } else {
+	// DiagnosticReporter.error(astIdentifierType, "Class " + identifier + " not
+	// found");
+	// }
+
+	// return null;
+	// }
 
 	@Override
 	public ASTType visit(ASTAssign astAssign)
@@ -340,7 +368,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			instanceName = astCallFunctionExpr.getInstance().getName();
 		}
 
-		if (LibraryManager.isBuiltIn(functionName) && instanceName == null) {
+		if (libraryManager.isBuiltIn(functionName) && instanceName == null) {
 			return null;
 		}
 
@@ -370,7 +398,7 @@ public class NameAnalyser implements ASTVisitor<ASTType>
 			instanceName = astCallFunctionStat.getInstance().getName();
 		}
 
-		if (LibraryManager.isBuiltIn(functionName) && instanceName == null) {
+		if (libraryManager.isBuiltIn(functionName) && instanceName == null) {
 			return null;
 		}
 

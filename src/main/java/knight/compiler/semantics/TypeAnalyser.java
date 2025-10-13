@@ -80,6 +80,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	private final ScopeManager scopeManager;
 	private final Set<String> processedClasses = new HashSet<>();
 	private final Set<String> processedFunctions = new HashSet<>();
+	private final LibraryManager libraryManager = new LibraryManager();
 
 	public TypeAnalyser(SymbolProgram symbolProgram)
 	{
@@ -143,8 +144,10 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 			for (ASTArgument astArgument : astFunction.getArguments()) {
 				astArgument.accept(this);
 			}
-			astFunction.getBody().accept(this);
 
+			if (astFunction.getBody() != null) {
+				astFunction.getBody().accept(this);
+			}
 			// TODO: Validate return type matches function declaration
 		} finally {
 			scopeManager.exitFunction();
@@ -782,7 +785,7 @@ public class TypeAnalyser implements ASTVisitor<ASTType>
 	{
 		SymbolFunction symbolFunction = (SymbolFunction) functionName.getBinding();
 
-		if (LibraryManager.isBuiltIn(functionName.getName())) {
+		if (libraryManager.isBuiltIn(functionName.getName())) {
 			// LibraryFunction libraryFunction = LibraryManager.getBuiltIn(functionName);
 			return null;
 		}

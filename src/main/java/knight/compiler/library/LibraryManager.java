@@ -22,7 +22,6 @@ public class LibraryManager
 		registerBuiltIn("__builtin_to_string", "string", new String[] { "int" }, "return std::to_string(%s);");
 		registerBuiltIn("__builtin_to_int", "int", new String[] { "string" }, "return std::stoi(%s);");
 		registerBuiltIn("__builtin_length", "int", new String[] { "string" }, "return %s.length();");
-
 	}
 
 	public static ASTProgram loadStandardLibrary()
@@ -54,12 +53,12 @@ public class LibraryManager
 		builtinFunctions.put(name, new LibraryFunction(name, returnType, paramTypes, impl));
 	}
 
-	public static LibraryFunction getBuiltIn(String name)
+	public LibraryFunction getBuiltIn(String name)
 	{
 		return builtinFunctions.get(name);
 	}
 
-	public static boolean isBuiltIn(String name)
+	public boolean isBuiltIn(String name)
 	{
 		return builtinFunctions.containsKey(name);
 	}

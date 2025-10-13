@@ -132,7 +132,11 @@ public class ASTSourceFileSetter implements ASTVisitor<Void>
 		for (ASTArgument astArgument : astFunction.getArguments()) {
 			astArgument.accept(this);
 		}
-		astFunction.getBody().accept(this);
+
+		if (astFunction.getBody() != null) {
+			astFunction.getBody().accept(this);
+		}
+
 		return null;
 	}
 

@@ -66,6 +66,7 @@ public class CodeGenerator implements ASTVisitor<Void>
 	private final CodeBuilder codeBuilder;
 	private final HeaderManager headerManager;
 	private final TypeConverter typeConverter;
+	private final LibraryManager libraryManager = new LibraryManager();
 
 	public CodeGenerator(String progPath, String filename)
 	{
@@ -170,8 +171,9 @@ public class CodeGenerator implements ASTVisitor<Void>
 		if (!astInterface.getExtendedInterfaces().isEmpty()) {
 			codeBuilder.append(" : ");
 			for (int i = 0; i < astInterface.getExtendedInterfaces().size(); i++) {
-				if (i > 0)
+				if (i > 0) {
 					codeBuilder.append(", ");
+				}
 				codeBuilder.append("public " + astInterface.getExtendedInterfaces().get(i).getName());
 			}
 		}
@@ -197,9 +199,47 @@ public class CodeGenerator implements ASTVisitor<Void>
 	private void generateFunctionDeclaration(ASTFunction function)
 	{
 		String returnType = typeConverter.convertType(function.getReturnType());
-		codeBuilder.appendRawToDeclarations(returnType + " " + function.getIdentifier().getName() + "(");
-		generateParameterList(function);
-		codeBuilder.appendLine(");");
+		StringBuilder decl = new StringBuilder();
+
+		if (function.isStatic()) {
+			decl.append("static ");
+		} else if (function.isAbstract()) {
+			decl.append("virtual ");
+		}
+
+		decl.append(returnType).append(" ").append(function.getIdentifier().getName()).append("(");
+
+		for (int i = 0; i < function.getArgumentCount(); i++) {
+			ASTArgument arg = function.getArgument(i);
+			String paramType = typeConverter.convertType(arg.getType());
+			decl.append(paramType).append(" ").append(arg.getIdentifier().getName());
+			if (i < function.getArgumentCount() - 1) {
+				decl.append(", ");
+			}
+		}
+
+		// generateParameterList(function);
+
+		decl.append(")");
+
+		// if (function.isAbstract()) {
+		// decl.append(" = 0;");
+		// } else {
+		// decl.append(";");
+		// }
+
+		if (function.isAbstract()) {
+			decl.append(" = 0");
+		}
+
+		decl.append(";");
+		codeBuilder.appendRawToDeclarations(decl.toString());
+
+		// String returnType = typeConverter.convertType(function.getReturnType());
+		// codeBuilder.appendRawToDeclarations(returnType + " " +
+		// function.getIdentifier().getName() + "(");
+		// generateParameterList(function);
+		// codeBuilder.appendLine(");");
 	}
 
 	@Override
@@ -220,6 +260,10 @@ public class CodeGenerator implements ASTVisitor<Void>
 
 	private void generateFunctionImplementation(ASTFunction function, String className)
 	{
+		if (function.isAbstract()) {
+			return;
+		}
+
 		String returnType = typeConverter.convertType(function.getReturnType());
 		String functionName = function.getIdentifier().getName();
 
@@ -315,7 +359,13 @@ public class CodeGenerator implements ASTVisitor<Void>
 	{
 		codeBuilder.append("return ");
 		if (astReturnStatement.getExpression() != null) {
-			astReturnStatement.getExpression().accept(this);
+			ASTExpression expr = astReturnStatement.getExpression();
+			if (expr instanceof ASTNewInstance) {
+				codeBuilder.append("new ");
+			}
+			expr.accept(this);
+
+			// astReturnStatement.getExpression().accept(this);
 		}
 		codeBuilder.appendLine(";");
 		return null;
@@ -386,8 +436,8 @@ public class CodeGenerator implements ASTVisitor<Void>
 	{
 		String functionName = astCallFunctionStat.getFunctionName().getName();
 
-		if (LibraryManager.isBuiltIn(functionName) && astCallFunctionStat.getInstance() == null) {
-			LibraryFunction libFunction = LibraryManager.getBuiltIn(functionName);
+		if (libraryManager.isBuiltIn(functionName) && astCallFunctionStat.getInstance() == null) {
+			LibraryFunction libFunction = libraryManager.getBuiltIn(functionName);
 
 			String[] argStrings = new String[astCallFunctionStat.getArgumentCount()];
 			for (int i = 0; i < astCallFunctionStat.getArgumentCount(); i++) {
@@ -404,8 +454,8 @@ public class CodeGenerator implements ASTVisitor<Void>
 			return null;
 		}
 
-		if (LibraryManager.isBuiltIn(functionName) && astCallFunctionStat.getInstance() == null) {
-			LibraryFunction libFunction = LibraryManager.getBuiltIn(functionName);
+		if (libraryManager.isBuiltIn(functionName) && astCallFunctionStat.getInstance() == null) {
+			LibraryFunction libFunction = libraryManager.getBuiltIn(functionName);
 			codeBuilder.appendLine(libFunction.getImplementation());
 			return null;
 		}
