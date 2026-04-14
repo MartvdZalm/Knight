@@ -4,20 +4,14 @@
 #include <vector>
 
 int main();
-
-int calculate(int a, int b);
-class Person
+int calculate(int a, int b);class Person
  {
 public:
     std::string name;
     int age;
-std::string getName(    );
-void print(    );
-};
+std::string getName();void print();};
 
-void print(std::string input);
-void println(std::string input);
-
+void print(std::string input);void println(std::string input);
 
 int main() {
     Person person = Person()    ;

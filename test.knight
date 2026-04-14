@@ -2,13 +2,13 @@ import "program.knight"
 
 fn main(): int
 {
-	Person person = new Person();
-	person.age = 19;
-	person.name = "Mart van der Zalm";
+    Person person = new Person();
+    person.age = 19;
+    person.name = "Mart van der Zalm";
 
-	println(person.getName());
+    println(person.getName());
 
-	person.print();
+    person.print();
 
-	ret 0;
+    ret 0;
 }
