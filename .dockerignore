@@ -1,0 +1,14 @@
+target/
+.git/
+.github/
+.idea/
+.settings/
+*.md
+docs/
+test
+test.cpp
+test.knight
+program.knight
+project-notes.md
+knight.sublime-project
+knight.sublime-workspace

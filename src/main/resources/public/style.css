@@ -1,0 +1,174 @@
+:root {
+	color-scheme: light dark;
+	--bg: #0f1419;
+	--panel: #171d24;
+	--border: #2a3441;
+	--text: #e7ecf1;
+	--muted: #9aa7b5;
+	--accent: #4f8cff;
+	--accent-hover: #3d78e6;
+	--success: #3ecf8e;
+	--error: #ff6b6b;
+	--warning: #f7c948;
+	font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	background: var(--bg);
+	color: var(--text);
+}
+
+header {
+	padding: 1.25rem 1.5rem 0.5rem;
+	border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+	margin: 0 0 0.25rem;
+	font-size: 1.5rem;
+}
+
+header p {
+	margin: 0;
+	color: var(--muted);
+}
+
+main {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+	padding: 1rem 1.5rem 3rem;
+	min-height: calc(100vh - 7rem);
+}
+
+.panel-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 0.75rem;
+}
+
+.panel-header h2 {
+	margin: 0;
+	font-size: 1rem;
+}
+
+.editor-panel,
+.output-panel {
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	padding: 1rem;
+	min-height: 420px;
+	display: flex;
+	flex-direction: column;
+}
+
+#run-button {
+	background: var(--accent);
+	border: none;
+	color: white;
+	padding: 0.55rem 1.1rem;
+	border-radius: 8px;
+	font-size: 0.95rem;
+	cursor: pointer;
+}
+
+#run-button:hover:not(:disabled) {
+	background: var(--accent-hover);
+}
+
+#run-button:disabled {
+	opacity: 0.65;
+	cursor: wait;
+}
+
+.CodeMirror {
+	height: 100%;
+	min-height: 340px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	font-size: 14px;
+	flex: 1;
+}
+
+.tabs {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.tab {
+	background: transparent;
+	border: 1px solid var(--border);
+	color: var(--muted);
+	padding: 0.45rem 0.8rem;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.tab.active {
+	color: var(--text);
+	border-color: var(--accent);
+}
+
+.tab-content {
+	display: none;
+	flex: 1;
+}
+
+.tab-content.active {
+	display: flex;
+}
+
+.output-box {
+	margin: 0;
+	flex: 1;
+	width: 100%;
+	padding: 0.85rem;
+	border-radius: 8px;
+	border: 1px solid var(--border);
+	background: #0b1016;
+	overflow: auto;
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-family: "Cascadia Code", "Consolas", monospace;
+	font-size: 13px;
+	line-height: 1.45;
+}
+
+#status-bar {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 0.65rem 1.5rem;
+	border-top: 1px solid var(--border);
+	background: rgba(15, 20, 25, 0.95);
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+#status-bar.running {
+	color: var(--accent);
+}
+
+#status-bar.success {
+	color: var(--success);
+}
+
+#status-bar.error {
+	color: var(--error);
+}
+
+@media (max-width: 960px) {
+	main {
+		grid-template-columns: 1fr;
+	}
+}

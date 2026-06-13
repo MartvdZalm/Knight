@@ -15,7 +15,7 @@ void print(std::string input);void println(std::string input);
 
 int main() {
     Person person = Person()    ;
-    person.age = 19    ;
+    person.age = 20    ;
     person.name = "Mart van der Zalm"    ;
     println(person.getName()    );
     person.print(    );

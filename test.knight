@@ -3,7 +3,7 @@ import "program.knight"
 fn main(): int
 {
     Person person = new Person();
-    person.age = 19;
+    person.age = 20;
     person.name = "Mart van der Zalm";
 
     println(person.getName());

@@ -10,8 +10,12 @@ import knight.compiler.ast.AST;
 import knight.compiler.ast.ASTSourceFileSetter;
 import knight.compiler.ast.program.ASTProgram;
 import knight.compiler.lexer.Lexer;
+import knight.compiler.lexer.Symbol;
+import knight.compiler.lexer.Token;
+import knight.compiler.lexer.Tokens;
 import knight.compiler.library.LibraryManager;
 import knight.compiler.parser.Parser;
+import knight.compiler.semantics.diagnostics.DiagnosticReporter;
 import knight.compiler.semantics.BuildSymbolTree;
 import knight.compiler.semantics.NameAnalyser;
 import knight.compiler.semantics.TypeAnalyser;
@@ -40,7 +44,8 @@ public class Compiler
 				reader.close();
 			} catch (Exception e) {
 				System.err.println("Error parsing file: " + file.getPath() + " - " + e.getMessage());
-				e.printStackTrace();
+				Token token = new Token(Symbol.symbol("EOF", Tokens.EOF), 1, 1);
+				DiagnosticReporter.error(token, e.getMessage(), file.getPath());
 			}
 		}
 

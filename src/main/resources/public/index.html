@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Knight Playground</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
+	<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+	<header>
+		<h1>Knight Playground</h1>
+		<p>Write Knight code, compile it, and run the generated program.</p>
+	</header>
+
+	<main>
+		<section class="editor-panel">
+			<div class="panel-header">
+				<h2>Source</h2>
+				<button id="run-button" type="button">Run</button>
+			</div>
+			<textarea id="source-editor">fn main(): int
+{
+	println("Hello, Knight!");
+	ret 0;
+}</textarea>
+		</section>
+
+		<section class="output-panel">
+			<div class="tabs">
+				<button class="tab active" data-tab="output" type="button">Output</button>
+				<button class="tab" data-tab="diagnostics" type="button">Diagnostics</button>
+				<button class="tab" data-tab="cpp" type="button">Generated C++</button>
+			</div>
+
+			<div id="tab-output" class="tab-content active">
+				<pre id="program-output" class="output-box">Program output will appear here.</pre>
+			</div>
+
+			<div id="tab-diagnostics" class="tab-content">
+				<pre id="diagnostics-output" class="output-box">No diagnostics yet.</pre>
+			</div>
+
+			<div id="tab-cpp" class="tab-content">
+				<pre id="cpp-output" class="output-box">Generated C++ will appear here after a successful compile.</pre>
+			</div>
+		</section>
+	</main>
+
+	<div id="status-bar" aria-live="polite"></div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+	<script src="/app.js"></script>
+</body>
+</html>
