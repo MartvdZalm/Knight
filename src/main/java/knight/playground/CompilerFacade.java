@@ -130,11 +130,9 @@ public final class CompilerFacade
 				try {
 					Files.deleteIfExists(path);
 				} catch (Exception ignored) {
-					// Best-effort cleanup for temp directories.
 				}
 			});
 		} catch (Exception ignored) {
-			// Best-effort cleanup for temp directories.
 		}
 	}
 }
