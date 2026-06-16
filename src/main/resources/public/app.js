@@ -1,6 +1,6 @@
 const editor = CodeMirror.fromTextArea(document.getElementById("source-editor"), {
 	lineNumbers: true,
-	theme: "material",
+	theme: "default",
 	indentUnit: 4,
 	tabSize: 4,
 	indentWithTabs: false,
@@ -11,17 +11,23 @@ const programOutput = document.getElementById("program-output");
 const diagnosticsOutput = document.getElementById("diagnostics-output");
 const cppOutput = document.getElementById("cpp-output");
 const statusBar = document.getElementById("status-bar");
+const statusMessage = document.getElementById("status-message");
 const tabs = document.querySelectorAll(".tab");
 const tabContents = document.querySelectorAll(".tab-content");
 
 function setStatus(message, type) {
-	statusBar.textContent = message;
-	statusBar.className = type || "";
+	statusMessage.textContent = message;
+	statusBar.className = "statusbar";
+	if (type) {
+		statusBar.classList.add(type);
+	}
 }
 
 function activateTab(tabName) {
 	tabs.forEach((tab) => {
-		tab.classList.toggle("active", tab.dataset.tab === tabName);
+		const isActive = tab.dataset.tab === tabName;
+		tab.classList.toggle("active", isActive);
+		tab.setAttribute("aria-selected", isActive ? "true" : "false");
 	});
 	tabContents.forEach((content) => {
 		content.classList.toggle("active", content.id === `tab-${tabName}`);

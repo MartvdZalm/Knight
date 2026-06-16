@@ -5,50 +5,52 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Knight Playground</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
 	<link rel="stylesheet" href="/style.css">
 </head>
 <body>
-	<header>
-		<h1>Knight Playground</h1>
-		<p>Write Knight code, compile it, and run the generated program.</p>
-	</header>
+	<div class="playground">
+		<div class="toolbar">
+			<button id="run-button" class="w95-button" type="button">Run</button>
+			<span class="toolbar-hint">Ctrl+Enter to compile and run</span>
+		</div>
 
-	<main>
-		<section class="editor-panel">
-			<div class="panel-header">
-				<h2>Source</h2>
-				<button id="run-button" type="button">Run</button>
-			</div>
-			<textarea id="source-editor">fn main(): int
+		<main class="playground-main">
+			<section class="panel editor-panel">
+				<label class="panel-label" for="source-editor">Source.knight</label>
+				<div class="editor-sunken w95-border-sunken">
+					<textarea id="source-editor">fn main(): int
 {
 	println("Hello, Knight!");
 	ret 0;
 }</textarea>
-		</section>
+				</div>
+			</section>
 
-		<section class="output-panel">
-			<div class="tabs">
-				<button class="tab active" data-tab="output" type="button">Output</button>
-				<button class="tab" data-tab="diagnostics" type="button">Diagnostics</button>
-				<button class="tab" data-tab="cpp" type="button">Generated C++</button>
-			</div>
+			<section class="panel output-panel">
+				<div class="tabs" role="tablist">
+					<button class="tab w95-button active" data-tab="output" type="button" role="tab" aria-selected="true">Output</button>
+					<button class="tab w95-button" data-tab="diagnostics" type="button" role="tab" aria-selected="false">Diagnostics</button>
+					<button class="tab w95-button" data-tab="cpp" type="button" role="tab" aria-selected="false">Generated C++</button>
+				</div>
 
-			<div id="tab-output" class="tab-content active">
-				<pre id="program-output" class="output-box">Program output will appear here.</pre>
-			</div>
+				<div id="tab-output" class="tab-content active" role="tabpanel">
+					<pre id="program-output" class="output-box w95-border-sunken">Program output will appear here.</pre>
+				</div>
 
-			<div id="tab-diagnostics" class="tab-content">
-				<pre id="diagnostics-output" class="output-box">No diagnostics yet.</pre>
-			</div>
+				<div id="tab-diagnostics" class="tab-content" role="tabpanel">
+					<pre id="diagnostics-output" class="output-box w95-border-sunken">No diagnostics yet.</pre>
+				</div>
 
-			<div id="tab-cpp" class="tab-content">
-				<pre id="cpp-output" class="output-box">Generated C++ will appear here after a successful compile.</pre>
-			</div>
-		</section>
-	</main>
+				<div id="tab-cpp" class="tab-content" role="tabpanel">
+					<pre id="cpp-output" class="output-box w95-border-sunken">Generated C++ will appear here after a successful compile.</pre>
+				</div>
+			</section>
+		</main>
 
-	<div id="status-bar" aria-live="polite"></div>
+		<div id="status-bar" class="statusbar" aria-live="polite">
+			<span id="status-message">Ready</span>
+		</div>
+	</div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 	<script src="/app.js"></script>
